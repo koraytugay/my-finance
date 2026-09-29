@@ -285,14 +285,20 @@ function renderAthStreaksSection(history) {
     if (cadCardStat && cadStreaks.length > 0) {
         cadCardStat.innerHTML = cadStreaks.map(s => `${s.nonAthWeeks} wks`).join(' &bull; ');
         if (cadCardSub) {
-            cadCardSub.textContent = `Top 1: ${cadStreaks[0].nonAthWeeks} weeks (W${cadStreaks[0].startWeek}–W${cadStreaks[0].endWeek})`;
+            const spanStr = cadStreaks[0].startWeek === cadStreaks[0].endWeek
+                ? `W${cadStreaks[0].startWeek}`
+                : `W${cadStreaks[0].startWeek}–W${cadStreaks[0].endWeek}`;
+            cadCardSub.textContent = `Top 1: ${cadStreaks[0].nonAthWeeks} week${cadStreaks[0].nonAthWeeks === 1 ? '' : 's'} (${spanStr})`;
         }
     }
 
     if (usdCardStat && usdStreaks.length > 0) {
         usdCardStat.innerHTML = usdStreaks.map(s => `${s.nonAthWeeks} wks`).join(' &bull; ');
         if (usdCardSub) {
-            usdCardSub.textContent = `Top 1: ${usdStreaks[0].nonAthWeeks} weeks (W${usdStreaks[0].startWeek}–W${usdStreaks[0].endWeek})`;
+            const spanStr = usdStreaks[0].startWeek === usdStreaks[0].endWeek
+                ? `W${usdStreaks[0].startWeek}`
+                : `W${usdStreaks[0].startWeek}–W${usdStreaks[0].endWeek}`;
+            usdCardSub.textContent = `Top 1: ${usdStreaks[0].nonAthWeeks} week${usdStreaks[0].nonAthWeeks === 1 ? '' : 's'} (${spanStr})`;
         }
     }
 
@@ -325,6 +331,7 @@ function renderAthStreaksSection(history) {
                 ? '<span style="color: #d97706; font-weight: 700;">Ongoing consolidation</span>'
                 : `Recovery: ${recoveryStr} (W${s.recoveryWeek})`;
             const dipColor = s.maxDD < 0 ? '#cf222e' : '#16a34a';
+            const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
 
             return `
                 <div style="background: #f8fafc; border-radius: 8px; padding: 10px 14px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -335,7 +342,7 @@ function renderAthStreaksSection(history) {
                             <span style="font-size: 0.74rem; color: #64748b;">(${s.elapsedWeeks} wks ${s.isOngoing ? 'elapsed' : 'recovery'})</span>
                         </div>
                         <div style="font-size: 0.74rem; color: #64748b;">
-                            Weeks ${s.startWeek}–${s.endWeek} &bull; ${dateStr}
+                            ${weekRangeStr} &bull; ${dateStr}
                         </div>
                         <div style="font-size: 0.72rem; color: #475569; margin-top: 2px;">
                             Prior Peak: ${peakStr} (W${s.peakWeek}) &rarr; ${recoveryPart}
