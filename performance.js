@@ -388,16 +388,16 @@ function renderOverviewCards() {
     // 3. Weekly Streak & Win/Loss Statistics
     let upWeeks = 0;
     let downWeeks = 0;
-    let bestWeek = allHistory[0];
-    let worstWeek = allHistory[0];
+    let bestWeek = allHistory.length > 1 ? allHistory[1] : allHistory[0];
+    let worstWeek = allHistory.length > 1 ? allHistory[1] : allHistory[0];
 
     for (let i = 1; i < allHistory.length; i++) {
         const r = allHistory[i];
         if (r.weeklyChangeCAD > 0) upWeeks++;
         else if (r.weeklyChangeCAD < 0) downWeeks++;
 
-        if (r.weeklyChangeCAD > (bestWeek.weeklyChangeCAD || 0)) bestWeek = r;
-        if (r.weeklyChangeCAD < (worstWeek.weeklyChangeCAD || 0)) worstWeek = r;
+        if ((r.weeklyChangeCAD || 0) > (bestWeek.weeklyChangeCAD || 0)) bestWeek = r;
+        if ((r.weeklyChangeCAD || 0) < (worstWeek.weeklyChangeCAD || 0)) worstWeek = r;
     }
 
     const totalActiveWeeks = upWeeks + downWeeks;
@@ -436,13 +436,16 @@ function renderOverviewCards() {
     document.getElementById('stat-win-ratio').textContent = `${winRatio.toFixed(1)}%`;
     document.getElementById('stat-win-count').textContent = `${upWeeks} up / ${downWeeks} down`;
 
-    document.getElementById('stat-best-week').textContent = `+${formatCurrency(bestWeek.weeklyChangeCAD, 'CAD')}`;
-    document.getElementById('stat-best-week-date').textContent = `Week ${bestWeek.week} (${bestWeek.date}) +${bestWeek.weeklyChangePct}%`;
+    const bestSign = (bestWeek.weeklyChangeCAD || 0) >= 0 ? '+' : '';
+    const bestPctSign = (bestWeek.weeklyChangePct || 0) >= 0 ? '+' : '';
+    document.getElementById('stat-best-week').textContent = `${bestSign}${formatCurrency(bestWeek.weeklyChangeCAD || 0, 'CAD')}`;
+    document.getElementById('stat-best-week-date').textContent = `Week ${bestWeek.week} (${bestWeek.date}) ${bestPctSign}${bestWeek.weeklyChangePct}%`;
 
-    document.getElementById('stat-worst-week').textContent = formatCurrency(worstWeek.weeklyChangeCAD, 'CAD');
+    document.getElementById('stat-worst-week').textContent = formatCurrency(worstWeek.weeklyChangeCAD || 0, 'CAD');
     document.getElementById('stat-worst-week-date').textContent = `Week ${worstWeek.week} (${worstWeek.date}) ${worstWeek.weeklyChangePct}%`;
 
-    document.getElementById('stat-avg-week').textContent = `+${formatCurrency(avgGain, 'CAD')}`;
+    const avgSign = avgGain >= 0 ? '+' : '';
+    document.getElementById('stat-avg-week').textContent = `${avgSign}${formatCurrency(avgGain, 'CAD')}`;
     document.getElementById('stat-weeks-tracked').textContent = `${allHistory.length} weeks tracked`;
 
     // 4b. Update Weekly Momentum & Streak Analytics Cards (CAD & USD)
