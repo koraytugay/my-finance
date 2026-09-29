@@ -966,36 +966,8 @@ function renderWeeklyBarChart() {
 
 /* ================= Rolling 52-Week Extremes (Best & Worst) ================= */
 
-let rolling52ViewMode = 'both'; // 'both', 'current', 'best', 'worst'
 let rolling52TimelineMetric = 'pct'; // 'pct', 'cad', 'usd'
 let rolling52OverlayMetric = 'pct'; // 'pct', 'cad', 'usd'
-
-function setRolling52View(mode) {
-    rolling52ViewMode = mode;
-    const btnBoth = document.getElementById('btn-r52-view-both');
-    const btnCurrent = document.getElementById('btn-r52-view-current');
-    const btnBest = document.getElementById('btn-r52-view-best');
-    const btnWorst = document.getElementById('btn-r52-view-worst');
-
-    [btnBoth, btnCurrent, btnBest, btnWorst].forEach(btn => {
-        if (btn) {
-            btn.style.background = 'white';
-            btn.style.color = '#24292f';
-        }
-    });
-
-    if (mode === 'current') {
-        if (btnCurrent) { btnCurrent.style.background = '#1f2328'; btnCurrent.style.color = 'white'; }
-    } else if (mode === 'best') {
-        if (btnBest) { btnBest.style.background = '#1f2328'; btnBest.style.color = 'white'; }
-    } else if (mode === 'worst') {
-        if (btnWorst) { btnWorst.style.background = '#1f2328'; btnWorst.style.color = 'white'; }
-    } else {
-        if (btnBoth) { btnBoth.style.background = '#1f2328'; btnBoth.style.color = 'white'; }
-    }
-
-    renderRolling52Charts();
-}
 
 function setRolling52OverlayMetric(metric) {
     rolling52OverlayMetric = metric;
@@ -1382,7 +1354,7 @@ function renderRolling52Charts() {
     }
 
     // Render Overlay SVG Chart
-    renderRolling52OverlayChart(best, worst, current, currency, rolling52ViewMode, rolling52OverlayMetric);
+    renderRolling52OverlayChart(best, worst, current, currency, rolling52OverlayMetric);
 
     // Render Continuous Rolling 52-Week Trailing Returns Timeline Chart
     if (timeline && timeline.length > 0) {
@@ -1392,7 +1364,7 @@ function renderRolling52Charts() {
     }
 }
 
-function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', viewMode = 'both', overlayMetric = 'pct') {
+function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', overlayMetric = 'pct') {
     const box = document.getElementById('r52-overlay-svg-box');
     const container = document.getElementById('r52-overlay-container');
     const tooltip = document.getElementById('r52-overlay-tooltip');
