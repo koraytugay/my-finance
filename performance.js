@@ -2565,12 +2565,18 @@ function renderRiskAnalytics() {
     });
     const calmar = maxDDPct > 0 ? cagr / maxDDPct : 0;
 
-    document.getElementById('stat-risk-volatility').textContent = `${(annVolatility * 100).toFixed(1)}%`;
-    document.getElementById('stat-risk-volatility-sub').textContent = `Weekly σ: ${(weeklyStdDev * 100).toFixed(2)}% | Market CAGR: ${(cagr * 100).toFixed(1)}%`;
+    const statVol = document.getElementById('stat-risk-volatility');
+    const statVolSub = document.getElementById('stat-risk-volatility-sub');
+    const statSharpe = document.getElementById('stat-risk-sharpe');
+    const statSortino = document.getElementById('stat-risk-sortino');
+    const statCalmar = document.getElementById('stat-risk-calmar');
 
-    document.getElementById('stat-risk-sharpe').textContent = sharpe.toFixed(2);
-    document.getElementById('stat-risk-sortino').textContent = sortino.toFixed(2);
-    document.getElementById('stat-risk-calmar').textContent = calmar.toFixed(2);
+    if (statVol) statVol.textContent = `${(annVolatility * 100).toFixed(1)}%`;
+    if (statVolSub) statVolSub.textContent = `Weekly σ: ${(weeklyStdDev * 100).toFixed(2)}% | Market CAGR: ${(cagr * 100).toFixed(1)}%`;
+
+    if (statSharpe) statSharpe.textContent = isFinite(sharpe) ? sharpe.toFixed(2) : '-';
+    if (statSortino) statSortino.textContent = isFinite(sortino) ? sortino.toFixed(2) : '-';
+    if (statCalmar) statCalmar.textContent = isFinite(calmar) ? calmar.toFixed(2) : '-';
 }
 
 function renderCrisisStressTest() {
