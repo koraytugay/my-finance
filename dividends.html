@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Dividends &amp; Passive Income</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .income-pill {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        .pill-monthly { background: #e0f2fe; color: #0369a1; }
+        .pill-quarterly { background: #fef3c7; color: #92400e; }
+        .pill-annual { background: #f1f5f9; color: #475569; }
+        .pill-semiannual { background: #fae8ff; color: #86198f; }
+        .pill-fixed { background: #f0fdf4; color: #166534; }
+
+        .pill-tax-free { background: #dcfce7; color: #15803d; }
+        .pill-tax-deferred { background: #f3e8ff; color: #7e22ce; }
+        .pill-eligible-div { background: #e0f2fe; color: #0284c7; }
+        .pill-foreign-div { background: #ffedd5; color: #c2410c; }
+        .pill-cash-tax { background: #fee2e2; color: #b91c1c; }
+        .pill-blended { background: #f1f5f9; color: #334155; }
+
+        .view-toggle {
+            display: inline-flex;
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 8px;
+            gap: 2px;
+        }
+        .view-toggle-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #475569;
+            transition: all 0.15s ease;
+            font-family: inherit;
+        }
+        .view-toggle-btn:hover {
+            color: #0f172a;
+        }
+        .view-toggle-btn.active {
+            background: #ffffff;
+            color: #0f172a;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .tax-shelter-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px 18px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            flex: 1 1 190px;
+            min-width: 180px;
+        }
+
+        .month-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+            position: relative;
+            cursor: pointer;
+        }
+        .month-bar:hover .month-col {
+            filter: brightness(0.92);
+        }
+        .month-col {
+            width: 100%;
+            max-width: 44px;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.2s ease;
+            position: relative;
+            min-height: 4px;
+            display: flex;
+            flex-direction: column-reverse;
+            overflow: hidden;
+        }
+        .month-col.peak {
+            outline: 2px solid #10b981;
+            outline-offset: 1px;
+        }
+        .month-net-part {
+            width: 100%;
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: height 0.2s ease;
+        }
+        .month-net-part.peak {
+            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
+        }
+        .month-tax-part {
+            width: 100%;
+            background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+            transition: height 0.2s ease;
+        }
+        .month-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            margin-top: 8px;
+            text-align: center;
+        }
+        .month-val {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Dividends &amp; Passive Income</h1>
+            <p class="subtitle">After-Tax Cashflow Projections, Payment Schedule &amp; CRA Tax Drag Breakdown</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link active">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Calculating passive cashflow &amp; after-tax distribution schedules...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
+
+            <!-- View Toggle & Tax Policy Controls Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <span style="font-weight: 700; font-size: 0.85rem; color: #475569;">Cashflow Focus:</span>
+                    <div class="view-toggle">
+                        <button id="btn-mode-net" class="view-toggle-btn active" onclick="setCashflowMode('net')">💰 After-Tax (In-Pocket)</button>
+                        <button id="btn-mode-gross" class="view-toggle-btn" onclick="setCashflowMode('gross')">📊 Pre-Tax (Gross)</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn-secondary" onclick="toggleTaxSettings()" id="btn-toggle-tax-settings">
+                        ⚙️ Tax Assumptions
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tax Assumptions Accordion/Panel -->
+            <div id="tax-settings-panel" class="controls" style="display: none; padding: 18px 22px; margin-bottom: 22px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #1e293b;">🇨🇦 Tax Policy &amp; Bracket Assumptions</h4>
+                        <p style="margin: 3px 0 0 0; font-size: 0.8rem; color: #64748b;">
+                            Configured per your rules: Cash &amp; interest taxed at 30%, eligible Canadian dividends receive CRA Dividend Tax Credit, and registered accounts (RRSP, TFSA, FHSA) assume 0% immediate tax drag.
+                        </p>
+                    </div>
+                    <button class="btn-secondary" onclick="resetTaxSettings()" style="font-size: 0.78rem; height: 28px;">Reset Defaults</button>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Marginal Tax Rate on Cash / Interest (%):</label>
+                        <input type="number" id="setting-cash-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('cashRatePct', this.value)" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <span style="font-size: 0.71rem; color: #64748b;">Applies to Cash, HISA, and 2.0% Fixed Income</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Eligible Canadian Dividend Rate (%):</label>
+                        <input type="number" id="setting-eligible-rate" value="8.9" step="0.1" min="0" max="50" onchange="updateTaxSetting('eligibleDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <span style="font-size: 0.71rem; color: #64748b;">30% bracket + 38% gross-up &amp; DTC (Ontario)</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Foreign / US Dividend Rate (%):</label>
+                        <input type="number" id="setting-foreign-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('foreignDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <span style="font-size: 0.71rem; color: #64748b;">Foreign income taxed at regular marginal rate</span>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Registered Accounts (TFSA / RRSP / FHSA):</label>
+                        <input type="text" value="0.0% (Tax-Free / Deferred)" disabled style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid #e2e8f0; background: #f8fafc; border-radius: 6px; color: #166534; font-weight: 700;">
+                        <span style="font-size: 0.71rem; color: #64748b;">Assumed 0% current tax per portfolio specification</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-annual-income" style="color: #166534;">$0.00</span>
+                    <span class="stat-label" id="label-annual-income">Projected Net Annual Income</span>
+                    <span class="stat-sub" id="stat-annual-sub">Gross: $0.00 | Tax: -$0.00</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-monthly-income" style="color: #0969da;">$0.00</span>
+                    <span class="stat-label" id="label-monthly-income">Monthly In-Pocket Cashflow</span>
+                    <span class="stat-sub" id="stat-monthly-sub">Average net per month</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-tax-drag" style="color: #dc2626;">-$0.00</span>
+                    <span class="stat-label">Annual CRA Tax Drag</span>
+                    <span class="stat-sub" id="stat-tax-drag-sub">0.0% effective tax on cashflow</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-sheltered-pct" style="color: #8250df;">0.0%</span>
+                    <span class="stat-label">Tax-Sheltered Income</span>
+                    <span class="stat-sub" id="stat-sheltered-sub">0% tax in TFSA, RRSP &amp; FHSA</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-top-payer-name">-</span>
+                    <span class="stat-label" id="label-top-payer">Top Net Contributor</span>
+                    <span class="stat-sub" id="stat-top-payer-val">$0.00 / yr</span>
+                </div>
+            </div>
+
+            <!-- Tax Location of Cashflow Section -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        🛡️ Tax Efficiency &amp; Drag Breakdown
+                    </h3>
+                    <span style="font-size: 0.78rem; font-weight: 700; color: #475569;" id="tax-efficiency-summary">
+                        Total Portfolio Take-Home: 0.0%
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Complete breakdown of your passive distributions across registered tax-shelters and taxable accounts under Canadian CRA tax rules.
+                </p>
+
+                <!-- 5 Tax Classification Cards -->
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <div class="tax-shelter-card" style="border-left: 4px solid #16a34a;">
+                        <div style="font-size: 0.73rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">100% Tax-Free (TFSA &amp; FHSA)</div>
+                        <div id="tax-card-taxfree" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
+                        <div id="tax-card-taxfree-sub" style="font-size: 0.75rem; color: #64748b;">0% CRA tax drag on distributions</div>
+                    </div>
+                    <div class="tax-shelter-card" style="border-left: 4px solid #8250df;">
+                        <div style="font-size: 0.73rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Tax-Deferred (RRSP)</div>
+                        <div id="tax-card-deferred" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
+                        <div id="tax-card-deferred-sub" style="font-size: 0.75rem; color: #64748b;">0% current tax (compounds gross)</div>
+                    </div>
+                    <div class="tax-shelter-card" style="border-left: 4px solid #0284c7;">
+                        <div style="font-size: 0.73rem; font-weight: 700; color: #0284c7; text-transform: uppercase;">🍁 Eligible Divs (Non-Reg)</div>
+                        <div id="tax-card-eligible" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
+                        <div id="tax-card-eligible-sub" style="font-size: 0.75rem; color: #64748b;">~8.9% effective tax (DTC applied)</div>
+                    </div>
+                    <div class="tax-shelter-card" style="border-left: 4px solid #ea580c;">
+                        <div style="font-size: 0.73rem; font-weight: 700; color: #ea580c; text-transform: uppercase;">🌐 Foreign Divs (Non-Reg)</div>
+                        <div id="tax-card-foreign" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
+                        <div id="tax-card-foreign-sub" style="font-size: 0.75rem; color: #64748b;">30.0% marginal rate (US &amp; Intl)</div>
+                    </div>
+                    <div class="tax-shelter-card" style="border-left: 4px solid #dc2626;">
+                        <div style="font-size: 0.73rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">💵 Cash &amp; Fixed (Non-Reg)</div>
+                        <div id="tax-card-cash" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
+                        <div id="tax-card-cash-sub" style="font-size: 0.75rem; color: #64748b;">30.0% tax on cash &amp; 2% fixed income</div>
+                    </div>
+                </div>
+
+                <!-- Gross-to-Net Cashflow Waterfall Bar -->
+                <div style="margin-top: 10px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 6px;">
+                        <span id="bar-label-net" style="color: #166534;">■ Real In-Pocket Cashflow: $0.00 (0.0%)</span>
+                        <span id="bar-label-drag" style="color: #dc2626;">■ CRA Tax Drag: -$0.00 (0.0%)</span>
+                    </div>
+                    <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: #e2e8f0;">
+                        <div id="tax-bar-net" style="background: #16a34a; height: 100%; width: 85%;" title="Net In-Pocket"></div>
+                        <div id="tax-bar-drag" style="background: #ea580c; height: 100%; width: 15%;" title="Tax Drag"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estimated Monthly Distribution Calendar -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                            📅 12-Month Distribution Schedule
+                        </h3>
+                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
+                            Estimated cashflow received each calendar month, showing net take-home cashflow with CRA tax drag breakdown.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 14px; font-size: 0.75rem; font-weight: 700;">
+                        <span style="color: #2563eb;">■ Net In-Pocket Cashflow</span>
+                        <span style="color: #ea580c;">■ Estimated CRA Tax Drag</span>
+                    </div>
+                </div>
+
+                <!-- Calendar Bars Container -->
+                <div style="height: 180px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 10px 10px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; position: relative;" id="calendar-bars-wrap">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- Holdings Income Table Section -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                            📋 Holding Passive Income &amp; Tax Breakdown
+                        </h3>
+                        <span id="filtered-count" class="section-count" style="margin-left: 0; font-size: 0.8rem; color: #64748b;">0 positions</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="filter-search" placeholder="Search ticker or brokerage..." oninput="applyTableFilters()" style="padding: 6px 12px; font-size: 0.82rem; border: 1px solid #d0d7de; border-radius: 6px; min-width: 200px;">
+                        <select id="filter-account" onchange="applyTableFilters()" style="padding: 6px 10px; font-size: 0.82rem; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="ALL">All Accounts</option>
+                        </select>
+                        <select id="filter-tax" onchange="applyTableFilters()" style="padding: 6px 10px; font-size: 0.82rem; border: 1px solid #d0d7de; border-radius: 6px;">
+                            <option value="ALL">All Tax Statuses</option>
+                            <option value="taxfree">Tax-Free (TFSA &amp; FHSA) - 0% Tax</option>
+                            <option value="deferred">Tax-Deferred (RRSP) - 0% Tax</option>
+                            <option value="eligible">Taxable - Canadian Eligible Dividends (8.9%)</option>
+                            <option value="foreign">Taxable - Foreign / US Dividends (30%)</option>
+                            <option value="cash">Taxable - Cash &amp; Fixed Income (30%)</option>
+                            <option value="blended">Taxable - Blended (XEQT / Multi-Asset)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="dividend-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortTable('ticker')" style="cursor: pointer;">Holding / Asset ⬍</th>
+                                <th onclick="sortTable('account')" style="cursor: pointer;">Account &amp; Brokerage ⬍</th>
+                                <th>Strategy</th>
+                                <th style="text-align: right;" onclick="sortTable('sum')" style="cursor: pointer;">Market Value ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('yield')" style="cursor: pointer;">Est. Yield ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('yoc')" style="cursor: pointer;">Yield on Cost ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('gross')" style="cursor: pointer;">Gross Income ⬍</th>
+                                <th style="text-align: center;" onclick="sortTable('taxRate')" style="cursor: pointer;">Tax Treatment ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('taxDrag')" style="cursor: pointer;">Est. Tax Drag ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('netAnnual')" style="cursor: pointer;">Net Income (CAD) ⬍</th>
+                                <th style="text-align: right;" onclick="sortTable('netMonthly')" style="cursor: pointer;">Net Monthly ⬍</th>
+                                <th style="text-align: center;">Frequency</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dividend-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                        <tfoot>
+                            <tr style="background: #f0fdf4; font-weight: 800; border-top: 2px solid #16a34a;">
+                                <td colspan="3" style="padding: 12px 14px; color: #166534;">Portfolio Total Passive Cashflow</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #166534;" id="tfoot-total-val">$0.00</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #166534;" id="tfoot-total-yield">0.00%</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #166534;" id="tfoot-total-yoc">0.00%</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #166534;" id="tfoot-total-gross">$0.00</td>
+                                <td style="text-align: center; padding: 12px 14px; color: #166534;" id="tfoot-total-rate">0.0% Eff.</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #dc2626;" id="tfoot-total-drag">-$0.00</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #166534;" id="tfoot-total-net">$0.00</td>
+                                <td style="text-align: right; padding: 12px 14px; color: #0969da;" id="tfoot-total-monthly">$0.00</td>
+                                <td style="text-align: center; color: #166534;">Every Month</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/koraytugay/my-finance" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>&copy; 2026 My Finance &bull; Automated Google Sheets Portfolio &bull; AES-256-GCM Encrypted</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="dividends.js?v=2.5"></script>
+</body>
+</html>

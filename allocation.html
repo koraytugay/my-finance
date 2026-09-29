@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Asset Allocation</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .alloc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+        .alloc-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+        .alloc-bar-segment {
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Asset Allocation</h1>
+            <p class="subtitle">Geographic Diversification &amp; Factor Tilt Analysis</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link active">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing asset allocation...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="alloc-content" style="display: none;">
+            <!-- Top Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-us">$0.00</span>
+                    <span class="stat-label">US Equities</span>
+                    <span class="stat-sub" id="alloc-us-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-canada">$0.00</span>
+                    <span class="stat-label">Canadian Equities</span>
+                    <span class="stat-sub" id="alloc-canada-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-dev">$0.00</span>
+                    <span class="stat-label">Developed Markets</span>
+                    <span class="stat-sub" id="alloc-dev-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-em">$0.00</span>
+                    <span class="stat-label">Emerging Markets</span>
+                    <span class="stat-sub" id="alloc-em-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-fixed">$0.00</span>
+                    <span class="stat-label">Fixed Income &amp; Cash</span>
+                    <span class="stat-sub" id="alloc-fixed-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="alloc-alts">$0.00</span>
+                    <span class="stat-label">Metals &amp; Crypto</span>
+                    <span class="stat-sub" id="alloc-alts-pct">0.0%</span>
+                </div>
+            </div>
+
+            <!-- Visual Breakdown Cards Grid -->
+            <div class="alloc-grid">
+                <!-- Global Geographic Equity Distribution -->
+                <div class="alloc-card">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Global Equity Geography</h3>
+                    <div id="geo-breakdown-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Asset Class Distribution -->
+                <div class="alloc-card">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Asset Class Allocation</h3>
+                    <div id="class-breakdown-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Factor vs Broad Market Strategy Tilt -->
+                <div class="alloc-card">
+                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Investment Strategy Tilts</h3>
+                    <div id="strategy-breakdown-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Currency Exposure & FX Sensitivity Simulator (Feature 5) -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        🌐 Currency Exposure &amp; FX Sensitivity Simulator
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="fx-live-pill">
+                        Baseline FX: 1 USD ≈ 1.370 CAD (0.730 USD/CAD)
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Uncovering your true economic currency exposure (beyond account denominations) and simulating how fluctuations in the CAD/USD exchange rate impact your total net worth.
+                </p>
+
+                <!-- 2 Comparison Columns: Account Denomination vs Look-Through Economic Exposure -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <!-- Column 1: Account Denomination -->
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+                            1. Direct Account Denomination
+                        </div>
+                        <div style="font-size: 0.82rem; color: #475569; margin-bottom: 12px;">
+                            Currency your assets are directly quoted in at Questrade &amp; IBKR:
+                        </div>
+
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                                <span>🇨🇦 CAD-Denominated Accounts</span>
+                                <span id="fx-direct-cad-val">$663,858 (97.6%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                <div id="fx-direct-cad-bar" style="width: 97.6%; height: 100%; background: #0969da;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                                <span>🇺🇸 USD-Denominated Cash &amp; Equities</span>
+                                <span id="fx-direct-usd-val">$16,183 (2.4%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                <div id="fx-direct-usd-bar" style="width: 2.4%; height: 100%; background: #16a34a;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: True Look-Through Economic Currency Exposure -->
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+                            2. True Economic Exposure (Look-Through)
+                        </div>
+                        <div style="font-size: 0.82rem; color: #475569; margin-bottom: 12px;">
+                            Underlying currencies powering your ETF revenue and corporate earnings:
+                        </div>
+
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                                <span>🇺🇸 US Dollar Revenue (VFV, US Equities)</span>
+                                <span id="fx-econ-usd-val">$225,100 CAD (33.1%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                <div id="fx-econ-usd-bar" style="width: 33.1%; height: 100%; background: #16a34a;"></div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                                <span>🇨🇦 Canadian Dollar (TSX Equities &amp; Bonds)</span>
+                                <span id="fx-econ-cad-val">$307,200 CAD (45.2%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                <div id="fx-econ-cad-bar" style="width: 45.2%; height: 100%; background: #0969da;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                                <span>🌍 Global &amp; Non-Fiat (EUR, JPY, Gold, Crypto)</span>
+                                <span id="fx-econ-intl-val">$147,741 CAD (21.7%)</span>
+                            </div>
+                            <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                                <div id="fx-econ-intl-bar" style="width: 21.7%; height: 100%; background: #8250df;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive FX Sensitivity Simulator -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
+                                🎛️ Interactive FX Sensitivity Simulator
+                            </h4>
+                            <span style="font-size: 0.78rem; color: #64748b;">Slide to test portfolio impact if the Canadian Dollar moves against the US Dollar</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #0969da;" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
+                            <button type="button" class="btn-secondary" onclick="resetFXSlider()" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px;">
+                        <input type="range" id="fx-slider" min="0.65" max="0.80" step="0.005" value="0.73" style="width: 100%; cursor: pointer;" oninput="onFXSliderChange(this.value)">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                            <span>0.650 (Weaker CAD / Stronger USD)</span>
+                            <span>0.730 (Baseline)</span>
+                            <span>0.800 (Stronger CAD / Weaker USD)</span>
+                        </div>
+                    </div>
+
+                    <!-- Impact Display Cards -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Simulated Portfolio Net Worth</div>
+                            <div id="sim-nw-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 3px 0;">$680,041 CAD</div>
+                            <div id="sim-nw-usd" style="font-size: 0.74rem; color: #64748b;">≈ $496,430 USD</div>
+                        </div>
+
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Net Currency Impact ($ CAD)</div>
+                            <div id="sim-impact-cad" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 3px 0;">+$0 CAD (0.00%)</div>
+                            <div id="sim-impact-desc" style="font-size: 0.74rem; color: #64748b;">Holding unhedged US assets buffers currency swings</div>
+                        </div>
+
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Natural FX Hedge Efficiency</div>
+                            <div style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin: 3px 0;" id="sim-fx-shield-pct">33.1% US Shield</div>
+                            <div style="font-size: 0.74rem; color: #64748b;">CAD dips boost purchasing power</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simplified ETF & Cash Allocation Table (Aggregated) -->
+            <div class="content-section">
+                <div class="section-header">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <h2 class="section-title">ETF &amp; Cash Allocation</h2>
+                        <span id="simple-alloc-count" class="section-count">0 assets</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-secondary" id="btn-copy-alloc-tsv" onclick="copySimpleAllocationTable('tsv')" title="Copy as tab-separated table (paste directly into Excel / Sheets / Notes)">
+                            📋 Copy Table
+                        </button>
+                        <button type="button" class="btn-secondary" id="btn-copy-alloc-text" onclick="copySimpleAllocationTable('text')" title="Copy as clean text list">
+                            📄 Copy Text
+                        </button>
+                    </div>
+                </div>
+                <p style="font-size: 0.84rem; color: #64748b; margin-top: -6px; margin-bottom: 16px;">
+                    Overall portfolio allocation across ETFs and Cash, aggregated irrespective of account or brokerage. Simple format for copy-pasting.
+                </p>
+
+                <div class="table-responsive">
+                    <table class="data-table" id="simple-alloc-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortSimpleAlloc('asset')" style="cursor: pointer;" title="Sort by Asset">
+                                    Asset <span id="sort-icon-asset" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
+                                </th>
+                                <th class="text-right" onclick="sortSimpleAlloc('pct')" style="cursor: pointer;" title="Sort by Allocation">
+                                    Allocation <span id="sort-icon-pct" style="font-size: 0.72rem; color: #0969da; margin-left: 2px;">▼</span>
+                                </th>
+                                <th class="text-right" onclick="sortSimpleAlloc('sum')" style="cursor: pointer;" title="Sort by Value">
+                                    Value (CAD) <span id="sort-icon-sum" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="simple-alloc-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot id="simple-alloc-tfoot" style="font-weight: 800; background: #f8fafc;">
+                            <!-- Populated by JS -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Complete Asset Allocation Matrix Table -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Asset Allocation Matrix</h2>
+                    <span id="matrix-count" class="section-count">37 holdings</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Fund / Asset Name</th>
+                                <th>Strategy</th>
+                                <th class="text-right">Total CAD</th>
+                                <th class="text-right">US</th>
+                                <th class="text-right">Canada</th>
+                                <th class="text-right">Developed</th>
+                                <th class="text-right">Emerging</th>
+                                <th class="text-right">Fixed</th>
+                                <th class="text-right">Metals</th>
+                                <th class="text-right">Crypto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matrix-tbody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                        <tfoot id="matrix-tfoot" style="font-weight: 800; background: #f8fafc;">
+                            <!-- Populated by JS -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>My Finance &bull; Personal Financial Tracker &bull; Powered by GitHub Pages &amp; Public Yahoo Finance API</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="allocation.js?v=2.5"></script>
+</body>
+</html>

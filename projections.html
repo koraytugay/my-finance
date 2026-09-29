@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - FIRE &amp; Wealth Projections</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .param-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .param-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .param-item label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+        }
+        .param-item input[type="range"] {
+            width: 100%;
+            accent-color: #0969da;
+            cursor: pointer;
+        }
+        .param-item input[type="number"],
+        .param-item input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid #d0d7de;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        .milestone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .milestone-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+        .milestone-card.reached {
+            border-color: #86efac;
+            background: #f0fdf4;
+        }
+        .milestone-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-pending { background: #e0f2fe; color: #0369a1; }
+        .badge-reached { background: #dcfce7; color: #15803d; }
+
+        .progress-bar-wrap {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0 6px 0;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #0969da;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        .progress-bar-fill.complete {
+            background: #16a34a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>FIRE &amp; Wealth Projections</h1>
+            <p class="subtitle">Interactive Compounding Simulator, Milestone Countdown &amp; Safe Withdrawal Planner</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link active">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading portfolio baseline &amp; computing projections...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
+            <!-- Top Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-current-nw" style="color: #1f2328;">$0.00</span>
+                    <span class="stat-label">Current Net Worth</span>
+                    <span class="stat-sub">Live portfolio baseline</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-safe-annual" style="color: #166534;">$0.00</span>
+                    <span class="stat-label">Safe Annual Withdrawal Today</span>
+                    <span class="stat-sub" id="stat-safe-monthly">$0.00 / month</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-fire-target" style="color: #0969da;">$0.00</span>
+                    <span class="stat-label">Financial Freedom Number</span>
+                    <span class="stat-sub" id="stat-fire-progress">0% reached</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-time-to-fire" style="color: #8250df;">- years</span>
+                    <span class="stat-label">Time to Freedom</span>
+                    <span class="stat-sub" id="stat-fire-date">Estimated target date</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-coast-20yr">$0.00</span>
+                    <span class="stat-label">Coast FIRE in 20 Yrs</span>
+                    <span class="stat-sub">With $0 further savings</span>
+                </div>
+            </div>
+
+            <!-- Interactive Parameters Control Card -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                            🎛️ Simulation Parameters &amp; Assumptions
+                        </h3>
+                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
+                            Adjust growth rate, monthly contributions, and safe withdrawal assumptions to simulate your financial trajectory.
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Currency View:</span>
+                        <div class="currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-mode-nominal" class="btn-secondary active" onclick="setInflationMode('nominal')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">Nominal (Future $)</button>
+                            <button type="button" id="btn-mode-real" class="btn-secondary" onclick="setInflationMode('real')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">Real (Today's Power)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="param-grid">
+                    <div class="param-item">
+                        <label for="input-starting-nw">
+                            <span>Starting Portfolio ($ CAD)</span>
+                        </label>
+                        <input type="number" id="input-starting-nw" step="1000" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-monthly-save">
+                            <span>Monthly Contribution ($ CAD/mo)</span>
+                            <span id="label-monthly-save" style="color: #0969da;">$2,500</span>
+                        </label>
+                        <input type="range" id="input-monthly-save" min="0" max="15000" step="100" value="2500" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-return-rate">
+                            <span>Expected Annual Return (%)</span>
+                            <span id="label-return-rate" style="color: #166534;">7.0%</span>
+                        </label>
+                        <input type="range" id="input-return-rate" min="2.0" max="14.0" step="0.25" value="7.0" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-inflation-rate">
+                            <span>Assumed Inflation Rate (%)</span>
+                            <span id="label-inflation-rate" style="color: #d97706;">2.5%</span>
+                        </label>
+                        <input type="range" id="input-inflation-rate" min="0.0" max="6.0" step="0.25" value="2.5" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-swr-rate">
+                            <span>Safe Withdrawal Rate (SWR %)</span>
+                            <span id="label-swr-rate" style="color: #8250df;">4.0%</span>
+                        </label>
+                        <input type="range" id="input-swr-rate" min="2.5" max="5.5" step="0.1" value="4.0" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-target-spend">
+                            <span>Target Annual Spend ($ CAD/yr)</span>
+                        </label>
+                        <input type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Milestone Countdown Section -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                    🏆 Net Worth Milestone Countdown
+                </h3>
+                <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 16px 0;">
+                    Projected timeline to hit major financial markers based on your current savings and growth pace.
+                </p>
+                <div class="milestone-grid" id="milestones-container">
+                    <!-- Populated via JS -->
+                </div>
+            </div>
+
+            <!-- SVG Multi-Scenario Compounding Chart -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                            📈 30-Year Wealth Trajectory Chart
+                        </h3>
+                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
+                            Visualizes your wealth compound curves over 30 years under Expected, Optimistic (+2%), and Conservative (-2%) returns vs. Cash Savings Baseline. Hover to inspect values.
+                        </p>
+                    </div>
+                    <div style="display: flex; gap: 12px; font-size: 0.78rem; font-weight: 700; flex-wrap: wrap;">
+                        <span style="color: #16a34a;">● Optimistic (+2%)</span>
+                        <span style="color: #0969da;">● Expected Return</span>
+                        <span style="color: #d97706;">● Conservative (-2%)</span>
+                        <span style="color: #94a3b8;">● Capital Invested</span>
+                    </div>
+                </div>
+                <div id="chart-wrap" style="width: 100%; height: 260px; position: relative;">
+                    <div id="projection-svg-wrap" style="width: 100%; height: 100%;"></div>
+                    <div id="projection-tooltip" class="chart-tooltip" style="display: none; position: absolute; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid rgba(255, 255, 255, 0.15); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.78rem; pointer-events: none; z-index: 100; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);"></div>
+                </div>
+            </div>
+
+            <!-- Detailed Year-by-Year Compounding Table -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                    📋 Year-by-Year Growth &amp; Withdrawal Schedule
+                </h3>
+                <div class="table-container">
+                    <table class="data-table" id="projections-table">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th>Timeline</th>
+                                <th style="text-align: right;">Start Balance</th>
+                                <th style="text-align: right;">Annual Saved</th>
+                                <th style="text-align: right;">Compound Growth ($)</th>
+                                <th style="text-align: right; font-weight: 800;">End Balance</th>
+                                <th style="text-align: right; color: #166534;">Safe Annual Spend</th>
+                                <th style="text-align: right; color: #0969da;">Safe Monthly Spend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="projections-table-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/koraytugay/my-finance" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>&copy; 2026 My Finance &bull; Automated Google Sheets Portfolio &bull; AES-256-GCM Encrypted</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="projections.js?v=2.5"></script>
+</body>
+</html>

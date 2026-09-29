@@ -1,0 +1,57 @@
+name: Sync Google Sheets Portfolio
+
+on:
+  schedule:
+    # Monday to Friday every hour from 8:00 AM to 5:00 PM EDT (UTC-4 -> 12:00 to 21:00 UTC)
+    - cron: "0 12-21 * * 1-5"
+    # Saturday noon (16:00 UTC / 12:00 PM EDT) to capture Friday evening weekly carryover updates
+    - cron: "0 16 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: google-sheets-sync-pipeline
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 2. Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 3. Sync from Google Sheets & Encrypt
+        env:
+          PORTFOLIO_PASSWORD: ${{ secrets.PORTFOLIO_PASSWORD }}
+          NODE_OPTIONS: "--dns-result-order=ipv4first"
+        run: |
+          node sync.js
+
+      - name: 4. Commit & Push Encrypted Portfolio to GitHub
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Stage encrypted files and public benchmark data
+          git add encrypted/*.enc
+          git add data/benchmarks.json 2>/dev/null || true
+          
+          if ! git diff --quiet --staged; then
+            git commit -m "chore: automated sync ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git pull --rebase origin ${{ github.ref_name }}
+            git push
+            echo "✓ Changes committed and pushed successfully."
+          else
+            echo "ℹ No changes detected. Working tree clean, skipping commit."
+          fi

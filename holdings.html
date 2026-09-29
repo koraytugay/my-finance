@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Portfolio Holdings</title>
+    <link rel="stylesheet" href="styles.css?v=2.6">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Finance</h1>
+            <p class="subtitle">Personal Portfolio &amp; Net Worth Tracker</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link active">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading portfolio data...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
+            <!-- Key Metric Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-total-cad">$0.00</span>
+                    <span class="stat-label">Total Portfolio CAD</span>
+                    <span class="stat-sub" id="stat-total-usd">≈ $0.00 USD</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-stocks">$0.00</span>
+                    <span class="stat-label">Equities</span>
+                    <span class="stat-sub" id="stat-stocks-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-fixed">$0.00</span>
+                    <span class="stat-label">Fixed Income &amp; Cash</span>
+                    <span class="stat-sub" id="stat-fixed-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-alts">$0.00</span>
+                    <span class="stat-label">Metals &amp; Crypto</span>
+                    <span class="stat-sub" id="stat-alts-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-unrealized-gain" style="color: #166534;">$0.00</span>
+                    <span class="stat-label">Current Unrealized Gains</span>
+                    <span class="stat-sub" id="stat-unrealized-sub">Across all holdings</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-holdings-count">0</span>
+                    <span class="stat-label">Total Positions</span>
+                    <span class="stat-sub" id="stat-last-updated">Updated recently</span>
+                </div>
+            </div>
+
+            <!-- Controls Toolbar -->
+            <div class="controls">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select" onchange="applyFiltersAndSort()">
+                            <option value="value-desc">Value (High to Low)</option>
+                            <option value="value-asc">Value (Low to High)</option>
+                            <option value="gain-desc">Gain / Loss $ (High to Low)</option>
+                            <option value="gain-asc">Gain / Loss $ (Low to High)</option>
+                            <option value="gain-pct-desc">Gain % (High to Low)</option>
+                            <option value="gain-pct-asc">Gain % (Low to High)</option>
+                            <option value="bookcost-desc">Book Cost (High to Low)</option>
+                            <option value="bookcost-asc">Book Cost (Low to High)</option>
+                            <option value="avgcost-desc">Avg Cost (High to Low)</option>
+                            <option value="avgcost-asc">Avg Cost (Low to High)</option>
+                            <option value="ticker-asc">Ticker (A to Z)</option>
+                            <option value="ticker-desc">Ticker (Z to A)</option>
+                            <option value="name-asc">Name (A to Z)</option>
+                            <option value="name-desc">Name (Z to A)</option>
+                            <option value="price-desc">Price (High to Low)</option>
+                            <option value="price-asc">Price (Low to High)</option>
+                            <option value="shares-desc">Shares (Most to Least)</option>
+                            <option value="shares-asc">Shares (Least to Most)</option>
+                            <option value="brokerage">Brokerage (A to Z)</option>
+                            <option value="brokerage-desc">Brokerage (Z to A)</option>
+                            <option value="account">Account Type (A to Z)</option>
+                            <option value="account-desc">Account Type (Z to A)</option>
+                            <option value="strategy">Strategy (A to Z)</option>
+                            <option value="strategy-desc">Strategy (Z to A)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="filter-brokerage">Brokerage:</label>
+                        <select id="filter-brokerage" onchange="applyFiltersAndSort()">
+                            <option value="all">All Brokerages</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="filter-account">Account:</label>
+                        <select id="filter-account" onchange="applyFiltersAndSort()">
+                            <option value="all">All Accounts</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="filter-strategy">Strategy:</label>
+                        <select id="filter-strategy" onchange="applyFiltersAndSort()">
+                            <option value="all">All Strategies</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="view-mode">View:</label>
+                        <select id="view-mode" onchange="changeViewMode(this.value)">
+                            <option value="table">Table</option>
+                            <option value="cards">Cards</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="control-group control-group-full">
+                        <label for="search-input">Search:</label>
+                        <input type="text" id="search-input" placeholder="Search by ticker, ETF name, brokerage, account..." oninput="applyFiltersAndSort()">
+                    </div>
+                    <div class="control-group">
+                        <button class="btn-secondary" onclick="exportDataCSV()">Export CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Holdings View Container -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Holdings Breakdown</h2>
+                    <span id="filtered-count" class="section-count">0 positions</span>
+                </div>
+
+                <!-- Table View -->
+                <div id="holdings-table-container" class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-col="ticker" onclick="setSort('ticker')" style="cursor: pointer;">Ticker ⬍</th>
+                                <th data-col="name" onclick="setSort('name')" style="cursor: pointer;">Asset / Fund Name ⬍</th>
+                                <th data-col="brokerage" onclick="setSort('brokerage')" style="cursor: pointer;">Brokerage ⬍</th>
+                                <th data-col="account" onclick="setSort('account')" style="cursor: pointer;">Account ⬍</th>
+                                <th data-col="count" class="text-right" onclick="setSort('count')" style="cursor: pointer;">Shares ⬍</th>
+                                <th data-col="averageCost" class="text-right" onclick="setSort('averageCost')" style="cursor: pointer;">Avg Cost ⬍</th>
+                                <th data-col="unitPrice" class="text-right" onclick="setSort('unitPrice')" style="cursor: pointer;">Price (CAD) ⬍</th>
+                                <th data-col="totalCost" class="text-right" onclick="setSort('totalCost')" style="cursor: pointer;">Book Cost ⬍</th>
+                                <th data-col="sum" class="text-right" onclick="setSort('sum')" style="cursor: pointer;">Market Value ⬍</th>
+                                <th data-col="unrealizedGainCAD" class="text-right" onclick="setSort('unrealizedGainCAD')" style="cursor: pointer;">Gain / Loss ⬍</th>
+                                <th data-col="weight" class="text-right" onclick="setSort('weight')" style="cursor: pointer;">% Weight ⬍</th>
+                                <th data-col="strategy" onclick="setSort('strategy')" style="cursor: pointer;">Strategy ⬍</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdings-tbody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Cards Grid View -->
+                <div id="holdings-cards-container" class="holdings-grid" style="display: none;">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Holding Details Modal -->
+        <div id="holding-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+            <div class="modal-content">
+                <button class="modal-close" onclick="closeHoldingModal()">&times;</button>
+                <div id="modal-body">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>My Finance &bull; Personal Financial Tracker &bull; Powered by GitHub Pages &amp; Public Yahoo Finance API</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="holdings.js?v=2.5"></script>
+</body>
+</html>

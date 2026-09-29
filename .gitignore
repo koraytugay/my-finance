@@ -1,0 +1,27 @@
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Node
+node_modules/
+
+# Logs
+runlogs/*.log
+*.log
+
+# Scratch
+scratch/
+
+# Plaintext Decrypted Files (Keep personal quantities private)
+*.csv
+encrypted/*.csv
+encrypted/*.json
+*.decrypted.*
+Holdings-export.csv
+Carry-Over-export.csv
+
+# Google Cloud Service Account Keys & Secrets
+*gen-lang-client*.json
+credentials*.json
+*.key.json

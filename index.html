@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Main Overview</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .main-card {
+            background: white;
+            border: 1px solid #edf2f7;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-card-header {
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1.5px solid #e2e8f0;
+        }
+        .main-card-title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #1f2328;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-card-subtitle {
+            margin: 3px 0 0 0;
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+        .summary-metric-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            margin-top: 16px;
+        }
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.88rem;
+        }
+        .metric-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .metric-label {
+            color: #475569;
+            font-weight: 500;
+        }
+        .metric-value {
+            font-weight: 700;
+            color: #1f2328;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Finance</h1>
+            <p class="subtitle">Google Sheets &bull; Main Executive Dashboard</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link active">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading Main tab data...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
+            <!-- Top Stat Cards (2 Rows of 4 Cards) -->
+            <div class="stats" style="margin-bottom: 12px;">
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-total-cad">$0.00</span>
+                    <span class="stat-label">Total Portfolio CAD</span>
+                    <span class="stat-sub" id="main-stat-total-usd">≈ $0.00 USD</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-week-change" style="color: #16a34a;">+$0.00</span>
+                    <span class="stat-label" id="main-stat-week-label">Current Week</span>
+                    <span class="stat-sub" id="main-stat-week-sub">+0.00% &bull; 🟢 Up this week</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-timeback-cad" style="color: #16a34a;">0 weeks</span>
+                    <span class="stat-label">Time Back (CAD)</span>
+                    <span class="stat-sub" id="main-stat-timeback-cad-sub">🟢 At All-Time High</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-timeback-usd" style="color: #16a34a;">0 weeks</span>
+                    <span class="stat-label">Time Back (USD)</span>
+                    <span class="stat-sub" id="main-stat-timeback-usd-sub">🟢 At All-Time High</span>
+                </div>
+            </div>
+            <div class="stats" style="margin-bottom: 24px;">
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-ath" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="stat-label" id="main-stat-ath-label">All-Time High Status</span>
+                    <span class="stat-sub" id="main-stat-ath-val">$0.00 ATH</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-stocks">$0.00</span>
+                    <span class="stat-label">Equities (Stocks)</span>
+                    <span class="stat-sub" id="main-stat-stocks-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-fixed">$0.00</span>
+                    <span class="stat-label">Fixed Income</span>
+                    <span class="stat-sub" id="main-stat-fixed-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-alts">$0.00</span>
+                    <span class="stat-label">Precious Metals &amp; Crypto</span>
+                    <span class="stat-sub" id="main-stat-alts-pct">0.0% of portfolio</span>
+                </div>
+            </div>
+
+            <!-- Net Worth Progression Graph -->
+            <div class="chart-wrapper">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="main-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Net Worth Progression</h2>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                            <input type="checkbox" id="main-overlay-xeqt" onchange="toggleMainXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                            Overlay XEQT
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <div class="timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;">All Time</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2026" onclick="setMainTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">2026</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2025" onclick="setMainTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">2025</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2024" onclick="setMainTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">2024</button>
+                            <button type="button" class="btn-secondary timeframe-pill active" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;">Last 52W</button>
+                        </div>
+                        <div class="currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-main-cur-cad" class="btn-secondary active" onclick="setMainCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">CAD ($)</button>
+                            <button type="button" id="btn-main-cur-usd" class="btn-secondary" onclick="setMainCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">USD ($)</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-container" id="main-chart-container">
+                    <div id="main-chart-svg-box"></div>
+                    <div id="main-chart-tooltip" class="chart-tooltip"></div>
+                </div>
+                <div class="chart-legend" id="main-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                    <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
+                    </div>
+                </div>
+            </div>
+
+            <!-- Google Sheets Main Tab 3-Column Tables Layout -->
+            <div class="main-grid">
+                <!-- 1. Asset Class Table -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            🌍 Asset Class
+                        </h2>
+                        <p class="main-card-subtitle">
+                            Google Sheets Main Tab &bull; Equities Breakdown &amp; Asset Classes
+                        </p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-asset-class">
+                            <thead>
+                                <tr>
+                                    <th>Asset Class</th>
+                                    <th style="text-align: right;">Total Value</th>
+                                    <th style="text-align: right;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-asset-class">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 2. Account Type Table -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            🏛️ Account Type
+                        </h2>
+                        <p class="main-card-subtitle">
+                            Google Sheets Main Tab &bull; Tax Registration &amp; Portfolio Growth
+                        </p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-account-type">
+                            <thead>
+                                <tr>
+                                    <th>Account Type</th>
+                                    <th style="text-align: right;">Total Value</th>
+                                    <th style="text-align: right;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-account-type">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. Category Table -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            📦 Category
+                        </h2>
+                        <p class="main-card-subtitle">
+                            Google Sheets Main Tab &bull; High-Level Asset Categories
+                        </p>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="table-category">
+                            <thead>
+                                <tr>
+                                    <th>Category</th>
+                                    <th style="text-align: right;">Total Value</th>
+                                    <th style="text-align: right;">Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-category">
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Mini Visual Category Allocation Bar -->
+                    <div style="margin-top: 18px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">
+                            <span>CATEGORY DISTRIBUTION</span>
+                            <span id="cat-bar-total">$0.00 CAD</span>
+                        </div>
+                        <div id="cat-progress-bar" style="height: 12px; border-radius: 6px; overflow: hidden; display: flex; background: #e2e8f0;">
+                            <!-- Injected via JS -->
+                        </div>
+                        <div id="cat-legend" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.74rem;">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance & Growth Tracking Cards (52-Week & YTD) -->
+            <div class="main-grid">
+                <!-- 1. 52-Week Performance Tracking Card -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            📈 52-Week Performance Tracking
+                        </h2>
+                        <p class="main-card-subtitle">
+                            Trailing 52-Week Portfolio Growth &amp; Milestones
+                        </p>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Portfolio Value</span>
+                        <span class="metric-value" id="metric-total-val" style="color: #0969da;">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Net Worth 1 Year Ago</span>
+                        <span class="metric-value" id="metric-cost-basis">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Change in Last 52 Weeks</span>
+                        <span class="metric-value" id="metric-total-gain" style="color: #16a34a;">+$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Return (Last 52 Weeks)</span>
+                        <span class="metric-value" id="metric-gain-pct" style="color: #16a34a;">+0.00%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Monthly Average Change</span>
+                        <span class="metric-value" id="metric-monthly-rate" style="color: #16a34a;">+$0.00 / mo</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Peak Net Worth</span>
+                        <span class="metric-value" id="metric-ath-val" style="color: #0969da;">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- 2. Year to Date (YTD) Tracking Card -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            📅 Year to Date (YTD) Tracking
+                        </h2>
+                        <p class="main-card-subtitle" id="ytd-card-subtitle">
+                            Calendar Year Performance &amp; Net Wealth Growth
+                        </p>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Portfolio Value</span>
+                        <span class="metric-value" id="ytd-total-val" style="color: #0969da;">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Net Worth at Start of Year</span>
+                        <span class="metric-value" id="ytd-start-val">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Change Year to Date</span>
+                        <span class="metric-value" id="ytd-total-gain" style="color: #16a34a;">+$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Return Year to Date</span>
+                        <span class="metric-value" id="ytd-gain-pct" style="color: #16a34a;">+0.00%</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Monthly Average Change</span>
+                        <span class="metric-value" id="ytd-monthly-rate" style="color: #16a34a;">+$0.00 / mo</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Peak Net Worth</span>
+                        <span class="metric-value" id="ytd-peak-val" style="color: #0969da;">$0.00</span>
+                    </div>
+                </div>
+
+                <!-- 3. All-Time Wealth & Growth Decomposition Card -->
+                <div class="main-card">
+                    <div class="main-card-header">
+                        <h2 class="main-card-title">
+                            💎 All-Time Wealth &amp; Growth
+                        </h2>
+                        <p class="main-card-subtitle">
+                            Baseline Capital vs. Contributions vs. ETF Growth
+                        </p>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Current Net Worth</span>
+                        <span class="metric-value" id="alltime-net-worth" style="color: #0969da;">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Starting Baseline (Week 1)</span>
+                        <span class="metric-value" id="alltime-baseline-val">$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Contributions &amp; Realized Growth</span>
+                        <span class="metric-value" id="alltime-contributions-val" style="color: #8250df;">+$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Current Unrealized Gains</span>
+                        <span class="metric-value" id="alltime-etf-gain-val" style="color: #16a34a;">+$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Growth</span>
+                        <span class="metric-value" id="alltime-growth-val" style="color: #0969da;">+$0.00</span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Total Growth Rate</span>
+                        <span class="metric-value" id="alltime-roi-pct" style="color: #0969da;">+0.00% since Week 1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/koraytugay/my-finance" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>&copy; 2026 My Finance &bull; Automated Google Sheets Portfolio &bull; AES-256-GCM Encrypted</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="main.js?v=2.5"></script>
+</body>
+</html>

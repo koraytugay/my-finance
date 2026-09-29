@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Financial Stats &amp; Milestones</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .top-holdings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .top-holding-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px 16px;
+            position: relative;
+        }
+        .rank-badge {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Financial Statistics &amp; Milestones</h1>
+            <p class="subtitle">Portfolio Concentration &amp; Performance Records</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link active">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Computing portfolio statistics...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="stats-content" style="display: none;">
+            <!-- Overview Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-avg-growth">0.00%</span>
+                    <span class="stat-label">Avg Weekly Growth</span>
+                    <span class="stat-sub" id="stat-avg-growth-sub">Across history</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-top3-conc">0.0%</span>
+                    <span class="stat-label">Top 3 Concentration</span>
+                    <span class="stat-sub">Share of total portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-top5-conc">0.0%</span>
+                    <span class="stat-label">Top 5 Concentration</span>
+                    <span class="stat-sub">Share of total portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-best-week">+$0.00</span>
+                    <span class="stat-label">Best Single Week</span>
+                    <span class="stat-sub" id="stat-best-week-date">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-worst-week">-$0.00</span>
+                    <span class="stat-label">Max Weekly Pullback</span>
+                    <span class="stat-sub" id="stat-worst-week-date">-</span>
+                </div>
+            </div>
+
+            <!-- Financial Milestones & Crossover Point (Feature 3) -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        🎯 Financial Milestones &amp; The "Crossover Point"
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="milestone-current-pill">
+                        Current: $680,041 CAD
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Tracking trajectory toward seven-figure financial independence and the tipping point where your portfolio's passive returns outpace active labor savings.
+                </p>
+
+                <!-- Milestone Cards -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                    <!-- $750k Milestone -->
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #1f2328;">$750,000 CAD Milestone</span>
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #0969da;" id="m1-pct">90.7%</span>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin-bottom: 4px;" id="m1-rem">-$69,959 to go</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;" id="m1-time">Est. ~23 weeks at current velocity</div>
+                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div id="m1-bar" style="width: 90.7%; height: 100%; background: #0969da;"></div>
+                        </div>
+                    </div>
+
+                    <!-- $800k Milestone -->
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #1f2328;">$800,000 CAD Milestone</span>
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #8250df;" id="m2-pct">85.0%</span>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #8250df; margin-bottom: 4px;" id="m2-rem">-$119,959 to go</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;" id="m2-time">Est. ~40 weeks at current velocity</div>
+                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div id="m2-bar" style="width: 85.0%; height: 100%; background: #8250df;"></div>
+                        </div>
+                    </div>
+
+                    <!-- $1,000,000 Milestone -->
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 0.85rem; font-weight: 800; color: #1f2328;">$1,000,000 CAD (Two-Comma Club)</span>
+                            <span style="font-size: 0.78rem; font-weight: 800; color: #16a34a;" id="m3-pct">68.0%</span>
+                        </div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin-bottom: 4px;" id="m3-rem">-$319,959 to go</div>
+                        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 10px;" id="m3-time">Est. ~105 weeks (~2.0 yrs)</div>
+                        <div style="width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div id="m3-bar" style="width: 68.0%; height: 100%; background: #16a34a;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crossover Point Box -->
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Self-Funding Compounding Momentum</span>
+                            <h4 style="margin: 2px 0 0 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                                ⚡ The "Crossover Point": <span id="crossover-pct" style="color: #16a34a;">42.7% Replaced</span>
+                            </h4>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Portfolio Passive Run-Rate</div>
+                            <div style="font-size: 1.15rem; font-weight: 800; color: #16a34a;" id="crossover-annual">+$47,603 / yr ($3,967 / mo)</div>
+                        </div>
+                    </div>
+
+                    <div style="width: 100%; height: 14px; background: #e2e8f0; border-radius: 7px; overflow: hidden; margin-bottom: 10px;">
+                        <div id="crossover-bar" style="width: 42.7%; height: 100%; background: linear-gradient(90deg, #0969da 0%, #16a34a 100%);"></div>
+                    </div>
+
+                    <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.5;" id="crossover-desc">
+                        At an expected 7.0% annual compounding rate, your portfolio produces <strong>+$47,603/year ($3,967/month)</strong> completely passively. This already replaces <strong>42.7%</strong> of your active annual savings inflow ($111,500/yr). Full Crossover (100% self-funding) will occur at ~$1,593,000 CAD.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Fee & MER Drag Audit Section (Feature 4) -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        🛡️ Fee &amp; MER Drag Audit: The "DIY Savings" Validator
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="mer-savings-pill">
+                        DIY Advantage: +$12,172 / year saved
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Quantifying how much wealth you protect by managing ultra-low-cost index ETFs instead of paying typical Canadian bank mutual fund fees (1.95%).
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Portfolio Weighted MER</div>
+                        <div id="mer-weighted-val" style="font-size: 1.35rem; font-weight: 800; color: #16a34a; margin: 4px 0;">~0.16%</div>
+                        <div id="mer-annual-cost" style="font-size: 0.75rem; color: #64748b;">Cost: $1,088 / year across 37 ETFs</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #cf222e; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #cf222e; text-transform: uppercase;">Bank Mutual Fund Fee (1.95%)</div>
+                        <div id="mer-bank-cost" style="font-size: 1.35rem; font-weight: 800; color: #cf222e; margin: 4px 0;">$13,260 / year</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Average Canadian retail MER drag</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Annual Wealth Preserved</div>
+                        <div id="mer-annual-saved" style="font-size: 1.35rem; font-weight: 800; color: #0969da; margin: 4px 0;">+$12,172 / yr</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Kept directly compounding for you</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">10-Year Compounding Edge</div>
+                        <div id="mer-10yr-edge" style="font-size: 1.35rem; font-weight: 800; color: #8250df; margin: 4px 0;">+$178,500+</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Future value of fees saved (at 7%)</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.8rem; color: #475569; background: #f8fafc; border-radius: 8px; padding: 12px 16px; border: 1px solid #e2e8f0;">
+                    💡 <strong>Fee Drag Audit:</strong> Because you hold low-cost ETFs (e.g. VFV at 0.09%, XEQT at 0.20%, Bond ETFs at 0.10%), your total portfolio fee drag is only <strong>0.16%</strong>. By bypassing traditional wealth advisors and high-MER mutual funds (1.95%), you protect over <strong>$1,000 every single month</strong> in pure capital.
+                </div>
+            </div>
+
+            <!-- Top 5 Holdings by Market Value -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Top 5 Largest Positions</h2>
+                    <span class="section-count">Core Pillars</span>
+                </div>
+                <div id="top-holdings-grid" class="top-holdings-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Annual Breakdown & Best/Worst Weeks -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+                <!-- Annual Performance -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Annual Performance</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Year</th>
+                                    <th class="text-right">Starting CAD</th>
+                                    <th class="text-right">Ending CAD</th>
+                                    <th class="text-right">Net Growth</th>
+                                    <th class="text-right">Return %</th>
+                                </tr>
+                            </thead>
+                            <tbody id="annual-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Record Weeks -->
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Extreme Weekly Moves</h2>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Week</th>
+                                    <th class="text-right">Net Change CAD</th>
+                                    <th class="text-right">% Change</th>
+                                </tr>
+                            </thead>
+                            <tbody id="extreme-tbody">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>My Finance &bull; Personal Financial Tracker &bull; Powered by GitHub Pages &amp; Public Yahoo Finance API</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="stats.js?v=2.5"></script>
+</body>
+</html>

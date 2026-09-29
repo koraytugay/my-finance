@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Net Worth History</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .chart-wrapper {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 24px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Net Worth History</h1>
+            <p class="subtitle">Weekly Portfolio Tracking &amp; Growth Trajectory</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link active">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading history records...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="history-content" style="display: none;">
+            <!-- Key Metric Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-current-cad">$0.00</span>
+                    <span class="stat-label">Current Net Worth</span>
+                    <span class="stat-sub" id="hist-current-usd">≈ $0.00 USD</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-starting-cad" style="color: #0969da;">$0.00</span>
+                    <span class="stat-label">Starting Baseline</span>
+                    <span class="stat-sub" id="hist-starting-sub">Week 1 (Aug 2024)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-total-contributions" style="color: #8250df;">+$0.00</span>
+                    <span class="stat-label">Contributions &amp; Realized</span>
+                    <span class="stat-sub" id="hist-total-contributions-sub">Added since Week 1</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-actual-return" style="color: #16a34a;">+$0.00</span>
+                    <span class="stat-label">Current Unrealized Gains</span>
+                    <span class="stat-sub" id="hist-actual-return-pct">Open positions</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-total-gain" style="color: #0969da;">+$0.00</span>
+                    <span class="stat-label">Total Growth</span>
+                    <span class="stat-sub" id="hist-total-gain-pct">+0.0% all-time</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-peak-cad">$0.00</span>
+                    <span class="stat-label">All-Time Peak</span>
+                    <span class="stat-sub" id="hist-peak-date">High water mark</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-drawdown-cad">$0.00</span>
+                    <span class="stat-label">Current Drawdown</span>
+                    <span class="stat-sub" id="hist-drawdown-pct">0.00% from peak</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="hist-total-weeks">0</span>
+                    <span class="stat-label">Total Weeks Tracked</span>
+                    <span class="stat-sub" id="hist-start-date">Since Aug 2024</span>
+                </div>
+            </div>
+
+            <!-- Capital & Wealth Decomposition Banner -->
+            <div class="controls" style="padding: 16px 20px; margin-bottom: 20px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                    <div style="font-weight: 700; font-size: 0.95rem; color: #1f2328; display: flex; align-items: center; gap: 6px;">
+                        <span>💎 Net Worth Growth &amp; Baseline</span>
+                        <span style="font-size: 0.75rem; font-weight: 500; color: #64748b;">(Starting Baseline + Contributions &amp; Realized + Current Unrealized Gains)</span>
+                    </div>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="hist-decomp-summary">
+                        Current Unrealized Gains: +$0.00
+                    </span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; color: #475569; flex-wrap: wrap; gap: 6px;">
+                    <span id="hist-bar-label-starting" style="color: #0969da;">■ Starting Baseline: $0.00 (0.0%)</span>
+                    <span id="hist-bar-label-savings" style="color: #8250df;">■ Contributions &amp; Realized: +$0.00 (0.0%)</span>
+                    <span id="hist-bar-label-gains" style="color: #16a34a;">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
+                </div>
+                <div style="width: 100%; height: 14px; border-radius: 6px; overflow: hidden; display: flex; background: #e2e8f0;">
+                    <div id="hist-bar-starting" style="background: #0969da; height: 100%; width: 50%;" title="Starting Baseline"></div>
+                    <div id="hist-bar-savings" style="background: #8250df; height: 100%; width: 35%;" title="Contributions &amp; Realized Growth"></div>
+                    <div id="hist-bar-gains" style="background: #16a34a; height: 100%; width: 15%;" title="Current Unrealized Gains"></div>
+                </div>
+            </div>
+
+            <!-- Controls Toolbar -->
+            <div class="controls">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label for="timeframe-select">Timeframe:</label>
+                        <select id="timeframe-select" onchange="applyHistoryFilter()">
+                            <option value="all">All Time</option>
+                            <option value="2026">Year 2026</option>
+                            <option value="2025">Year 2025</option>
+                            <option value="2024">Year 2024</option>
+                            <option value="last-52">Last 52 Weeks (1 Year)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="currency-toggle">Display Currency:</label>
+                        <select id="currency-toggle" onchange="applyHistoryFilter()">
+                            <option value="CAD">CAD ($)</option>
+                            <option value="USD">USD ($)</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group" style="margin-left: auto;">
+                        <button class="btn-secondary" onclick="exportHistoryCSV()">Export History CSV</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visual Chart Container -->
+            <div class="chart-wrapper">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="chart-title">Net Worth Progression</h2>
+                        <span id="chart-subtitle" class="section-count">111 data points</span>
+                    </div>
+                    <div>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                            <input type="checkbox" id="hist-overlay-xeqt" onchange="toggleHistXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                            Overlay XEQT
+                        </label>
+                    </div>
+                </div>
+                <div class="chart-container" id="chart-container">
+                    <!-- Dynamic SVG chart injected by history.js -->
+                    <div id="chart-svg-box"></div>
+                    <div id="chart-tooltip" class="chart-tooltip"></div>
+                </div>
+                <div class="chart-legend" id="chart-legend">
+                    <div class="legend-item"><span class="legend-dot" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                </div>
+            </div>
+
+            <!-- Savings Velocity & Annual Inflows Section (Feature 2) -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        ⚡ Savings Velocity &amp; Annual Wealth Inflows
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="velocity-overall-pill">
+                        Average Velocity: +$3,030 / week ($13,120 / month)
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Annual breakdown of portfolio growth showing contribution discipline combined with market appreciation over your history.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px;" id="velocity-grid">
+                    <!-- Populated dynamically by history.js -->
+                </div>
+            </div>
+
+            <!-- Historical Pullback & Downside Resilience Section (Feature 7) -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        🛡️ Historical Pullback &amp; Downside Resilience
+                    </h3>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="resilience-ath-pill">
+                        🟢 Sitting at All-Time Peak (0.00% Drawdown)
+                    </span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Stress-testing portfolio durability: measuring your deepest market pullbacks and recovery speed across your history.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Current Drawdown</div>
+                        <div id="resilience-current-dd" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 4px 0;">0.00%</div>
+                        <div id="resilience-current-dd-sub" style="font-size: 0.75rem; color: #64748b;">At all-time high ($680,041 CAD)</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #cf222e; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #cf222e; text-transform: uppercase;">Deepest Pullback (Max DD)</div>
+                        <div id="resilience-max-dd" style="font-size: 1.25rem; font-weight: 800; color: #cf222e; margin: 4px 0;">-7.62%</div>
+                        <div id="resilience-max-dd-sub" style="font-size: 0.75rem; color: #64748b;">-$30,694 on Apr 4, 2025</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Longest Pullback Duration</div>
+                        <div id="resilience-recovery-wks" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">6 weeks</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Fast recovery to fresh peak</div>
+                    </div>
+                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Asset Buffer Efficiency</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: #8250df; margin: 4px 0;">High Resilience</div>
+                        <div style="font-size: 0.75rem; color: #64748b;">Fixed income &amp; gold dampened dips</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical Data Table -->
+            <div class="content-section">
+                <div class="section-header">
+                    <h2 class="section-title">Weekly Log Records</h2>
+                    <span id="record-count" class="section-count">111 entries</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Week</th>
+                                <th>Date</th>
+                                <th class="text-right">Stocks</th>
+                                <th class="text-right">Fixed</th>
+                                <th class="text-right">Precious Metals</th>
+                                <th class="text-right">Crypto</th>
+                                <th class="text-right">Total CAD</th>
+                                <th class="text-right">Total USD</th>
+                                <th class="text-right">Weekly Change</th>
+                                <th class="text-right">Change %</th>
+                                <th class="text-right">Peak CAD</th>
+                                <th class="text-right">Drawdown</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-tbody">
+                            <!-- Populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>My Finance &bull; Personal Financial Tracker &bull; Powered by GitHub Pages &amp; Public Yahoo Finance API</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="history.js?v=2.5"></script>
+</body>
+</html>

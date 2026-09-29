@@ -1,0 +1,21 @@
+{
+  "name": "my-finance",
+  "version": "1.0.0",
+  "description": "Personal finance, net worth, and portfolio tracking website",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "sync": "node sync.js",
+    "encrypt-key": "node scripts/encrypt-google-key.js"
+  },
+  "keywords": [
+    "finance",
+    "portfolio",
+    "google-sheets",
+    "net-worth",
+    "encrypted"
+  ],
+  "author": "Koray Tugay",
+  "license": "ISC"
+}

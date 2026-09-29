@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Accounts &amp; Brokerages</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+    <style>
+        .group-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 24px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+        }
+        .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .account-summary-pill {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .subgroup-header-row {
+            background: #f1f5f9;
+            border-top: 2px solid #cbd5e1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .subgroup-header-row td {
+            padding: 10px 14px;
+        }
+        .subgroup-subtotal-row {
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 2px solid #cbd5e1;
+        }
+        .subgroup-subtotal-row td {
+            padding: 8px 14px;
+            font-size: 0.85rem;
+        }
+        .group-total-row {
+            background: #f0fdf4;
+            border-top: 2px solid #16a34a;
+        }
+        .group-total-row td {
+            padding: 12px 14px;
+            color: #166534;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Accounts &amp; Brokerages</h1>
+            <p class="subtitle">Tax Wrapper Structure &amp; Institution Breakdown</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link active">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading account details...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="accounts-content" style="display: none;">
+            <!-- Top Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-registered">$0.00</span>
+                    <span class="stat-label">Registered Accounts</span>
+                    <span class="stat-sub" id="stat-registered-pct">RRSP + TFSA + FHSA</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-nonregistered">$0.00</span>
+                    <span class="stat-label">Non-Registered Accounts</span>
+                    <span class="stat-sub" id="stat-nonregistered-pct">Taxable investments</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-cash-total">$0.00</span>
+                    <span class="stat-label">Cash Reserves</span>
+                    <span class="stat-sub" id="stat-cash-pct">Across all banks</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-top-brokerage">-</span>
+                    <span class="stat-label">Primary Brokerage</span>
+                    <span class="stat-sub" id="stat-top-brokerage-val">$0.00 CAD</span>
+                </div>
+            </div>
+
+            <!-- View Toggle Controls -->
+            <div class="controls">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <label for="group-by-select">Group By:</label>
+                        <select id="group-by-select" onchange="renderGroupedViews()">
+                            <option value="brokerage">Brokerage / Financial Institution</option>
+                            <option value="account-type">Account Type (Tax Wrapper)</option>
+                            <option value="registered-status">Tax Status (Registered vs Taxable)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grouped Cards Container -->
+            <div id="groups-container">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+
+        <footer>
+            <p>My Finance &bull; Personal Financial Tracker &bull; Powered by GitHub Pages &amp; Public Yahoo Finance API</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="accounts.js?v=2.5"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Finance - Tax Location &amp; Asset Placement</title>
+    <link rel="stylesheet" href="styles.css?v=2.5">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Finance</h1>
+            <p class="subtitle">Personal Portfolio &amp; Net Worth Tracker</p>
+        </header>
+
+        <nav class="page-nav">
+            <div class="nav-row">
+                <a href="index.html" class="nav-link">Main</a>
+                <a href="holdings.html" class="nav-link">Holdings</a>
+                <a href="history.html" class="nav-link">Net Worth History</a>
+                <a href="allocation.html" class="nav-link">Asset Allocation</a>
+                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="nav-link">Dividends</a>
+                <a href="stats.html" class="nav-link">Financial Stats</a>
+                <a href="performance.html" class="nav-link">Performance</a>
+                <a href="projections.html" class="nav-link">Projections</a>
+                <a href="tax.html" class="nav-link active">Tax Location</a>
+            </div>
+        </nav>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading tax placement data...</p>
+        </div>
+
+        <!-- Error Container -->
+        <div id="error" class="error" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <div id="main-content" style="display: none;">
+            <!-- Key Metric Stat Cards -->
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-registered-cad" style="color: #1a7f37;">$0.00</span>
+                    <span class="stat-label">Tax-Sheltered Wealth</span>
+                    <span class="stat-sub" id="stat-registered-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-taxable-cad" style="color: #0969da;">$0.00</span>
+                    <span class="stat-label">Taxable Wealth</span>
+                    <span class="stat-sub" id="stat-taxable-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-tfsa-cad">$0.00</span>
+                    <span class="stat-label">TFSA (100% Tax-Free)</span>
+                    <span class="stat-sub" id="stat-tfsa-pct">0.0%</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-rrsp-cad">$0.00</span>
+                    <span class="stat-label">RRSP / FHSA</span>
+                    <span class="stat-sub" id="stat-rrsp-pct">Tax-deferred</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="stat-shield-score">0%</span>
+                    <span class="stat-label">Tax-Shield Ratio</span>
+                    <span class="stat-sub" id="stat-shield-status">Optimal</span>
+                </div>
+            </div>
+
+            <!-- Tax Location Matrix Table -->
+            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                    🏛️ Asset Location Matrix
+                </h3>
+                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                    Shows the dollar distribution of each asset class across tax-sheltered and taxable account wrappers.
+                </p>
+                <div class="table-container">
+                    <table class="data-table" id="tax-matrix-table">
+                        <thead>
+                            <tr id="tax-matrix-header">
+                                <th>Asset Class</th>
+                                <!-- Account columns injected dynamically -->
+                                <th style="text-align: right;">Total CAD</th>
+                                <th style="text-align: center;">% Sheltered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tax-matrix-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                        <tfoot id="tax-matrix-footer" style="font-weight: 800; background: #f8fafc;">
+                            <!-- Injected via JS -->
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tax Location Best Practices & Insights -->
+            <div class="controls" style="padding: 20px; margin-bottom: 30px;">
+                <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                    💡 Tax Optimization &amp; Placement Principles
+                </h3>
+                <div id="tax-insights-container" style="display: flex; flex-direction: column; gap: 12px;">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="https://github.com/koraytugay/my-finance" target="_blank" rel="noopener">GitHub</a>
+            </div>
+            <p>&copy; 2026 My Finance &bull; Automated Google Sheets Portfolio &bull; AES-256-GCM Encrypted</p>
+        </footer>
+    </div>
+
+    <script src="api.js?v=2.5"></script>
+    <script src="tax.js?v=2.5"></script>
+</body>
+</html>
