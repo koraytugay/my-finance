@@ -1452,8 +1452,14 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', vie
             label = Math.abs(val) < 0.001 ? '0%' : `${val > 0 ? '+' : ''}${val.toFixed(0)}%`;
         } else {
             const currSymbol = overlayMetric === 'usd' ? 'US$' : '$';
-            const kVal = Math.round(val / 1000);
-            label = Math.abs(val) < 100 ? `${currSymbol}0` : `${val > 0 ? '+' : ''}${currSymbol}${kVal}k`;
+            const absK = Math.round(Math.abs(val) / 1000);
+            if (Math.abs(val) < 100) {
+                label = `${currSymbol}0`;
+            } else if (val < 0) {
+                label = `-${currSymbol}${absK}k`;
+            } else {
+                label = `+${currSymbol}${absK}k`;
+            }
         }
         gridLinesHtml += `
             <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${strokeDash}" />
@@ -1924,8 +1930,15 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         if (metric === 'pct') {
             label = `${val >= 0 ? '+' : ''}${val.toFixed(0)}%`;
         } else {
-            const kVal = Math.round(val / 1000);
-            label = `${val >= 0 ? '+' : ''}$${kVal}k`;
+            const currSymbol = metric === 'usd' ? 'US$' : '$';
+            const absK = Math.round(Math.abs(val) / 1000);
+            if (Math.abs(val) < 100) {
+                label = `${currSymbol}0`;
+            } else if (val < 0) {
+                label = `-${currSymbol}${absK}k`;
+            } else {
+                label = `+${currSymbol}${absK}k`;
+            }
         }
         gridLinesHtml += `
             <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${strokeDash}" />
