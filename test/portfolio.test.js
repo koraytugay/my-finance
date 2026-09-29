@@ -849,7 +849,7 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     resetMainChartState();
   });
 
-  await t.test('buildMainYearOverlaySeries accurately groups records and normalizes fractions across full year', () => {
+  await t.test('buildMainYearOverlaySeries accurately groups records and normalizes fractions and percentage returns', () => {
     const overlay = buildMainYearOverlaySeries(MOCK_HISTORY, ['2025', '2026'], 'CAD');
     assert.equal(overlay.yearSeries.length, 2, 'Should build 2 series for 2025 and 2026');
 
@@ -861,26 +861,55 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     assert.equal(s2025.color, '#8250df');
     assert.equal(s2026.color, '#0969da');
 
+    // Both series must have Jan 1 anchor point with 0.00% return
+    assert.equal(s2025.points[0].isAnchor, true, '2025 must start with Jan 1 anchor');
+    assert.equal(s2025.points[0].fraction, 0.0, 'Anchor fraction must be 0.0');
+    assert.equal(s2025.points[0].pct, 0.0, 'Anchor return must be exactly 0.0%');
+
+    assert.equal(s2026.points[0].isAnchor, true, '2026 must start with Jan 1 anchor');
+    assert.equal(s2026.points[0].pct, 0.0, 'Anchor return must be exactly 0.0%');
+
     // 2025 points should span across the whole year from near 0 to near 1
     assert.ok(s2025.points.length > 50, '2025 should have full year of weekly records');
-    assert.ok(s2025.points[0].fraction < 0.05, 'Early 2025 should start near 0%');
     assert.ok(s2025.points[s2025.points.length - 1].fraction > 0.95, 'Late 2025 should end near 100%');
 
-    // Fractions must be strictly between 0 and 1
+    // Fractions must be strictly between 0 and 1, and percentage returns must be finite
     s2025.points.forEach(p => {
       assert.ok(p.fraction >= 0 && p.fraction <= 1, `Point fraction ${p.fraction} must be in [0, 1]`);
+      assert.ok(Number.isFinite(p.pct), 'Point percentage return must be finite');
       assert.ok(Number.isFinite(p.val), 'Point value must be finite');
     });
 
-    // 2026 partial year points
-    assert.ok(s2026.points.length > 0, '2026 should have records');
-    assert.ok(s2026.points[0].fraction < 0.05, 'Early 2026 starts near 0%');
+    // 2025 ending return should reflect growth over the year
+    const last2025 = s2025.points[s2025.points.length - 1];
+    assert.ok(last2025.pct > 20, `2025 ending return should be > 20%, got ${last2025.pct}%`);
 
-    // Min and Max must encompass both years
+    // Percentage bounds
+    assert.ok(overlay.minPct <= 0, 'minPct must be <= 0%');
+    assert.ok(overlay.maxPct >= 20, 'maxPct must be >= 20%');
+    assert.ok(overlay.paddedMin <= overlay.minPct, 'paddedMin must provide breathing room below minPct');
+    assert.ok(overlay.paddedMax >= overlay.maxPct, 'paddedMax must provide breathing room above maxPct');
+    assert.ok([1, 2, 5, 10].includes(overlay.step), `step must be a clean interval, got ${overlay.step}`);
+
+    // Dollar value bounds preserved
     assert.ok(overlay.minVal > 0, 'minVal should be positive');
     assert.ok(overlay.maxVal >= overlay.minVal, 'maxVal should be >= minVal');
-    assert.ok(overlay.paddedMin <= overlay.minVal, 'paddedMin should provide padding');
-    assert.ok(overlay.paddedMax >= overlay.maxVal, 'paddedMax should provide padding');
+  });
+
+  await t.test('buildMainYearOverlaySeries handles USD currency and empty edge cases', () => {
+    const overlayUSD = buildMainYearOverlaySeries(MOCK_HISTORY, ['2025'], 'USD');
+    assert.equal(overlayUSD.yearSeries.length, 1);
+    assert.equal(overlayUSD.yearSeries[0].points[0].pct, 0.0);
+    assert.ok(overlayUSD.yearSeries[0].points.length > 50);
+    // Currency USD values must be lower than CAD values
+    assert.ok(overlayUSD.minVal < 200000, 'USD values must be scaled to USD');
+
+    // Empty selections
+    const emptyOverlay = buildMainYearOverlaySeries([], ['2025'], 'CAD');
+    assert.equal(emptyOverlay.yearSeries.length, 0);
+
+    const noYearsOverlay = buildMainYearOverlaySeries(MOCK_HISTORY, [], 'CAD');
+    assert.equal(noYearsOverlay.yearSeries.length, 0);
   });
 });
 

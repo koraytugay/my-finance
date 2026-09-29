@@ -758,6 +758,26 @@ function updateMainTimeframeButtonsUI() {
             btn.title = isActive ? `Year ${tf} (Active - click to hide)` : `Year ${tf} (Click to overlay)`;
         }
     });
+
+    const xeqtInput = document.getElementById('main-overlay-xeqt');
+    if (xeqtInput) {
+        const xeqtLabel = xeqtInput.closest('label');
+        if (currentMainMode === 'years') {
+            if (xeqtLabel) {
+                xeqtLabel.style.opacity = '0.4';
+                xeqtLabel.style.cursor = 'not-allowed';
+                xeqtLabel.title = 'XEQT benchmark overlay is available in All Time and Last 52W views';
+            }
+            xeqtInput.disabled = true;
+        } else {
+            if (xeqtLabel) {
+                xeqtLabel.style.opacity = '1';
+                xeqtLabel.style.cursor = 'pointer';
+                xeqtLabel.title = 'Compare your portfolio growth with holding 100% XEQT over the selected timeframe';
+            }
+            xeqtInput.disabled = false;
+        }
+    }
 }
 
 function syncMainTimeframeButtons(history) {
@@ -1143,59 +1163,128 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 }
 
 /**
- * Processes and groups history records by calendar year with full-year progression fractions.
+ * Processes and groups history records by calendar year with full-year progression fractions and percentage return.
  */
 function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD') {
     const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    const weeklyChgKey = currency === 'USD' ? 'weeklyChangeUSD' : 'weeklyChangeCAD';
     const selectedYearsList = Array.from(selectedYears || []).sort();
     const yearSeries = [];
 
-    selectedYearsList.forEach(year => {
-        const recs = (history || []).filter(r => r.date && r.date.startsWith(year));
-        if (recs.length > 0) {
-            yearSeries.push({
-                year,
-                records: recs,
-                color: getMainYearColor(year),
-                points: recs.map((r, i) => ({
-                    date: r.date,
-                    fraction: getDayOfYearFraction(r.date),
-                    val: r[valKey],
-                    weeklyChangeCAD: r.weeklyChangeCAD || 0,
-                    weeklyChangePct: r.weeklyChangePct || 0,
-                    idx: i,
-                    rec: r
-                }))
-            });
-        }
-    });
+    const sortedHistory = [...(history || [])].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    const allVals = [];
-    yearSeries.forEach(s => {
-        s.records.forEach(r => {
-            const v = r[valKey];
-            if (typeof v === 'number' && Number.isFinite(v)) allVals.push(v);
+    selectedYearsList.forEach(year => {
+        const recs = sortedHistory.filter(r => r.date && r.date.startsWith(year));
+        if (recs.length === 0) return;
+
+        // Determine baseline value entering the year (close of previous year or starting value)
+        const priorRecs = sortedHistory.filter(r => r.date && r.date < `${year}-01-01`);
+        let baseVal = 0;
+        if (priorRecs.length > 0) {
+            const lastPrior = priorRecs[priorRecs.length - 1];
+            baseVal = lastPrior[valKey] || 0;
+        }
+
+        if (baseVal <= 0 && recs.length > 0) {
+            const firstRec = recs[0];
+            const chg = typeof firstRec[weeklyChgKey] === 'number' ? firstRec[weeklyChgKey] : 0;
+            baseVal = (firstRec[valKey] || 0) - chg;
+        }
+
+        if (baseVal <= 0 && recs.length > 0) {
+            baseVal = recs[0][valKey] || 1;
+        }
+
+        const points = [];
+
+        // Anchor at Jan 1 (0.00%)
+        points.push({
+            date: `${year}-01-01`,
+            fraction: 0.0,
+            val: baseVal,
+            pct: 0.0,
+            weeklyChangeCAD: 0,
+            weeklyChangePct: 0,
+            isAnchor: true,
+            rec: {
+                date: `${year}-01-01`,
+                totalCAD: currency === 'CAD' ? baseVal : (baseVal / 0.74),
+                totalUSD: currency === 'USD' ? baseVal : (baseVal * 0.74),
+                weeklyChangeCAD: 0,
+                weeklyChangePct: 0
+            }
+        });
+
+        recs.forEach((r, idx) => {
+            const val = r[valKey] || 0;
+            const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
+            points.push({
+                date: r.date,
+                fraction: getDayOfYearFraction(r.date),
+                val: val,
+                pct: pct,
+                weeklyChangeCAD: r.weeklyChangeCAD || 0,
+                weeklyChangePct: r.weeklyChangePct || 0,
+                idx: idx,
+                isAnchor: false,
+                rec: r
+            });
+        });
+
+        yearSeries.push({
+            year,
+            baseVal,
+            color: getMainYearColor(year),
+            records: recs,
+            points: points
         });
     });
 
+    const allPcts = [0];
+    const allVals = [];
+    yearSeries.forEach(s => {
+        s.points.forEach(p => {
+            if (typeof p.pct === 'number' && Number.isFinite(p.pct)) {
+                allPcts.push(p.pct);
+            }
+            if (typeof p.val === 'number' && Number.isFinite(p.val)) {
+                allVals.push(p.val);
+            }
+        });
+    });
+
+    let minPct = Math.min(...allPcts);
+    let maxPct = Math.max(...allPcts);
     let minVal = allVals.length > 0 ? Math.min(...allVals) : 0;
     let maxVal = allVals.length > 0 ? Math.max(...allVals) : 0;
-    const range = maxVal - minVal || 10000;
-    const paddedMin = Math.floor(Math.max(0, minVal - range * 0.08) / 10000) * 10000;
-    const paddedMax = Math.ceil((maxVal + range * 0.08) / 10000) * 10000;
+
+    // Dynamic padding & neat step intervals for % Y-axis
+    const span = maxPct - minPct;
+    const pad = span > 0 ? Math.max(1, span * 0.1) : 4;
+    let step = 5;
+    if (span + 2 * pad > 40) step = 10;
+    else if (span + 2 * pad <= 14) step = 2;
+    else if (span + 2 * pad <= 6) step = 1;
+
+    const paddedMin = Math.floor((minPct - pad) / step) * step;
+    const paddedMax = Math.ceil((maxPct + pad) / step) * step;
 
     return {
         yearSeries,
+        allPcts,
         allVals,
+        minPct,
+        maxPct,
         minVal,
         maxVal,
         paddedMin,
-        paddedMax
+        paddedMax,
+        step
     };
 }
 
 /**
- * Renders the multi-year overlay progression chart where the X-axis spans the full calendar year (Jan–Dec).
+ * Renders the multi-year overlay progression chart in percentage (%) where the X-axis spans the full calendar year (Jan–Dec).
  */
 function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
     const selectedYearsList = Array.from(currentMainSelectedYears).sort();
@@ -1203,31 +1292,38 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     if (titleEl) {
         const sortedDesc = [...selectedYearsList].reverse();
         titleEl.textContent = sortedDesc.length > 1
-            ? `📈 Net Worth Progression (Overlay: ${sortedDesc.join(' vs ')})`
-            : `📈 Net Worth Progression (Year ${sortedDesc[0]})`;
+            ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
+            : `📈 Net Worth Progression (% Year ${sortedDesc[0]})`;
     }
 
     const overlayData = buildMainYearOverlaySeries(rawHistory, currentMainSelectedYears, currency);
-    const { yearSeries, paddedMin: minVal, paddedMax: maxVal } = overlayData;
+    const { yearSeries, paddedMin, paddedMax, step } = overlayData;
 
     if (yearSeries.length === 0) {
         box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
         return;
     }
 
-    const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
-    const getX = (dateStr) => padding.left + getDayOfYearFraction(dateStr) * plotW;
+    const getY = (pct) => padding.top + plotH - ((pct - paddedMin) / (paddedMax - paddedMin)) * plotH;
 
-    // Y Gridlines (4 steps)
-    const ySteps = 4;
+    // Y Gridlines in percentage (%)
+    const tickCount = Math.round((paddedMax - paddedMin) / step);
     let yGridHtml = '';
-    for (let i = 0; i <= ySteps; i++) {
-        const val = minVal + (i / ySteps) * (maxVal - minVal);
-        const y = getY(val);
-        const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
+    for (let i = 0; i <= tickCount; i++) {
+        const p = Math.round((paddedMin + i * step) * 10) / 10;
+        const y = getY(p);
+        const sign = p > 0 ? '+' : '';
+        const label = `${sign}${p}%`;
+        const isZero = Math.abs(p) < 0.001;
+        const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
+        const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
+        const strokeWidth = isZero ? '1.5' : '1';
+        const fontColor = isZero ? '#1e293b' : '#8c959f';
+        const fontWeight = isZero ? '700' : 'normal';
+
         yGridHtml += `
-            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-            <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
+            <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${fontColor}" font-weight="${fontWeight}" font-size="11" text-anchor="end">${label}</text>
         `;
     }
 
@@ -1259,16 +1355,16 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     let pointsHtml = '';
 
     yearSeries.forEach(s => {
-        const pts = s.records.map((r, i) => ({
-            x: getX(r.date),
-            y: getY(r[valKey]),
-            rec: r,
+        const pts = s.points.map((p, i) => ({
+            x: padding.left + p.fraction * plotW,
+            y: getY(p.pct),
+            p,
             idx: i
         }));
 
         if (pts.length === 0) return;
 
-        const linePathD = 'M ' + pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
+        const linePathD = 'M ' + pts.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' L ');
 
         if (yearSeries.length === 1) {
             const areaPathD = `${linePathD} L ${pts[pts.length - 1].x.toFixed(1)},${padding.top + plotH} L ${pts[0].x.toFixed(1)},${padding.top + plotH} Z`;
@@ -1287,8 +1383,8 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             <path d="${linePathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         `;
 
-        pointsHtml += pts.map(p => `
-            <circle class="main-overlay-point" data-year="${s.year}" data-idx="${p.idx}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${s.color}" stroke="#ffffff" stroke-width="1.8" style="cursor: pointer;" />
+        pointsHtml += pts.filter(pt => !pt.p.isAnchor).map(pt => `
+            <circle class="main-overlay-point" data-year="${s.year}" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.2" fill="${s.color}" stroke="#ffffff" stroke-width="1.8" />
         `).join('');
     });
 
@@ -1335,27 +1431,26 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const activeYearDetails = [];
 
             yearSeries.forEach(s => {
-                let closest = s.records[0];
+                let closest = s.points[0];
                 let closestDist = Infinity;
-                s.records.forEach(r => {
-                    const rFrac = getDayOfYearFraction(r.date);
-                    const dist = Math.abs(rFrac - frac);
+                s.points.forEach(p => {
+                    const dist = Math.abs(p.fraction - frac);
                     if (dist < closestDist) {
                         closestDist = dist;
-                        closest = r;
+                        closest = p;
                     }
                 });
 
                 if (closest) {
-                    const cx = (padding.left + getDayOfYearFraction(closest.date) * plotW).toFixed(1);
-                    const cy = getY(closest[valKey]).toFixed(1);
+                    const cx = (padding.left + closest.fraction * plotW).toFixed(1);
+                    const cy = getY(closest.pct).toFixed(1);
                     hoverDotsHtml += `
                         <circle cx="${cx}" cy="${cy}" r="5.5" fill="${s.color}" stroke="#ffffff" stroke-width="2" />
                     `;
                     activeYearDetails.push({
                         year: s.year,
                         color: s.color,
-                        rec: closest,
+                        point: closest,
                         cx,
                         cy
                     });
@@ -1374,21 +1469,34 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             activeYearDetails.sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
 
             activeYearDetails.forEach(d => {
-                const sign = d.rec.weeklyChangeCAD >= 0 ? '+' : '';
-                const changeColor = d.rec.weeklyChangeCAD >= 0 ? '#4ade80' : '#f87171';
+                const p = d.point;
+                const pctSign = p.pct >= 0 ? '+' : '';
+                const pctColor = p.pct >= 0 ? '#4ade80' : '#f87171';
+                const weeklySign = p.weeklyChangeCAD >= 0 ? '+' : '';
+                const weeklyColor = p.weeklyChangeCAD >= 0 ? '#4ade80' : '#f87171';
+
                 tipHtml += `
-                    <div style="margin-bottom: 5px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
-                            <span style="display: flex; align-items: center; gap: 5px; font-weight: 700;">
+                    <div style="margin-bottom: 6px;">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                            <span style="display: flex; align-items: center; gap: 5px;">
                                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${d.color};"></span>
                                 <strong style="color: ${d.color};">${d.year}:</strong>
-                                <span style="color: #cbd5e1; font-size: 0.73rem; font-weight: normal;">(${formatDate(d.rec.date)})</span>
+                                <span style="color: #cbd5e1; font-size: 0.72rem;">(${formatDate(p.date)})</span>
                             </span>
-                            <strong style="color: #ffffff; font-size: 0.84rem;">${formatCurrency(d.rec[valKey], currency)}</strong>
+                            <span style="display: flex; align-items: baseline; gap: 6px;">
+                                <strong style="color: ${pctColor}; font-size: 0.88rem;">${pctSign}${p.pct.toFixed(2)}%</strong>
+                                <span style="color: #cbd5e1; font-size: 0.74rem;">(${formatCurrency(p.val, currency)})</span>
+                            </span>
                         </div>
-                        <div style="font-size: 0.72rem; color: ${changeColor}; padding-left: 13px;">
-                            Weekly: ${sign}${formatCurrency(d.rec.weeklyChangeCAD, 'CAD')} (${sign}${d.rec.weeklyChangePct.toFixed(2)}%)
-                        </div>
+                        ${!p.isAnchor ? `
+                            <div style="font-size: 0.71rem; color: ${weeklyColor}; padding-left: 13px;">
+                                Weekly: ${weeklySign}${formatCurrency(currency === 'USD' ? (p.rec.weeklyChangeUSD || 0) : (p.rec.weeklyChangeCAD || 0), currency)} (${weeklySign}${p.weeklyChangePct.toFixed(2)}%)
+                            </div>
+                        ` : `
+                            <div style="font-size: 0.71rem; color: #94a3b8; padding-left: 13px; font-style: italic;">
+                                Baseline (Jan 1, 0.00%)
+                            </div>
+                        `}
                     </div>
                 `;
             });
@@ -1396,14 +1504,22 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             if (activeYearDetails.length >= 2) {
                 const newest = activeYearDetails[0];
                 const prior = activeYearDetails[1];
-                const spreadVal = newest.rec[valKey] - prior.rec[valKey];
-                const spreadPct = prior.rec[valKey] > 0 ? (spreadVal / prior.rec[valKey] * 100) : 0;
-                const spSign = spreadVal >= 0 ? '+' : '';
-                const spColor = spreadVal >= 0 ? '#4ade80' : '#f87171';
+                const pctDiff = newest.point.pct - prior.point.pct;
+                const spSign = pctDiff >= 0 ? '+' : '';
+                const spColor = pctDiff >= 0 ? '#4ade80' : '#f87171';
+                const valDiff = newest.point.val - prior.point.val;
+                const valSign = valDiff >= 0 ? '+' : '';
+
                 tipHtml += `
-                    <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.74rem; display: flex; justify-content: space-between; align-items: center;">
-                        <span>YoY Spread (${newest.year} vs ${prior.year}):</span>
-                        <strong style="color: ${spColor};">${spSign}${formatCurrency(spreadVal, currency)} (${spSign}${spreadPct.toFixed(2)}%)</strong>
+                    <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.74rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Performance (${newest.year} vs ${prior.year}):</span>
+                            <strong style="color: ${spColor};">${spSign}${pctDiff.toFixed(2)}% pts</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; color: #cbd5e1; font-size: 0.71rem; margin-top: 2px;">
+                            <span>Net Worth Diff:</span>
+                            <span>${valSign}${formatCurrency(valDiff, currency)}</span>
+                        </div>
                     </div>
                 `;
             }
@@ -1438,28 +1554,31 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const legendEl = document.getElementById('main-chart-legend');
     if (legendEl) {
         let itemsHtml = yearSeries.map(s => {
-            const latest = s.records[s.records.length - 1];
+            const last = s.points[s.points.length - 1];
+            const sign = last.pct >= 0 ? '+' : '';
+            const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
             return `
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
-                    <strong style="color: ${s.color};">${s.year}</strong>: ${formatCurrency(latest[valKey], currency)}
+                    <strong style="color: ${s.color};">${s.year}</strong>:
+                    <span style="font-weight: 700; color: ${color};">${sign}${last.pct.toFixed(2)}%</span>
+                    <span style="color: #64748b; font-size: 0.74rem;">(${formatCurrency(last.val, currency)})</span>
                 </div>
             `;
         }).join('');
 
         if (yearSeries.length >= 2) {
             const sortedDesc = [...yearSeries].sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
-            const newest = sortedDesc[0].records[sortedDesc[0].records.length - 1];
-            const prior = sortedDesc[1].records[sortedDesc[1].records.length - 1];
-            const spreadVal = newest[valKey] - prior[valKey];
-            const spreadPct = prior[valKey] > 0 ? (spreadVal / prior[valKey] * 100) : 0;
-            const sign = spreadVal >= 0 ? '+' : '';
-            const color = spreadVal >= 0 ? '#16a34a' : '#cf222e';
-            const bg = spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const newest = sortedDesc[0].points[sortedDesc[0].points.length - 1];
+            const prior = sortedDesc[1].points[sortedDesc[1].points.length - 1];
+            const diff = newest.pct - prior.pct;
+            const sign = diff >= 0 ? '+' : '';
+            const color = diff >= 0 ? '#16a34a' : '#cf222e';
+            const bg = diff >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
 
             itemsHtml += `
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${color}; background: ${bg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${color}30;">
-                    ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${sign}${formatCurrency(spreadVal, currency)} (${sign}${spreadPct.toFixed(2)}%)
+                    ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${sign}${diff.toFixed(2)}% pts
                 </div>
             `;
         }
