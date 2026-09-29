@@ -296,8 +296,8 @@ header h1 {
 }
 
 .timeframe-pill.active, .currency-toggle button.active {
-    background: #1f2328 !important;
-    color: #ffffff !important;
+    background: #1f2328;
+    color: #ffffff;
 }
 
 /* ================= Content Containers & Sections ================= */

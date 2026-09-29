@@ -9,6 +9,9 @@
 let rawHistory = [];
 let rawBenchmarks = null;
 let currentMainTimeframe = 'last-52';
+let currentMainMode = 'single'; // 'single' | 'years'
+let currentMainSingleTimeframe = 'last-52'; // 'last-52' | 'all'
+let currentMainSelectedYears = new Set(); // Set of active year strings, e.g. Set(['2026', '2025'])
 let currentMainCurrency = 'CAD';
 let currentMainOverlayXeqt = false;
 
@@ -31,6 +34,7 @@ async function initMain() {
         const mainData = calculateMainData(holdings, history);
 
         renderMainTopStats(mainData, holdings, history);
+        syncMainTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderAssetClassTable(mainData, holdings);
         renderAccountTypeTable(mainData, holdings, history);
@@ -690,36 +694,156 @@ function renderPerformanceCards(mainData) {
 }
 
 /* ================= Net Worth Progression SVG Chart ================= */
-function setMainTimeframe(tf) {
-    currentMainTimeframe = tf;
-    document.querySelectorAll('.timeframe-pill').forEach(btn => {
-        const isActive = btn.getAttribute('data-timeframe') === tf;
-        btn.classList.toggle('active', isActive);
-        btn.style.background = isActive ? '#1f2328' : 'white';
-        btn.style.color = isActive ? 'white' : '#24292f';
+
+const MAIN_YEAR_COLORS = {
+    '2026': '#0969da', // Vibrant Blue
+    '2025': '#8250df', // Elegant Purple
+    '2024': '#d97706', // Amber / Gold
+    '2023': '#0891b2', // Teal / Cyan
+    '2027': '#e11d48', // Rose
+    '2028': '#16a34a'  // Emerald
+};
+
+function getMainYearColor(year) {
+    if (MAIN_YEAR_COLORS[year]) return MAIN_YEAR_COLORS[year];
+    const palette = ['#0969da', '#8250df', '#d97706', '#0891b2', '#e11d48', '#4f46e5', '#059669'];
+    const num = parseInt(year, 10);
+    if (!isNaN(num)) {
+        return palette[Math.abs(num) % palette.length];
+    }
+    return '#0969da';
+}
+
+/**
+ * Calculates normalized progress of a calendar date within its year [0, 1].
+ * Jan 1 = 0.0, Dec 31 = 1.0.
+ */
+function getDayOfYearFraction(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return 0;
+    const parts = dateStr.split('-');
+    if (parts.length < 3) return 0;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+
+    const target = new Date(Date.UTC(y, m, d, 12, 0, 0));
+    const startOfYear = new Date(Date.UTC(y, 0, 1, 0, 0, 0));
+    const endOfYear = new Date(Date.UTC(y, 11, 31, 23, 59, 59));
+
+    const fraction = (target - startOfYear) / (endOfYear - startOfYear);
+    return Math.max(0, Math.min(1, fraction));
+}
+
+function updateMainTimeframeButtonsUI() {
+    if (typeof document === 'undefined') return;
+    const buttons = document.querySelectorAll('.timeframe-pill');
+    buttons.forEach(btn => {
+        const tf = btn.getAttribute('data-timeframe');
+        if (tf === 'all') {
+            const isActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
+            btn.classList.toggle('active', isActive);
+            btn.style.background = isActive ? '#1f2328' : 'white';
+            btn.style.color = isActive ? 'white' : '#24292f';
+        } else if (tf === 'last-52') {
+            const isActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52';
+            btn.classList.toggle('active', isActive);
+            btn.style.background = isActive ? '#1f2328' : 'white';
+            btn.style.color = isActive ? 'white' : '#24292f';
+        } else if (/^\d{4}$/.test(tf)) {
+            const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(tf);
+            btn.classList.toggle('active', isActive);
+            const yrColor = getMainYearColor(tf);
+            btn.style.background = isActive ? yrColor : 'white';
+            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.title = isActive ? `Year ${tf} (Active - click to hide)` : `Year ${tf} (Click to overlay)`;
+        }
     });
+}
+
+function syncMainTimeframeButtons(history) {
+    const container = document.getElementById('main-timeframe-toggle');
+    if (!container || !history || history.length === 0) return;
+
+    const availableYears = [...new Set(
+        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
+    )].sort().reverse();
+
+    if (availableYears.length === 0) return;
+
+    let html = `
+        <button type="button" class="btn-secondary timeframe-pill ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? '#1f2328' : 'white'}; color: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
+        <button type="button" class="btn-secondary timeframe-pill ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? '#1f2328' : 'white'}; color: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
+    `;
+
+    availableYears.forEach(year => {
+        const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(year);
+        const yrColor = getMainYearColor(year);
+        const bg = isActive ? yrColor : 'white';
+        const color = isActive ? 'white' : '#24292f';
+        html += `
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+function setMainTimeframe(tf) {
+    if (tf === 'all' || tf === 'last-52') {
+        currentMainMode = 'single';
+        currentMainSingleTimeframe = tf;
+        currentMainSelectedYears.clear();
+        currentMainTimeframe = tf;
+    } else if (/^\d{4}$/.test(tf)) {
+        if (currentMainMode === 'single') {
+            currentMainMode = 'years';
+            currentMainSingleTimeframe = null;
+            currentMainSelectedYears.clear();
+            currentMainSelectedYears.add(tf);
+        } else {
+            if (currentMainSelectedYears.has(tf)) {
+                if (currentMainSelectedYears.size > 1) {
+                    currentMainSelectedYears.delete(tf);
+                } else {
+                    currentMainMode = 'single';
+                    currentMainSingleTimeframe = 'last-52';
+                    currentMainSelectedYears.clear();
+                    currentMainTimeframe = 'last-52';
+                }
+            } else {
+                currentMainSelectedYears.add(tf);
+            }
+        }
+        if (currentMainMode === 'years') {
+            currentMainTimeframe = Array.from(currentMainSelectedYears).sort().join(',');
+        }
+    }
+
+    updateMainTimeframeButtonsUI();
     renderMainProgressionChart();
 }
 
 function setMainCurrency(curr) {
     currentMainCurrency = curr;
-    const btnCad = document.getElementById('btn-main-cur-cad');
-    const btnUsd = document.getElementById('btn-main-cur-usd');
-    if (btnCad && btnUsd) {
-        if (curr === 'CAD') {
-            btnCad.classList.add('active');
-            btnCad.style.background = '#1f2328';
-            btnCad.style.color = 'white';
-            btnUsd.classList.remove('active');
-            btnUsd.style.background = 'white';
-            btnUsd.style.color = '#24292f';
-        } else {
-            btnUsd.classList.add('active');
-            btnUsd.style.background = '#1f2328';
-            btnUsd.style.color = 'white';
-            btnCad.classList.remove('active');
-            btnCad.style.background = 'white';
-            btnCad.style.color = '#24292f';
+    if (typeof document !== 'undefined') {
+        const btnCad = document.getElementById('btn-main-cur-cad');
+        const btnUsd = document.getElementById('btn-main-cur-usd');
+        if (btnCad && btnUsd) {
+            if (curr === 'CAD') {
+                btnCad.classList.add('active');
+                btnCad.style.background = '#1f2328';
+                btnCad.style.color = 'white';
+                btnUsd.classList.remove('active');
+                btnUsd.style.background = 'white';
+                btnUsd.style.color = '#24292f';
+            } else {
+                btnUsd.classList.add('active');
+                btnUsd.style.background = '#1f2328';
+                btnUsd.style.color = 'white';
+                btnCad.classList.remove('active');
+                btnCad.style.background = 'white';
+                btnCad.style.color = '#24292f';
+            }
         }
     }
     renderMainProgressionChart();
@@ -740,36 +864,44 @@ async function toggleMainXeqtOverlay(checked) {
 }
 
 function renderMainProgressionChart() {
+    if (typeof document === 'undefined') return;
     const box = document.getElementById('main-chart-svg-box');
     const tooltip = document.getElementById('main-chart-tooltip');
     if (!box || !rawHistory || rawHistory.length === 0) return;
 
-    const timeframeSelect = document.getElementById('main-timeframe-select');
-    const currencyToggle = document.getElementById('main-currency-toggle');
-    const timeframe = timeframeSelect ? timeframeSelect.value : currentMainTimeframe;
-    const currency = currencyToggle ? currencyToggle.value : currentMainCurrency;
+    const currency = currentMainCurrency;
+    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    const width = 1000;
+    const height = 220;
+    const padding = { top: 18, right: 25, bottom: 32, left: 65 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
 
-    let records = [...rawHistory];
-    const latestRec = rawHistory[rawHistory.length - 1];
-    const currentYear = latestRec?.date ? latestRec.date.split('-')[0] : new Date().getFullYear().toString();
-    const effectiveTimeframe = timeframe === 'ytd' ? currentYear : timeframe;
+    const titleEl = document.getElementById('main-chart-title');
 
-    if (/^\d{4}$/.test(effectiveTimeframe)) {
-        const firstIdx = records.findIndex(r => r.date && r.date.startsWith(effectiveTimeframe));
-        const lastIdx = records.reduce((acc, r, i) => (r.date && r.date.startsWith(effectiveTimeframe)) ? i : acc, -1);
-        if (firstIdx !== -1 && lastIdx !== -1) {
-            const startIdx = firstIdx > 0 ? firstIdx - 1 : 0;
-            records = records.slice(startIdx, lastIdx + 1);
-        } else {
-            records = records.filter(r => r.date && r.date.startsWith(effectiveTimeframe));
-        }
-    } else if (timeframe === 'last-52') {
-        records = records.length > 52 ? records.slice(-53) : records;
-    } else if (timeframe === 'last-26') {
-        records = records.length > 26 ? records.slice(-27) : records;
+    if (currentMainMode === 'years' && currentMainSelectedYears.size > 0) {
+        renderMainYearOverlayChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl);
+    } else {
+        renderMainSingleChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl);
+    }
+}
+
+/**
+ * Renders the single-curve progression chart ("All Time" or "Last 52 Weeks").
+ */
+function renderMainSingleChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
+    const timeframe = currentMainSingleTimeframe || 'last-52';
+
+    if (titleEl) {
+        titleEl.textContent = timeframe === 'all'
+            ? '📈 Net Worth Progression (All Time)'
+            : '📈 Net Worth Progression (Last 52 Weeks)';
     }
 
-    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    let records = [...rawHistory];
+    if (timeframe === 'last-52') {
+        records = records.length > 52 ? records.slice(-53) : records;
+    }
 
     if (records.length === 0) {
         box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for this timeframe.</p>';
@@ -785,13 +917,6 @@ function renderMainProgressionChart() {
         xeqtSeries = computeXeqtProgressionOverlay(records, rawHistory, xeqtPrices, currency, currentXeqtPrice);
     }
 
-    const width = 1000;
-    const height = 210;
-    const padding = { top: 16, right: 25, bottom: 30, left: 65 };
-
-    const plotW = width - padding.left - padding.right;
-    const plotH = height - padding.top - padding.bottom;
-
     const allChartVals = records.map(r => r[valKey]);
     if (showXeqt && xeqtSeries.length > 0) {
         allChartVals.push(...xeqtSeries.map(x => x.val));
@@ -799,7 +924,6 @@ function renderMainProgressionChart() {
 
     let minVal = Math.min(...allChartVals);
     let maxVal = Math.max(...allChartVals);
-
     const range = maxVal - minVal || 10000;
     minVal = Math.floor(Math.max(0, minVal - range * 0.08) / 10000) * 10000;
     maxVal = Math.ceil((maxVal + range * 0.08) / 10000) * 10000;
@@ -813,10 +937,10 @@ function renderMainProgressionChart() {
     for (let i = 0; i <= ySteps; i++) {
         const val = minVal + (i / ySteps) * (maxVal - minVal);
         const y = getY(val);
-        const label = `$${(val / 1000).toFixed(0)}k`;
+        const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
         gridLinesHtml += `
-            <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-            <text x="${padding.left - 10}" y="${y + 4}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
+            <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
         `;
     }
 
@@ -829,8 +953,8 @@ function renderMainProgressionChart() {
         const x = getX(idx);
         const label = formatDate(rec.date);
         xTicksHtml += `
-            <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
         `;
     }
 
@@ -1018,6 +1142,332 @@ function renderMainProgressionChart() {
     });
 }
 
+/**
+ * Processes and groups history records by calendar year with full-year progression fractions.
+ */
+function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD') {
+    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    const selectedYearsList = Array.from(selectedYears || []).sort();
+    const yearSeries = [];
+
+    selectedYearsList.forEach(year => {
+        const recs = (history || []).filter(r => r.date && r.date.startsWith(year));
+        if (recs.length > 0) {
+            yearSeries.push({
+                year,
+                records: recs,
+                color: getMainYearColor(year),
+                points: recs.map((r, i) => ({
+                    date: r.date,
+                    fraction: getDayOfYearFraction(r.date),
+                    val: r[valKey],
+                    weeklyChangeCAD: r.weeklyChangeCAD || 0,
+                    weeklyChangePct: r.weeklyChangePct || 0,
+                    idx: i,
+                    rec: r
+                }))
+            });
+        }
+    });
+
+    const allVals = [];
+    yearSeries.forEach(s => {
+        s.records.forEach(r => {
+            const v = r[valKey];
+            if (typeof v === 'number' && Number.isFinite(v)) allVals.push(v);
+        });
+    });
+
+    let minVal = allVals.length > 0 ? Math.min(...allVals) : 0;
+    let maxVal = allVals.length > 0 ? Math.max(...allVals) : 0;
+    const range = maxVal - minVal || 10000;
+    const paddedMin = Math.floor(Math.max(0, minVal - range * 0.08) / 10000) * 10000;
+    const paddedMax = Math.ceil((maxVal + range * 0.08) / 10000) * 10000;
+
+    return {
+        yearSeries,
+        allVals,
+        minVal,
+        maxVal,
+        paddedMin,
+        paddedMax
+    };
+}
+
+/**
+ * Renders the multi-year overlay progression chart where the X-axis spans the full calendar year (Jan–Dec).
+ */
+function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
+    const selectedYearsList = Array.from(currentMainSelectedYears).sort();
+
+    if (titleEl) {
+        const sortedDesc = [...selectedYearsList].reverse();
+        titleEl.textContent = sortedDesc.length > 1
+            ? `📈 Net Worth Progression (Overlay: ${sortedDesc.join(' vs ')})`
+            : `📈 Net Worth Progression (Year ${sortedDesc[0]})`;
+    }
+
+    const overlayData = buildMainYearOverlaySeries(rawHistory, currentMainSelectedYears, currency);
+    const { yearSeries, paddedMin: minVal, paddedMax: maxVal } = overlayData;
+
+    if (yearSeries.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
+        return;
+    }
+
+    const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
+    const getX = (dateStr) => padding.left + getDayOfYearFraction(dateStr) * plotW;
+
+    // Y Gridlines (4 steps)
+    const ySteps = 4;
+    let yGridHtml = '';
+    for (let i = 0; i <= ySteps; i++) {
+        const val = minVal + (i / ySteps) * (maxVal - minVal);
+        const y = getY(val);
+        const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
+        yGridHtml += `
+            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
+            <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+        `;
+    }
+
+    // X-Axis (Full Year: 12 Month columns Jan - Dec)
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const monthDayStarts = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    const monthDaysCount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    let xGridHtml = '';
+    for (let m = 0; m < 12; m++) {
+        const startFrac = monthDayStarts[m] / 365;
+        const midFrac = (monthDayStarts[m] + monthDaysCount[m] / 2) / 365;
+        const startX = padding.left + startFrac * plotW;
+        const midX = padding.left + midFrac * plotW;
+
+        if (m > 0) {
+            xGridHtml += `
+                <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+            `;
+        }
+        xGridHtml += `
+            <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${monthNames[m]}</text>
+        `;
+    }
+
+    // SVG paths and point markers
+    let defsHtml = '';
+    let pathsHtml = '';
+    let pointsHtml = '';
+
+    yearSeries.forEach(s => {
+        const pts = s.records.map((r, i) => ({
+            x: getX(r.date),
+            y: getY(r[valKey]),
+            rec: r,
+            idx: i
+        }));
+
+        if (pts.length === 0) return;
+
+        const linePathD = 'M ' + pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
+
+        if (yearSeries.length === 1) {
+            const areaPathD = `${linePathD} L ${pts[pts.length - 1].x.toFixed(1)},${padding.top + plotH} L ${pts[0].x.toFixed(1)},${padding.top + plotH} Z`;
+            defsHtml += `
+                <linearGradient id="mainAreaGrad_${s.year}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="${s.color}" stop-opacity="0.22" />
+                    <stop offset="100%" stop-color="${s.color}" stop-opacity="0.0" />
+                </linearGradient>
+            `;
+            pathsHtml += `
+                <path d="${areaPathD}" fill="url(#mainAreaGrad_${s.year})" />
+            `;
+        }
+
+        pathsHtml += `
+            <path d="${linePathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        `;
+
+        pointsHtml += pts.map(p => `
+            <circle class="main-overlay-point" data-year="${s.year}" data-idx="${p.idx}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${s.color}" stroke="#ffffff" stroke-width="1.8" style="cursor: pointer;" />
+        `).join('');
+    });
+
+    const crosshairHtml = `
+        <line id="main-overlay-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+        <g id="main-overlay-hover-dots" style="pointer-events: none;"></g>
+        <rect id="main-overlay-mouse-capture" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair;" />
+    `;
+
+    const svg = `
+        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="main-networth-svg" style="width: 100%; max-height: 220px; display: block; overflow: visible;">
+            <defs>
+                ${defsHtml}
+            </defs>
+            ${yGridHtml}
+            ${xGridHtml}
+            ${pathsHtml}
+            ${pointsHtml}
+            ${crosshairHtml}
+        </svg>
+    `;
+
+    box.innerHTML = svg;
+
+    // Interactive mouse tracking across calendar year X-axis
+    const captureRect = box.querySelector('#main-overlay-mouse-capture');
+    const cursorLine = box.querySelector('#main-overlay-cursor');
+    const hoverDotsGroup = box.querySelector('#main-overlay-hover-dots');
+    const svgEl = box.querySelector('#main-networth-svg');
+
+    if (captureRect && cursorLine && hoverDotsGroup && svgEl) {
+        captureRect.addEventListener('mousemove', (e) => {
+            const rect = svgEl.getBoundingClientRect();
+            const scaleX = width / rect.width;
+            const mouseSvgX = (e.clientX - rect.left) * scaleX;
+            const clampedX = Math.max(padding.left, Math.min(width - padding.right, mouseSvgX));
+            const frac = (clampedX - padding.left) / plotW;
+
+            cursorLine.setAttribute('x1', clampedX.toFixed(1));
+            cursorLine.setAttribute('x2', clampedX.toFixed(1));
+            cursorLine.style.display = 'block';
+
+            let hoverDotsHtml = '';
+            const activeYearDetails = [];
+
+            yearSeries.forEach(s => {
+                let closest = s.records[0];
+                let closestDist = Infinity;
+                s.records.forEach(r => {
+                    const rFrac = getDayOfYearFraction(r.date);
+                    const dist = Math.abs(rFrac - frac);
+                    if (dist < closestDist) {
+                        closestDist = dist;
+                        closest = r;
+                    }
+                });
+
+                if (closest) {
+                    const cx = (padding.left + getDayOfYearFraction(closest.date) * plotW).toFixed(1);
+                    const cy = getY(closest[valKey]).toFixed(1);
+                    hoverDotsHtml += `
+                        <circle cx="${cx}" cy="${cy}" r="5.5" fill="${s.color}" stroke="#ffffff" stroke-width="2" />
+                    `;
+                    activeYearDetails.push({
+                        year: s.year,
+                        color: s.color,
+                        rec: closest,
+                        cx,
+                        cy
+                    });
+                }
+            });
+
+            hoverDotsGroup.innerHTML = hoverDotsHtml;
+
+            const approxMonthIdx = Math.max(0, Math.min(11, Math.floor(frac * 12)));
+            let tipHtml = `
+                <div style="font-weight: 800; font-size: 0.82rem; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">
+                    🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}
+                </div>
+            `;
+
+            activeYearDetails.sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
+
+            activeYearDetails.forEach(d => {
+                const sign = d.rec.weeklyChangeCAD >= 0 ? '+' : '';
+                const changeColor = d.rec.weeklyChangeCAD >= 0 ? '#4ade80' : '#f87171';
+                tipHtml += `
+                    <div style="margin-bottom: 5px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                            <span style="display: flex; align-items: center; gap: 5px; font-weight: 700;">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${d.color};"></span>
+                                <strong style="color: ${d.color};">${d.year}:</strong>
+                                <span style="color: #cbd5e1; font-size: 0.73rem; font-weight: normal;">(${formatDate(d.rec.date)})</span>
+                            </span>
+                            <strong style="color: #ffffff; font-size: 0.84rem;">${formatCurrency(d.rec[valKey], currency)}</strong>
+                        </div>
+                        <div style="font-size: 0.72rem; color: ${changeColor}; padding-left: 13px;">
+                            Weekly: ${sign}${formatCurrency(d.rec.weeklyChangeCAD, 'CAD')} (${sign}${d.rec.weeklyChangePct.toFixed(2)}%)
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (activeYearDetails.length >= 2) {
+                const newest = activeYearDetails[0];
+                const prior = activeYearDetails[1];
+                const spreadVal = newest.rec[valKey] - prior.rec[valKey];
+                const spreadPct = prior.rec[valKey] > 0 ? (spreadVal / prior.rec[valKey] * 100) : 0;
+                const spSign = spreadVal >= 0 ? '+' : '';
+                const spColor = spreadVal >= 0 ? '#4ade80' : '#f87171';
+                tipHtml += `
+                    <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.74rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span>YoY Spread (${newest.year} vs ${prior.year}):</span>
+                        <strong style="color: ${spColor};">${spSign}${formatCurrency(spreadVal, currency)} (${spSign}${spreadPct.toFixed(2)}%)</strong>
+                    </div>
+                `;
+            }
+
+            tooltip.innerHTML = tipHtml;
+            tooltip.style.display = 'block';
+
+            const container = document.getElementById('main-chart-container');
+            const parentRect = container.getBoundingClientRect();
+            let left = e.clientX - parentRect.left + 15;
+            let top = e.clientY - parentRect.top - 80;
+
+            if (left + 240 > parentRect.width) {
+                left -= 255;
+            }
+            if (top < 0) {
+                top = e.clientY - parentRect.top + 20;
+            }
+
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+        });
+
+        captureRect.addEventListener('mouseleave', () => {
+            cursorLine.style.display = 'none';
+            hoverDotsGroup.innerHTML = '';
+            tooltip.style.display = 'none';
+        });
+    }
+
+    // Legend
+    const legendEl = document.getElementById('main-chart-legend');
+    if (legendEl) {
+        let itemsHtml = yearSeries.map(s => {
+            const latest = s.records[s.records.length - 1];
+            return `
+                <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
+                    <strong style="color: ${s.color};">${s.year}</strong>: ${formatCurrency(latest[valKey], currency)}
+                </div>
+            `;
+        }).join('');
+
+        if (yearSeries.length >= 2) {
+            const sortedDesc = [...yearSeries].sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
+            const newest = sortedDesc[0].records[sortedDesc[0].records.length - 1];
+            const prior = sortedDesc[1].records[sortedDesc[1].records.length - 1];
+            const spreadVal = newest[valKey] - prior[valKey];
+            const spreadPct = prior[valKey] > 0 ? (spreadVal / prior[valKey] * 100) : 0;
+            const sign = spreadVal >= 0 ? '+' : '';
+            const color = spreadVal >= 0 ? '#16a34a' : '#cf222e';
+            const bg = spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+
+            itemsHtml += `
+                <div style="font-size: 0.75rem; font-weight: 700; color: ${color}; background: ${bg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${color}30;">
+                    ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${sign}${formatCurrency(spreadVal, currency)} (${sign}${spreadPct.toFixed(2)}%)
+                </div>
+            `;
+        }
+
+        legendEl.innerHTML = itemsHtml;
+    }
+}
+
 if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('resize', () => {
         if (rawHistory && rawHistory.length > 0) {
@@ -1036,6 +1486,26 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         renderMainProgressionChart,
         toggleMainXeqtOverlay,
-        calculateTimeBack
+        calculateTimeBack,
+        setMainTimeframe,
+        setMainCurrency,
+        getDayOfYearFraction,
+        getMainYearColor,
+        syncMainTimeframeButtons,
+        buildMainYearOverlaySeries,
+        getMainChartState: () => ({
+            currentMainMode,
+            currentMainSingleTimeframe,
+            currentMainSelectedYears: new Set(currentMainSelectedYears),
+            currentMainTimeframe,
+            currentMainCurrency
+        }),
+        resetMainChartState: () => {
+            currentMainMode = 'single';
+            currentMainSingleTimeframe = 'last-52';
+            currentMainSelectedYears.clear();
+            currentMainTimeframe = 'last-52';
+            currentMainCurrency = 'CAD';
+        }
     };
 }

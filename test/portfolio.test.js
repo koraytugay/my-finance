@@ -17,7 +17,15 @@ const {
   isCashHolding,
   getHoldingAssetKey
 } = require('../allocation.js');
-const { calculateTimeBack } = require('../main.js');
+const {
+  calculateTimeBack,
+  getDayOfYearFraction,
+  getMainYearColor,
+  setMainTimeframe,
+  getMainChartState,
+  resetMainChartState,
+  buildMainYearOverlaySeries
+} = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
 const MOCK_HOLDINGS = [
@@ -739,3 +747,140 @@ test('Aggregated ETF & Cash Allocation Suite', async (t) => {
     }
   });
 });
+
+test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
+  await t.test('getDayOfYearFraction calculates normalized calendar position accurately', () => {
+    // Jan 1 should be near 0.0
+    const jan1 = getDayOfYearFraction('2025-01-01');
+    assert.ok(Math.abs(jan1 - 0.0) < 0.005, `Jan 1 must be near 0.0, got ${jan1}`);
+
+    // Dec 31 should be near 1.0
+    const dec31 = getDayOfYearFraction('2025-12-31');
+    assert.ok(Math.abs(dec31 - 1.0) < 0.005, `Dec 31 must be near 1.0, got ${dec31}`);
+
+    // Mid-year (July 2) should be near 0.50
+    const mid = getDayOfYearFraction('2025-07-02');
+    assert.ok(Math.abs(mid - 0.50) < 0.02, `Mid-year must be near 0.50, got ${mid}`);
+
+    // Monotonic progression
+    const mar = getDayOfYearFraction('2025-03-15');
+    const jun = getDayOfYearFraction('2025-06-15');
+    const sep = getDayOfYearFraction('2025-09-15');
+    assert.ok(mar < jun && jun < sep, 'Fractions must increase monotonically across the year');
+
+    // Leap year (2024) handles smoothly
+    const leapDec = getDayOfYearFraction('2024-12-31');
+    assert.ok(Math.abs(leapDec - 1.0) < 0.005, `Leap year Dec 31 must be near 1.0, got ${leapDec}`);
+
+    // Invalid inputs fallback to 0 safely
+    assert.equal(getDayOfYearFraction(null), 0);
+    assert.equal(getDayOfYearFraction(''), 0);
+    assert.equal(getDayOfYearFraction('bad-date'), 0);
+  });
+
+  await t.test('getMainYearColor provides distinct colors with fallback', () => {
+    assert.equal(getMainYearColor('2026'), '#0969da');
+    assert.equal(getMainYearColor('2025'), '#8250df');
+    assert.equal(getMainYearColor('2024'), '#d97706');
+    assert.ok(/^#[0-9a-fA-F]{6}$/.test(getMainYearColor('2030')));
+  });
+
+  await t.test('setMainTimeframe manages multi-year toggles and exclusive single views', () => {
+    resetMainChartState();
+
+    // Default state: single mode with last-52
+    let state = getMainChartState();
+    assert.equal(state.currentMainMode, 'single');
+    assert.equal(state.currentMainSingleTimeframe, 'last-52');
+    assert.equal(state.currentMainSelectedYears.size, 0);
+
+    // Clicking a year (e.g. 2026) transitions to years mode with 2026 active
+    setMainTimeframe('2026');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'years');
+    assert.equal(state.currentMainSingleTimeframe, null);
+    assert.deepEqual(Array.from(state.currentMainSelectedYears), ['2026']);
+
+    // Clicking another year (e.g. 2025) adds it as an overlay toggle
+    setMainTimeframe('2025');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'years');
+    assert.deepEqual(Array.from(state.currentMainSelectedYears).sort(), ['2025', '2026']);
+
+    // Clicking 2024 adds a 3rd year
+    setMainTimeframe('2024');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'years');
+    assert.deepEqual(Array.from(state.currentMainSelectedYears).sort(), ['2024', '2025', '2026']);
+
+    // Clicking 2025 toggles it off
+    setMainTimeframe('2025');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'years');
+    assert.deepEqual(Array.from(state.currentMainSelectedYears).sort(), ['2024', '2026']);
+
+    // Clicking "All Time" switches to exclusive single view
+    setMainTimeframe('all');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'single');
+    assert.equal(state.currentMainSingleTimeframe, 'all');
+    assert.equal(state.currentMainSelectedYears.size, 0);
+
+    // Clicking "Last 52W" switches to exclusive single view
+    setMainTimeframe('last-52');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'single');
+    assert.equal(state.currentMainSingleTimeframe, 'last-52');
+    assert.equal(state.currentMainSelectedYears.size, 0);
+
+    // Clicking 2026 from single view switches to years mode
+    setMainTimeframe('2026');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'years');
+    assert.deepEqual(Array.from(state.currentMainSelectedYears), ['2026']);
+
+    // Toggling off the only active year falls back to last-52
+    setMainTimeframe('2026');
+    state = getMainChartState();
+    assert.equal(state.currentMainMode, 'single');
+    assert.equal(state.currentMainSingleTimeframe, 'last-52');
+    assert.equal(state.currentMainSelectedYears.size, 0);
+
+    resetMainChartState();
+  });
+
+  await t.test('buildMainYearOverlaySeries accurately groups records and normalizes fractions across full year', () => {
+    const overlay = buildMainYearOverlaySeries(MOCK_HISTORY, ['2025', '2026'], 'CAD');
+    assert.equal(overlay.yearSeries.length, 2, 'Should build 2 series for 2025 and 2026');
+
+    const s2025 = overlay.yearSeries.find(s => s.year === '2025');
+    const s2026 = overlay.yearSeries.find(s => s.year === '2026');
+
+    assert.ok(s2025, '2025 series exists');
+    assert.ok(s2026, '2026 series exists');
+    assert.equal(s2025.color, '#8250df');
+    assert.equal(s2026.color, '#0969da');
+
+    // 2025 points should span across the whole year from near 0 to near 1
+    assert.ok(s2025.points.length > 50, '2025 should have full year of weekly records');
+    assert.ok(s2025.points[0].fraction < 0.05, 'Early 2025 should start near 0%');
+    assert.ok(s2025.points[s2025.points.length - 1].fraction > 0.95, 'Late 2025 should end near 100%');
+
+    // Fractions must be strictly between 0 and 1
+    s2025.points.forEach(p => {
+      assert.ok(p.fraction >= 0 && p.fraction <= 1, `Point fraction ${p.fraction} must be in [0, 1]`);
+      assert.ok(Number.isFinite(p.val), 'Point value must be finite');
+    });
+
+    // 2026 partial year points
+    assert.ok(s2026.points.length > 0, '2026 should have records');
+    assert.ok(s2026.points[0].fraction < 0.05, 'Early 2026 starts near 0%');
+
+    // Min and Max must encompass both years
+    assert.ok(overlay.minVal > 0, 'minVal should be positive');
+    assert.ok(overlay.maxVal >= overlay.minVal, 'maxVal should be >= minVal');
+    assert.ok(overlay.paddedMin <= overlay.minVal, 'paddedMin should provide padding');
+    assert.ok(overlay.paddedMax >= overlay.maxVal, 'paddedMax should provide padding');
+  });
+});
+
