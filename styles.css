@@ -538,7 +538,7 @@ header h1 {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(2px);
     z-index: 1000;
     display: flex;
@@ -615,7 +615,7 @@ header h1 {
 
 .chart-tooltip {
     position: absolute;
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(15, 23, 42, 0.8);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     color: #ffffff;
