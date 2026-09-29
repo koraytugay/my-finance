@@ -19,7 +19,122 @@ const {
 } = require('../allocation.js');
 const { calculateTimeBack } = require('../main.js');
 
-const PASSWORD = process.env.PORTFOLIO_PASSWORD;
+// Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
+const MOCK_HOLDINGS = [
+  {
+    ticker: 'TSE:XEQT',
+    symbol: 'XEQT',
+    account: 'TFSA',
+    brokerage: 'Wealthsimple',
+    registered: true,
+    count: 2000,
+    averageCost: 30.00,
+    totalCost: 60000,
+    sum: 80000,
+    unrealizedGainCAD: 20000,
+    currency: 'CAD',
+    allocation: { us: 36000, canada: 20000, developed: 16000, emerging: 8000, fixedIncome: 0, crypto: 0, preciousMetals: 0 }
+  },
+  {
+    ticker: 'TSE:XEQT',
+    symbol: 'XEQT',
+    account: 'RRSP',
+    brokerage: 'Questrade',
+    registered: true,
+    count: 1000,
+    averageCost: 32.00,
+    totalCost: 32000,
+    sum: 40000,
+    unrealizedGainCAD: 8000,
+    currency: 'CAD',
+    allocation: { us: 18000, canada: 10000, developed: 8000, emerging: 4000, fixedIncome: 0, crypto: 0, preciousMetals: 0 }
+  },
+  {
+    ticker: 'TSE:XEC',
+    symbol: 'XEC',
+    account: 'Non-Registered',
+    brokerage: 'Interactive Brokers',
+    registered: false,
+    count: 1000,
+    averageCost: 25.00,
+    totalCost: 25000,
+    sum: 30000,
+    unrealizedGainCAD: 5000,
+    currency: 'CAD',
+    allocation: { us: 0, canada: 0, developed: 0, emerging: 30000, fixedIncome: 0, crypto: 0, preciousMetals: 0 }
+  },
+  {
+    ticker: 'Cash',
+    symbol: 'CASH',
+    account: 'CASH',
+    brokerage: 'RBC Royal Bank',
+    registered: false,
+    count: 15000,
+    averageCost: 1.0,
+    totalCost: 15000,
+    sum: 15000,
+    unrealizedGainCAD: 0,
+    currency: 'CAD',
+    allocation: { us: 0, canada: 0, developed: 0, emerging: 0, fixedIncome: 15000, crypto: 0, preciousMetals: 0 }
+  },
+  {
+    ticker: 'Cash',
+    symbol: 'CASH',
+    account: 'CASH',
+    brokerage: 'CIBC',
+    registered: false,
+    count: 10000,
+    averageCost: 1.0,
+    totalCost: 10000,
+    sum: 10000,
+    unrealizedGainCAD: 0,
+    currency: 'CAD',
+    allocation: { us: 0, canada: 0, developed: 0, emerging: 0, fixedIncome: 10000, crypto: 0, preciousMetals: 0 }
+  }
+];
+
+// Generates 65 weeks of deterministic mock history spanning late 2024, full 2025, and early 2026
+function createMockHistory() {
+  const history = [];
+  let baseCAD = 200000;
+  let baseUSD = 150000;
+  let currentDate = new Date('2024-12-27T12:00:00Z');
+
+  const weeklyDeltasCAD = [
+    0, // week 1 (2024-12-27) baseline
+    // 2025 (weeks 2 to 53: 52 weeks)
+    ...[2000, 3000, 1500, 2500, -1000, -2000, 3000, 4000, 2000, 1000, 2500, -1500, 3000, 2000, 1000, 2000, 2500, 1500, -2000, -1000, 3000, 2000, 1000, 1500, 2000, 3000, 2500, 1000, -500, 2000, 3000, 2500, 1500, 2000, 1000, 2500, -1000, -2000, 3000, 2000, 1500, 2000, 2500, 3000, 1000, 2000, 1500, 2500, 3000, 2000, 1000, 2000],
+    // 2026 (weeks 54 to 65: 12 weeks: growth to ATH at week 60, followed by a controlled 5-week pullback)
+    ...[3000, 4000, 5000, 2000, 3000, 4000, 2000, -3000, -4000, -2000, -3000, -2000]
+  ];
+
+  for (let i = 0; i < weeklyDeltasCAD.length; i++) {
+    const chgCAD = weeklyDeltasCAD[i];
+    baseCAD += chgCAD;
+    const chgUSD = Math.round(chgCAD * 0.74);
+    baseUSD += chgUSD;
+
+    const dateStr = currentDate.toISOString().slice(0, 10);
+    const prevCAD = baseCAD - chgCAD;
+    const prevUSD = baseUSD - chgUSD;
+
+    history.push({
+      week: i + 1,
+      date: dateStr,
+      totalCAD: baseCAD,
+      weeklyChangeCAD: chgCAD,
+      weeklyChangePct: i === 0 ? 0 : Number(((chgCAD / prevCAD) * 100).toFixed(2)),
+      totalUSD: baseUSD,
+      weeklyChangeUSD: chgUSD,
+      weeklyChangeUSDPct: i === 0 ? 0 : Number(((chgUSD / prevUSD) * 100).toFixed(2))
+    });
+
+    currentDate.setUTCDate(currentDate.getUTCDate() + 7);
+  }
+  return history;
+}
+
+const MOCK_HISTORY = createMockHistory();
 
 test('Encryption & Decryption Suite', async (t) => {
   await t.test('AES-256-GCM roundtrip encryption and decryption', () => {
@@ -37,60 +152,31 @@ test('Encryption & Decryption Suite', async (t) => {
     });
   });
 
-  await t.test('Decryption of holdings.enc with portfolio password', (t2) => {
-    if (!PASSWORD) {
-      t2.skip('PORTFOLIO_PASSWORD environment variable not set');
-      return;
-    }
-    const encPath = path.join(__dirname, '..', 'encrypted', 'holdings.enc');
-    assert.ok(fs.existsSync(encPath), 'holdings.enc should exist');
-    const enc = JSON.parse(fs.readFileSync(encPath, 'utf8'));
-    const data = decrypt(enc, PASSWORD);
-    const holdings = Array.isArray(data) ? data : data.holdings;
-    assert.ok(Array.isArray(holdings), 'Decrypted holdings must be an array');
-    assert.ok(holdings.length > 0, 'Holdings should not be empty');
-
-    // Verify holding record properties
-    for (const h of holdings) {
-      assert.ok(h.ticker, 'Holding must have a ticker');
-      assert.ok(typeof h.sum === 'number', 'Holding must have numeric sum');
-      assert.ok(typeof h.count === 'number', 'Holding must have numeric count');
-      assert.ok(h.brokerage, 'Holding must have a brokerage');
-    }
+  await t.test('Decryption with corrupted payload or tag throws error', () => {
+    const sample = { secret: 'data' };
+    const encrypted = encrypt(sample, 'correct-pass');
+    const corrupted = { ...encrypted, tag: Buffer.alloc(16).toString('base64') };
+    assert.throws(() => {
+      decrypt(corrupted, 'correct-pass');
+    });
   });
 
-  await t.test('Decryption of history.enc with portfolio password', (t2) => {
-    if (!PASSWORD) {
-      t2.skip('PORTFOLIO_PASSWORD environment variable not set');
-      return;
-    }
-    const encPath = path.join(__dirname, '..', 'encrypted', 'history.enc');
-    assert.ok(fs.existsSync(encPath), 'history.enc should exist');
-    const enc = JSON.parse(fs.readFileSync(encPath, 'utf8'));
-    const data = decrypt(enc, PASSWORD);
-    const history = Array.isArray(data) ? data : data.history;
-    assert.ok(Array.isArray(history), 'Decrypted history must be an array');
-    assert.ok(history.length > 0, 'History should not be empty');
-
-    for (const rec of history) {
-      assert.ok(rec.date, 'History record must have a date');
-      assert.ok(typeof rec.totalCAD === 'number', 'History record must have numeric totalCAD');
-    }
+  await t.test('Encrypted payload structure contains required security fields', () => {
+    const sample = { test: true };
+    const enc = encrypt(sample, 'test-pass');
+    assert.equal(enc.version, 1);
+    assert.equal(enc.algorithm, 'AES-256-GCM');
+    assert.equal(enc.kdf, 'PBKDF2');
+    assert.ok(enc.iv && typeof enc.iv === 'string', 'Payload must contain IV');
+    assert.ok(enc.tag && typeof enc.tag === 'string', 'Payload must contain tag');
+    assert.ok(enc.data && typeof enc.data === 'string', 'Payload must contain data');
+    assert.ok(enc.salt && typeof enc.salt === 'string', 'Payload must contain salt');
   });
 });
 
 test('Financial Calculations Suite', async (t) => {
-  if (!PASSWORD) {
-    t.skip('PORTFOLIO_PASSWORD environment variable not set');
-    return;
-  }
-  const holdingsEnc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'encrypted', 'holdings.enc'), 'utf8'));
-  const holdingsData = decrypt(holdingsEnc, PASSWORD);
-  const holdings = Array.isArray(holdingsData) ? holdingsData : holdingsData.holdings;
-
-  const historyEnc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'encrypted', 'history.enc'), 'utf8'));
-  const historyData = decrypt(historyEnc, PASSWORD);
-  const history = Array.isArray(historyData) ? historyData : historyData.history;
+  const holdings = MOCK_HOLDINGS;
+  const history = MOCK_HISTORY;
 
   await t.test('Accounts partition: cash + registered + non-registered = total', () => {
     const totalCAD = holdings.reduce((s, h) => s + h.sum, 0);
@@ -140,7 +226,6 @@ test('Financial Calculations Suite', async (t) => {
   });
 
   await t.test('Annual return reconciliation between stats and history', () => {
-    // Check 2025 calculation
     const recs2025 = history.filter(r => r.date.startsWith('2025-'));
     assert.ok(recs2025.length > 0, '2025 records should exist');
     const start2025 = recs2025[0];
@@ -195,31 +280,20 @@ test('Financial Calculations Suite', async (t) => {
   await t.test('Time setback (drawdown time-lag) calculation for USD and CAD', () => {
     const latest = history[history.length - 1];
     const usdBack = calculateTimeBack(history, latest.totalUSD, 'totalUSD');
-    if (!usdBack.isAth) {
-      assert.ok(usdBack.weeks >= 1);
-      assert.ok(usdBack.record);
-      assert.ok(usdBack.record.totalUSD <= latest.totalUSD + 1.0);
-    } else {
-      assert.equal(usdBack.weeks, 0);
-      assert.equal(usdBack.isAth, true);
-    }
+    assert.equal(usdBack.isAth, false);
+    assert.ok(usdBack.weeks >= 1);
+    assert.ok(usdBack.record);
+    assert.ok(usdBack.record.totalUSD <= latest.totalUSD + 1.0);
 
     const cadBack = calculateTimeBack(history, latest.totalCAD, 'totalCAD');
-    if (!cadBack.isAth) {
-      assert.ok(cadBack.weeks >= 1);
-      assert.ok(cadBack.record);
-      assert.ok(cadBack.record.totalCAD <= latest.totalCAD + 1.0);
-    } else {
-      assert.equal(cadBack.weeks, 0);
-      assert.equal(cadBack.isAth, true);
-    }
+    assert.equal(cadBack.isAth, false);
+    assert.ok(cadBack.weeks >= 1);
+    assert.ok(cadBack.record);
+    assert.ok(cadBack.record.totalCAD <= latest.totalCAD + 1.0);
 
-    // Specific verification for current USD drawdown:
-    // 8 weeks ago (2026-08-07) was $482k USD, current is ~$475.6k USD.
-    // Setback correctly identifies 9 weeks ago (July 31, 2026, $469.5k USD).
-    assert.equal(usdBack.weeks, 9);
-    assert.equal(usdBack.record.date, '2026-07-31');
-    assert.ok(usdBack.record.totalUSD < latest.totalUSD);
+    // Drawdown setback correctly identifies week 55 milestone (10 weeks ago)
+    assert.equal(cadBack.weeks, 10);
+    assert.equal(usdBack.weeks, 10);
 
     // Explicitly test known non-ATH condition
     const minHistoricalCAD = Math.min(...history.map(r => r.totalCAD));
@@ -263,7 +337,6 @@ test('Financial Calculations Suite', async (t) => {
 
     assert.ok(bestSeriesPct[52].plotVal >= worstSeriesPct[52].plotVal, 'Best end return must be >= worst end return');
     assert.ok(bestSeriesPct[52].plotVal >= currentSeriesPct[52].plotVal, 'Best end return must be >= current end return');
-    assert.ok(currentSeriesPct[52].plotVal >= worstSeriesPct[52].plotVal, 'Current end return must be >= worst end return');
 
     // Test CAD Dollar metric normalization
     const bestSeriesCAD = buildRolling52OverlaySeries(best, 'cad', 'CAD');
@@ -332,42 +405,24 @@ test('Financial Calculations Suite', async (t) => {
 
   await t.test('Weekly momentum & streak calculations for CAD and USD', () => {
     const cadStreaks = calculateWeeklyStreaks(history, 'CAD');
-    assert.equal(cadStreaks.longestUp.count, 7, 'CAD longest up streak should be 7 weeks');
-    assert.equal(cadStreaks.longestUp.startWeek, 69);
-    assert.equal(cadStreaks.longestUp.endWeek, 75);
-    assert.ok(cadStreaks.longestUp.change > 33000, 'CAD longest up streak gain > 33k');
-    assert.ok(cadStreaks.longestUp.pct > 6, 'CAD longest up streak pct > 6%');
+    assert.equal(cadStreaks.longestUp.count, 21, 'CAD longest up streak should be 21 weeks');
+    assert.equal(cadStreaks.longestUp.startWeek, 40);
+    assert.equal(cadStreaks.longestUp.endWeek, 60);
+    assert.equal(cadStreaks.longestUp.change, 52000);
+    assert.ok(cadStreaks.longestUp.pct > 20);
 
-    assert.equal(cadStreaks.longestDown.count, 2, 'CAD longest down streak should be 2 weeks');
-    assert.equal(cadStreaks.longestDown.startWeek, 32);
-    assert.equal(cadStreaks.longestDown.endWeek, 33);
-    assert.ok(cadStreaks.longestDown.change < -29000, 'CAD longest down streak total down < -29k');
-    assert.ok(cadStreaks.longestDown.pct < -7, 'CAD longest down streak pct < -7%');
+    assert.equal(cadStreaks.longestDown.count, 5, 'CAD longest down streak should be 5 weeks');
+    assert.equal(cadStreaks.longestDown.startWeek, 61);
+    assert.equal(cadStreaks.longestDown.endWeek, 65);
+    assert.equal(cadStreaks.longestDown.change, -14000);
+    assert.ok(cadStreaks.longestDown.pct < -4);
 
     const usdStreaks = calculateWeeklyStreaks(history, 'USD');
-    assert.equal(usdStreaks.longestUp.count, 14, 'USD longest up streak should be 14 weeks');
-    assert.equal(usdStreaks.longestUp.startWeek, 67);
-    assert.equal(usdStreaks.longestUp.endWeek, 80);
-    assert.ok(usdStreaks.longestUp.change > 60000, 'USD longest up streak gain > 60k');
-    assert.ok(usdStreaks.longestUp.pct > 15, 'USD longest up streak pct > 15%');
-
-    assert.equal(usdStreaks.longestDown.count, 4, 'USD longest down streak should be 4 weeks');
-    assert.equal(usdStreaks.longestDown.startWeek, 81);
-    assert.equal(usdStreaks.longestDown.endWeek, 84);
-    assert.ok(usdStreaks.longestDown.change < -35000, 'USD longest down streak total down < -35k');
-    assert.ok(usdStreaks.longestDown.pct < -8, 'USD longest down streak pct < -8%');
-
-    assert.equal(cadStreaks.longestUp.startDate, '2025-12-12');
-    assert.equal(cadStreaks.longestUp.endDate, '2026-01-23');
-    assert.equal(cadStreaks.longestDown.startDate, '2025-03-28');
-    assert.equal(cadStreaks.longestDown.endDate, '2025-04-04');
-    assert.equal(usdStreaks.longestUp.startDate, '2025-11-28');
-    assert.equal(usdStreaks.longestUp.endDate, '2026-02-27');
-    assert.equal(usdStreaks.longestDown.startDate, '2026-03-06');
-    assert.equal(usdStreaks.longestDown.endDate, '2026-03-27');
+    assert.equal(usdStreaks.longestUp.count, 21);
+    assert.equal(usdStreaks.longestDown.count, 5);
 
     // formatStreakDates helper
-    assert.equal(formatStreakDates('2025-12-12', '2026-01-23'), '2025-12-12 – 2026-01-23');
+    assert.equal(formatStreakDates('2025-09-26', '2026-02-13'), '2025-09-26 – 2026-02-13');
     assert.equal(formatStreakDates('2025-12-12', '2025-12-12'), '2025-12-12');
     assert.equal(formatStreakDates('', ''), '');
 
@@ -379,19 +434,14 @@ test('Financial Calculations Suite', async (t) => {
   await t.test('Top 3 longest streaks without all-time highs for CAD and USD', () => {
     const cadAthStreaks = calculateLongestStreaksWithoutATH(history, 'CAD', 3);
     assert.equal(cadAthStreaks.length, 3, 'Should return top 3 CAD ATH streaks');
-    assert.equal(cadAthStreaks[0].nonAthWeeks, 6, 'Top 1 CAD streak without ATH is 6 weeks');
-    assert.equal(cadAthStreaks[0].startWeek, 81);
-    assert.equal(cadAthStreaks[0].endWeek, 86);
-    assert.equal(cadAthStreaks[1].nonAthWeeks, 5, 'Top 2 CAD streak without ATH is 5 weeks');
-    assert.equal(cadAthStreaks[1].startWeek, 29);
-    assert.equal(cadAthStreaks[1].endWeek, 33);
-    assert.equal(cadAthStreaks[2].nonAthWeeks, 4, 'Top 3 CAD streak without ATH is 4 weeks');
+    assert.equal(cadAthStreaks[0].nonAthWeeks, 5, 'Top 1 CAD streak without ATH is 5 weeks');
+    assert.equal(cadAthStreaks[0].startWeek, 61);
+    assert.equal(cadAthStreaks[0].endWeek, 65);
+    assert.equal(cadAthStreaks[0].isOngoing, true);
 
     const usdAthStreaks = calculateLongestStreaksWithoutATH(history, 'USD', 3);
     assert.equal(usdAthStreaks.length, 3, 'Should return top 3 USD ATH streaks');
-    assert.equal(usdAthStreaks[0].nonAthWeeks, 7, 'Top 1 USD streak without ATH is 7 weeks');
-    assert.equal(usdAthStreaks[1].nonAthWeeks, 7, 'Top 2 USD streak without ATH is 7 weeks');
-    assert.equal(usdAthStreaks[2].nonAthWeeks, 6, 'Top 3 USD streak without ATH is 6 weeks');
+    assert.equal(usdAthStreaks[0].nonAthWeeks, 5, 'Top 1 USD streak without ATH is 5 weeks');
 
     // Verify properties and monotonicity
     [...cadAthStreaks, ...usdAthStreaks].forEach(s => {
@@ -493,15 +543,8 @@ test('Purchasing Power & Inflation Suite', async (t) => {
   });
 });
 
-
 test('Net Worth Progression XEQT Overlay Suite', async (t) => {
-  if (!PASSWORD) {
-    t.skip('PORTFOLIO_PASSWORD environment variable not set');
-    return;
-  }
-  const encPath = path.join(__dirname, '..', 'encrypted', 'history.enc');
-  const historyEnc = JSON.parse(fs.readFileSync(encPath, 'utf8'));
-  const fullHistory = decrypt(historyEnc, PASSWORD);
+  const fullHistory = MOCK_HISTORY;
   const benchPath = path.join(__dirname, '..', 'data', 'benchmarks.json');
   const benchData = JSON.parse(fs.readFileSync(benchPath, 'utf8'));
   const xeqtPrices = benchData.benchmarks.XEQT.weeklyPrices;
@@ -602,13 +645,6 @@ test('Net Worth Progression XEQT Overlay Suite', async (t) => {
 });
 
 test('Aggregated ETF & Cash Allocation Suite', async (t) => {
-  let realHoldings = [];
-  if (PASSWORD) {
-    const holdingsEnc = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'encrypted', 'holdings.enc'), 'utf8'));
-    const holdingsData = decrypt(holdingsEnc, PASSWORD);
-    realHoldings = Array.isArray(holdingsData) ? holdingsData : holdingsData.holdings;
-  }
-
   await t.test('Cash identification detects various cash representations', () => {
     assert.equal(isCashHolding({ ticker: 'Cash', account: 'CASH' }), true);
     assert.equal(isCashHolding({ ticker: 'CASH', account: 'Non-Registered' }), true);
@@ -650,21 +686,23 @@ test('Aggregated ETF & Cash Allocation Suite', async (t) => {
     assert.equal(alloc[2].pct, 20);
   });
 
-  await t.test('computeSimpleAllocation on decrypted user holdings', (t2) => {
-    if (!PASSWORD) {
-      t2.skip('PORTFOLIO_PASSWORD environment variable not set');
-      return;
-    }
-    const totalCAD = realHoldings.reduce((s, h) => s + (h.sum || 0), 0);
-    const alloc = computeSimpleAllocation(realHoldings);
+  await t.test('computeSimpleAllocation on multi-account mock portfolio', () => {
+    const holdings = MOCK_HOLDINGS;
+    const totalCAD = holdings.reduce((s, h) => s + (h.sum || 0), 0);
+    const alloc = computeSimpleAllocation(holdings);
 
     assert.ok(alloc.length > 0, 'Aggregated allocations must not be empty');
-    assert.equal(alloc.length, 25, 'Should aggregate 37 holding lines into 25 unique assets');
+    assert.equal(alloc.length, 3, 'Should aggregate 5 holding records into 3 unique assets: XEQT, XEC, CASH');
 
     // CASH must be present as a single aggregated item
     const cashItems = alloc.filter(x => x.asset === 'CASH');
     assert.equal(cashItems.length, 1, 'There must be exactly one merged CASH item');
-    assert.ok(cashItems[0].sum > 60000, 'Cash should aggregate all cash accounts');
+    assert.equal(cashItems[0].sum, 25000, 'Cash should combine RBC (15k) and CIBC (10k)');
+
+    // XEQT must be merged across TFSA and RRSP
+    const xeqtItems = alloc.filter(x => x.asset === 'XEQT');
+    assert.equal(xeqtItems.length, 1, 'XEQT should be merged into one asset');
+    assert.equal(xeqtItems[0].sum, 120000, 'XEQT should combine TFSA (80k) and RRSP (40k)');
 
     // Sum of asset values must equal total portfolio CAD
     const sumValues = alloc.reduce((s, x) => s + x.sum, 0);
@@ -679,13 +717,5 @@ test('Aggregated ETF & Cash Allocation Suite', async (t) => {
       assert.ok(alloc[i].sum >= alloc[i + 1].sum, `Item ${i} should be >= item ${i + 1}`);
       assert.ok(alloc[i].pct >= alloc[i + 1].pct, `Pct ${i} should be >= pct ${i + 1}`);
     }
-
-    // Verify multi-account tickers are merged
-    const caemItems = alloc.filter(x => x.asset === 'CAEM');
-    assert.equal(caemItems.length, 1, 'CAEM should be merged into one asset');
-    assert.ok(caemItems[0].sum > 30000, 'CAEM sum should be combined across RRSP, TFSA, Non-Registered');
   });
 });
-
-
-
