@@ -776,11 +776,13 @@ function renderMainProgressionChart() {
         return;
     }
 
-    const xeqtPrices = rawBenchmarks?.benchmarks?.XEQT?.weeklyPrices || [];
+    const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
+    const currentXeqtPrice = xeqtBenchmark?.currentPrice;
     const showXeqt = currentMainOverlayXeqt && xeqtPrices.length > 0;
     let xeqtSeries = [];
     if (showXeqt && typeof computeXeqtProgressionOverlay === 'function') {
-        xeqtSeries = computeXeqtProgressionOverlay(records, rawHistory, xeqtPrices, currency);
+        xeqtSeries = computeXeqtProgressionOverlay(records, rawHistory, xeqtPrices, currency, currentXeqtPrice);
     }
 
     const width = 1000;

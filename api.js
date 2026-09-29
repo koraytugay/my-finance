@@ -381,15 +381,28 @@ function calculateHoldingsCostBasis(holdings) {
  * @param {string} currency 'CAD' or 'USD'
  * @returns {Array} Array of overlay data points matching each record in records
  */
-function computeXeqtProgressionOverlay(records, fullHistory, xeqtWeeklyPrices, currency = 'CAD') {
-    if (!records || records.length === 0 || !xeqtWeeklyPrices || xeqtWeeklyPrices.length === 0) {
+function computeXeqtProgressionOverlay(records, fullHistory, xeqtWeeklyPrices, currency = 'CAD', currentBenchmarkPrice = null) {
+    if (!records || records.length === 0 || !xeqtWeeklyPrices) {
         return [];
     }
+
+    const prices = Array.isArray(xeqtWeeklyPrices) ? xeqtWeeklyPrices : (xeqtWeeklyPrices.weeklyPrices || []);
+    if (prices.length === 0) {
+        return [];
+    }
+
+    const livePrice = (currentBenchmarkPrice != null && Number.isFinite(Number(currentBenchmarkPrice)))
+        ? Number(currentBenchmarkPrice)
+        : (!Array.isArray(xeqtWeeklyPrices) && xeqtWeeklyPrices.currentPrice ? xeqtWeeklyPrices.currentPrice : null);
 
     const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
     const startPortfolioVal = records[0][valKey] || 0;
 
-    function getXeqtPrice(r) {
+    const latestHistoryRec = (Array.isArray(fullHistory) && fullHistory.length > 0)
+        ? fullHistory[fullHistory.length - 1]
+        : records[records.length - 1];
+
+    function getXeqtPrice(r, i) {
         let idx = -1;
         if (r.week !== undefined && r.week !== null && Number.isFinite(Number(r.week))) {
             idx = Number(r.week) - 1;
@@ -397,16 +410,25 @@ function computeXeqtProgressionOverlay(records, fullHistory, xeqtWeeklyPrices, c
             idx = fullHistory.findIndex(h => h.date === r.date);
         }
         if (idx < 0) idx = 0;
-        const clampedIdx = Math.min(Math.max(0, idx), xeqtWeeklyPrices.length - 1);
-        return xeqtWeeklyPrices[clampedIdx] || xeqtWeeklyPrices[xeqtWeeklyPrices.length - 1] || 0;
+
+        // If this is the latest chronological record and a live price is available
+        const isLatestRecord = (r === latestHistoryRec) || (latestHistoryRec && r.date === latestHistoryRec.date);
+        if (isLatestRecord && livePrice != null && livePrice > 0) {
+            if (idx >= prices.length - 1 || (records[i - 1] && records[i - 1].date !== r.date)) {
+                return livePrice;
+            }
+        }
+
+        const clampedIdx = Math.min(Math.max(0, idx), prices.length - 1);
+        return prices[clampedIdx] || prices[prices.length - 1] || 0;
     }
 
-    const startP = getXeqtPrice(records[0]);
+    const startP = getXeqtPrice(records[0], 0);
     const rate0 = (records[0].totalCAD && records[0].totalUSD) ? (records[0].totalUSD / records[0].totalCAD) : 1;
     const startPrice = currency === 'USD' ? (startP * rate0) : startP;
 
     return records.map((r, i) => {
-        const curP = getXeqtPrice(r);
+        const curP = getXeqtPrice(r, i);
         const curRate = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : 1;
         const curPrice = currency === 'USD' ? (curP * curRate) : curP;
 

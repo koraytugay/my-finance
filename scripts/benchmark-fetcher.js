@@ -122,6 +122,7 @@ async function fetchBenchmarkHistory(item, startDateStr = DEFAULT_START_DATE, ti
     const weeklyPrices = [];
     let curDate = new Date(actualStartDate + 'T00:00:00Z');
     const stopDate = new Date(actualEndDate + 'T00:00:00Z');
+    let lastSampledDate = null;
     while (curDate <= stopDate) {
       const dtStr = curDate.toISOString().slice(0, 10);
       let matchedPrice = null;
@@ -134,8 +135,15 @@ async function fetchBenchmarkHistory(item, startDateStr = DEFAULT_START_DATE, ti
       }
       if (matchedPrice != null) {
         weeklyPrices.push(matchedPrice);
+        lastSampledDate = dtStr;
       }
       curDate = new Date(curDate.getTime() + (7 * 86400000));
+    }
+
+    // If actualEndDate extends past the last weekly sample, include current close
+    // so live/mid-week snapshots have their corresponding price point
+    if (lastSampledDate && actualEndDate > lastSampledDate && currentPrice != null && currentPrice > 0) {
+      weeklyPrices.push(Number(currentPrice.toFixed(2)));
     }
 
     return {

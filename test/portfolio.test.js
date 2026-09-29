@@ -613,6 +613,26 @@ test('Net Worth Progression XEQT Overlay Suite', async (t) => {
     assert.equal(overlay[1].spreadPct, 10);    // 15% - 5% = +10% alpha
   });
 
+  await t.test('computeXeqtProgressionOverlay dynamically uses currentBenchmarkPrice on latest node preventing clamping duplication', () => {
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 70000 },
+      { week: 2, date: '2025-01-08', totalCAD: 105000, totalUSD: 73500 },
+      { week: 3, date: '2025-01-12', totalCAD: 104000, totalUSD: 72800 } // mid-week update
+    ];
+    // Historical weekly prices only has 2 weeks: 50, 52
+    const mockPrices = [50, 52];
+    // Live price for week 3 is 51
+    const currentPrice = 51;
+
+    const overlay = computeXeqtProgressionOverlay(mockRecords, mockRecords, mockPrices, 'CAD', currentPrice);
+    assert.equal(overlay.length, 3);
+    assert.equal(overlay[0].price, 50);
+    assert.equal(overlay[1].price, 52);
+    assert.equal(overlay[2].price, 51);
+    assert.notEqual(overlay[1].val, overlay[2].val, 'Latest node value must not duplicate node before');
+    assert.equal(overlay[2].val, 102000); // 100000 * (51 / 50)
+  });
+
   await t.test('computeXeqtProgressionOverlay operates smoothly across all real timeframes', () => {
     const timeframes = [
       { id: 'all', recs: fullHistory },

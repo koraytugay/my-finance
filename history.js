@@ -415,11 +415,13 @@ function renderChart(records, currency = 'CAD') {
         return;
     }
 
-    const xeqtPrices = allBenchmarks?.benchmarks?.XEQT?.weeklyPrices || [];
+    const xeqtBenchmark = allBenchmarks?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
+    const currentXeqtPrice = xeqtBenchmark?.currentPrice;
     const showXeqt = showHistXeqtOverlay && xeqtPrices.length > 0;
     let xeqtSeries = [];
     if (showXeqt && typeof computeXeqtProgressionOverlay === 'function') {
-        xeqtSeries = computeXeqtProgressionOverlay(records, allHistory, xeqtPrices, currency);
+        xeqtSeries = computeXeqtProgressionOverlay(records, allHistory, xeqtPrices, currency, currentXeqtPrice);
     }
 
     const width = 1000;
