@@ -1906,8 +1906,17 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         minY = minRaw < 0 ? Math.floor(minRaw / 10) * 10 : 0;
         maxY = Math.ceil((Math.max(maxRaw, 10) * 1.15) / 10) * 10;
     } else {
-        minY = minRaw < 0 ? Math.floor(minRaw / 50000) * 50000 : 0;
-        maxY = Math.ceil((Math.max(maxRaw, 10000) * 1.15) / 25000) * 25000;
+        const minDollar = Math.min(0, minRaw);
+        const maxDollar = Math.max(0, maxRaw);
+        const diff = maxDollar - minDollar || 10000;
+        let step = 25000;
+        if (diff <= 50000) step = 10000;
+        else if (diff <= 100000) step = 20000;
+        else if (diff <= 250000) step = 50000;
+        else step = 100000;
+
+        minY = minDollar < 0 ? Math.floor(minDollar / step) * step : 0;
+        maxY = Math.ceil((Math.max(maxDollar, 10000) * 1.12) / step) * step;
     }
 
     const rangeY = maxY - minY || 1;
