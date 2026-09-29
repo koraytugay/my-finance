@@ -843,7 +843,7 @@ function renderMonthlyHeatmap() {
                 continue;
             }
 
-            const monthStart = records[0].totalCAD - records[0].weeklyChangeCAD;
+            const monthStart = records[0].totalCAD - (records[0].weeklyChangeCAD || 0);
             const monthEnd = records[records.length - 1].totalCAD;
             const mGainPct = monthStart > 0 ? ((monthEnd - monthStart) / monthStart) * 100 : 0;
 
