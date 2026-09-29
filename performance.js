@@ -2344,11 +2344,12 @@ function renderDrawdownChart() {
     }
 
     // X-Axis Date Labels (sample 6 evenly spaced dates)
-    const step = Math.floor(allHistory.length / 5);
+    const fmt = typeof formatDate === 'function' ? formatDate : (d => d);
+    const step = Math.max(1, Math.floor(allHistory.length / 5));
     for (let i = 0; i < allHistory.length; i += step) {
         const pt = points[i];
         if (pt) {
-            svg += `<text x="${pt.x}" y="${height - 8}" font-size="10.5" fill="#64748b" text-anchor="middle">${pt.r.date}</text>`;
+            svg += `<text x="${pt.x}" y="${height - 8}" font-size="10.5" fill="#64748b" text-anchor="middle">${fmt(pt.r.date)}</text>`;
         }
     }
 
