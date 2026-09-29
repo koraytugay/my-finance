@@ -1008,5 +1008,116 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       resetMainChartState();
     }
   });
+
+  await t.test('buildMainYearOverlaySeries dynamically starts 2024 from the lowest overlay node for that week', () => {
+    // Generate multi-year history where 2024 starts in late August (Week 1 at 2024-08-23)
+    const testHistory = [];
+
+    // 2024: starts Aug 23, 2024 (Day 237) with $200k, progresses 18 weeks to Dec 20, 2024 (ends at $217k)
+    let d = new Date('2024-08-23T12:00:00Z');
+    let val = 200000;
+    for (let w = 1; w <= 18; w++) {
+      testHistory.push({
+        week: w,
+        date: d.toISOString().slice(0, 10),
+        totalCAD: val,
+        totalUSD: Math.round(val * 0.74),
+        weeklyChangeCAD: w === 1 ? 0 : 1000,
+        weeklyChangePct: w === 1 ? 0 : Number(((1000 / (val - 1000)) * 100).toFixed(2))
+      });
+      val += 1000;
+      d.setUTCDate(d.getUTCDate() + 7);
+    }
+
+    // 2025: full year 52 weeks (Jan 3 to Dec 26) - moderate growth
+    d = new Date('2025-01-03T12:00:00Z');
+    val = 220000;
+    for (let w = 19; w <= 70; w++) {
+      testHistory.push({
+        week: w,
+        date: d.toISOString().slice(0, 10),
+        totalCAD: val,
+        totalUSD: Math.round(val * 0.74),
+        weeklyChangeCAD: 1500,
+        weeklyChangePct: 0.6
+      });
+      val += 1500;
+      d.setUTCDate(d.getUTCDate() + 7);
+    }
+
+    // 2026: 35 weeks (Jan 2 to Aug 28, reaching Day 234 on Aug 21 with controlled gain)
+    d = new Date('2026-01-02T12:00:00Z');
+    val = 300000;
+    for (let w = 71; w <= 105; w++) {
+      testHistory.push({
+        week: w,
+        date: d.toISOString().slice(0, 10),
+        totalCAD: val,
+        totalUSD: Math.round(val * 0.74),
+        weeklyChangeCAD: 1200,
+        weeklyChangePct: 0.4
+      });
+      val += 1200;
+      d.setUTCDate(d.getUTCDate() + 7);
+    }
+
+    // 1. Overlay 2024 and 2026: 2024 must start from 2026's node at Day 234
+    const ov24_26 = buildMainYearOverlaySeries(testHistory, ['2024', '2026'], 'CAD', 'PCT');
+    assert.equal(ov24_26.yearSeries.length, 2);
+
+    const s2024 = ov24_26.yearSeries.find(s => s.year === '2024');
+    const s2026 = ov24_26.yearSeries.find(s => s.year === '2026');
+    assert.ok(s2024, '2024 series must be present');
+    assert.ok(s2026, '2026 series must be present');
+
+    assert.equal(s2024.chainedFromYear, '2026', '2024 must chain from 2026');
+    assert.ok(s2024.chainedStartPct > 10, '2024 starting return must match 2026 return at that week');
+
+    // 2024 should NOT have a Jan 1 anchor when overlaid
+    assert.equal(s2024.points[0].isAnchor, false, 'Overlaid 2024 must NOT start with Jan 1 flat anchor');
+    assert.equal(s2024.points[0].isOverlayStart, true, 'First point must be marked as isOverlayStart');
+    assert.equal(s2024.points[0].overlayFromYear, '2026', 'Overlay source year must be 2026');
+    assert.equal(s2024.points[0].pct, s2024.chainedStartPct, 'Point 0 return must equal chainedStartPct');
+    const closest2026Node = s2026.points.filter(p => !p.isAnchor).reduce((closest, p) => {
+      const d = Math.abs(p.fraction - s2024.points[0].fraction);
+      return d < Math.abs(closest.fraction - s2024.points[0].fraction) ? p : closest;
+    });
+    assert.equal(s2024.points[0].fraction, closest2026Node.fraction, 'Fraction must align with 2026 node');
+
+    // Subsequent 2024 points must grow onward from the starting node
+    const last2024 = s2024.points[s2024.points.length - 1];
+    assert.ok(last2024.pct > s2024.points[0].pct, '2024 progression must grow onward to year end');
+
+    // 2. Overlay 2024, 2025, and 2026: 2024 must pick whichever year is lowest at that week
+    const ovAll = buildMainYearOverlaySeries(testHistory, ['2024', '2025', '2026'], 'CAD', 'PCT');
+    const s2024All = ovAll.yearSeries.find(s => s.year === '2024');
+    const s2025All = ovAll.yearSeries.find(s => s.year === '2025');
+    const s2026All = ovAll.yearSeries.find(s => s.year === '2026');
+
+    // Find the nodes in 2025 and 2026 near Day 234
+    const node25 = s2025All.points.filter(p => !p.isAnchor).reduce((closest, p) => {
+      const d = Math.abs(p.fraction - s2024All.points[0].fraction);
+      return d < Math.abs(closest.fraction - s2024All.points[0].fraction) ? p : closest;
+    });
+    const node26 = s2026All.points.filter(p => !p.isAnchor).reduce((closest, p) => {
+      const d = Math.abs(p.fraction - s2024All.points[0].fraction);
+      return d < Math.abs(closest.fraction - s2024All.points[0].fraction) ? p : closest;
+    });
+    const expectedLowestPct = Math.min(node25.pct, node26.pct);
+    assert.ok(Math.abs(s2024All.points[0].pct - expectedLowestPct) < 0.001, '2024 must start from whichever node is lowest for that week');
+
+    // 3. Selecting 2024 ALONE: Starts from normal Jan 1 anchor at 0.00% (no overlay)
+    const ovAlone = buildMainYearOverlaySeries(testHistory, ['2024'], 'CAD', 'PCT');
+    assert.equal(ovAlone.yearSeries.length, 1);
+    assert.equal(ovAlone.yearSeries[0].chainedFromYear, undefined, '2024 alone must not be chained');
+    assert.equal(ovAlone.yearSeries[0].points[0].isAnchor, true, '2024 alone must start with Jan 1 baseline anchor');
+    assert.equal(ovAlone.yearSeries[0].points[0].pct, 0.0, '2024 alone must start at 0%');
+
+    // 4. Currency mode: selects the lowest dollar node and chains dollar value onwards
+    const ovCAD = buildMainYearOverlaySeries(testHistory, ['2024', '2025', '2026'], 'CAD', 'CAD');
+    const s2024CAD = ovCAD.yearSeries.find(s => s.year === '2024');
+    assert.ok(s2024CAD.chainedStartVal > 0, 'Must have a positive chainedStartVal');
+    assert.equal(s2024CAD.points[0].val, s2024CAD.chainedStartVal, 'Point 0 dollar value must match chainedStartVal');
+  });
 });
 
