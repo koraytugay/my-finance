@@ -351,6 +351,32 @@ function getHoldingAssetKey(h) {
         .trim();
 }
 
+function getHoldingCostAndGain(h) {
+    const sum = Number(h?.sum) || 0;
+    let cost = 0;
+    let gainCAD = 0;
+
+    if (h && typeof h.totalCost === 'number' && h.totalCost > 0) {
+        cost = Number(h.totalCost);
+    } else if (h && Number(h.averageCost || 0) > 0 && Number(h.count || 0) > 0) {
+        cost = Number(h.averageCost) * Number(h.count);
+    } else if (h && typeof h.unrealizedGainCAD === 'number') {
+        cost = sum - h.unrealizedGainCAD;
+    } else if (isCashHolding(h) || (h && (h.ticker === 'Cash' || h.strategy === 'Fixed Income'))) {
+        cost = sum;
+    } else {
+        cost = sum;
+    }
+
+    if (h && typeof h.unrealizedGainCAD === 'number') {
+        gainCAD = Number(h.unrealizedGainCAD);
+    } else {
+        gainCAD = sum - cost;
+    }
+
+    return { cost, gainCAD };
+}
+
 function computeSimpleAllocation(holdingsList) {
     const list = holdingsList || [];
     const totalCAD = list.reduce((s, h) => s + (Number(h.sum) || 0), 0) || 1;
@@ -360,18 +386,29 @@ function computeSimpleAllocation(holdingsList) {
         const asset = getHoldingAssetKey(h);
         if (!asset) return;
 
+        const sum = Number(h.sum) || 0;
+        const { cost, gainCAD } = getHoldingCostAndGain(h);
+
         if (!map[asset]) {
             map[asset] = {
                 asset: asset,
                 sum: 0,
+                cost: 0,
+                gainCAD: 0,
+                gainPct: 0,
                 pct: 0
             };
         }
-        map[asset].sum += (Number(h.sum) || 0);
+        map[asset].sum += sum;
+        map[asset].cost += cost;
+        map[asset].gainCAD += gainCAD;
     });
 
     const result = Object.values(map).map(item => {
         item.pct = (item.sum / totalCAD) * 100;
+        item.gainCAD = Number(item.gainCAD.toFixed(2));
+        item.cost = Number(item.cost.toFixed(2));
+        item.gainPct = item.cost > 0 ? Number(((item.gainCAD / item.cost) * 100).toFixed(2)) : 0;
         return item;
     });
 
@@ -394,7 +431,7 @@ function renderSimpleAllocTable() {
     }
 
     if (simpleAllocData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="empty-state" style="text-align: center; color: #64748b; padding: 16px;">No allocation data available.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state" style="text-align: center; color: #64748b; padding: 16px;">No allocation data available.</td></tr>`;
         if (tfoot) tfoot.innerHTML = '';
         return;
     }
@@ -405,34 +442,68 @@ function renderSimpleAllocTable() {
         if (simpleAllocSort.col === 'asset') {
             diff = a.asset.localeCompare(b.asset);
         } else if (simpleAllocSort.col === 'pct') {
-            diff = a.pct - b.pct;
+            diff = (a.pct - b.pct) || (a.sum - b.sum);
+        } else if (simpleAllocSort.col === 'gain') {
+            diff = (a.gainCAD - b.gainCAD) || (a.sum - b.sum);
         } else {
-            diff = a.sum - b.sum;
+            diff = (a.sum - b.sum) || a.asset.localeCompare(b.asset);
         }
         return simpleAllocSort.dir === 'desc' ? -diff : diff;
     });
 
-    tbody.innerHTML = sorted.map(item => `
-        <tr>
-            <td><strong style="color: #0969da;">${escapeHtml(item.asset)}</strong></td>
-            <td class="text-right font-bold">${item.pct.toFixed(2)}%</td>
-            <td class="text-right font-bold">${formatCurrency(item.sum)}</td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = sorted.map(item => {
+        const gainCAD = Number(item.gainCAD) || 0;
+        const gainPct = Number(item.gainPct) || 0;
+        const isCash = item.asset === 'CASH';
+
+        let gainHtml = '';
+        if (isCash || (gainCAD === 0 && item.cost === item.sum)) {
+            gainHtml = `
+                <div style="font-weight: 700; color: #64748b;">$0.00</div>
+                <div style="font-size: 0.72rem; color: #64748b;">0.00%</div>
+            `;
+        } else {
+            const sign = gainCAD > 0 ? '+' : '';
+            const color = gainCAD > 0 ? '#166534' : (gainCAD < 0 ? '#cf222e' : '#64748b');
+            gainHtml = `
+                <div style="font-weight: 700; color: ${color};">${sign}${formatCurrency(gainCAD)}</div>
+                <div style="font-size: 0.72rem; color: ${color};">${sign}${gainPct.toFixed(2)}%</div>
+            `;
+        }
+
+        return `
+            <tr>
+                <td><strong style="color: #0969da;">${escapeHtml(item.asset)}</strong></td>
+                <td class="text-right font-bold">${item.pct.toFixed(2)}%</td>
+                <td class="text-right font-bold">${formatCurrency(item.sum)}</td>
+                <td class="text-right">${gainHtml}</td>
+            </tr>
+        `;
+    }).join('');
 
     const totalCAD = holdings.reduce((s, h) => s + (Number(h.sum) || 0), 0);
+    const totalCost = simpleAllocData.reduce((s, item) => s + (Number(item.cost) || 0), 0);
+    const totalGainCAD = simpleAllocData.reduce((s, item) => s + (Number(item.gainCAD) || 0), 0);
+    const totalGainPct = totalCost > 0 ? (totalGainCAD / totalCost) * 100 : 0;
+    const totalGainSign = totalGainCAD > 0 ? '+' : '';
+    const totalGainColor = totalGainCAD > 0 ? '#166534' : (totalGainCAD < 0 ? '#cf222e' : '#64748b');
+
     if (tfoot) {
         tfoot.innerHTML = `
             <tr>
                 <td>PORTFOLIO TOTAL</td>
                 <td class="text-right">100.00%</td>
                 <td class="text-right font-bold">${formatCurrency(totalCAD)}</td>
+                <td class="text-right font-bold">
+                    <div style="color: ${totalGainColor};">${totalGainSign}${formatCurrency(totalGainCAD)}</div>
+                    <div style="font-size: 0.72rem; color: ${totalGainColor}; font-weight: normal;">${totalGainSign}${totalGainPct.toFixed(2)}%</div>
+                </td>
             </tr>
         `;
     }
 
     // Update sort icons
-    const cols = ['asset', 'pct', 'sum'];
+    const cols = ['asset', 'pct', 'sum', 'gain'];
     cols.forEach(c => {
         const iconEl = document.getElementById(`sort-icon-${c}`);
         if (!iconEl) return;
@@ -468,35 +539,48 @@ function copySimpleAllocationTable(format = 'tsv') {
         if (simpleAllocSort.col === 'asset') {
             diff = a.asset.localeCompare(b.asset);
         } else if (simpleAllocSort.col === 'pct') {
-            diff = a.pct - b.pct;
+            diff = (a.pct - b.pct) || (a.sum - b.sum);
+        } else if (simpleAllocSort.col === 'gain') {
+            diff = (a.gainCAD - b.gainCAD) || (a.sum - b.sum);
         } else {
-            diff = a.sum - b.sum;
+            diff = (a.sum - b.sum) || a.asset.localeCompare(b.asset);
         }
         return simpleAllocSort.dir === 'desc' ? -diff : diff;
     });
 
     const totalCAD = holdings.reduce((s, h) => s + (Number(h.sum) || 0), 0);
+    const totalCost = simpleAllocData.reduce((s, item) => s + (Number(item.cost) || 0), 0);
+    const totalGainCAD = simpleAllocData.reduce((s, item) => s + (Number(item.gainCAD) || 0), 0);
+    const totalGainPct = totalCost > 0 ? (totalGainCAD / totalCost) * 100 : 0;
+    const totalGainSign = totalGainCAD > 0 ? '+' : '';
+
     let textContent = '';
     let htmlContent = '';
 
     if (format === 'text') {
-        const lines = sorted.map(item => `${item.pct.toFixed(2)}% ${item.asset} (${formatCurrency(item.sum)})`);
-        lines.push(`Total: 100.00% (${formatCurrency(totalCAD)})`);
+        const lines = sorted.map(item => {
+            const sign = item.gainCAD > 0 ? '+' : '';
+            return `${item.pct.toFixed(2)}% ${item.asset} (${formatCurrency(item.sum)}, Gain/Loss: ${sign}${formatCurrency(item.gainCAD)} / ${sign}${item.gainPct.toFixed(2)}%)`;
+        });
+        lines.push(`Total: 100.00% (${formatCurrency(totalCAD)}, Gain/Loss: ${totalGainSign}${formatCurrency(totalGainCAD)} / ${totalGainSign}${totalGainPct.toFixed(2)}%)`);
         textContent = lines.join('\n');
     } else {
         // Tab-separated values (TSV)
         const lines = [];
-        lines.push(['Asset', 'Allocation', 'Value (CAD)'].join('\t'));
+        lines.push(['Asset', 'Allocation', 'Value (CAD)', 'Gain / Loss (CAD)'].join('\t'));
         sorted.forEach(item => {
-            lines.push([item.asset, `${item.pct.toFixed(2)}%`, formatCurrency(item.sum)].join('\t'));
+            const sign = item.gainCAD > 0 ? '+' : '';
+            lines.push([item.asset, `${item.pct.toFixed(2)}%`, formatCurrency(item.sum), `${sign}${formatCurrency(item.gainCAD)} (${sign}${item.gainPct.toFixed(2)}%)`].join('\t'));
         });
-        lines.push(['Total', '100.00%', formatCurrency(totalCAD)].join('\t'));
+        lines.push(['Total', '100.00%', formatCurrency(totalCAD), `${totalGainSign}${formatCurrency(totalGainCAD)} (${totalGainSign}${totalGainPct.toFixed(2)}%)`].join('\t'));
         textContent = lines.join('\n');
 
-        const htmlRows = sorted.map(item =>
-            `<tr><td>${escapeHtml(item.asset)}</td><td style="text-align:right;">${item.pct.toFixed(2)}%</td><td style="text-align:right;">${formatCurrency(item.sum)}</td></tr>`
-        ).join('');
-        htmlContent = `<table><thead><tr><th>Asset</th><th>Allocation</th><th>Value (CAD)</th></tr></thead><tbody>${htmlRows}</tbody><tfoot><tr><td>Total</td><td style="text-align:right;">100.00%</td><td style="text-align:right;">${formatCurrency(totalCAD)}</td></tr></tfoot></table>`;
+        const htmlRows = sorted.map(item => {
+            const sign = item.gainCAD > 0 ? '+' : '';
+            const color = item.gainCAD > 0 ? '#166534' : (item.gainCAD < 0 ? '#cf222e' : '#64748b');
+            return `<tr><td>${escapeHtml(item.asset)}</td><td style="text-align:right;">${item.pct.toFixed(2)}%</td><td style="text-align:right;">${formatCurrency(item.sum)}</td><td style="text-align:right;color:${color};">${sign}${formatCurrency(item.gainCAD)} (${sign}${item.gainPct.toFixed(2)}%)</td></tr>`;
+        }).join('');
+        htmlContent = `<table><thead><tr><th>Asset</th><th>Allocation</th><th>Value (CAD)</th><th>Gain / Loss (CAD)</th></tr></thead><tbody>${htmlRows}</tbody><tfoot><tr><td>Total</td><td style="text-align:right;">100.00%</td><td style="text-align:right;">${formatCurrency(totalCAD)}</td><td style="text-align:right;">${totalGainSign}${formatCurrency(totalGainCAD)} (${totalGainSign}${totalGainPct.toFixed(2)}%)</td></tr></tfoot></table>`;
     }
 
     const btnId = format === 'text' ? 'btn-copy-alloc-text' : 'btn-copy-alloc-tsv';
@@ -567,6 +651,7 @@ if (typeof module !== 'undefined' && module.exports) {
         calculateTotals,
         isCashHolding,
         getHoldingAssetKey,
+        getHoldingCostAndGain,
         computeSimpleAllocation
     };
 }

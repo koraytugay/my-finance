@@ -15,7 +15,8 @@ const { computeXeqtProgressionOverlay } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
-  getHoldingAssetKey
+  getHoldingAssetKey,
+  getHoldingCostAndGain
 } = require('../allocation.js');
 const {
   calculateTimeBack,
@@ -748,6 +749,73 @@ test('Aggregated ETF & Cash Allocation Suite', async (t) => {
       assert.ok(alloc[i].sum >= alloc[i + 1].sum, `Item ${i} should be >= item ${i + 1}`);
       assert.ok(alloc[i].pct >= alloc[i + 1].pct, `Pct ${i} should be >= pct ${i + 1}`);
     }
+  });
+
+  await t.test('computeSimpleAllocation accurately aggregates unrealized gains and losses across accounts', () => {
+    const holdings = MOCK_HOLDINGS;
+    const alloc = computeSimpleAllocation(holdings);
+
+    // XEQT is held in TFSA (gain 20k, cost 60k) and RRSP (gain 8k, cost 32k)
+    const xeqt = alloc.find(x => x.asset === 'XEQT');
+    assert.ok(xeqt, 'XEQT must be present');
+    assert.equal(xeqt.sum, 120000);
+    assert.equal(xeqt.cost, 92000);
+    assert.equal(xeqt.gainCAD, 28000, 'XEQT unrealized gain must be 20k + 8k = 28k');
+    assert.equal(xeqt.gainPct, 30.43, 'XEQT gain percentage should be (28000 / 92000) * 100 = 30.43%');
+
+    // XEC: sum 30k, cost 25k, gain 5k (20.00%)
+    const xec = alloc.find(x => x.asset === 'XEC');
+    assert.ok(xec, 'XEC must be present');
+    assert.equal(xec.sum, 30000);
+    assert.equal(xec.cost, 25000);
+    assert.equal(xec.gainCAD, 5000);
+    assert.equal(xec.gainPct, 20.00);
+
+    // CASH: sum 25k, cost 25k, gain 0 (0.00%)
+    const cash = alloc.find(x => x.asset === 'CASH');
+    assert.ok(cash, 'CASH must be present');
+    assert.equal(cash.sum, 25000);
+    assert.equal(cash.cost, 25000);
+    assert.equal(cash.gainCAD, 0);
+    assert.equal(cash.gainPct, 0);
+
+    // Total portfolio unrealized gain matches sum of components
+    const totalGainCAD = alloc.reduce((s, x) => s + x.gainCAD, 0);
+    assert.equal(totalGainCAD, 33000, 'Total unrealized gains across assets must equal 33k CAD');
+  });
+
+  await t.test('computeSimpleAllocation handles positions with unrealized losses correctly', () => {
+    const portfolioWithLoss = [
+      { ticker: 'TSE:XEQT', sum: 50000, totalCost: 40000, unrealizedGainCAD: 10000 },
+      { ticker: 'TSE:VEE', sum: 8000, totalCost: 10000, unrealizedGainCAD: -2000 }, // $2,000 loss (-20%)
+      { ticker: 'Cash', account: 'CASH', sum: 2000 }
+    ];
+    const alloc = computeSimpleAllocation(portfolioWithLoss);
+
+    const vee = alloc.find(x => x.asset === 'VEE');
+    assert.ok(vee, 'VEE must be present');
+    assert.equal(vee.sum, 8000);
+    assert.equal(vee.cost, 10000);
+    assert.equal(vee.gainCAD, -2000, 'Unrealized loss should be negative');
+    assert.equal(vee.gainPct, -20.00, 'Unrealized loss percentage should be -20.00%');
+  });
+
+  await t.test('getHoldingCostAndGain correctly derives cost and gain under various holding representations', () => {
+    // 1. With totalCost and unrealizedGainCAD explicitly provided
+    const h1 = { sum: 1000, totalCost: 800, unrealizedGainCAD: 200 };
+    assert.deepEqual(getHoldingCostAndGain(h1), { cost: 800, gainCAD: 200 });
+
+    // 2. With averageCost and count provided
+    const h2 = { sum: 1500, averageCost: 10, count: 100 };
+    assert.deepEqual(getHoldingCostAndGain(h2), { cost: 1000, gainCAD: 500 });
+
+    // 3. Cash holding
+    const h3 = { ticker: 'Cash', sum: 5000 };
+    assert.deepEqual(getHoldingCostAndGain(h3), { cost: 5000, gainCAD: 0 });
+
+    // 4. Unrealized loss with totalCost
+    const h4 = { sum: 700, totalCost: 1000 };
+    assert.deepEqual(getHoldingCostAndGain(h4), { cost: 1000, gainCAD: -300 });
   });
 });
 
