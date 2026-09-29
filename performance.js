@@ -1051,6 +1051,10 @@ function buildRolling52OverlaySeries(windowData, metric = 'pct', currency = 'CAD
     const startUSD = windowData.startValUSD;
     const startVal = currency === 'USD' ? startUSD : startCAD;
 
+    const baselineDate = (windowData.startIndex > 0 && typeof allHistory !== 'undefined' && allHistory && allHistory[windowData.startIndex - 1])
+        ? allHistory[windowData.startIndex - 1].date
+        : windowData.startDate;
+
     const series = [{
         weekIdx: 0,
         pct: 0,
@@ -1063,7 +1067,7 @@ function buildRolling52OverlaySeries(windowData, metric = 'pct', currency = 'CAD
         gainUSD: 0,
         plotVal: 0,
         record: null,
-        date: windowData.startDate
+        date: baselineDate
     }];
 
     windowData.records.forEach((r, idx) => {
@@ -1229,8 +1233,12 @@ function renderRolling52Charts() {
     const bestPace = document.getElementById('r52-best-pace');
     const bestWinRatio = document.getElementById('r52-best-win-ratio');
 
+    const getWinBaselineDate = (w) => (w && w.startIndex > 0 && allHistory && allHistory[w.startIndex - 1])
+        ? allHistory[w.startIndex - 1].date
+        : (w ? w.startDate : '');
+
     if (bestWeeksPill) bestWeeksPill.textContent = `Weeks ${best.startWeek}–${best.endWeek}`;
-    if (bestDates) bestDates.textContent = `${formatDate(best.startDate)} – ${formatDate(best.endDate)}`;
+    if (bestDates) bestDates.textContent = `${formatDate(getWinBaselineDate(best))} – ${formatDate(best.endDate)}`;
     if (bestProgPct) bestProgPct.textContent = `${signOf(best.pctCAD)}${best.pctCAD.toFixed(2)}%`;
     if (bestProgUsdPct) bestProgUsdPct.textContent = `${signOf(best.pctUSD)}${best.pctUSD.toFixed(2)}% USD`;
     if (bestProgCad) bestProgCad.textContent = `${signOf(best.gainCAD)}${formatCurrency(best.gainCAD, 'CAD')}`;
@@ -1254,7 +1262,7 @@ function renderRolling52Charts() {
 
     if (current && currentWeeksPill) {
         currentWeeksPill.textContent = `Weeks ${current.startWeek}–${current.endWeek}`;
-        if (currentDates) currentDates.textContent = `${formatDate(current.startDate)} – ${formatDate(current.endDate)}`;
+        if (currentDates) currentDates.textContent = `${formatDate(getWinBaselineDate(current))} – ${formatDate(current.endDate)}`;
         if (currentProgPct) currentProgPct.textContent = `${signOf(current.pctCAD)}${current.pctCAD.toFixed(2)}%`;
         if (currentProgUsdPct) currentProgUsdPct.textContent = `${signOf(current.pctUSD)}${current.pctUSD.toFixed(2)}% USD`;
         if (currentProgCad) currentProgCad.textContent = `${signOf(current.gainCAD)}${formatCurrency(current.gainCAD, 'CAD')}`;
@@ -1278,7 +1286,7 @@ function renderRolling52Charts() {
     const worstWinRatio = document.getElementById('r52-worst-win-ratio');
 
     if (worstWeeksPill) worstWeeksPill.textContent = `Weeks ${worst.startWeek}–${worst.endWeek}`;
-    if (worstDates) worstDates.textContent = `${formatDate(worst.startDate)} – ${formatDate(worst.endDate)}`;
+    if (worstDates) worstDates.textContent = `${formatDate(getWinBaselineDate(worst))} – ${formatDate(worst.endDate)}`;
     if (worstProgPct) worstProgPct.textContent = `${signOf(worst.pctCAD)}${worst.pctCAD.toFixed(2)}%`;
     if (worstProgUsdPct) worstProgUsdPct.textContent = `${signOf(worst.pctUSD)}${worst.pctUSD.toFixed(2)}% USD`;
     if (worstProgCad) worstProgCad.textContent = `${signOf(worst.gainCAD)}${formatCurrency(worst.gainCAD, 'CAD')}`;
