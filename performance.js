@@ -953,9 +953,13 @@ function renderWeeklyBarChart() {
         tooltip.style.left = `${tipLeft}px`;
         tooltip.style.top = `${Math.max(10, mouseY - 30)}px`;
         const sign = change >= 0 ? '+' : '';
+        const pctNum = Number(pct);
+        const pctStr = (pct !== undefined && pct !== null && !isNaN(pctNum))
+            ? ` (${pctNum >= 0 ? '+' : ''}${pctNum.toFixed(2)}%)`
+            : '';
         tooltip.innerHTML = `
             <strong>Week ${week} (${date})</strong><br>
-            Net Change: <span style="color: ${change >= 0 ? '#4ade80' : '#f87171'}">${sign}${formatCurrency(change, 'CAD')} (${sign}${pct}%)</span>
+            Net Change: <span style="color: ${change >= 0 ? '#4ade80' : '#f87171'}">${sign}${formatCurrency(change, 'CAD')}${pctStr}</span>
         `;
     };
 
