@@ -1786,27 +1786,54 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
 
     // 1b. Calculate XEQT Benchmark Rolling 52W values
     const bData = benchmarksData || (typeof allBenchmarks !== 'undefined' ? allBenchmarks : null);
-    const xeqtPrices = bData?.benchmarks?.XEQT?.weeklyPrices || [];
+    const xeqtBenchmark = bData?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
     const hasXeqtData = xeqtPrices.length > 0;
+    const liveXeqtPrice = xeqtBenchmark?.currentPrice;
 
     const xeqtSeries = timeline.map((w, idx) => {
         let pct = 0;
+        let pctUSD = 0;
         if (hasXeqtData) {
-            const pStart = xeqtPrices[idx] || xeqtPrices[0];
-            const pEnd = xeqtPrices[Math.min(xeqtPrices.length - 1, idx + 51)];
+            // A rolling 52-week period spans 52 elapsed weeks between the baseline before the window and the window end.
+            // For idx > 0, the baseline is at idx - 1, and the window end is at idx + 51: (idx + 51) - (idx - 1) = 52 weeks.
+            // For idx = 0, the window spans records 0 to 51 (from inception baseline).
+            const startIdx = idx > 0 ? (idx - 1) : 0;
+            const endIdx = idx + 51;
+
+            const pStart = xeqtPrices[Math.min(xeqtPrices.length - 1, startIdx)] || xeqtPrices[0];
+            let pEnd = xeqtPrices[Math.min(xeqtPrices.length - 1, endIdx)];
+
+            // If this is the latest window and a live market price is available, use it for the ending price
+            if (idx === timeline.length - 1 && liveXeqtPrice != null && liveXeqtPrice > 0) {
+                pEnd = liveXeqtPrice;
+            }
+
             pct = pStart > 0 ? ((pEnd - pStart) / pStart) * 100 : 0;
+
+            // In USD mode, convert XEQT return using USD/CAD exchange rates at start and end of the 52W window
+            if (metric === 'usd') {
+                const rStart = (idx > 0 && allHistory && allHistory[idx - 1]) ? allHistory[idx - 1] : (allHistory && allHistory[0]);
+                const rEnd = (allHistory && allHistory[idx + 51]) ? allHistory[idx + 51] : (allHistory && allHistory[allHistory.length - 1]);
+                const rateStart = (rStart && rStart.totalCAD && rStart.totalUSD) ? (rStart.totalUSD / rStart.totalCAD) : 1;
+                const rateEnd = (rEnd && rEnd.totalCAD && rEnd.totalUSD) ? (rEnd.totalUSD / rEnd.totalCAD) : 1;
+                const pStartUSD = pStart * rateStart;
+                const pEndUSD = pEnd * rateEnd;
+                pctUSD = pStartUSD > 0 ? ((pEndUSD - pStartUSD) / pStartUSD) * 100 : pct;
+            }
         } else {
-            const totalRet = bData?.benchmarks?.XEQT?.returnPct !== undefined ? bData.benchmarks.XEQT.returnPct : 43.81;
+            const totalRet = xeqtBenchmark?.returnPct !== undefined ? xeqtBenchmark.returnPct : 43.81;
             pct = totalRet / (Math.max(1, allHistory.length) / 52.14);
+            pctUSD = pct;
         }
 
         let val = pct;
         if (metric === 'cad') val = w.startValCAD * (pct / 100);
-        else if (metric === 'usd') val = w.startValUSD * (pct / 100);
+        else if (metric === 'usd') val = w.startValUSD * (pctUSD / 100);
 
         return {
             index: idx,
-            pct: Number(pct.toFixed(2)),
+            pct: Number((metric === 'usd' ? pctUSD : pct).toFixed(2)),
             val: Number(val.toFixed(2))
         };
     });
@@ -2094,12 +2121,16 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
             const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
             const signDiff = diff >= 0 ? '+' : '';
 
+            const baselineDate = (item.window && item.window.startIndex > 0 && allHistory && allHistory[item.window.startIndex - 1])
+                ? allHistory[item.window.startIndex - 1].date
+                : item.startDate;
+
             tooltip.innerHTML = `
                 <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 4px; display: flex; align-items: center;">
                     Week ${item.endWeek} Trailing 52W ${tag}
                 </div>
                 <div style="font-size: 0.72rem; color: #94a3b8; margin-bottom: 8px;">
-                    ${fmt(item.startDate)} &rarr; ${fmt(item.endDate)}
+                    ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
                 </div>
                 <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
