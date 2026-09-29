@@ -13,6 +13,7 @@ let currentMainMode = 'single'; // 'single' | 'years'
 let currentMainSingleTimeframe = 'last-52'; // 'last-52' | 'all'
 let currentMainSelectedYears = new Set(); // Set of active year strings, e.g. Set(['2026', '2025'])
 let currentMainCurrency = 'CAD';
+let currentMainUnit = 'CAD'; // 'CAD' | 'USD' | 'PCT'
 let currentMainOverlayXeqt = false;
 
 async function initMain() {
@@ -827,6 +828,8 @@ function setMainTimeframe(tf) {
             currentMainSingleTimeframe = null;
             currentMainSelectedYears.clear();
             currentMainSelectedYears.add(tf);
+            currentMainUnit = 'PCT'; // Automatically switch to % when entering year overlay mode
+            updateMainUnitButtonsUI();
         } else {
             if (currentMainSelectedYears.has(tf)) {
                 if (currentMainSelectedYears.size > 1) {
@@ -850,30 +853,45 @@ function setMainTimeframe(tf) {
     renderMainProgressionChart();
 }
 
-function setMainCurrency(curr) {
-    currentMainCurrency = curr;
-    if (typeof document !== 'undefined') {
-        const btnCad = document.getElementById('btn-main-cur-cad');
-        const btnUsd = document.getElementById('btn-main-cur-usd');
-        if (btnCad && btnUsd) {
-            if (curr === 'CAD') {
-                btnCad.classList.add('active');
-                btnCad.style.background = '#1f2328';
-                btnCad.style.color = 'white';
-                btnUsd.classList.remove('active');
-                btnUsd.style.background = 'white';
-                btnUsd.style.color = '#24292f';
-            } else {
-                btnUsd.classList.add('active');
-                btnUsd.style.background = '#1f2328';
-                btnUsd.style.color = 'white';
-                btnCad.classList.remove('active');
-                btnCad.style.background = 'white';
-                btnCad.style.color = '#24292f';
-            }
-        }
+function setMainUnit(unit) {
+    if (unit === 'CAD' || unit === 'USD') {
+        currentMainCurrency = unit;
+        currentMainUnit = unit;
+    } else if (unit === 'PCT' || unit === '%') {
+        currentMainUnit = 'PCT';
     }
+    updateMainUnitButtonsUI();
     renderMainProgressionChart();
+}
+
+function setMainCurrency(curr) {
+    setMainUnit(curr);
+}
+
+function updateMainUnitButtonsUI() {
+    if (typeof document === 'undefined') return;
+    const btnCad = document.getElementById('btn-main-cur-cad');
+    const btnUsd = document.getElementById('btn-main-cur-usd');
+    const btnPct = document.getElementById('btn-main-unit-pct');
+
+    if (btnCad) {
+        const isActive = currentMainUnit === 'CAD';
+        btnCad.classList.toggle('active', isActive);
+        btnCad.style.background = isActive ? '#1f2328' : 'white';
+        btnCad.style.color = isActive ? 'white' : '#24292f';
+    }
+    if (btnUsd) {
+        const isActive = currentMainUnit === 'USD';
+        btnUsd.classList.toggle('active', isActive);
+        btnUsd.style.background = isActive ? '#1f2328' : 'white';
+        btnUsd.style.color = isActive ? 'white' : '#24292f';
+    }
+    if (btnPct) {
+        const isActive = currentMainUnit === 'PCT';
+        btnPct.classList.toggle('active', isActive);
+        btnPct.style.background = isActive ? '#1f2328' : 'white';
+        btnPct.style.color = isActive ? 'white' : '#24292f';
+    }
 }
 
 async function toggleMainXeqtOverlay(checked) {
@@ -918,11 +936,19 @@ function renderMainProgressionChart() {
  */
 function renderMainSingleChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
     const timeframe = currentMainSingleTimeframe || 'last-52';
+    const isPct = currentMainUnit === 'PCT';
 
     if (titleEl) {
-        titleEl.textContent = timeframe === 'all'
-            ? '📈 Net Worth Progression (All Time)'
-            : '📈 Net Worth Progression (Last 52 Weeks)';
+        if (isPct) {
+            titleEl.textContent = timeframe === 'all'
+                ? '📈 Net Worth Progression (% Return - All Time)'
+                : '📈 Net Worth Progression (% Return - Last 52 Weeks)';
+        } else {
+            const curLabel = currency === 'USD' ? 'USD' : 'CAD';
+            titleEl.textContent = timeframe === 'all'
+                ? `📈 Net Worth Progression (All Time - ${curLabel})`
+                : `📈 Net Worth Progression (Last 52 Weeks - ${curLabel})`;
+        }
     }
 
     let records = [...rawHistory];
@@ -944,31 +970,95 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         xeqtSeries = computeXeqtProgressionOverlay(records, rawHistory, xeqtPrices, currency, currentXeqtPrice);
     }
 
-    const allChartVals = records.map(r => r[valKey]);
-    if (showXeqt && xeqtSeries.length > 0) {
-        allChartVals.push(...xeqtSeries.map(x => x.val));
+    const baseVal = records[0][valKey] || 1;
+    const portPoints = records.map((r, i) => {
+        const val = r[valKey] || 0;
+        const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
+        return {
+            val: val,
+            pct: pct,
+            rec: r,
+            idx: i
+        };
+    });
+
+    let minVal, maxVal, step;
+    let getY;
+
+    if (isPct) {
+        const allChartPcts = [0, ...portPoints.map(p => p.pct)];
+        if (showXeqt && xeqtSeries.length > 0) {
+            allChartPcts.push(...xeqtSeries.map(x => x.returnPct));
+        }
+
+        const minPct = Math.min(...allChartPcts);
+        const maxPct = Math.max(...allChartPcts);
+        const span = maxPct - minPct;
+        const pad = span > 0 ? Math.max(1, span * 0.1) : 4;
+
+        step = 5;
+        if (span + 2 * pad > 40) step = 10;
+        else if (span + 2 * pad <= 14) step = 2;
+        else if (span + 2 * pad <= 6) step = 1;
+
+        minVal = Math.floor((minPct - pad) / step) * step;
+        maxVal = Math.ceil((maxPct + pad) / step) * step;
+
+        getY = (pct) => padding.top + plotH - ((pct - minVal) / (maxVal - minVal)) * plotH;
+    } else {
+        const allChartVals = portPoints.map(p => p.val);
+        if (showXeqt && xeqtSeries.length > 0) {
+            allChartVals.push(...xeqtSeries.map(x => x.val));
+        }
+
+        minVal = Math.min(...allChartVals);
+        maxVal = Math.max(...allChartVals);
+        const range = maxVal - minVal || 10000;
+        minVal = Math.floor(Math.max(0, minVal - range * 0.08) / 10000) * 10000;
+        maxVal = Math.ceil((maxVal + range * 0.08) / 10000) * 10000;
+
+        getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
     }
 
-    let minVal = Math.min(...allChartVals);
-    let maxVal = Math.max(...allChartVals);
-    const range = maxVal - minVal || 10000;
-    minVal = Math.floor(Math.max(0, minVal - range * 0.08) / 10000) * 10000;
-    maxVal = Math.ceil((maxVal + range * 0.08) / 10000) * 10000;
-
     const getX = (idx) => padding.left + (idx / (records.length - 1 || 1)) * plotW;
-    const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
 
-    // Y Gridlines (4 steps)
-    const ySteps = 4;
+    portPoints.forEach(p => {
+        p.x = getX(p.idx);
+        p.y = getY(isPct ? p.pct : p.val);
+    });
+
+    // Y Gridlines
     let gridLinesHtml = '';
-    for (let i = 0; i <= ySteps; i++) {
-        const val = minVal + (i / ySteps) * (maxVal - minVal);
-        const y = getY(val);
-        const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
-        gridLinesHtml += `
-            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-            <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
-        `;
+    if (isPct) {
+        const tickCount = Math.round((maxVal - minVal) / step);
+        for (let i = 0; i <= tickCount; i++) {
+            const p = Math.round((minVal + i * step) * 10) / 10;
+            const y = getY(p);
+            const sign = p > 0 ? '+' : '';
+            const label = `${sign}${p}%`;
+            const isZero = Math.abs(p) < 0.001;
+            const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
+            const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
+            const strokeWidth = isZero ? '1.5' : '1';
+            const fontColor = isZero ? '#1e293b' : '#8c959f';
+            const fontWeight = isZero ? '700' : 'normal';
+
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${fontColor}" font-weight="${fontWeight}" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
+    } else {
+        const ySteps = 4;
+        for (let i = 0; i <= ySteps; i++) {
+            const val = minVal + (i / ySteps) * (maxVal - minVal);
+            const y = getY(val);
+            const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
+                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
     }
 
     // X Date ticks
@@ -986,34 +1076,34 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     // Portfolio line and area
-    const points = records.map((r, i) => `${getX(i).toFixed(1)},${getY(r[valKey]).toFixed(1)}`);
-    const linePathD = 'M ' + points.join(' L ');
+    const pointsStr = portPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+    const linePathD = 'M ' + pointsStr.join(' L ');
     const areaPathD = `${linePathD} L ${getX(records.length - 1).toFixed(1)},${padding.top + plotH} L ${getX(0).toFixed(1)},${padding.top + plotH} Z`;
 
-    const hoverPointsHtml = records.map((r, i) => {
-        const cx = getX(i).toFixed(1);
-        const cy = getY(r[valKey]).toFixed(1);
-        return `
-            <circle class="main-chart-point" data-idx="${i}" cx="${cx}" cy="${cy}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
-        `;
-    }).join('');
+    const hoverPointsHtml = portPoints.map((p, i) => `
+        <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+    `).join('');
 
     // XEQT Benchmark line and points
     let xeqtPathHtml = '';
     let xeqtPointsHtml = '';
     if (showXeqt && xeqtSeries.length > 0) {
-        const xeqtPoints = xeqtSeries.map((x, i) => `${getX(i).toFixed(1)},${getY(x.val).toFixed(1)}`);
-        const xeqtLineD = 'M ' + xeqtPoints.join(' L ');
+        const xeqtPoints = xeqtSeries.map((x, i) => {
+            const plotVal = isPct ? x.returnPct : x.val;
+            return {
+                x: getX(i),
+                y: getY(plotVal),
+                item: x,
+                idx: i
+            };
+        });
+        const xeqtLineD = 'M ' + xeqtPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
         xeqtPathHtml = `
             <path d="${xeqtLineD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
         `;
-        xeqtPointsHtml = xeqtSeries.map((x, i) => {
-            const cx = getX(i).toFixed(1);
-            const cy = getY(x.val).toFixed(1);
-            return `
-                <circle class="main-xeqt-point" data-idx="${i}" cx="${cx}" cy="${cy}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
-            `;
-        }).join('');
+        xeqtPointsHtml = xeqtPoints.map((p, i) => `
+            <circle class="main-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
+        `).join('');
     }
 
     const svg = `
@@ -1039,29 +1129,34 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     // Update legend
     const legendEl = document.getElementById('main-chart-legend');
     if (legendEl) {
+        const lastPort = portPoints[portPoints.length - 1];
+        const portSign = lastPort.pct >= 0 ? '+' : '';
+
         if (showXeqt && xeqtSeries.length > 0) {
-            const startVal = records[0][valKey];
             const lastItem = xeqtSeries[xeqtSeries.length - 1];
             const spreadSign = lastItem.spreadVal >= 0 ? '+' : '';
             const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
             const spreadBg = lastItem.spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const xeqtSign = lastItem.returnPct >= 0 ? '+' : '';
+
             legendEl.innerHTML = `
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
-                    <strong style="color: #1f2328;">Portfolio Net Worth</strong>
+                    <strong style="color: #1f2328;">Portfolio</strong>: ${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : `${formatCurrency(lastPort.val, currency)} (${portSign}${lastPort.pct.toFixed(2)}%)`}
                 </div>
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark</strong> (Simulated from ${formatCurrency(startVal, currency)})
+                    <strong style="color: #16a34a;">XEQT Benchmark</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
                 </div>
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
-                    Spread: ${spreadSign}${formatCurrency(lastItem.spreadVal, currency)} (${spreadSign}${lastItem.spreadPct.toFixed(2)}%)
+                    Spread: ${spreadSign}${lastItem.spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(lastItem.spreadVal, currency)})
                 </div>
             `;
         } else {
             legendEl.innerHTML = `
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
-                    <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
+                    <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
+                    Total Net Worth: <strong>${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : formatCurrency(lastPort.val, currency)}</strong> &bull; Hover any data point to inspect breakdown
                 </div>
             `;
         }
@@ -1072,6 +1167,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     allInteractivePoints.forEach(circle => {
         circle.addEventListener('mouseenter', (e) => {
             const idx = parseInt(e.target.getAttribute('data-idx'), 10);
+            const pt = portPoints[idx];
             const r = records[idx];
 
             const portPoint = box.querySelector(`.main-chart-point[data-idx="${idx}"]`);
@@ -1089,6 +1185,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
             const dateStr = formatDate(r.date);
             const totalVal = formatCurrency(r[valKey], currency);
+            const pctSign = pt.pct >= 0 ? '+' : '';
+            const pctColor = pt.pct >= 0 ? '#3fb950' : '#f85149';
             const weeklyChangeStr = `${r.weeklyChangeCAD >= 0 ? '+' : ''}${formatCurrency(r.weeklyChangeCAD, 'CAD')} (${r.weeklyChangePct >= 0 ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%)`;
             const changeColor = r.weeklyChangeCAD >= 0 ? '#3fb950' : '#f85149';
 
@@ -1097,25 +1195,25 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 const x = xeqtSeries[idx];
                 const xeqtValStr = formatCurrency(x.val, currency);
                 const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
-                const portRetStr = `${x.portfolioReturnPct >= 0 ? '+' : ''}${x.portfolioReturnPct.toFixed(2)}%`;
+                const portRetStr = `${pt.pct >= 0 ? '+' : ''}${pt.pct.toFixed(2)}%`;
                 const spreadSign = x.spreadVal >= 0 ? '+' : '';
                 const spreadColor = x.spreadVal >= 0 ? '#3fb950' : '#f85149';
                 const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
-                const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}%`;
+                const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
                 xeqtHtml = `
                     <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                             <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark:</span>
-                            <strong style="color: #4ade80;">${xeqtValStr}</strong>
+                            <strong style="color: #4ade80;">${isPct ? xeqtRetStr : xeqtValStr}</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px;">
-                            <span>Return from Start:</span>
+                            <span>Cumulative Return:</span>
                             <span>Port: <strong style="color: #58a6ff;">${portRetStr}</strong> vs XEQT: <strong style="color: #4ade80;">${xeqtRetStr}</strong></span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; color: ${spreadColor}; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 4px;">
                             <span>Outperformance Spread:</span>
-                            <span>${spreadValStr} (${spreadPctStr})</span>
+                            <span>${isPct ? spreadPctStr : `${spreadValStr} (${spreadPctStr})`}</span>
                         </div>
                     </div>
                 `;
@@ -1123,7 +1221,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
             tooltip.innerHTML = `
                 <div style="font-weight: 700; margin-bottom: 4px;">Week ${r.week} &bull; ${dateStr}</div>
-                <div style="font-size: 1.05rem; font-weight: 800; color: #58a6ff;">${totalVal}</div>
+                <div style="font-size: 1.05rem; font-weight: 800; color: #58a6ff; display: flex; align-items: baseline; gap: 6px;">
+                    ${isPct ? `<span>${pctSign}${pt.pct.toFixed(2)}%</span><span style="font-size: 0.78rem; color: #cbd5e1; font-weight: normal;">(${totalVal})</span>` : `<span>${totalVal}</span><span style="font-size: 0.78rem; color: #cbd5e1; font-weight: normal;">(${pctSign}${pt.pct.toFixed(2)}%)</span>`}
+                </div>
                 <div style="margin-top: 3px; font-size: 0.78rem; color: ${changeColor};">Weekly: ${weeklyChangeStr}</div>
                 ${xeqtHtml}
                 <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px;">
@@ -1276,6 +1376,11 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD') {
     const paddedMin = Math.floor((minPct - pad) / step) * step;
     const paddedMax = Math.ceil((maxPct + pad) / step) * step;
 
+    // Dollar bounds for $ Y-axis
+    const dollarRange = maxVal - minVal || 10000;
+    const paddedDollarMin = Math.floor(Math.max(0, minVal - dollarRange * 0.08) / 10000) * 10000;
+    const paddedDollarMax = Math.ceil((maxVal + dollarRange * 0.08) / 10000) * 10000;
+
     return {
         yearSeries,
         allPcts,
@@ -1286,52 +1391,81 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD') {
         maxVal,
         paddedMin,
         paddedMax,
+        paddedDollarMin,
+        paddedDollarMax,
         step
     };
 }
 
 /**
- * Renders the multi-year overlay progression chart in percentage (%) where the X-axis spans the full calendar year (Jan–Dec).
+ * Renders the multi-year overlay progression chart where the X-axis spans the full calendar year (Jan–Dec).
+ * Supports both percentage (%) and currency ($) modes depending on currentMainUnit.
  */
 function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
     const selectedYearsList = Array.from(currentMainSelectedYears).sort();
+    const isPct = currentMainUnit === 'PCT';
 
     if (titleEl) {
         const sortedDesc = [...selectedYearsList].reverse();
-        titleEl.textContent = sortedDesc.length > 1
-            ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
-            : `📈 Net Worth Progression (% Year ${sortedDesc[0]})`;
+        if (isPct) {
+            titleEl.textContent = sortedDesc.length > 1
+                ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression (% Year ${sortedDesc[0]})`;
+        } else {
+            const curLabel = currency === 'USD' ? 'USD' : 'CAD';
+            titleEl.textContent = sortedDesc.length > 1
+                ? `📈 Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
+        }
     }
 
     const overlayData = buildMainYearOverlaySeries(rawHistory, currentMainSelectedYears, currency);
-    const { yearSeries, paddedMin, paddedMax, step } = overlayData;
+    const { yearSeries, paddedMin, paddedMax, paddedDollarMin, paddedDollarMax, step } = overlayData;
 
     if (yearSeries.length === 0) {
         box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
         return;
     }
 
-    const getY = (pct) => padding.top + plotH - ((pct - paddedMin) / (paddedMax - paddedMin)) * plotH;
+    let getY;
+    if (isPct) {
+        getY = (pct) => padding.top + plotH - ((pct - paddedMin) / (paddedMax - paddedMin)) * plotH;
+    } else {
+        getY = (val) => padding.top + plotH - ((val - paddedDollarMin) / (paddedDollarMax - paddedDollarMin)) * plotH;
+    }
 
-    // Y Gridlines in percentage (%)
-    const tickCount = Math.round((paddedMax - paddedMin) / step);
+    // Y Gridlines
     let yGridHtml = '';
-    for (let i = 0; i <= tickCount; i++) {
-        const p = Math.round((paddedMin + i * step) * 10) / 10;
-        const y = getY(p);
-        const sign = p > 0 ? '+' : '';
-        const label = `${sign}${p}%`;
-        const isZero = Math.abs(p) < 0.001;
-        const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
-        const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
-        const strokeWidth = isZero ? '1.5' : '1';
-        const fontColor = isZero ? '#1e293b' : '#8c959f';
-        const fontWeight = isZero ? '700' : 'normal';
+    if (isPct) {
+        const tickCount = Math.round((paddedMax - paddedMin) / step);
+        for (let i = 0; i <= tickCount; i++) {
+            const p = Math.round((paddedMin + i * step) * 10) / 10;
+            const y = getY(p);
+            const sign = p > 0 ? '+' : '';
+            const label = `${sign}${p}%`;
+            const isZero = Math.abs(p) < 0.001;
+            const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
+            const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
+            const strokeWidth = isZero ? '1.5' : '1';
+            const fontColor = isZero ? '#1e293b' : '#8c959f';
+            const fontWeight = isZero ? '700' : 'normal';
 
-        yGridHtml += `
-            <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
-            <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${fontColor}" font-weight="${fontWeight}" font-size="11" text-anchor="end">${label}</text>
-        `;
+            yGridHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${fontColor}" font-weight="${fontWeight}" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
+    } else {
+        const ySteps = 4;
+        for (let i = 0; i <= ySteps; i++) {
+            const val = paddedDollarMin + (i / ySteps) * (paddedDollarMax - paddedDollarMin);
+            const y = getY(val);
+            const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
+            yGridHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
+                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
     }
 
     // X-Axis (Full Year: 12 Month columns Jan - Dec)
@@ -1364,7 +1498,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     yearSeries.forEach(s => {
         const pts = s.points.map((p, i) => ({
             x: padding.left + p.fraction * plotW,
-            y: getY(p.pct),
+            y: getY(isPct ? p.pct : p.val),
             p,
             idx: i
         }));
@@ -1450,7 +1584,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
                 if (closest) {
                     const cx = (padding.left + closest.fraction * plotW).toFixed(1);
-                    const cy = getY(closest.pct).toFixed(1);
+                    const cy = getY(isPct ? closest.pct : closest.val).toFixed(1);
                     hoverDotsHtml += `
                         <circle cx="${cx}" cy="${cy}" r="5.5" fill="${s.color}" stroke="#ffffff" stroke-width="2" />
                     `;
@@ -1491,8 +1625,13 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                                 <span style="color: #cbd5e1; font-size: 0.72rem;">(${formatDate(p.date)})</span>
                             </span>
                             <span style="display: flex; align-items: baseline; gap: 6px;">
-                                <strong style="color: ${pctColor}; font-size: 0.88rem;">${pctSign}${p.pct.toFixed(2)}%</strong>
-                                <span style="color: #cbd5e1; font-size: 0.74rem;">(${formatCurrency(p.val, currency)})</span>
+                                ${isPct ? `
+                                    <strong style="color: ${pctColor}; font-size: 0.88rem;">${pctSign}${p.pct.toFixed(2)}%</strong>
+                                    <span style="color: #cbd5e1; font-size: 0.74rem;">(${formatCurrency(p.val, currency)})</span>
+                                ` : `
+                                    <strong style="color: #ffffff; font-size: 0.88rem;">${formatCurrency(p.val, currency)}</strong>
+                                    <span style="color: ${pctColor}; font-size: 0.74rem;">(${pctSign}${p.pct.toFixed(2)}%)</span>
+                                `}
                             </span>
                         </div>
                         ${!p.isAnchor ? `
@@ -1568,8 +1707,8 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
                     <strong style="color: ${s.color};">${s.year}</strong>:
-                    <span style="font-weight: 700; color: ${color};">${sign}${last.pct.toFixed(2)}%</span>
-                    <span style="color: #64748b; font-size: 0.74rem;">(${formatCurrency(last.val, currency)})</span>
+                    <span style="font-weight: 700; color: ${color};">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</span>
+                    <span style="color: #64748b; font-size: 0.74rem;">(${isPct ? formatCurrency(last.val, currency) : `${sign}${last.pct.toFixed(2)}%`})</span>
                 </div>
             `;
         }).join('');
@@ -1579,13 +1718,15 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const newest = sortedDesc[0].points[sortedDesc[0].points.length - 1];
             const prior = sortedDesc[1].points[sortedDesc[1].points.length - 1];
             const diff = newest.pct - prior.pct;
+            const valDiff = newest.val - prior.val;
             const sign = diff >= 0 ? '+' : '';
+            const valSign = valDiff >= 0 ? '+' : '';
             const color = diff >= 0 ? '#16a34a' : '#cf222e';
             const bg = diff >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
 
             itemsHtml += `
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${color}; background: ${bg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${color}30;">
-                    ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${sign}${diff.toFixed(2)}% pts
+                    ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${isPct ? `${sign}${diff.toFixed(2)}% pts` : `${valSign}${formatCurrency(valDiff, currency)} (${sign}${diff.toFixed(2)}% pts)`}
                 </div>
             `;
         }
@@ -1615,6 +1756,7 @@ if (typeof module !== 'undefined' && module.exports) {
         calculateTimeBack,
         setMainTimeframe,
         setMainCurrency,
+        setMainUnit,
         getDayOfYearFraction,
         getMainYearColor,
         syncMainTimeframeButtons,
@@ -1624,7 +1766,8 @@ if (typeof module !== 'undefined' && module.exports) {
             currentMainSingleTimeframe,
             currentMainSelectedYears: new Set(currentMainSelectedYears),
             currentMainTimeframe,
-            currentMainCurrency
+            currentMainCurrency,
+            currentMainUnit
         }),
         resetMainChartState: () => {
             currentMainMode = 'single';
@@ -1632,6 +1775,7 @@ if (typeof module !== 'undefined' && module.exports) {
             currentMainSelectedYears.clear();
             currentMainTimeframe = 'last-52';
             currentMainCurrency = 'CAD';
+            currentMainUnit = 'CAD';
         }
     };
 }

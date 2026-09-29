@@ -22,6 +22,8 @@ const {
   getDayOfYearFraction,
   getMainYearColor,
   setMainTimeframe,
+  setMainCurrency,
+  setMainUnit,
   getMainChartState,
   resetMainChartState,
   buildMainYearOverlaySeries,
@@ -925,6 +927,85 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       assert.deepEqual(matches, ['2024', '2025', '2026', 'last-52', 'all'], 'Buttons must strictly follow 2024 - 2025 - 2026 - last-52 - all order');
     } finally {
       delete global.document;
+    }
+  });
+
+  await t.test('setMainUnit manages CAD, USD, and PCT states and updates UI correctly', () => {
+    resetMainChartState();
+
+    const mockButtons = {
+      'btn-main-cur-cad': { classList: new Set(), style: {} },
+      'btn-main-cur-usd': { classList: new Set(), style: {} },
+      'btn-main-unit-pct': { classList: new Set(), style: {} }
+    };
+
+    for (const key of Object.keys(mockButtons)) {
+      mockButtons[key].classList.toggle = function(cls, force) {
+        if (force) this.add(cls); else this.delete(cls);
+      };
+    }
+
+    global.document = {
+      getElementById: (id) => mockButtons[id] || null,
+      querySelectorAll: () => []
+    };
+
+    try {
+      // Default: CAD
+      let state = getMainChartState();
+      assert.equal(state.currentMainUnit, 'CAD');
+      assert.equal(state.currentMainCurrency, 'CAD');
+
+      // Switch to USD
+      setMainUnit('USD');
+      state = getMainChartState();
+      assert.equal(state.currentMainUnit, 'USD');
+      assert.equal(state.currentMainCurrency, 'USD');
+      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
+
+      // Switch to % (PCT)
+      setMainUnit('PCT');
+      state = getMainChartState();
+      assert.equal(state.currentMainUnit, 'PCT');
+      // Currency remains preserved
+      assert.equal(state.currentMainCurrency, 'USD');
+      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-cur-usd'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
+
+      // Switch to CAD via setMainCurrency alias
+      setMainCurrency('CAD');
+      state = getMainChartState();
+      assert.equal(state.currentMainUnit, 'CAD');
+      assert.equal(state.currentMainCurrency, 'CAD');
+      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
+
+      // Entering year mode auto-switches unit to PCT
+      setMainTimeframe('2025');
+      state = getMainChartState();
+      assert.equal(state.currentMainMode, 'years');
+      assert.equal(state.currentMainUnit, 'PCT');
+      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'));
+
+      // While in year mode, user can manually switch unit to CAD or USD
+      setMainUnit('USD');
+      state = getMainChartState();
+      assert.equal(state.currentMainMode, 'years');
+      assert.equal(state.currentMainUnit, 'USD');
+      assert.equal(state.currentMainCurrency, 'USD');
+
+      // Reset restores CAD
+      resetMainChartState();
+      state = getMainChartState();
+      assert.equal(state.currentMainUnit, 'CAD');
+      assert.equal(state.currentMainCurrency, 'CAD');
+      assert.equal(state.currentMainMode, 'single');
+    } finally {
+      delete global.document;
+      resetMainChartState();
     }
   });
 });
