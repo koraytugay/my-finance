@@ -24,7 +24,8 @@ const {
   setMainTimeframe,
   getMainChartState,
   resetMainChartState,
-  buildMainYearOverlaySeries
+  buildMainYearOverlaySeries,
+  syncMainTimeframeButtons
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -910,6 +911,21 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
 
     const noYearsOverlay = buildMainYearOverlaySeries(MOCK_HISTORY, [], 'CAD');
     assert.equal(noYearsOverlay.yearSeries.length, 0);
+  });
+
+  await t.test('syncMainTimeframeButtons renders buttons in order 2024 - 2025 - 2026 - Last 52W - All Time', () => {
+    const mockContainer = { innerHTML: '' };
+    global.document = {
+      getElementById: (id) => id === 'main-timeframe-toggle' ? mockContainer : null
+    };
+
+    try {
+      syncMainTimeframeButtons(MOCK_HISTORY);
+      const matches = Array.from(mockContainer.innerHTML.matchAll(/data-timeframe="([^"]+)"/g)).map(m => m[1]);
+      assert.deepEqual(matches, ['2024', '2025', '2026', 'last-52', 'all'], 'Buttons must strictly follow 2024 - 2025 - 2026 - last-52 - all order');
+    } finally {
+      delete global.document;
+    }
   });
 });
 

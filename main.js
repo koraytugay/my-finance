@@ -784,26 +784,33 @@ function syncMainTimeframeButtons(history) {
     const container = document.getElementById('main-timeframe-toggle');
     if (!container || !history || history.length === 0) return;
 
+    // Chronological order: 2024, 2025, 2026...
     const availableYears = [...new Set(
         history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
-    )].sort().reverse();
+    )].sort();
 
     if (availableYears.length === 0) return;
 
-    let html = `
-        <button type="button" class="btn-secondary timeframe-pill ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? '#1f2328' : 'white'}; color: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'all' ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
-        <button type="button" class="btn-secondary timeframe-pill ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? '#1f2328' : 'white'}; color: ${currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52' ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
-    `;
+    let html = '';
 
-    availableYears.forEach(year => {
+    availableYears.forEach((year, idx) => {
         const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(year);
         const yrColor = getMainYearColor(year);
         const bg = isActive ? yrColor : 'white';
         const color = isActive ? 'white' : '#24292f';
+        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
         html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
         `;
     });
+
+    const isLast52Active = currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52';
+    const isAllActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
+
+    html += `
+        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
+        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
+    `;
 
     container.innerHTML = html;
 }
