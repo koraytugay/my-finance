@@ -5,22 +5,6 @@
  * 2. Account Type (Non-Registered vs Registered) + Growth & Milestone Metrics
  * 3. Category (High-level asset categories)
  */
-
-const formatCurrency = (typeof globalThis !== 'undefined' && typeof globalThis.formatCurrency === 'function' ? globalThis.formatCurrency : null)
-    || (typeof require !== 'undefined' ? require('./api.js').formatCurrency : null)
-    || ((val, curr) => (curr === 'USD' ? `US$${Number(val).toLocaleString()}` : `$${Number(val).toLocaleString()}`));
-
-const formatDate = (typeof globalThis !== 'undefined' && typeof globalThis.formatDate === 'function' ? globalThis.formatDate : null)
-    || (typeof require !== 'undefined' ? require('./api.js').formatDate : null)
-    || ((d) => d);
-
-const formatPercent = (typeof globalThis !== 'undefined' && typeof globalThis.formatPercent === 'function' ? globalThis.formatPercent : null)
-    || (typeof require !== 'undefined' ? require('./api.js').formatPercent : null)
-    || ((p) => `${p}%`);
-
-const computeXeqtProgressionOverlay = (typeof globalThis !== 'undefined' && typeof globalThis.computeXeqtProgressionOverlay === 'function' ? globalThis.computeXeqtProgressionOverlay : null)
-    || (typeof require !== 'undefined' ? require('./api.js').computeXeqtProgressionOverlay : null);
-
 let rawHistory = [];
 let rawBenchmarks = null;
 let currentMainTimeframe = 'last-52';

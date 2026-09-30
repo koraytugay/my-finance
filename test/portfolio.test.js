@@ -1167,6 +1167,12 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     };
 
     try {
+      const api = require('../api.js');
+      global.formatCurrency = api.formatCurrency;
+      global.formatDate = api.formatDate;
+      global.formatPercent = api.formatPercent;
+      global.computeXeqtProgressionOverlay = api.computeXeqtProgressionOverlay;
+
       // Provide mock history for 2025 and mock XEQT benchmarks
       const testHistory2025 = [
         { week: 19, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000, weeklyChangeCAD: 1000, weeklyChangePct: 1.0 },
@@ -1208,6 +1214,10 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       assert.ok(mockLegend.innerHTML.includes('Spread:'), 'Legend must include Spread');
     } finally {
       delete global.document;
+      delete global.formatCurrency;
+      delete global.formatDate;
+      delete global.formatPercent;
+      delete global.computeXeqtProgressionOverlay;
       resetMainChartState();
       setMainChartData([], null);
     }
