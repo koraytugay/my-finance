@@ -7,6 +7,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { fetchUsdCadRate } = require('./price-fetcher');
 
 const BENCHMARKS_CONFIG = [
   {
@@ -224,6 +225,24 @@ async function updateBenchmarks(startDate = DEFAULT_START_DATE, outPath = null) 
   const msDiff = new Date(latestEndDate).getTime() - new Date(startDate).getTime();
   const approxWeeks = Math.max(1, Math.round(msDiff / (7 * 86400000)));
 
+  // Fetch live USD/CAD exchange rate fresh from public markets
+  let fx = fallbackData.fx || null;
+  try {
+    const liveUsdCad = await fetchUsdCadRate();
+    if (liveUsdCad && liveUsdCad > 0) {
+      const usdCad = Number(liveUsdCad.toFixed(4));
+      const cadUsd = Number((1 / liveUsdCad).toFixed(4));
+      fx = {
+        symbol: 'USDCAD=X',
+        usdCadRate: usdCad,
+        cadUsdRate: cadUsd,
+        updatedAt: new Date().toISOString()
+      };
+    }
+  } catch (fxErr) {
+    console.warn('[benchmark-fetcher] Live FX fetch warning:', fxErr.message);
+  }
+
   const payload = {
     updatedAt: new Date().toISOString(),
     window: {
@@ -232,11 +251,21 @@ async function updateBenchmarks(startDate = DEFAULT_START_DATE, outPath = null) 
       weeks: approxWeeks,
       label: `${startDisplay} – ${endDisplay} (${approxWeeks}-Week Window)`
     },
+    fx,
     benchmarks
   };
 
   fs.writeFileSync(targetFile, JSON.stringify(payload, null, 2), 'utf8');
   console.log(`[benchmark-fetcher] Successfully updated benchmarks in ${targetFile}`);
+
+  if (fx) {
+    const fxFile = path.join(targetDir, 'fx.json');
+    try {
+      fs.writeFileSync(fxFile, JSON.stringify(fx, null, 2), 'utf8');
+      console.log(`[benchmark-fetcher] Successfully updated FX rate in ${fxFile}: 1 CAD = ${fx.cadUsdRate} USD (USD/CAD ${fx.usdCadRate})`);
+    } catch (_) {}
+  }
+
   return payload;
 }
 

@@ -72,8 +72,13 @@ function updateStatCards() {
     const myContributionsCAD = Math.max(0, totalGrowthCAD - totalMarketGainsCAD);
 
     // 1. Current Net Worth
+    const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || (typeof allBenchmarks !== 'undefined' && allBenchmarks?.fx?.cadUsdRate)
+        || (latest && latest.totalCAD && latest.totalUSD ? (latest.totalUSD / latest.totalCAD) : 0.7073);
+    const currentUSD = currentCAD * cadUsdRate;
+
     document.getElementById('hist-current-cad').textContent = formatCurrency(currentCAD, 'CAD');
-    document.getElementById('hist-current-usd').textContent = `≈ ${formatCurrency(latest.totalUSD, 'USD')}`;
+    document.getElementById('hist-current-usd').textContent = `≈ ${formatCurrency(currentUSD, 'USD')}`;
 
     // 2. Starting Baseline
     const startEl = document.getElementById('hist-starting-cad');

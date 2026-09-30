@@ -47,7 +47,12 @@ async function initHoldings() {
 
 function updateOverviewCards() {
     const totalCAD = allHoldings.reduce((sum, h) => sum + h.sum, 0);
-    const cadUsdRate = currentPrices?.cadUsdRate || 0.7073;
+    const cadUsdRate = currentPrices?.cadUsdRate
+        || (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || (typeof allBenchmarks !== 'undefined' && allBenchmarks?.fx?.cadUsdRate)
+        || (allHistory && allHistory.length > 0 && allHistory[allHistory.length - 1].totalCAD && allHistory[allHistory.length - 1].totalUSD
+            ? (allHistory[allHistory.length - 1].totalUSD / allHistory[allHistory.length - 1].totalCAD)
+            : 0.7073);
     const totalUSD = totalCAD * cadUsdRate;
 
     let stocksCAD = 0;

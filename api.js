@@ -71,26 +71,47 @@ async function decryptPayloadWebCrypto(payload, password) {
 
 async function getPrices(forceRefresh = false) {
     if (cachedPrices && !forceRefresh) return cachedPrices;
-    let cadUsdRate = 0.7073;
+    let cadUsdRate = null;
     let lastUpdated = '';
 
-    if (!cachedHistory) {
+    // 1. Try to load fresh live FX rate from benchmarks
+    if (!cachedBenchmarks) {
         try {
-            await getHistory();
+            await getBenchmarks();
         } catch (_) {}
     }
 
-    if (cachedHistory && cachedHistory.length > 0) {
-        const latest = cachedHistory[cachedHistory.length - 1];
-        if (latest.totalCAD && latest.totalUSD) {
-            cadUsdRate = Number((latest.totalUSD / latest.totalCAD).toFixed(4));
+    if (cachedBenchmarks && cachedBenchmarks.fx && cachedBenchmarks.fx.cadUsdRate) {
+        cadUsdRate = cachedBenchmarks.fx.cadUsdRate;
+        lastUpdated = cachedBenchmarks.fx.updatedAt || cachedBenchmarks.updatedAt || '';
+    }
+
+    // 2. If benchmarks FX not found, derive from latest historical snapshot
+    if (!cadUsdRate) {
+        if (!cachedHistory) {
+            try {
+                await getHistory();
+            } catch (_) {}
         }
-        lastUpdated = latest.date;
+
+        if (cachedHistory && cachedHistory.length > 0) {
+            const latest = cachedHistory[cachedHistory.length - 1];
+            if (latest.totalCAD && latest.totalUSD) {
+                cadUsdRate = Number((latest.totalUSD / latest.totalCAD).toFixed(4));
+            }
+            if (!lastUpdated) lastUpdated = latest.date;
+        }
+    }
+
+    // 3. Fallback only if no data available
+    if (!cadUsdRate) {
+        cadUsdRate = 0.7073;
     }
 
     cachedPrices = { quotes: {}, cadUsdRate, lastUpdated };
     if (typeof window !== 'undefined') {
         window.cachedPrices = cachedPrices;
+        window.baseFXRate = cadUsdRate;
     }
     return cachedPrices;
 }
@@ -202,6 +223,16 @@ async function getBenchmarks(forceRefresh = false) {
         const res = await fetch(`data/benchmarks.json?t=${Date.now()}`);
         if (res.ok) {
             cachedBenchmarks = await res.json();
+            if (cachedBenchmarks.fx?.cadUsdRate) {
+                if (cachedPrices) {
+                    cachedPrices.cadUsdRate = cachedBenchmarks.fx.cadUsdRate;
+                }
+                if (typeof window !== 'undefined') {
+                    if (!window.cachedPrices) window.cachedPrices = {};
+                    window.cachedPrices.cadUsdRate = cachedBenchmarks.fx.cadUsdRate;
+                    window.baseFXRate = cachedBenchmarks.fx.cadUsdRate;
+                }
+            }
             return cachedBenchmarks;
         }
     } catch (e) {

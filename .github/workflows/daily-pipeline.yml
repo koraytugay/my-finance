@@ -46,6 +46,7 @@ jobs:
           # Stage encrypted files and public benchmark data
           git add encrypted/*.enc
           git add data/benchmarks.json 2>/dev/null || true
+          git add data/fx.json 2>/dev/null || true
           
           if ! git diff --quiet --staged; then
             git commit -m "chore: automated sync ($(date -u +'%Y-%m-%d %H:%M UTC'))"

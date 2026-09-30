@@ -11,7 +11,7 @@ const {
   calculatePurchasingPower,
   buildRolling52OverlaySeries
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay } = require('../api.js');
+const { computeXeqtProgressionOverlay, formatCurrency } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -19,6 +19,7 @@ const {
   getHoldingCostAndGain
 } = require('../allocation.js');
 const {
+  renderMainTopStats,
   renderMainYearOverlayChart,
   toggleMainXeqtOverlay,
   calculateTimeBack,
@@ -523,6 +524,21 @@ test('Public ETF Benchmarks Suite', async (t) => {
 
     // Sanity check: XEQT average 52-week rolling return is positive (~21%)
     assert.ok(avgXeqt52WPct > 15 && avgXeqt52WPct < 30, 'Average XEQT 52W return should be between 15% and 30%');
+  });
+
+  await t.test('Live USD/CAD FX rate is pulled fresh and stored in benchmarks.json and fx.json', () => {
+    assert.ok(benchData.fx, 'benchmarks.json must have fx object');
+    assert.equal(benchData.fx.symbol, 'USDCAD=X');
+    assert.ok(benchData.fx.usdCadRate > 1.0 && benchData.fx.usdCadRate < 2.0, 'usdCadRate should be realistic (1.0 to 2.0)');
+    assert.ok(benchData.fx.cadUsdRate > 0.5 && benchData.fx.cadUsdRate < 1.0, 'cadUsdRate should be realistic (0.5 to 1.0)');
+    assert.ok(benchData.fx.updatedAt, 'fx.updatedAt must exist');
+
+    const fxPath = path.join(__dirname, '..', 'data', 'fx.json');
+    assert.ok(fs.existsSync(fxPath), 'data/fx.json must exist');
+    const fxData = JSON.parse(fs.readFileSync(fxPath, 'utf8'));
+    assert.equal(fxData.symbol, 'USDCAD=X');
+    assert.equal(fxData.usdCadRate, benchData.fx.usdCadRate);
+    assert.equal(fxData.cadUsdRate, benchData.fx.cadUsdRate);
   });
 });
 
@@ -1332,6 +1348,47 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     const s2024CAD = ovCAD.yearSeries.find(s => s.year === '2024');
     assert.ok(s2024CAD.chainedStartVal > 0, 'Must have a positive chainedStartVal');
     assert.equal(s2024CAD.points[0].val, s2024CAD.chainedStartVal, 'Point 0 dollar value must match chainedStartVal');
+  });
+
+  await t.test('renderMainTopStats dynamically calculates totalUSD using cadUsdRate instead of stale lastRecord.totalUSD', () => {
+    const mockElements = {
+      'main-stat-total-cad': { textContent: '' },
+      'main-stat-total-usd': { textContent: '' }
+    };
+
+    global.document = {
+      getElementById: (id) => mockElements[id] || null
+    };
+
+    // Stale lastRecord from previous week had totalCAD=100000, totalUSD=70000 (FX 0.7000)
+    const history = [
+      { week: 1, date: '2026-09-25', totalCAD: 100000, totalUSD: 70000 }
+    ];
+    // Today live holdings grew to 120,000 CAD
+    const holdings = [
+      { sum: 120000 }
+    ];
+    const mainData = {
+      metrics: { totalValue: 120000 }
+    };
+
+    try {
+      global.formatCurrency = formatCurrency;
+      // With global live FX rate set to 0.7200
+      global.window = {
+        cachedPrices: { cadUsdRate: 0.72 }
+      };
+
+      renderMainTopStats(mainData, holdings, history);
+
+      assert.equal(mockElements['main-stat-total-cad'].textContent, '$120,000.00');
+      // Must equal 120,000 * 0.72 = $86,400.00 (US$86,400.00), NOT the stale 70,000!
+      assert.equal(mockElements['main-stat-total-usd'].textContent, '≈ US$86,400.00');
+    } finally {
+      delete global.document;
+      delete global.window;
+      delete global.formatCurrency;
+    }
   });
 });
 

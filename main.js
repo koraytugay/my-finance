@@ -268,7 +268,13 @@ function calculateMainData(holdings, history) {
 function renderMainTopStats(mainData, holdings, history) {
     const totalCAD = mainData.metrics && mainData.metrics.totalValue ? mainData.metrics.totalValue : holdings.reduce((s, h) => s + (h.sum || 0), 0);
     const lastRecord = history && history.length > 0 ? history[history.length - 1] : null;
-    const totalUSD = lastRecord ? lastRecord.totalUSD : (totalCAD * 0.7073);
+
+    const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate)
+        || (lastRecord && lastRecord.totalCAD && lastRecord.totalUSD
+            ? (lastRecord.totalUSD / lastRecord.totalCAD)
+            : 0.7073);
+    const totalUSD = totalCAD * cadUsdRate;
 
     document.getElementById('main-stat-total-cad').textContent = formatCurrency(totalCAD, 'CAD');
     document.getElementById('main-stat-total-usd').textContent = `≈ ${formatCurrency(totalUSD, 'USD')}`;
@@ -293,21 +299,28 @@ function renderMainTopStats(mainData, holdings, history) {
         }
     }
 
-    const catStocks = mainData.categories.find(c => c.name === 'Stocks') || { value: 0, percentage: '0%' };
-    const catFixed = mainData.categories.find(c => c.name === 'Fixed Income') || { value: 0, percentage: '0%' };
-    const catMetals = mainData.categories.find(c => c.name === 'Precious Metals') || { value: 0 };
-    const catCrypto = mainData.categories.find(c => c.name === 'Crypto') || { value: 0 };
+    const categories = mainData?.categories || [];
+    const catStocks = categories.find(c => c.name === 'Stocks') || { value: 0, percentage: '0%' };
+    const catFixed = categories.find(c => c.name === 'Fixed Income') || { value: 0, percentage: '0%' };
+    const catMetals = categories.find(c => c.name === 'Precious Metals') || { value: 0 };
+    const catCrypto = categories.find(c => c.name === 'Crypto') || { value: 0 };
     const altsVal = catMetals.value + catCrypto.value;
     const altsPct = totalCAD > 0 ? (altsVal / totalCAD * 100).toFixed(2) + '%' : '0.00%';
 
-    document.getElementById('main-stat-stocks').textContent = formatCurrency(catStocks.value, 'CAD');
-    document.getElementById('main-stat-stocks-pct').textContent = `${catStocks.percentage} of portfolio`;
+    const stocksEl = document.getElementById('main-stat-stocks');
+    const stocksPctEl = document.getElementById('main-stat-stocks-pct');
+    if (stocksEl) stocksEl.textContent = formatCurrency(catStocks.value, 'CAD');
+    if (stocksPctEl) stocksPctEl.textContent = `${catStocks.percentage} of portfolio`;
 
-    document.getElementById('main-stat-fixed').textContent = formatCurrency(catFixed.value, 'CAD');
-    document.getElementById('main-stat-fixed-pct').textContent = `${catFixed.percentage} of portfolio`;
+    const fixedEl = document.getElementById('main-stat-fixed');
+    const fixedPctEl = document.getElementById('main-stat-fixed-pct');
+    if (fixedEl) fixedEl.textContent = formatCurrency(catFixed.value, 'CAD');
+    if (fixedPctEl) fixedPctEl.textContent = `${catFixed.percentage} of portfolio`;
 
-    document.getElementById('main-stat-alts').textContent = formatCurrency(altsVal, 'CAD');
-    document.getElementById('main-stat-alts-pct').textContent = `${altsPct} of portfolio`;
+    const altsEl = document.getElementById('main-stat-alts');
+    const altsPctEl = document.getElementById('main-stat-alts-pct');
+    if (altsEl) altsEl.textContent = formatCurrency(altsVal, 'CAD');
+    if (altsPctEl) altsPctEl.textContent = `${altsPct} of portfolio`;
 
     const athValue = mainData.metrics?.athValue || 0;
     const diffFromAth = totalCAD - athValue;
@@ -316,17 +329,19 @@ function renderMainTopStats(mainData, holdings, history) {
     const athLabelEl = document.getElementById('main-stat-ath-label');
     const athValEl = document.getElementById('main-stat-ath-val');
 
-    if (isAth) {
-        athEl.textContent = '🟢 ATH!';
-        athEl.style.color = '#16a34a';
-        if (athLabelEl) athLabelEl.textContent = 'All-Time High Status';
-        athValEl.textContent = `At Peak: ${formatCurrency(athValue, 'CAD')}`;
-    } else {
-        const diffPct = athValue > 0 ? (diffFromAth / athValue) * 100 : 0;
-        athEl.textContent = formatCurrency(diffFromAth, 'CAD');
-        athEl.style.color = '#dc2626';
-        if (athLabelEl) athLabelEl.textContent = 'Off All-Time High';
-        athValEl.textContent = `${diffPct.toFixed(2)}% \u2022 Peak: ${formatCurrency(athValue, 'CAD')}`;
+    if (athEl) {
+        if (isAth) {
+            athEl.textContent = '🟢 ATH!';
+            athEl.style.color = '#16a34a';
+            if (athLabelEl) athLabelEl.textContent = 'All-Time High Status';
+            if (athValEl) athValEl.textContent = `At Peak: ${formatCurrency(athValue, 'CAD')}`;
+        } else {
+            const diffPct = athValue > 0 ? (diffFromAth / athValue) * 100 : 0;
+            athEl.textContent = formatCurrency(diffFromAth, 'CAD');
+            athEl.style.color = '#dc2626';
+            if (athLabelEl) athLabelEl.textContent = 'Off All-Time High';
+            if (athValEl) athValEl.textContent = `${diffPct.toFixed(2)}% \u2022 Peak: ${formatCurrency(athValue, 'CAD')}`;
+        }
     }
 
     // Time Back in Terms of Money (CAD & USD)
@@ -1213,8 +1228,25 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const totalVal = formatCurrency(r[valKey], currency);
             const pctSign = pt.pct >= 0 ? '+' : '';
             const pctColor = pt.pct >= 0 ? '#3fb950' : '#f85149';
-            const weeklyChangeStr = `${r.weeklyChangeCAD >= 0 ? '+' : ''}${formatCurrency(r.weeklyChangeCAD, 'CAD')} (${r.weeklyChangePct >= 0 ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%)`;
-            const changeColor = r.weeklyChangeCAD >= 0 ? '#3fb950' : '#f85149';
+            const isUSD = currency === 'USD';
+            const recRate = (r.totalCAD && r.totalUSD)
+                ? (r.totalUSD / r.totalCAD)
+                : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
+            const weeklyChangeVal = isUSD
+                ? (r.weeklyChangeUSD !== undefined
+                    ? r.weeklyChangeUSD
+                    : (idx > 0 && records[idx - 1].totalUSD !== undefined
+                        ? (r.totalUSD - records[idx - 1].totalUSD)
+                        : (r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD * recRate : 0)))
+                : (r.weeklyChangeCAD || 0);
+            const weeklyPct = isUSD && idx > 0 && records[idx - 1].totalUSD > 0
+                ? ((r.totalUSD - records[idx - 1].totalUSD) / records[idx - 1].totalUSD) * 100
+                : (r.weeklyChangePct || 0);
+
+            const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
+            const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
+            const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
+            const changeColor = weeklyChangeVal >= 0 ? '#3fb950' : '#f85149';
 
             let xeqtHtml = '';
             if (showXeqt && xeqtSeries[idx]) {
@@ -1245,6 +1277,11 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 `;
             }
 
+            const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
+            const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
+            const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
+            const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
+
             tooltip.innerHTML = `
                 <div style="font-weight: 700; margin-bottom: 4px;">Week ${r.week} &bull; ${dateStr}</div>
                 <div style="font-size: 1.05rem; font-weight: 800; color: #58a6ff; display: flex; align-items: baseline; gap: 6px;">
@@ -1253,8 +1290,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 <div style="margin-top: 3px; font-size: 0.78rem; color: ${changeColor};">Weekly: ${weeklyChangeStr}</div>
                 ${xeqtHtml}
                 <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px;">
-                    Stocks: ${formatCurrency(r.stocks)} &bull; Fixed: ${formatCurrency(r.fixed)}<br>
-                    Metals: ${formatCurrency(r.preciousMetals)} &bull; Crypto: ${formatCurrency(r.crypto)}
+                    Stocks: ${formatCurrency(sVal, currency)} &bull; Fixed: ${formatCurrency(fVal, currency)}<br>
+                    Metals: ${formatCurrency(mVal, currency)} &bull; Crypto: ${formatCurrency(cVal, currency)}
                 </div>
             `;
             tooltip.style.display = 'block';
@@ -1313,6 +1350,10 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
         ? [...selectedYearsList.filter(y => y !== '2024'), '2024']
         : selectedYearsList;
 
+    const activeFxRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate)
+        || 0.7073;
+
     processOrder.forEach(year => {
         const recs = sortedHistory.filter(r => r.date && r.date.startsWith(year));
         if (recs.length === 0) return;
@@ -1322,6 +1363,9 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
             const firstRec = recs[0];
             const firstFrac = getDayOfYearFraction(firstRec.date);
             const isCurrencyUnit = unit !== 'PCT';
+            const firstFx = (firstRec.totalCAD && firstRec.totalUSD)
+                ? (firstRec.totalUSD / firstRec.totalCAD)
+                : activeFxRate;
 
             // Find candidate nodes across all other overlaid years near 2024's start week
             const candidateNodes = [];
@@ -1378,6 +1422,7 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
                     val: startVal,
                     pct: startPct,
                     weeklyChangeCAD: 0,
+                    weeklyChangeUSD: 0,
                     weeklyChangePct: 0,
                     idx: 0,
                     isAnchor: false,
@@ -1386,9 +1431,10 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
                     overlayFromDate: lowestNode.date,
                     rec: {
                         ...firstRec,
-                        totalCAD: currency === 'CAD' ? startVal : (startVal / 0.74),
-                        totalUSD: currency === 'USD' ? startVal : (startVal * 0.74),
+                        totalCAD: currency === 'CAD' ? startVal : (startVal / firstFx),
+                        totalUSD: currency === 'USD' ? startVal : (startVal * firstFx),
                         weeklyChangeCAD: 0,
+                        weeklyChangeUSD: 0,
                         weeklyChangePct: 0
                     }
                 });
@@ -1403,21 +1449,26 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
                     const val = startVal * growthRatio;
                     const prevVal = points[idx - 1].val;
                     const weeklyChg = val - prevVal;
+                    const rFx = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : firstFx;
+                    const chgCAD = currency === 'CAD' ? weeklyChg : (weeklyChg / rFx);
+                    const chgUSD = currency === 'USD' ? weeklyChg : (weeklyChg * rFx);
 
                     points.push({
                         date: r.date,
                         fraction: getDayOfYearFraction(r.date),
                         val: val,
                         pct: pct,
-                        weeklyChangeCAD: currency === 'CAD' ? weeklyChg : (weeklyChg / 0.74),
+                        weeklyChangeCAD: chgCAD,
+                        weeklyChangeUSD: chgUSD,
                         weeklyChangePct: r.weeklyChangePct || 0,
                         idx: idx,
                         isAnchor: false,
                         rec: {
                             ...r,
-                            totalCAD: currency === 'CAD' ? val : (val / 0.74),
-                            totalUSD: currency === 'USD' ? val : (val * 0.74),
-                            weeklyChangeCAD: currency === 'CAD' ? weeklyChg : (weeklyChg / 0.74)
+                            totalCAD: currency === 'CAD' ? val : (val / rFx),
+                            totalUSD: currency === 'USD' ? val : (val * rFx),
+                            weeklyChangeCAD: chgCAD,
+                            weeklyChangeUSD: chgUSD
                         }
                     });
                 }
@@ -1456,6 +1507,10 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
             baseVal = recs[0][valKey] || 1;
         }
 
+        const anchorFx = (recs[0] && recs[0].totalCAD && recs[0].totalUSD)
+            ? (recs[0].totalUSD / recs[0].totalCAD)
+            : activeFxRate;
+
         const points = [];
 
         // Anchor at Jan 1 (0.00%)
@@ -1465,13 +1520,15 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
             val: baseVal,
             pct: 0.0,
             weeklyChangeCAD: 0,
+            weeklyChangeUSD: 0,
             weeklyChangePct: 0,
             isAnchor: true,
             rec: {
                 date: `${year}-01-01`,
-                totalCAD: currency === 'CAD' ? baseVal : (baseVal / 0.74),
-                totalUSD: currency === 'USD' ? baseVal : (baseVal * 0.74),
+                totalCAD: currency === 'CAD' ? baseVal : (baseVal / anchorFx),
+                totalUSD: currency === 'USD' ? baseVal : (baseVal * anchorFx),
                 weeklyChangeCAD: 0,
+                weeklyChangeUSD: 0,
                 weeklyChangePct: 0
             }
         });
@@ -1479,16 +1536,27 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
         recs.forEach((r, idx) => {
             const val = r[valKey] || 0;
             const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
+            const prevVal = idx > 0 ? (recs[idx - 1][valKey] || val) : (baseVal || val);
+            const weeklyChg = val - prevVal;
+            const rFx = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : activeFxRate;
+            const chgCAD = r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD : (currency === 'CAD' ? weeklyChg : weeklyChg / rFx);
+            const chgUSD = r.weeklyChangeUSD !== undefined ? r.weeklyChangeUSD : (currency === 'USD' ? weeklyChg : weeklyChg * rFx);
+
             points.push({
                 date: r.date,
                 fraction: getDayOfYearFraction(r.date),
                 val: val,
                 pct: pct,
-                weeklyChangeCAD: r.weeklyChangeCAD || 0,
+                weeklyChangeCAD: chgCAD,
+                weeklyChangeUSD: chgUSD,
                 weeklyChangePct: r.weeklyChangePct || 0,
                 idx: idx,
                 isAnchor: false,
-                rec: r
+                rec: {
+                    ...r,
+                    weeklyChangeCAD: chgCAD,
+                    weeklyChangeUSD: chgUSD
+                }
             });
         });
 
@@ -1889,8 +1957,12 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const p = d.point;
                 const pctSign = p.pct >= 0 ? '+' : '';
                 const pctColor = p.pct >= 0 ? '#4ade80' : '#f87171';
-                const weeklySign = p.weeklyChangeCAD >= 0 ? '+' : '';
-                const weeklyColor = p.weeklyChangeCAD >= 0 ? '#4ade80' : '#f87171';
+                const weeklyChgVal = currency === 'USD'
+                    ? (p.weeklyChangeUSD !== undefined ? p.weeklyChangeUSD : (p.rec?.weeklyChangeUSD || 0))
+                    : (p.weeklyChangeCAD !== undefined ? p.weeklyChangeCAD : (p.rec?.weeklyChangeCAD || 0));
+                const weeklySign = weeklyChgVal >= 0 ? '+' : '';
+                const weeklyColor = weeklyChgVal >= 0 ? '#4ade80' : '#f87171';
+                const weeklyPctSign = p.weeklyChangePct >= 0 ? '+' : '';
 
                 tipHtml += `
                     <div style="margin-bottom: 6px;">
@@ -1916,7 +1988,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                             </div>
                         ` : (!p.isAnchor ? `
                             <div style="font-size: 0.71rem; color: ${weeklyColor}; padding-left: 13px;">
-                                Weekly: ${weeklySign}${formatCurrency(currency === 'USD' ? (p.rec.weeklyChangeUSD || 0) : (p.rec.weeklyChangeCAD || 0), currency)} (${weeklySign}${p.weeklyChangePct.toFixed(2)}%)
+                                Weekly: ${weeklySign}${formatCurrency(weeklyChgVal, currency)} (${weeklyPctSign}${p.weeklyChangePct.toFixed(2)}%)
                             </div>
                         ` : `
                             <div style="font-size: 0.71rem; color: #94a3b8; padding-left: 13px; font-style: italic;">
@@ -2101,6 +2173,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         renderMainProgressionChart,
         renderMainYearOverlayChart,
+        renderMainTopStats,
         toggleMainXeqtOverlay,
         calculateTimeBack,
         setMainTimeframe,
