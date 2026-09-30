@@ -1,8 +1,8 @@
 {
-  "updatedAt": "2026-09-29T22:04:01.218Z",
+  "updatedAt": "2026-09-30T13:35:37.747Z",
   "window": {
     "startDate": "2024-08-23",
-    "endDate": "2026-09-29",
+    "endDate": "2026-09-30",
     "weeks": 110,
     "label": "Aug 2024 – Sep 2026 (110-Week Window)"
   },
@@ -14,11 +14,11 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 45.64,
-      "returnPct": 43.34,
+      "currentPrice": 45.75,
+      "returnPct": 43.69,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
-      "endDate": "2026-09-29",
+      "endDate": "2026-09-30",
       "weeklyPrices": [
         31.84,
         31.83,
@@ -130,7 +130,7 @@
         45.29,
         45.41,
         45.97,
-        45.64
+        45.75
       ]
     },
     "VFV": {
@@ -140,11 +140,11 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 192.82,
-      "returnPct": 42.67,
+      "currentPrice": 193.38,
+      "returnPct": 43.09,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
-      "endDate": "2026-09-29",
+      "endDate": "2026-09-30",
       "weeklyPrices": [
         135.15,
         135.19,
@@ -256,7 +256,7 @@
         188.58,
         190.07,
         194.55,
-        192.82
+        193.38
       ]
     },
     "XBAL": {
@@ -266,11 +266,11 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.73,
-      "returnPct": 22.03,
+      "currentPrice": 35.76,
+      "returnPct": 22.13,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
-      "endDate": "2026-09-29",
+      "endDate": "2026-09-30",
       "weeklyPrices": [
         29.28,
         29.21,
@@ -382,7 +382,7 @@
         35.71,
         35.82,
         35.94,
-        35.73
+        35.76
       ]
     },
     "XCB": {
@@ -396,7 +396,7 @@
       "returnPct": -2.2,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
-      "endDate": "2026-09-29",
+      "endDate": "2026-09-30",
       "weeklyPrices": [
         20.03,
         19.95,
