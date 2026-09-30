@@ -23,7 +23,7 @@ async function initHistory() {
             allHistory = sanitizeHistory(hist);
         } else {
             const todayStr = new Date().toISOString().slice(0, 10);
-            allHistory = (hist || []).filter(r => r && (!r.totalCAD || r.totalCAD > 0) && (!r.date || r.date <= todayStr));
+            allHistory = (hist || []).filter(r => r && typeof r.totalCAD === 'number' && !isNaN(r.totalCAD) && r.totalCAD > 0 && (!r.date || r.date <= todayStr));
         }
         allHoldings = h || [];
         allBenchmarks = benchmarks;
