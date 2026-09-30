@@ -2025,7 +2025,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         tickIndices.push(Math.round((i / (tickCount - 1)) * (N - 1)));
     }
     let xTicksHtml = '';
-    const fmt = typeof formatDate === 'function' ? formatDate : (d => d);
+    const fmt = typeof formatMonthShort === 'function' ? formatMonthShort : (typeof formatDate === 'function' ? formatDate : (d => d));
     tickIndices.forEach(idx => {
         const item = series[idx];
         const x = getX(idx);
@@ -2433,7 +2433,7 @@ function renderDrawdownChart() {
     }
 
     // X-Axis Date Labels (sample 6 evenly spaced dates)
-    const fmt = typeof formatDate === 'function' ? formatDate : (d => d);
+    const fmt = typeof formatMonthShort === 'function' ? formatMonthShort : (typeof formatDate === 'function' ? formatDate : (d => d));
     const step = Math.max(1, Math.floor(allHistory.length / 5));
     for (let i = 0; i < allHistory.length; i += step) {
         const pt = points[i];

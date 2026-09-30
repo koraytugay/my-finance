@@ -11,7 +11,7 @@ const {
   calculatePurchasingPower,
   buildRolling52OverlaySeries
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, formatCurrency } = require('../api.js');
+const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -722,6 +722,16 @@ test('Net Worth Progression XEQT Overlay Suite', async (t) => {
 
     assert.equal(lastCAD.returnPct, 17.96, 'CAD 52W return should be +17.96%');
     assert.equal(Math.round(lastUSD.returnPct), 13, 'USD 52W return should be ~13% due to CAD depreciation');
+  });
+
+  await t.test('formatMonthShort converts YYYY-MM-DD date strings to 3-letter month abbreviations', () => {
+    assert.equal(formatMonthShort('2026-04-03'), 'Apr');
+    assert.equal(formatMonthShort('2024-01-15'), 'Jan');
+    assert.equal(formatMonthShort('2025-12-31'), 'Dec');
+    assert.equal(formatMonthShort('2025-07-04'), 'Jul');
+    assert.equal(formatMonthShort('2025-09-22'), 'Sep');
+    assert.equal(formatMonthShort(''), '');
+    assert.equal(formatMonthShort(null), '');
   });
 });
 

@@ -353,6 +353,15 @@ function formatDate(dateStr) {
     return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
 }
 
+function formatMonthShort(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length < 2) return dateStr;
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return monthNames[monthIdx] || dateStr;
+}
+
 function escapeHtml(str) {
     if (!str && str !== 0) return '';
     return String(str)
@@ -496,6 +505,7 @@ if (typeof module !== 'undefined' && module.exports) {
         formatCurrency,
         formatPercent,
         formatDate,
+        formatMonthShort,
         escapeHtml,
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay

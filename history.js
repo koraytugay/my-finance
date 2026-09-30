@@ -475,7 +475,7 @@ function renderChart(records, currency = 'CAD') {
         const idx = Math.round((i / (numTicks - 1 || 1)) * (records.length - 1));
         const rec = records[idx];
         const x = getX(idx);
-        const label = formatDate(rec.date);
+        const label = typeof formatMonthShort === 'function' ? formatMonthShort(rec.date) : formatDate(rec.date);
         xTicksHtml += `
             <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
             <text x="${x}" y="${height - 10}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
