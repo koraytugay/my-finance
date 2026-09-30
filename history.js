@@ -662,7 +662,9 @@ function renderChart(records, currency = 'CAD') {
                     <strong>${formatCurrency(r.crypto)}</strong>
                 </div>
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect historical weeks</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Hover over graph to inspect historical weeks
+            </div>
         `;
     }
 

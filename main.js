@@ -1324,7 +1324,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                     <strong>${formatCurrency(cVal, currency)}</strong>
                 </div>
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect historical weeks</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Hover over graph to inspect historical weeks
+            </div>
         `;
     }
 
@@ -1975,7 +1977,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 ${yearRows}
             </div>
-            <div style="margin-top: 12px; font-size: 0.72rem; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+            <div class="chart-card-footer">
                 💡 Hover across calendar months to compare trajectories
             </div>
         `;
@@ -2167,6 +2169,9 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 <div>${yearRows}</div>
                 ${xeqtCardHtml}
                 ${compCardHtml}
+                <div class="chart-card-footer">
+                    💡 Hover across calendar months to compare trajectories
+                </div>
             `;
 
             renderMainChartInfoCard(cardContent, true);

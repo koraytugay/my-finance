@@ -479,7 +479,9 @@ function buildProjectionCardHtml(point, isHover = false) {
                 <strong style="color: #0969da;">${formatCurrency(monthlySWR)} / mo</strong>
             </div>
         </div>
-        ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect any year</div>` : ''}
+        <div class="chart-card-footer">
+            💡 Hover over graph to inspect any year
+        </div>
     `;
 }
 

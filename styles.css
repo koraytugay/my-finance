@@ -612,7 +612,7 @@ header h1 {
     display: grid;
     grid-template-columns: 1fr 310px;
     gap: 18px;
-    align-items: stretch;
+    align-items: start;
     margin: 10px 0;
 }
 
@@ -620,6 +620,7 @@ header h1 {
     .chart-layout-grid {
         grid-template-columns: 1fr;
         gap: 14px;
+        align-items: stretch;
     }
 }
 
@@ -627,22 +628,25 @@ header h1 {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    align-self: start;
 }
 
 .chart-info-card {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     font-size: 0.82rem;
     color: #1e293b;
     box-sizing: border-box;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-    min-height: 200px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    min-height: 250px;
+    align-self: start;
+    position: relative;
 }
 
 .chart-info-card.active {
@@ -655,24 +659,31 @@ header h1 {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 8px;
+    padding-bottom: 6px;
     border-bottom: 1px solid #e2e8f0;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    min-height: 22px;
 }
 
 .chart-card-date {
     font-weight: 700;
     font-size: 0.82rem;
     color: #334155;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .chart-card-badge {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 4px;
     background: #e2e8f0;
     color: #475569;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .chart-card-primary-val {
@@ -685,21 +696,38 @@ header h1 {
 
 .chart-card-sub-val {
     font-size: 0.78rem;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    min-height: 18px;
 }
 
 .chart-card-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 3px 0;
+    padding: 2.5px 0;
     font-size: 0.76rem;
+    line-height: 1.3;
 }
 
 .chart-card-section-divider {
     border-top: 1px solid #e2e8f0;
-    margin: 8px 0;
+    margin: 6px 0;
     padding-top: 6px;
+}
+
+.chart-card-footer {
+    margin-top: auto;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    text-align: center;
+    line-height: 1.3;
+    flex-shrink: 0;
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .chart-card-empty-state {

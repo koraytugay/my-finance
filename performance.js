@@ -998,7 +998,9 @@ function renderWeeklyBarChart() {
                     </span>
                 </div>
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across bars to inspect weekly changes</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Move cursor across bars to inspect weekly changes
+            </div>
         `;
     }
 
@@ -1800,7 +1802,9 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                     </div>
                 </div>` : ''}
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across weeks to compare trajectory</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Move cursor across weeks to compare trajectory
+            </div>
         `;
     }
 
@@ -2246,7 +2250,9 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
                     <span>${item.upWeeks} up / ${item.downWeeks} down (${item.winRate.toFixed(1)}%)</span>
                 </div>
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across timeline to inspect rolling 1-year windows</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Move cursor across timeline to inspect rolling 1-year windows
+            </div>
         `;
     }
 
@@ -2539,7 +2545,9 @@ function renderDrawdownChart() {
                     </span>
                 </div>
             </div>
-            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across underwater curve to inspect historical drawdowns</div>` : ''}
+            <div class="chart-card-footer">
+                💡 Move cursor across underwater curve to inspect historical drawdowns
+            </div>
         `;
     }
 
