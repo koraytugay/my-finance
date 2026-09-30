@@ -1555,5 +1555,57 @@ test('Portfolio Drawdown & High-Water Mark Integrity Suite', async (t) => {
   });
 });
 
+test('Rolling 52-Week Ranking & Overlay Consistency Suite', async (t) => {
+  await t.test('computeRolling52Windows ranks by USD dollar gain when rankBy="usd"', () => {
+    // Construct 54 weeks:
+    // Window 0 (weeks 1..52): starts 100k USD, ends 210k USD -> gainUSD = +110k, pct = +110%
+    // Window 1 (weeks 2..53): starts 150k USD, ends 270k USD -> gainUSD = +120k, pct = +80%
+    // Window 2 (weeks 3..54, current): starts 200k USD, ends 305k USD -> gainUSD = +105k, pct = +52.5%
+    const records = [];
+    for (let w = 1; w <= 54; w++) {
+      let usd = 100000 + (w * 2000);
+      if (w === 52) usd = 210000;
+      if (w === 53) usd = 270000;
+      if (w === 54) usd = 305000;
+      records.push({
+        week: w,
+        date: `2025-01-${String(w).padStart(2, '0')}`,
+        totalCAD: usd * 1.35,
+        totalUSD: usd,
+        weeklyChangeCAD: 2000 * 1.35,
+        weeklyChangeUSD: 2000
+      });
+    }
+
+    // When ranked by USD:
+    const extremesUSD = computeRolling52Windows(records, 'usd');
+    assert.ok(extremesUSD);
+    // Best USD gain should be Window 1 (+120k)
+    assert.equal(extremesUSD.best.gainUSD, extremesUSD.best.endValUSD - extremesUSD.best.startValUSD);
+    // Worst USD gain must be <= current USD gain
+    assert.ok(extremesUSD.worst.gainUSD <= extremesUSD.current.gainUSD,
+      `Worst USD gain (${extremesUSD.worst.gainUSD}) must be <= Current USD gain (${extremesUSD.current.gainUSD})`);
+    assert.ok(extremesUSD.best.gainUSD >= extremesUSD.current.gainUSD,
+      `Best USD gain (${extremesUSD.best.gainUSD}) must be >= Current USD gain (${extremesUSD.current.gainUSD})`);
+
+    // When ranked by percentage:
+    const extremesPct = computeRolling52Windows(records, 'pct');
+    assert.ok(extremesPct);
+    assert.ok(extremesPct.worst.pctCAD <= extremesPct.current.pctCAD,
+      `Worst pct (${extremesPct.worst.pctCAD}) must be <= Current pct (${extremesPct.current.pctCAD})`);
+  });
+
+  await t.test('computeRolling52Windows ranks by CAD dollar gain when rankBy="cad"', () => {
+    const mock = createMockHistory();
+    const extremesCAD = computeRolling52Windows(mock, 'cad');
+    assert.ok(extremesCAD);
+    assert.ok(extremesCAD.worst.gainCAD <= extremesCAD.current.gainCAD,
+      `Worst CAD gain (${extremesCAD.worst.gainCAD}) must be <= Current CAD gain (${extremesCAD.current.gainCAD})`);
+    assert.ok(extremesCAD.best.gainCAD >= extremesCAD.current.gainCAD,
+      `Best CAD gain (${extremesCAD.best.gainCAD}) must be >= Current CAD gain (${extremesCAD.current.gainCAD})`);
+  });
+});
+
+
 
 

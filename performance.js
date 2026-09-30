@@ -1254,13 +1254,24 @@ function computeRolling52Windows(records, rankBy = 'pct') {
 
     const timelineWindows = [...windows];
     const currentWindow = timelineWindows[timelineWindows.length - 1]; // Latest chronological 52-week period
-    const sortKey = rankBy === 'dollar' ? 'gainCAD' : 'pctCAD';
-    windows.sort((a, b) => b[sortKey] - a[sortKey]);
+
+    let sortKey = 'pctCAD';
+    if (rankBy === 'usd' || rankBy === 'dollarUSD') {
+        sortKey = 'gainUSD';
+    } else if (rankBy === 'cad' || rankBy === 'dollar' || rankBy === 'dollarCAD') {
+        sortKey = 'gainCAD';
+    } else if (rankBy === 'pctUSD') {
+        sortKey = 'pctUSD';
+    } else {
+        sortKey = 'pctCAD';
+    }
+
+    const sortedWindows = [...windows].sort((a, b) => b[sortKey] - a[sortKey]);
     return {
-        best: windows[0],
-        worst: windows[windows.length - 1],
+        best: sortedWindows[0],
+        worst: sortedWindows[sortedWindows.length - 1],
         current: currentWindow,
-        totalWindows: windows.length,
+        totalWindows: sortedWindows.length,
         timeline: timelineWindows
     };
 }
@@ -1274,7 +1285,7 @@ function renderRolling52Charts() {
         return;
     }
 
-    const rankBy = 'pct';
+    const rankBy = rolling52OverlayMetric; // Dynamically rank extremes by selected metric: 'usd', 'cad', or 'pct'
     const currency = rolling52OverlayMetric === 'usd' ? 'USD' : 'CAD';
 
     const extremes = computeRolling52Windows(allHistory, rankBy);
@@ -1282,6 +1293,18 @@ function renderRolling52Charts() {
 
     const { best, worst, current, timeline } = extremes;
     const signOf = (val) => val >= 0 ? '+' : '';
+
+    // Update section subtitle dynamically
+    const sectionSub = document.getElementById('r52-section-sub');
+    if (sectionSub) {
+        if (rolling52OverlayMetric === 'usd') {
+            sectionSub.textContent = 'Identifies the peak and valley 52-week rolling windows ranked by US Dollar ($ USD) growth across your portfolio history.';
+        } else if (rolling52OverlayMetric === 'cad') {
+            sectionSub.textContent = 'Identifies the peak and valley 52-week rolling windows ranked by Canadian Dollar ($ CAD) growth across your portfolio history.';
+        } else {
+            sectionSub.textContent = 'Identifies the peak (highest return) and valley (lowest return) 52-week rolling windows ranked by percentage return (%) across your entire portfolio history.';
+        }
+    }
 
     // Update Best Card
     const bestWeeksPill = document.getElementById('r52-best-weeks-pill');
@@ -1301,11 +1324,20 @@ function renderRolling52Charts() {
 
     if (bestWeeksPill) bestWeeksPill.textContent = `Weeks ${best.startWeek}–${best.endWeek}`;
     if (bestDates) bestDates.textContent = `${formatDate(getWinBaselineDate(best))} – ${formatDate(best.endDate)}`;
-    if (bestProgPct) bestProgPct.textContent = `${signOf(best.pctCAD)}${best.pctCAD.toFixed(2)}%`;
+    if (bestProgPct) {
+        bestProgPct.textContent = `${signOf(best.pctCAD)}${best.pctCAD.toFixed(2)}%`;
+        bestProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#16a34a' : '#1f2328';
+    }
     if (bestProgUsdPct) bestProgUsdPct.textContent = `${signOf(best.pctUSD)}${best.pctUSD.toFixed(2)}% USD`;
-    if (bestProgCad) bestProgCad.textContent = `${signOf(best.gainCAD)}${formatCurrency(best.gainCAD, 'CAD')}`;
+    if (bestProgCad) {
+        bestProgCad.textContent = `${signOf(best.gainCAD)}${formatCurrency(best.gainCAD, 'CAD')}`;
+        bestProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#16a34a' : '#1f2328';
+    }
     if (bestStartEndCad) bestStartEndCad.innerHTML = `${formatCurrency(best.startValCAD, 'CAD')} &rarr; ${formatCurrency(best.endValCAD, 'CAD')}`;
-    if (bestProgUsd) bestProgUsd.textContent = `${signOf(best.gainUSD)}${formatCurrency(best.gainUSD, 'USD')}`;
+    if (bestProgUsd) {
+        bestProgUsd.textContent = `${signOf(best.gainUSD)}${formatCurrency(best.gainUSD, 'USD')}`;
+        bestProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#16a34a' : '#1f2328';
+    }
     if (bestStartEndUsd) bestStartEndUsd.innerHTML = `${formatCurrency(best.startValUSD, 'USD')} &rarr; ${formatCurrency(best.endValUSD, 'USD')}`;
     if (bestPace) bestPace.textContent = `Avg: +${formatCurrency(best.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(best.avgWeeklyGainUSD, 'USD')} USD)`;
     if (bestWinRatio) bestWinRatio.textContent = `${best.upWeeks} up / ${best.downWeeks} down (${best.winRate.toFixed(1)}% win rate)`;
@@ -1325,11 +1357,20 @@ function renderRolling52Charts() {
     if (current && currentWeeksPill) {
         currentWeeksPill.textContent = `Weeks ${current.startWeek}–${current.endWeek}`;
         if (currentDates) currentDates.textContent = `${formatDate(getWinBaselineDate(current))} – ${formatDate(current.endDate)}`;
-        if (currentProgPct) currentProgPct.textContent = `${signOf(current.pctCAD)}${current.pctCAD.toFixed(2)}%`;
+        if (currentProgPct) {
+            currentProgPct.textContent = `${signOf(current.pctCAD)}${current.pctCAD.toFixed(2)}%`;
+            currentProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#0969da' : '#1f2328';
+        }
         if (currentProgUsdPct) currentProgUsdPct.textContent = `${signOf(current.pctUSD)}${current.pctUSD.toFixed(2)}% USD`;
-        if (currentProgCad) currentProgCad.textContent = `${signOf(current.gainCAD)}${formatCurrency(current.gainCAD, 'CAD')}`;
+        if (currentProgCad) {
+            currentProgCad.textContent = `${signOf(current.gainCAD)}${formatCurrency(current.gainCAD, 'CAD')}`;
+            currentProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#0969da' : '#1f2328';
+        }
         if (currentStartEndCad) currentStartEndCad.innerHTML = `${formatCurrency(current.startValCAD, 'CAD')} &rarr; ${formatCurrency(current.endValCAD, 'CAD')}`;
-        if (currentProgUsd) currentProgUsd.textContent = `${signOf(current.gainUSD)}${formatCurrency(current.gainUSD, 'USD')}`;
+        if (currentProgUsd) {
+            currentProgUsd.textContent = `${signOf(current.gainUSD)}${formatCurrency(current.gainUSD, 'USD')}`;
+            currentProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#0969da' : '#1f2328';
+        }
         if (currentStartEndUsd) currentStartEndUsd.innerHTML = `${formatCurrency(current.startValUSD, 'USD')} &rarr; ${formatCurrency(current.endValUSD, 'USD')}`;
         if (currentPace) currentPace.textContent = `Avg: +${formatCurrency(current.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(current.avgWeeklyGainUSD, 'USD')} USD)`;
         if (currentWinRatio) currentWinRatio.textContent = `${current.upWeeks} up / ${current.downWeeks} down (${current.winRate.toFixed(1)}% win rate)`;
@@ -1349,11 +1390,20 @@ function renderRolling52Charts() {
 
     if (worstWeeksPill) worstWeeksPill.textContent = `Weeks ${worst.startWeek}–${worst.endWeek}`;
     if (worstDates) worstDates.textContent = `${formatDate(getWinBaselineDate(worst))} – ${formatDate(worst.endDate)}`;
-    if (worstProgPct) worstProgPct.textContent = `${signOf(worst.pctCAD)}${worst.pctCAD.toFixed(2)}%`;
+    if (worstProgPct) {
+        worstProgPct.textContent = `${signOf(worst.pctCAD)}${worst.pctCAD.toFixed(2)}%`;
+        worstProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#cf222e' : '#1f2328';
+    }
     if (worstProgUsdPct) worstProgUsdPct.textContent = `${signOf(worst.pctUSD)}${worst.pctUSD.toFixed(2)}% USD`;
-    if (worstProgCad) worstProgCad.textContent = `${signOf(worst.gainCAD)}${formatCurrency(worst.gainCAD, 'CAD')}`;
+    if (worstProgCad) {
+        worstProgCad.textContent = `${signOf(worst.gainCAD)}${formatCurrency(worst.gainCAD, 'CAD')}`;
+        worstProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#cf222e' : '#1f2328';
+    }
     if (worstStartEndCad) worstStartEndCad.innerHTML = `${formatCurrency(worst.startValCAD, 'CAD')} &rarr; ${formatCurrency(worst.endValCAD, 'CAD')}`;
-    if (worstProgUsd) worstProgUsd.textContent = `${signOf(worst.gainUSD)}${formatCurrency(worst.gainUSD, 'USD')}`;
+    if (worstProgUsd) {
+        worstProgUsd.textContent = `${signOf(worst.gainUSD)}${formatCurrency(worst.gainUSD, 'USD')}`;
+        worstProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#cf222e' : '#1f2328';
+    }
     if (worstStartEndUsd) worstStartEndUsd.innerHTML = `${formatCurrency(worst.startValUSD, 'USD')} &rarr; ${formatCurrency(worst.endValUSD, 'USD')}`;
     if (worstPace) worstPace.textContent = `Avg: +${formatCurrency(worst.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(worst.avgWeeklyGainUSD, 'USD')} USD)`;
     if (worstWinRatio) worstWinRatio.textContent = `${worst.upWeeks} up / ${worst.downWeeks} down (${worst.winRate.toFixed(1)}% win rate)`;
