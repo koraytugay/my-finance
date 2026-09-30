@@ -52,6 +52,13 @@ function updateStatCards() {
     const latest = allHistory[allHistory.length - 1];
     const initial = allHistory[0];
 
+    // Total Net Worth Growth
+    // Compute current, baseline, unrealized gains, and contributions & realized growth
+    const costBasis = calculateHoldingsCostBasis(allHoldings);
+    const totalMarketGainsCAD = costBasis.totalMarketGainsCAD;
+    const startingCAD = initial.totalCAD || 0;
+    const currentCAD = (allHoldings && allHoldings.length > 0) ? costBasis.totalMarketCAD : latest.totalCAD;
+
     // Find peak
     let peakVal = 0;
     let peakDate = '';
@@ -62,15 +69,9 @@ function updateStatCards() {
         }
     });
 
-    const drawdownCAD = latest.totalCAD - peakVal;
-    const drawdownPct = peakVal > 0 ? (drawdownCAD / peakVal) * 100 : 0;
-
-    // Total Net Worth Growth
-    // Compute current, baseline, unrealized gains, and contributions & realized growth
-    const costBasis = calculateHoldingsCostBasis(allHoldings);
-    const totalMarketGainsCAD = costBasis.totalMarketGainsCAD;
-    const startingCAD = initial.totalCAD || 0;
-    const currentCAD = (allHoldings && allHoldings.length > 0) ? costBasis.totalMarketCAD : latest.totalCAD;
+    const effectivePeak = Math.max(peakVal, currentCAD);
+    const drawdownCAD = currentCAD - effectivePeak;
+    const drawdownPct = effectivePeak > 0 ? (drawdownCAD / effectivePeak) * 100 : 0;
 
     const totalGrowthCAD = currentCAD - startingCAD;
     const totalGrowthPct = startingCAD > 0 ? (totalGrowthCAD / startingCAD) * 100 : 0;
@@ -278,8 +279,9 @@ function renderResilienceMetrics(history, currentCAD) {
 
     const latest = history[history.length - 1];
     const liveVal = currentCAD > 0 ? currentCAD : latest.totalCAD;
-    const currentDD = liveVal - peak;
-    const currentDDPct = peak > 0 ? (currentDD / peak) * 100 : 0;
+    const effectivePeak = Math.max(peak, liveVal);
+    const currentDD = liveVal - effectivePeak;
+    const currentDDPct = effectivePeak > 0 ? (currentDD / effectivePeak) * 100 : 0;
 
     const athPill = document.getElementById('resilience-ath-pill');
     const currDDEl = document.getElementById('resilience-current-dd');

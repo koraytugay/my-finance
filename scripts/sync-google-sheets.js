@@ -366,6 +366,21 @@ async function fetchGoogleSheetsData(password, spreadsheetId = SPREADSHEET_ID) {
     }
   }
 
+  // Ensure runningPeakCAD and drawdownCAD are strictly computed and populated across history
+  let syncPeakCAD = 0;
+  for (let i = 0; i < history.length; i++) {
+    const h = history[i];
+    if (h.totalCAD > syncPeakCAD) syncPeakCAD = h.totalCAD;
+    if (!h.runningPeakCAD || h.runningPeakCAD < h.totalCAD) {
+      h.runningPeakCAD = syncPeakCAD;
+    } else {
+      syncPeakCAD = Math.max(syncPeakCAD, h.runningPeakCAD);
+    }
+    if (h.drawdownCAD === undefined || h.drawdownCAD === null || h.drawdownCAD === 0) {
+      h.drawdownCAD = h.totalCAD - h.runningPeakCAD;
+    }
+  }
+
   // 4. Check public APIs for latest ETF market prices (with safe fallback to Google Sheets)
   try {
     const lastRecord = history[history.length - 1];

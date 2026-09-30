@@ -2291,17 +2291,38 @@ function setDrawdownMode(mode) {
     renderDrawdownChart();
 }
 
-function renderDrawdownChart() {
-    const container = document.getElementById('drawdown-chart-container');
-    const svgWrap = document.getElementById('drawdown-svg-wrap') || container;
-    const tooltip = document.getElementById('drawdown-tooltip');
-    if (!container || !svgWrap || !allHistory || allHistory.length === 0) return;
-    svgWrap.innerHTML = '';
+/**
+ * Calculates historical drawdown metrics across all history records and current live valuation:
+ * - Max drawdown in dollars and percentage, with the corresponding record
+ * - Current drawdown in dollars and percentage against all-time peak
+ * - Longest recovery streak under water (weeks and dates)
+ * - Underwater series points for charting
+ * 
+ * @param {Array} history Array of historical records
+ * @param {number|null} currentCAD Current portfolio valuation (live or latest)
+ * @returns {Object} Drawdown analytics object
+ */
+function calculateDrawdownMetrics(history, currentCAD = null) {
+    if (!history || history.length === 0) {
+        return {
+            maxDDCAD: 0,
+            maxDDPct: 0,
+            maxDDRecord: null,
+            currentDDCAD: 0,
+            currentDDPct: 0,
+            currentPeakCAD: 0,
+            overallPeakCAD: 0,
+            longestRecoveryWeeks: 0,
+            longestStart: '',
+            longestEnd: '',
+            points: []
+        };
+    }
 
-    // 1. Calculate Drawdown Metrics & Stats
-    let maxDDRecord = allHistory[0];
-    let maxDDPct = 0;
+    let runningPeakCAD = 0;
+    let maxDDRecord = history[0];
     let maxDDCAD = 0;
+    let maxDDPct = 0;
 
     let longestRecoveryWeeks = 0;
     let longestStart = '';
@@ -2309,9 +2330,13 @@ function renderDrawdownChart() {
     let currentStreak = 0;
     let currentStreakStart = '';
 
-    allHistory.forEach((r, idx) => {
-        const peak = r.runningPeakCAD || r.totalCAD;
-        const ddCAD = r.drawdownCAD || (r.totalCAD - peak);
+    const points = history.map((r, idx) => {
+        const totalCAD = Number(r.totalCAD) || 0;
+        if (totalCAD > runningPeakCAD) {
+            runningPeakCAD = totalCAD;
+        }
+        const peak = runningPeakCAD;
+        const ddCAD = totalCAD - peak;
         const ddPct = peak > 0 ? (ddCAD / peak) * 100 : 0;
 
         if (ddCAD < maxDDCAD) {
@@ -2320,9 +2345,12 @@ function renderDrawdownChart() {
             maxDDRecord = r;
         }
 
-        // Recovery streak tracking
+        // Recovery streak tracking (weeks spent under water below preceding peak)
         if (ddCAD < 0) {
-            if (currentStreak === 0) currentStreakStart = allHistory[Math.max(0, idx - 1)].date;
+            if (currentStreak === 0) {
+                const prevRec = history[Math.max(0, idx - 1)];
+                currentStreakStart = prevRec ? prevRec.date : r.date;
+            }
             currentStreak++;
             if (currentStreak > longestRecoveryWeeks) {
                 longestRecoveryWeeks = currentStreak;
@@ -2332,33 +2360,94 @@ function renderDrawdownChart() {
         } else {
             currentStreak = 0;
         }
+
+        return {
+            r,
+            totalCAD,
+            peak,
+            ddCAD,
+            ddPct
+        };
     });
 
+    const latest = history[history.length - 1];
+    const liveVal = (currentCAD !== null && currentCAD !== undefined && Number(currentCAD) > 0)
+        ? Number(currentCAD)
+        : (latest ? Number(latest.totalCAD) || 0 : 0);
+
+    const overallPeakCAD = Math.max(runningPeakCAD, liveVal);
+    const currentDDCAD = liveVal - overallPeakCAD;
+    const currentDDPct = overallPeakCAD > 0 ? (currentDDCAD / overallPeakCAD) * 100 : 0;
+
+    return {
+        maxDDCAD,
+        maxDDPct,
+        maxDDRecord,
+        currentDDCAD,
+        currentDDPct,
+        currentPeakCAD: runningPeakCAD,
+        overallPeakCAD,
+        longestRecoveryWeeks,
+        longestStart,
+        longestEnd,
+        points
+    };
+}
+
+function renderDrawdownChart() {
+    const container = document.getElementById('drawdown-chart-container');
+    const svgWrap = document.getElementById('drawdown-svg-wrap') || container;
+    const tooltip = document.getElementById('drawdown-tooltip');
+    if (!container || !svgWrap || !allHistory || allHistory.length === 0) return;
+    svgWrap.innerHTML = '';
+
+    // 1. Calculate Drawdown Metrics & Stats dynamically
+    const costBasis = (typeof calculateHoldingsCostBasis === 'function' && allHoldings && allHoldings.length > 0)
+        ? calculateHoldingsCostBasis(allHoldings)
+        : null;
     const latest = allHistory[allHistory.length - 1];
-    const currentPeak = latest.runningPeakCAD || latest.totalCAD;
-    const currentDDCAD = latest.drawdownCAD || (latest.totalCAD - currentPeak);
-    const currentDDPct = currentPeak > 0 ? (currentDDCAD / currentPeak) * 100 : 0;
+    const liveCAD = (costBasis && costBasis.totalMarketCAD > 0) ? costBasis.totalMarketCAD : (latest ? latest.totalCAD : 0);
+
+    const metrics = calculateDrawdownMetrics(allHistory, liveCAD);
+    const { maxDDCAD, maxDDPct, maxDDRecord, currentDDCAD, currentDDPct, overallPeakCAD, longestRecoveryWeeks, longestStart, longestEnd } = metrics;
 
     // Update Sub-cards
+    const maxDateStr = maxDDRecord ? (typeof formatDate === 'function' ? formatDate(maxDDRecord.date) : maxDDRecord.date) : '-';
+    const maxWeekStr = maxDDRecord ? `Week ${maxDDRecord.week} (${maxDateStr})` : 'Week - (-)';
     document.getElementById('dd-stat-max').textContent = `${formatCurrency(maxDDCAD, 'CAD')} (${maxDDPct.toFixed(2)}%)`;
-    document.getElementById('dd-stat-max-date').textContent = `Week ${maxDDRecord.week} (${maxDDRecord.date})`;
+    document.getElementById('dd-stat-max-date').textContent = maxWeekStr;
 
     const curStatEl = document.getElementById('dd-stat-current');
     const curStatusEl = document.getElementById('dd-stat-current-status');
-    if (Math.abs(currentDDCAD) < 1) {
+    const curCardEl = document.getElementById('dd-stat-current-card') || (curStatEl ? curStatEl.parentElement : null);
+    const curTitleEl = document.getElementById('dd-stat-current-title') || (curCardEl ? curCardEl.firstElementChild : null);
+
+    if (currentDDCAD >= -1) {
         curStatEl.textContent = '$0.00 (0.0%)';
         curStatEl.style.color = '#16a34a';
-        curStatusEl.textContent = '🟢 At All-Time High';
+        curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakCAD, 'CAD')})`;
         curStatusEl.style.color = '#15803d';
+        if (curCardEl) {
+            curCardEl.style.background = '#f0fdf4';
+            curCardEl.style.borderColor = '#bbf7d0';
+        }
+        if (curTitleEl) curTitleEl.style.color = '#166534';
     } else {
         curStatEl.textContent = `${formatCurrency(currentDDCAD, 'CAD')} (${currentDDPct.toFixed(2)}%)`;
         curStatEl.style.color = '#dc2626';
-        curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDCAD), 'CAD')} from ATH`;
+        curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDCAD), 'CAD')} from ATH (${formatCurrency(overallPeakCAD, 'CAD')})`;
         curStatusEl.style.color = '#b91c1c';
+        if (curCardEl) {
+            curCardEl.style.background = '#fef2f2';
+            curCardEl.style.borderColor = '#fecaca';
+        }
+        if (curTitleEl) curTitleEl.style.color = '#991b1b';
     }
 
     document.getElementById('dd-stat-longest-duration').textContent = `${longestRecoveryWeeks} weeks`;
-    document.getElementById('dd-stat-longest-dates').textContent = longestStart ? `${longestStart} to ${longestEnd}` : 'Fast recoveries';
+    const formattedLongestStart = longestStart ? (typeof formatDate === 'function' ? formatDate(longestStart) : longestStart) : '';
+    const formattedLongestEnd = longestEnd ? (typeof formatDate === 'function' ? formatDate(longestEnd) : longestEnd) : '';
+    document.getElementById('dd-stat-longest-dates').textContent = longestStart ? `${formattedLongestStart} to ${formattedLongestEnd}` : 'Fast recoveries';
 
     // 2. SVG Geometry
     const width = container.clientWidth || 900;
@@ -2404,12 +2493,9 @@ function renderDrawdownChart() {
     }
 
     // Build Path Coordinates
-    const points = allHistory.map((r, idx) => {
-        const peak = r.runningPeakCAD || r.totalCAD;
-        const ddCAD = r.drawdownCAD || (r.totalCAD - peak);
-        const ddPct = peak > 0 ? (ddCAD / peak) * 100 : 0;
-        const val = isPct ? ddPct : ddCAD;
-        return { x: getX(idx), y: getY(val), r, val, ddCAD, ddPct, peak };
+    const points = metrics.points.map((pt, idx) => {
+        const val = isPct ? pt.ddPct : pt.ddCAD;
+        return { x: getX(idx), y: getY(val), r: pt.r, val, ddCAD: pt.ddCAD, ddPct: pt.ddPct, peak: pt.peak };
     });
 
     let pathD = `M ${points[0].x},${points[0].y}`;
@@ -2600,7 +2686,7 @@ function renderAnnualSummary() {
         let maxDrawdownPct = 0;
 
         recs.forEach(r => {
-            const ddCAD = r.drawdownCAD !== undefined && r.drawdownCAD !== null ? r.drawdownCAD : 0;
+            const ddCAD = r.drawdownCAD !== undefined && r.drawdownCAD !== null ? r.drawdownCAD : (r.totalCAD - (r.runningPeakCAD || r.totalCAD));
             const peak = r.runningPeakCAD || (r.totalCAD - ddCAD);
             const ddPct = peak > 0 ? (ddCAD / peak) * 100 : 0;
 
@@ -2668,7 +2754,7 @@ function renderRiskAnalytics() {
 
     let maxDDPct = 0;
     allHistory.forEach(r => {
-        const ddCAD = r.drawdownCAD !== undefined && r.drawdownCAD !== null ? r.drawdownCAD : 0;
+        const ddCAD = r.drawdownCAD !== undefined && r.drawdownCAD !== null ? r.drawdownCAD : (r.totalCAD - (r.runningPeakCAD || r.totalCAD));
         const peak = r.runningPeakCAD || (r.totalCAD - ddCAD);
         const pct = peak > 0 ? Math.abs(ddCAD / peak) : 0;
         if (pct > maxDDPct) maxDDPct = pct;
@@ -2808,7 +2894,8 @@ if (typeof module !== 'undefined' && module.exports) {
         formatStreakDates,
         computeRolling52Windows,
         calculatePurchasingPower,
-        buildRolling52OverlaySeries
+        buildRolling52OverlaySeries,
+        calculateDrawdownMetrics
     };
 }
 

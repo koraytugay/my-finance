@@ -9,7 +9,8 @@ const {
   formatStreakDates,
   computeRolling52Windows,
   calculatePurchasingPower,
-  buildRolling52OverlaySeries
+  buildRolling52OverlaySeries,
+  calculateDrawdownMetrics
 } = require('../performance.js');
 const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, sanitizeHistory } = require('../api.js');
 const {
@@ -1462,5 +1463,97 @@ test('History Sanitization & Weekly Closed Period Integrity Suite', async (t) =>
     assert.equal(Number(mainData.metrics.currentWeek.changePct.toFixed(2)), 1.00);
   });
 });
+
+test('Portfolio Drawdown & High-Water Mark Integrity Suite', async (t) => {
+  await t.test('calculateDrawdownMetrics correctly computes running peak and drawdown even when sheet columns are missing or zero', () => {
+    // 5 historical weeks: starts at 100k, rises to 110k, drops to 100k, drops to 95k, recovers to 105k
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000, runningPeakCAD: 0, drawdownCAD: 0 },
+      { week: 2, date: '2025-01-10', totalCAD: 110000, runningPeakCAD: 0, drawdownCAD: 0 }, // peak = 110k
+      { week: 3, date: '2025-01-17', totalCAD: 100000, runningPeakCAD: 0, drawdownCAD: 0 }, // -10k (-9.09%)
+      { week: 4, date: '2025-01-24', totalCAD: 95000, runningPeakCAD: 0, drawdownCAD: 0 },  // -15k (-13.64%) -> max drawdown
+      { week: 5, date: '2025-01-31', totalCAD: 105000, runningPeakCAD: 0, drawdownCAD: 0 }  // -5k (-4.55%)
+    ];
+
+    const metrics = calculateDrawdownMetrics(history);
+
+    assert.equal(metrics.overallPeakCAD, 110000);
+    assert.equal(metrics.currentPeakCAD, 110000);
+    assert.equal(metrics.maxDDCAD, -15000);
+    assert.equal(Number(metrics.maxDDPct.toFixed(2)), -13.64);
+    assert.equal(metrics.maxDDRecord.week, 4);
+    assert.equal(metrics.currentDDCAD, -5000);
+    assert.equal(Number(metrics.currentDDPct.toFixed(2)), -4.55);
+    assert.equal(metrics.longestRecoveryWeeks, 3); // weeks 3, 4, 5 spent under water
+    assert.equal(metrics.points.length, 5);
+    assert.equal(metrics.points[0].peak, 100000);
+    assert.equal(metrics.points[0].ddCAD, 0);
+    assert.equal(metrics.points[1].peak, 110000);
+    assert.equal(metrics.points[1].ddCAD, 0);
+    assert.equal(metrics.points[2].peak, 110000);
+    assert.equal(metrics.points[2].ddCAD, -10000);
+    assert.equal(metrics.points[3].peak, 110000);
+    assert.equal(metrics.points[3].ddCAD, -15000);
+    assert.equal(metrics.points[4].peak, 110000);
+    assert.equal(metrics.points[4].ddCAD, -5000);
+  });
+
+  await t.test('calculateDrawdownMetrics dynamically reflects current drawdown below ATH with live valuation', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 200000 },
+      { week: 2, date: '2025-01-10', totalCAD: 220000 }, // ATH = 220k
+      { week: 3, date: '2025-01-17', totalCAD: 215000 }
+    ];
+
+    // Live portfolio value is $210,000 (below peak of 220k by -10k)
+    const metrics = calculateDrawdownMetrics(history, 210000);
+    assert.equal(metrics.overallPeakCAD, 220000);
+    assert.equal(metrics.currentDDCAD, -10000);
+    assert.equal(Number(metrics.currentDDPct.toFixed(2)), -4.55);
+  });
+
+  await t.test('calculateDrawdownMetrics reflects 0.00% and marks ATH when live valuation is at or exceeds previous ATH', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 200000 },
+      { week: 2, date: '2025-01-10', totalCAD: 220000 },
+      { week: 3, date: '2025-01-17', totalCAD: 215000 }
+    ];
+
+    // Case A: Exactly at ATH (220k)
+    const metricsA = calculateDrawdownMetrics(history, 220000);
+    assert.equal(metricsA.overallPeakCAD, 220000);
+    assert.equal(metricsA.currentDDCAD, 0);
+    assert.equal(metricsA.currentDDPct, 0);
+
+    // Case B: New record ATH (225k)
+    const metricsB = calculateDrawdownMetrics(history, 225000);
+    assert.equal(metricsB.overallPeakCAD, 225000);
+    assert.equal(metricsB.currentDDCAD, 0);
+    assert.equal(metricsB.currentDDPct, 0);
+  });
+
+  await t.test('sanitizeHistory populates runningPeakCAD, drawdownCAD, and drawdownPct for all records', () => {
+    const raw = [
+      { week: 1, date: '2025-01-03', totalCAD: 50000 },
+      { week: 2, date: '2025-01-10', totalCAD: 60000 },
+      { week: 3, date: '2025-01-17', totalCAD: 54000 } // down 6k (-10%)
+    ];
+
+    const clean = sanitizeHistory(raw);
+    assert.equal(clean.length, 3);
+    assert.equal(clean[0].runningPeakCAD, 50000);
+    assert.equal(clean[0].drawdownCAD, 0);
+    assert.equal(clean[0].drawdownPct, 0);
+
+    assert.equal(clean[1].runningPeakCAD, 60000);
+    assert.equal(clean[1].drawdownCAD, 0);
+    assert.equal(clean[1].drawdownPct, 0);
+
+    assert.equal(clean[2].runningPeakCAD, 60000);
+    assert.equal(clean[2].drawdownCAD, -6000);
+    assert.equal(clean[2].drawdownPct, -10);
+  });
+});
+
 
 
