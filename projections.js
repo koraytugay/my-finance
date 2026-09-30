@@ -400,8 +400,14 @@ function renderProjectionChart() {
             <path d="${pathExp}" fill="none" stroke="#0969da" stroke-width="3" />
 
             <!-- Interactive Crosshair & Point Markers -->
-            <line id="crosshair-x" x1="0" y1="${padT}" x2="0" y2="${height - padB}" stroke="#475569" stroke-width="1" stroke-dasharray="3 2" style="display: none;" />
-            <circle id="dot-exp" r="4.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none;" />
+            <line id="crosshair-x" x1="0" y1="${padT}" x2="0" y2="${height - padB}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 3" style="display: none; pointer-events: none;" />
+            <circle id="dot-exp" r="5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="dot-opt" r="4.2" fill="#16a34a" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <circle id="dot-cons" r="4.2" fill="#d97706" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <circle id="dot-inv" r="3.8" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
+
+            <!-- Full Tracking Overlay Rect -->
+            <rect id="projection-overlay" x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
     `;
 
@@ -409,78 +415,177 @@ function renderProjectionChart() {
     attachChartTooltip(wrap, padL, padT, padB, plotW, plotH, width, height, maxVal);
 }
 
+function renderProjectionInfoCard(html, isActive = false) {
+    const card = document.getElementById('projections-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) {
+        card.classList.add('active');
+    } else {
+        card.classList.remove('active');
+    }
+}
+
+function buildProjectionCardHtml(point, isHover = false) {
+    if (!point) return '';
+    const swrInput = document.getElementById('input-swr-rate');
+    const swrRate = (swrInput ? parseFloat(swrInput.value) : 4.0) / 100;
+    const swrPctStr = (swrRate * 100).toFixed(1);
+    const annualSWR = point.expected * swrRate;
+    const monthlySWR = annualSWR / 12;
+
+    const badgeHtml = isHover
+        ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+        : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
+
+    return `
+        <div class="chart-card-header">
+            <span class="chart-card-date">Year ${point.year} &bull; ${point.timelineYear}</span>
+            ${badgeHtml}
+        </div>
+        <div class="chart-card-primary-val" style="color: #0969da;">
+            ${formatCurrency(point.expected)}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b;">
+            Expected Return Trajectory
+        </div>
+        <div class="chart-card-section-divider">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Scenario Projections</div>
+            <div class="chart-card-row">
+                <span style="color: #16a34a; font-weight: 600;">● Optimistic (+2%):</span>
+                <strong>${formatCurrency(point.optimistic)}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span style="color: #0969da; font-weight: 600;">● Expected:</span>
+                <strong>${formatCurrency(point.expected)}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span style="color: #d97706; font-weight: 600;">● Conservative (-2%):</span>
+                <strong>${formatCurrency(point.conservative)}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span style="color: #64748b; font-weight: 600;">● Capital Invested:</span>
+                <strong>${formatCurrency(point.invested)}</strong>
+            </div>
+        </div>
+        <div class="chart-card-section-divider">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Safe Withdrawal (${swrPctStr}%)</div>
+            <div class="chart-card-row">
+                <span>Safe Annual Spend:</span>
+                <strong style="color: #166534;">${formatCurrency(annualSWR)} / yr</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Safe Monthly Spend:</span>
+                <strong style="color: #0969da;">${formatCurrency(monthlySWR)} / mo</strong>
+            </div>
+        </div>
+        ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect any year</div>` : ''}
+    `;
+}
+
 function attachChartTooltip(wrap, padL, padT, padB, plotW, plotH, width, height, maxVal) {
     const svgEl = document.getElementById('svg-element');
-    const tooltip = document.getElementById('projection-tooltip');
+    const overlay = document.getElementById('projection-overlay');
     const crosshair = document.getElementById('crosshair-x');
     const dotExp = document.getElementById('dot-exp');
+    const dotOpt = document.getElementById('dot-opt');
+    const dotCons = document.getElementById('dot-cons');
+    const dotInv = document.getElementById('dot-inv');
 
-    if (!svgEl || !tooltip) return;
+    if (!svgEl) return;
 
-    svgEl.addEventListener('mousemove', (e) => {
-        const rect = svgEl.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const scaleX = width / (rect.width || 1);
-        const svgMouseX = mouseX * scaleX;
+    function getX(yr) {
+        return padL + (yr / 30) * plotW;
+    }
+    function getY(val) {
+        return padT + plotH - (val / maxVal) * plotH;
+    }
+
+    function setActiveYear(yearIndex) {
+        const point = chartPoints[yearIndex];
+        if (!point) return;
+
+        const xPos = getX(yearIndex);
+
+        if (crosshair) {
+            crosshair.setAttribute('x1', xPos.toFixed(1));
+            crosshair.setAttribute('x2', xPos.toFixed(1));
+            crosshair.style.display = 'block';
+        }
+        if (dotExp) {
+            dotExp.setAttribute('cx', xPos.toFixed(1));
+            dotExp.setAttribute('cy', getY(point.expected).toFixed(1));
+            dotExp.style.display = 'block';
+        }
+        if (dotOpt) {
+            dotOpt.setAttribute('cx', xPos.toFixed(1));
+            dotOpt.setAttribute('cy', getY(point.optimistic).toFixed(1));
+            dotOpt.style.display = 'block';
+        }
+        if (dotCons) {
+            dotCons.setAttribute('cx', xPos.toFixed(1));
+            dotCons.setAttribute('cy', getY(point.conservative).toFixed(1));
+            dotCons.style.display = 'block';
+        }
+        if (dotInv) {
+            dotInv.setAttribute('cx', xPos.toFixed(1));
+            dotInv.setAttribute('cy', getY(point.invested).toFixed(1));
+            dotInv.style.display = 'block';
+        }
+
+        renderProjectionInfoCard(buildProjectionCardHtml(point, true), true);
+    }
+
+    function clearActive() {
+        if (crosshair) crosshair.style.display = 'none';
+        if (dotExp) dotExp.style.display = 'none';
+        if (dotOpt) dotOpt.style.display = 'none';
+        if (dotCons) dotCons.style.display = 'none';
+        if (dotInv) dotInv.style.display = 'none';
+
+        const defaultPt = chartPoints[chartPoints.length - 1];
+        if (defaultPt) {
+            renderProjectionInfoCard(buildProjectionCardHtml(defaultPt, false), false);
+        }
+    }
+
+    const targetEl = overlay || svgEl;
+
+    targetEl.addEventListener('mousemove', (e) => {
+        let svgMouseX = padL;
+        if (typeof svgEl.getScreenCTM === 'function') {
+            const ctm = svgEl.getScreenCTM();
+            if (ctm) {
+                const pt = svgEl.createSVGPoint();
+                pt.x = e.clientX;
+                pt.y = e.clientY;
+                const svgP = pt.matrixTransform(ctm.inverse());
+                svgMouseX = svgP.x;
+            }
+        } else {
+            const rect = svgEl.getBoundingClientRect();
+            svgMouseX = (e.clientX - rect.left) * (width / (rect.width || 1));
+        }
 
         if (svgMouseX < padL || svgMouseX > padL + plotW) {
-            tooltip.style.display = 'none';
-            if (crosshair) crosshair.style.display = 'none';
-            if (dotExp) dotExp.style.display = 'none';
+            clearActive();
             return;
         }
 
         const pct = (svgMouseX - padL) / plotW;
         const yearIndex = Math.min(30, Math.max(0, Math.round(pct * 30)));
-        const point = chartPoints[yearIndex];
-        if (!point) return;
-
-        const xPos = padL + (yearIndex / 30) * plotW;
-        const yPosExp = padT + plotH - (point.expected / maxVal) * plotH;
-
-        if (crosshair) {
-            crosshair.setAttribute('x1', xPos);
-            crosshair.setAttribute('x2', xPos);
-            crosshair.style.display = 'block';
-        }
-
-        if (dotExp) {
-            dotExp.setAttribute('cx', xPos);
-            dotExp.setAttribute('cy', yPosExp);
-            dotExp.style.display = 'block';
-        }
-
-        const swrRate = parseFloat(document.getElementById('input-swr-rate').value) / 100;
-        const monthlySWR = (point.expected * swrRate) / 12;
-
-        tooltip.innerHTML = `
-            <div style="font-weight: 800; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 4px;">
-                Year ${point.year} (${point.timelineYear})
-            </div>
-            <div style="color: #60a5fa;">● Expected: <strong>${formatCurrency(point.expected)}</strong></div>
-            <div style="color: #4ade80;">● Optimistic: ${formatCurrency(point.optimistic)}</div>
-            <div style="color: #fbbf24;">● Conservative: ${formatCurrency(point.conservative)}</div>
-            <div style="color: #cbd5e1;">● Principal Saved: ${formatCurrency(point.invested)}</div>
-            <div style="margin-top: 6px; padding-top: 4px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 0.75rem; color: #86efac;">
-                Safe Monthly SWR: <strong>${formatCurrency(monthlySWR)} / mo</strong>
-            </div>
-        `;
-
-        tooltip.style.display = 'block';
-        const screenX = (xPos / width) * rect.width;
-        let tipX = screenX + 14;
-        if (tipX + 190 > rect.width) {
-            tipX = screenX - 200;
-        }
-        tooltip.style.left = `${Math.max(10, tipX)}px`;
-        tooltip.style.top = `30px`;
+        setActiveYear(yearIndex);
     });
 
-    svgEl.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-        if (crosshair) crosshair.style.display = 'none';
-        if (dotExp) dotExp.style.display = 'none';
+    targetEl.addEventListener('mouseleave', () => {
+        clearActive();
     });
+
+    // Default to 30-year end state
+    const defaultPt = chartPoints[chartPoints.length - 1];
+    if (defaultPt) {
+        renderProjectionInfoCard(buildProjectionCardHtml(defaultPt, false), false);
+    }
 }
 
 function formatCurrencyShort(val) {

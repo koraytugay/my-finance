@@ -973,6 +973,18 @@ function renderMainProgressionChart() {
 }
 
 /**
+ * Safely renders inspection card HTML to #main-chart-info-card
+ */
+function renderMainChartInfoCard(html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById('main-chart-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
+/**
  * Renders the single-curve progression chart ("All Time" or "Last 52 Weeks").
  */
 function renderMainSingleChart(box, tooltip, valKey, currency, width, height, padding, plotW, plotH, titleEl) {
@@ -1148,7 +1160,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     const svg = `
-        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="main-networth-svg" style="width: 100%; max-height: 220px; display: block;">
+        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="main-networth-svg" style="width: 100%; max-height: 220px; display: block; overflow: visible;">
             <defs>
                 <linearGradient id="mainAreaGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="#0969da" stop-opacity="0.25" />
@@ -1162,6 +1174,13 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             ${xeqtPathHtml}
             ${hoverPointsHtml}
             ${xeqtPointsHtml}
+            <!-- Vertical Crosshair Line -->
+            <line id="main-single-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <!-- Active Hover Dots -->
+            <circle id="main-single-port-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="main-single-xeqt-dot" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <!-- Full Tracking Overlay Rect -->
+            <rect id="main-single-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
     `;
 
@@ -1203,133 +1222,179 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         }
     }
 
-    const container = document.getElementById('main-chart-container');
-    const allInteractivePoints = box.querySelectorAll('.main-chart-point, .main-xeqt-point');
-    allInteractivePoints.forEach(circle => {
-        circle.addEventListener('mouseenter', (e) => {
-            const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-            const pt = portPoints[idx];
-            const r = records[idx];
+    if (tooltip) {
+        tooltip.style.display = 'none';
+    }
 
-            const portPoint = box.querySelector(`.main-chart-point[data-idx="${idx}"]`);
-            const xeqtPoint = box.querySelector(`.main-xeqt-point[data-idx="${idx}"]`);
+    function buildSingleCardHtml(idx, isHover = true) {
+        const r = records[idx];
+        const pt = portPoints[idx];
+        if (!r || !pt) return '';
+        const dateStr = formatDate(r.date);
+        const totalVal = formatCurrency(r[valKey], currency);
+        const pctSign = pt.pct >= 0 ? '+' : '';
+        const pctColor = pt.pct >= 0 ? '#16a34a' : '#cf222e';
+        const isUSD = currency === 'USD';
+        const recRate = (r.totalCAD && r.totalUSD)
+            ? (r.totalUSD / r.totalCAD)
+            : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
+        const weeklyChangeVal = isUSD
+            ? (r.weeklyChangeUSD !== undefined
+                ? r.weeklyChangeUSD
+                : (idx > 0 && records[idx - 1].totalUSD !== undefined
+                    ? (r.totalUSD - records[idx - 1].totalUSD)
+                    : (r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD * recRate : 0)))
+            : (r.weeklyChangeCAD || 0);
+        const weeklyPct = isUSD && idx > 0 && records[idx - 1].totalUSD > 0
+            ? ((r.totalUSD - records[idx - 1].totalUSD) / records[idx - 1].totalUSD) * 100
+            : (r.weeklyChangePct || 0);
 
-            if (portPoint) {
-                portPoint.setAttribute('r', '6');
-                portPoint.setAttribute('fill', '#054da7');
-            }
-            if (xeqtPoint) {
-                xeqtPoint.setAttribute('r', '5.5');
-                xeqtPoint.setAttribute('fill', '#16a34a');
-                xeqtPoint.setAttribute('stroke', '#ffffff');
-            }
+        const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
+        const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
+        const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
+        const changeColor = weeklyChangeVal >= 0 ? '#16a34a' : '#cf222e';
 
-            const dateStr = formatDate(r.date);
-            const totalVal = formatCurrency(r[valKey], currency);
-            const pctSign = pt.pct >= 0 ? '+' : '';
-            const pctColor = pt.pct >= 0 ? '#3fb950' : '#f85149';
-            const isUSD = currency === 'USD';
-            const recRate = (r.totalCAD && r.totalUSD)
-                ? (r.totalUSD / r.totalCAD)
-                : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
-            const weeklyChangeVal = isUSD
-                ? (r.weeklyChangeUSD !== undefined
-                    ? r.weeklyChangeUSD
-                    : (idx > 0 && records[idx - 1].totalUSD !== undefined
-                        ? (r.totalUSD - records[idx - 1].totalUSD)
-                        : (r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD * recRate : 0)))
-                : (r.weeklyChangeCAD || 0);
-            const weeklyPct = isUSD && idx > 0 && records[idx - 1].totalUSD > 0
-                ? ((r.totalUSD - records[idx - 1].totalUSD) / records[idx - 1].totalUSD) * 100
-                : (r.weeklyChangePct || 0);
+        let xeqtSection = '';
+        if (showXeqt && xeqtSeries[idx]) {
+            const x = xeqtSeries[idx];
+            const xeqtValStr = formatCurrency(x.val, currency);
+            const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
+            const portRetStr = `${pt.pct >= 0 ? '+' : ''}${pt.pct.toFixed(2)}%`;
+            const spreadSign = x.spreadVal >= 0 ? '+' : '';
+            const spreadColor = x.spreadVal >= 0 ? '#16a34a' : '#cf222e';
+            const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
+            const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
-            const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
-            const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
-            const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
-            const changeColor = weeklyChangeVal >= 0 ? '#3fb950' : '#f85149';
-
-            let xeqtHtml = '';
-            if (showXeqt && xeqtSeries[idx]) {
-                const x = xeqtSeries[idx];
-                const xeqtValStr = formatCurrency(x.val, currency);
-                const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
-                const portRetStr = `${pt.pct >= 0 ? '+' : ''}${pt.pct.toFixed(2)}%`;
-                const spreadSign = x.spreadVal >= 0 ? '+' : '';
-                const spreadColor = x.spreadVal >= 0 ? '#3fb950' : '#f85149';
-                const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
-                const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
-
-                xeqtHtml = `
-                    <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark (${currency}):</span>
-                            <strong style="color: #4ade80;">${isPct ? xeqtRetStr : xeqtValStr}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px;">
-                            <span>Cumulative Return:</span>
-                            <span>Port: <strong style="color: #58a6ff;">${portRetStr}</strong> vs XEQT: <strong style="color: #4ade80;">${xeqtRetStr}</strong></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; color: ${spreadColor}; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 4px;">
-                            <span>Outperformance Spread:</span>
-                            <span>${isPct ? spreadPctStr : `${spreadValStr} (${spreadPctStr})`}</span>
-                        </div>
+            xeqtSection = `
+                <div class="chart-card-section-divider">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                        <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                        <strong style="color: #16a34a;">${isPct ? xeqtRetStr : xeqtValStr}</strong>
                     </div>
-                `;
-            }
-
-            const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
-            const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
-            const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
-            const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
-
-            tooltip.innerHTML = `
-                <div style="font-weight: 700; margin-bottom: 4px;">Week ${r.week} &bull; ${dateStr}</div>
-                <div style="font-size: 1.05rem; font-weight: 800; color: #58a6ff; display: flex; align-items: baseline; gap: 6px;">
-                    ${isPct ? `<span>${pctSign}${pt.pct.toFixed(2)}%</span><span style="font-size: 0.78rem; color: #cbd5e1; font-weight: normal;">(${totalVal})</span>` : `<span>${totalVal}</span><span style="font-size: 0.78rem; color: #cbd5e1; font-weight: normal;">(${pctSign}${pt.pct.toFixed(2)}%)</span>`}
-                </div>
-                <div style="margin-top: 3px; font-size: 0.78rem; color: ${changeColor};">Weekly: ${weeklyChangeStr}</div>
-                ${xeqtHtml}
-                <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px;">
-                    Stocks: ${formatCurrency(sVal, currency)} &bull; Fixed: ${formatCurrency(fVal, currency)}<br>
-                    Metals: ${formatCurrency(mVal, currency)} &bull; Crypto: ${formatCurrency(cVal, currency)}
+                    <div class="chart-card-row" style="color: #64748b;">
+                        <span>Return:</span>
+                        <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xeqtRetStr}</strong></span>
+                    </div>
+                    <div class="chart-card-row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
+                        <span>Spread:</span>
+                        <span>${isPct ? spreadPctStr : `${spreadValStr} (${spreadPctStr})`}</span>
+                    </div>
                 </div>
             `;
-            tooltip.style.display = 'block';
+        }
 
-            const parentRect = container.getBoundingClientRect();
-            const targetCircle = portPoint || xeqtPoint || circle;
-            const circleRect = targetCircle.getBoundingClientRect();
-            let left = circleRect.left - parentRect.left + 10;
-            let top = circleRect.top - parentRect.top - 65;
+        const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
+        const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
+        const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
+        const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
 
-            if (left + 220 > parentRect.width) {
-                left -= 230;
+        const badgeHtml = isHover
+            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Week ${r.week} &bull; ${dateStr}</span>
+                ${badgeHtml}
+            </div>
+            <div class="chart-card-primary-val">
+                ${isPct ? `${pctSign}${pt.pct.toFixed(2)}%` : totalVal}
+            </div>
+            <div class="chart-card-sub-val" style="color: #64748b;">
+                ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
+                &bull; <span style="color: ${changeColor}; font-weight: 600;">${weeklyChangeStr}</span>
+            </div>
+            ${xeqtSection}
+            <div class="chart-card-section-divider">
+                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                <div class="chart-card-row">
+                    <span>Stocks:</span>
+                    <strong>${formatCurrency(sVal, currency)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Fixed Income:</span>
+                    <strong>${formatCurrency(fVal, currency)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Precious Metals:</span>
+                    <strong>${formatCurrency(mVal, currency)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Crypto:</span>
+                    <strong>${formatCurrency(cVal, currency)}</strong>
+                </div>
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect historical weeks</div>` : ''}
+        `;
+    }
+
+    const svgEl = box.querySelector('#main-networth-svg');
+    const overlay = box.querySelector('#main-single-overlay');
+    const cursorLine = box.querySelector('#main-single-cursor-line');
+    const portDot = box.querySelector('#main-single-port-dot');
+    const xeqtDot = box.querySelector('#main-single-xeqt-dot');
+
+    function setActivePoint(idx) {
+        if (idx < 0 || idx >= records.length) return;
+        const pt = portPoints[idx];
+        if (cursorLine) {
+            cursorLine.setAttribute('x1', pt.x.toFixed(1));
+            cursorLine.setAttribute('x2', pt.x.toFixed(1));
+            cursorLine.style.display = 'block';
+        }
+        if (portDot) {
+            portDot.setAttribute('cx', pt.x.toFixed(1));
+            portDot.setAttribute('cy', pt.y.toFixed(1));
+            portDot.style.display = 'block';
+        }
+        if (xeqtDot && showXeqt && xeqtPoints[idx]) {
+            xeqtDot.setAttribute('cx', xeqtPoints[idx].x.toFixed(1));
+            xeqtDot.setAttribute('cy', xeqtPoints[idx].y.toFixed(1));
+            xeqtDot.style.display = 'block';
+        } else if (xeqtDot) {
+            xeqtDot.style.display = 'none';
+        }
+        renderMainChartInfoCard(buildSingleCardHtml(idx, true), true);
+    }
+
+    function clearActivePoint() {
+        if (cursorLine) cursorLine.style.display = 'none';
+        if (portDot) portDot.style.display = 'none';
+        if (xeqtDot) xeqtDot.style.display = 'none';
+        renderMainChartInfoCard(buildSingleCardHtml(records.length - 1, false), false);
+    }
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const svgP = pt.matrixTransform(ctm.inverse());
+                    svgX = svgP.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
             }
-            if (top < 0) {
-                top = circleRect.bottom - parentRect.top + 10;
-            }
-
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
+            const frac = (clampedX - padding.left) / plotW;
+            const idx = Math.max(0, Math.min(records.length - 1, Math.round(frac * (records.length - 1))));
+            setActivePoint(idx);
         });
 
-        circle.addEventListener('mouseleave', (e) => {
-            const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-            const portPoint = box.querySelector(`.main-chart-point[data-idx="${idx}"]`);
-            const xeqtPoint = box.querySelector(`.main-xeqt-point[data-idx="${idx}"]`);
-
-            if (portPoint) {
-                portPoint.setAttribute('r', '3.5');
-                portPoint.setAttribute('fill', '#0969da');
-            }
-            if (xeqtPoint) {
-                xeqtPoint.setAttribute('r', '3.2');
-                xeqtPoint.setAttribute('fill', '#ffffff');
-                xeqtPoint.setAttribute('stroke', '#16a34a');
-            }
-            tooltip.style.display = 'none';
+        overlay.addEventListener('mouseleave', () => {
+            clearActivePoint();
         });
-    });
+    }
+
+    // Set initial card state
+    if (records.length > 0) {
+        renderMainChartInfoCard(buildSingleCardHtml(records.length - 1, false), false);
+    }
 }
 
 /**
@@ -1876,11 +1941,63 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const hoverDotsGroup = box.querySelector('#main-overlay-hover-dots');
     const svgEl = box.querySelector('#main-networth-svg');
 
+    if (tooltip) {
+        tooltip.style.display = 'none';
+    }
+
+    function buildYearOverlayDefaultCardHtml() {
+        let yearRows = yearSeries.map(s => {
+            const last = s.points[s.points.length - 1];
+            const sign = last.pct >= 0 ? '+' : '';
+            const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
+            return `
+                <div class="chart-card-row">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color}; display: inline-block;"></span>
+                        <strong style="color: ${s.color}">${s.year}</strong>:
+                    </span>
+                    <span>
+                        <strong style="color: ${color}">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</strong>
+                        <span style="color: #64748b; font-size: 0.72rem;">(${isPct ? formatCurrency(last.val, currency) : `${sign}${last.pct.toFixed(2)}%`})</span>
+                    </span>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Multi-Year Trajectory</span>
+                <span class="chart-card-badge">OVERLAY</span>
+            </div>
+            <div class="chart-card-sub-val" style="color: #64748b; margin-bottom: 8px;">
+                ${yearSeries.map(s => s.year).join(' vs ')} across calendar days
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+                ${yearRows}
+            </div>
+            <div style="margin-top: 12px; font-size: 0.72rem; color: #94a3b8; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+                💡 Hover across calendar months to compare trajectories
+            </div>
+        `;
+    }
+
     if (captureRect && cursorLine && hoverDotsGroup && svgEl) {
         captureRect.addEventListener('mousemove', (e) => {
-            const rect = svgEl.getBoundingClientRect();
-            const scaleX = width / rect.width;
-            const mouseSvgX = (e.clientX - rect.left) * scaleX;
+            let mouseSvgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const svgP = pt.matrixTransform(ctm.inverse());
+                    mouseSvgX = svgP.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
+                mouseSvgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
+            }
+
             const clampedX = Math.max(padding.left, Math.min(width - padding.right, mouseSvgX));
             const frac = (clampedX - padding.left) / plotW;
 
@@ -1893,7 +2010,6 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
             yearSeries.forEach(s => {
                 const startFrac = s.points[0] ? s.points[0].fraction : 0;
-                // If cursor is before this series started, skip it
                 if (frac < startFrac - 0.02) {
                     return;
                 }
@@ -1945,45 +2061,34 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             hoverDotsGroup.innerHTML = hoverDotsHtml;
 
             const approxMonthIdx = Math.max(0, Math.min(11, Math.floor(frac * 12)));
-            let tipHtml = `
-                <div style="font-weight: 800; font-size: 0.82rem; margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px;">
-                    🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}
-                </div>
-            `;
-
             activeYearDetails.sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
 
-            activeYearDetails.forEach(d => {
+            let yearRows = activeYearDetails.map(d => {
                 const p = d.point;
                 const pctSign = p.pct >= 0 ? '+' : '';
-                const pctColor = p.pct >= 0 ? '#4ade80' : '#f87171';
+                const pctColor = p.pct >= 0 ? '#16a34a' : '#cf222e';
                 const weeklyChgVal = currency === 'USD'
                     ? (p.weeklyChangeUSD !== undefined ? p.weeklyChangeUSD : (p.rec?.weeklyChangeUSD || 0))
                     : (p.weeklyChangeCAD !== undefined ? p.weeklyChangeCAD : (p.rec?.weeklyChangeCAD || 0));
                 const weeklySign = weeklyChgVal >= 0 ? '+' : '';
-                const weeklyColor = weeklyChgVal >= 0 ? '#4ade80' : '#f87171';
+                const weeklyColor = weeklyChgVal >= 0 ? '#16a34a' : '#cf222e';
                 const weeklyPctSign = p.weeklyChangePct >= 0 ? '+' : '';
 
-                tipHtml += `
+                return `
                     <div style="margin-bottom: 6px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                        <div class="chart-card-row">
                             <span style="display: flex; align-items: center; gap: 5px;">
                                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${d.color};"></span>
-                                <strong style="color: ${d.color};">${d.year}:</strong>
-                                <span style="color: #cbd5e1; font-size: 0.72rem;">(${formatDate(p.date)})</span>
+                                <strong style="color: ${d.color}; font-size: 0.82rem;">${d.year}</strong>
+                                <span style="color: #64748b; font-size: 0.72rem;">(${formatDate(p.date)})</span>
                             </span>
-                            <span style="display: flex; align-items: baseline; gap: 6px;">
-                                ${isPct ? `
-                                    <strong style="color: ${pctColor}; font-size: 0.88rem;">${pctSign}${p.pct.toFixed(2)}%</strong>
-                                    <span style="color: #cbd5e1; font-size: 0.74rem;">(${formatCurrency(p.val, currency)})</span>
-                                ` : `
-                                    <strong style="color: #ffffff; font-size: 0.88rem;">${formatCurrency(p.val, currency)}</strong>
-                                    <span style="color: ${pctColor}; font-size: 0.74rem;">(${pctSign}${p.pct.toFixed(2)}%)</span>
-                                `}
+                            <span>
+                                <strong style="color: #1e293b;">${formatCurrency(p.val, currency)}</strong>
+                                <span style="color: ${pctColor}; font-weight: 700; font-size: 0.76rem;">(${pctSign}${p.pct.toFixed(2)}%)</span>
                             </span>
                         </div>
                         ${p.isOverlayStart ? `
-                            <div style="font-size: 0.71rem; color: #f59e0b; padding-left: 13px; font-weight: 600;">
+                            <div style="font-size: 0.71rem; color: #d97706; padding-left: 13px; font-weight: 600;">
                                 ↳ Starts from ${p.overlayFromYear} node (${formatDate(p.overlayFromDate)})
                             </div>
                         ` : (!p.isAnchor ? `
@@ -1997,13 +2102,14 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                         `)}
                     </div>
                 `;
-            });
+            }).join('');
 
+            let xeqtCardHtml = '';
             if (showXeqt && closestXeqt && closestXeqt.p.data) {
                 const xPct = closestXeqt.p.pct;
                 const xVal = closestXeqt.p.val;
                 const xSign = xPct >= 0 ? '+' : '';
-                const xColor = xPct >= 0 ? '#4ade80' : '#f87171';
+                const xColor = xPct >= 0 ? '#16a34a' : '#cf222e';
                 const xValStr = formatCurrency(xVal, currency);
                 const xRetStr = `${xSign}${xPct.toFixed(2)}%`;
 
@@ -2013,26 +2119,15 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const spreadPct = portPct - xPct;
                 const spreadVal = portVal - xVal;
                 const spreadSign = spreadPct >= 0 ? '+' : '';
-                const spreadColor = spreadPct >= 0 ? '#4ade80' : '#f87171';
+                const spreadColor = spreadPct >= 0 ? '#16a34a' : '#cf222e';
 
-                tipHtml += `
-                    <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
-                            <span style="display: flex; align-items: center; gap: 5px;">
-                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
-                                <strong style="color: #4ade80;">🟢 XEQT Benchmark (${currency}):</strong>
-                            </span>
-                            <span style="display: flex; align-items: baseline; gap: 6px;">
-                                ${isPct ? `
-                                    <strong style="color: ${xColor}; font-size: 0.88rem;">${xRetStr}</strong>
-                                    <span style="color: #cbd5e1; font-size: 0.74rem;">(${xValStr})</span>
-                                ` : `
-                                    <strong style="color: #ffffff; font-size: 0.88rem;">${xValStr}</strong>
-                                    <span style="color: ${xColor}; font-size: 0.74rem;">(${xRetStr})</span>
-                                `}
-                            </span>
+                xeqtCardHtml = `
+                    <div class="chart-card-section-divider">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                            <strong style="color: #16a34a;">${isPct ? xRetStr : xValStr}</strong>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                        <div class="chart-card-row" style="color: #64748b;">
                             <span>Spread:</span>
                             <strong style="color: ${spreadColor};">${spreadSign}${spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(spreadVal, currency)})</strong>
                         </div>
@@ -2040,54 +2135,52 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 `;
             }
 
+            let compCardHtml = '';
             if (activeYearDetails.length >= 2) {
                 const newest = activeYearDetails[0];
                 const prior = activeYearDetails[1];
                 const pctDiff = newest.point.pct - prior.point.pct;
                 const spSign = pctDiff >= 0 ? '+' : '';
-                const spColor = pctDiff >= 0 ? '#4ade80' : '#f87171';
+                const spColor = pctDiff >= 0 ? '#16a34a' : '#cf222e';
                 const valDiff = newest.point.val - prior.point.val;
                 const valSign = valDiff >= 0 ? '+' : '';
 
-                tipHtml += `
-                    <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.15); font-size: 0.74rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>Performance (${newest.year} vs ${prior.year}):</span>
+                compCardHtml = `
+                    <div class="chart-card-section-divider">
+                        <div class="chart-card-row">
+                            <span>Diff (${newest.year} vs ${prior.year}):</span>
                             <strong style="color: ${spColor};">${spSign}${pctDiff.toFixed(2)}% pts</strong>
                         </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; color: #cbd5e1; font-size: 0.71rem; margin-top: 2px;">
-                            <span>Net Worth Diff:</span>
+                        <div class="chart-card-row" style="color: #64748b;">
+                            <span>Net Worth Gap:</span>
                             <span>${valSign}${formatCurrency(valDiff, currency)}</span>
                         </div>
                     </div>
                 `;
             }
 
-            tooltip.innerHTML = tipHtml;
-            tooltip.style.display = 'block';
+            const cardContent = `
+                <div class="chart-card-header">
+                    <span class="chart-card-date">🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}</span>
+                    <span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>
+                </div>
+                <div>${yearRows}</div>
+                ${xeqtCardHtml}
+                ${compCardHtml}
+            `;
 
-            const container = document.getElementById('main-chart-container');
-            const parentRect = container.getBoundingClientRect();
-            let left = e.clientX - parentRect.left + 15;
-            let top = e.clientY - parentRect.top - 80;
-
-            if (left + 240 > parentRect.width) {
-                left -= 255;
-            }
-            if (top < 0) {
-                top = e.clientY - parentRect.top + 20;
-            }
-
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
+            renderMainChartInfoCard(cardContent, true);
         });
 
         captureRect.addEventListener('mouseleave', () => {
             cursorLine.style.display = 'none';
             hoverDotsGroup.innerHTML = '';
-            tooltip.style.display = 'none';
+            renderMainChartInfoCard(buildYearOverlayDefaultCardHtml(), false);
         });
     }
+
+    // Set initial card state for overlay
+    renderMainChartInfoCard(buildYearOverlayDefaultCardHtml(), false);
 
     // Legend
     const legendEl = document.getElementById('main-chart-legend');

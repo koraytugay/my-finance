@@ -158,13 +158,20 @@
                         </label>
                     </div>
                 </div>
-                <div class="chart-container" id="chart-container">
-                    <!-- Dynamic SVG chart injected by history.js -->
-                    <div id="chart-svg-box"></div>
-                    <div id="chart-tooltip" class="chart-tooltip"></div>
-                </div>
-                <div class="chart-legend" id="chart-legend">
-                    <div class="legend-item"><span class="legend-dot" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                <div class="chart-layout-grid">
+                    <div class="chart-canvas-col">
+                        <div class="chart-container" id="chart-container" style="margin: 0;">
+                            <!-- Dynamic SVG chart injected by history.js -->
+                            <div id="chart-svg-box"></div>
+                            <div id="chart-tooltip" class="chart-tooltip"></div>
+                        </div>
+                        <div class="chart-legend" id="chart-legend" style="margin-top: 10px;">
+                            <div class="legend-item"><span class="legend-dot" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                        </div>
+                    </div>
+                    <div class="chart-info-card" id="hist-chart-info-card">
+                        <!-- Populated dynamically via history.js -->
+                    </div>
                 </div>
             </div>
 

@@ -515,7 +515,7 @@ function renderChart(records, currency = 'CAD') {
     }
 
     const svg = `
-        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="networth-svg" style="width: 100%; max-height: 250px; display: block;">
+        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="networth-svg" style="width: 100%; max-height: 250px; display: block; overflow: visible;">
             <defs>
                 <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stop-color="#0969da" stop-opacity="0.28" />
@@ -535,6 +535,14 @@ function renderChart(records, currency = 'CAD') {
             <!-- Hover Interaction Points -->
             ${hoverPointsHtml}
             ${xeqtPointsHtml}
+
+            <!-- Vertical Crosshair Line -->
+            <line id="hist-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <!-- Active Hover Dots -->
+            <circle id="hist-port-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="hist-xeqt-dot" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <!-- Full Tracking Overlay Rect -->
+            <rect id="hist-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
     `;
 
@@ -569,107 +577,162 @@ function renderChart(records, currency = 'CAD') {
         }
     }
 
-    // Attach hover listeners to circles
-    const allInteractivePoints = box.querySelectorAll('.chart-point, .hist-xeqt-point');
-    allInteractivePoints.forEach(circle => {
-        circle.addEventListener('mouseenter', (e) => {
-            const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-            const r = records[idx];
+    if (tooltip) {
+        tooltip.style.display = 'none';
+    }
 
-            const portPoint = box.querySelector(`.chart-point[data-idx="${idx}"]`);
-            const xeqtPoint = box.querySelector(`.hist-xeqt-point[data-idx="${idx}"]`);
+    function renderHistChartInfoCard(html, isActive = false) {
+        const card = document.getElementById('hist-chart-info-card');
+        if (!card) return;
+        card.innerHTML = html;
+        if (isActive) card.classList.add('active');
+        else card.classList.remove('active');
+    }
 
-            if (portPoint) {
-                portPoint.setAttribute('r', '7');
-                portPoint.setAttribute('fill', '#054da7');
-            }
-            if (xeqtPoint) {
-                xeqtPoint.setAttribute('r', '6');
-                xeqtPoint.setAttribute('fill', '#16a34a');
-                xeqtPoint.setAttribute('stroke', '#ffffff');
-            }
+    function buildHistCardHtml(idx, isHover = true) {
+        const r = records[idx];
+        const pt = portPoints[idx];
+        if (!r || !pt) return '';
+        const dateStr = formatDate(r.date);
+        const totalVal = formatCurrency(r[valKey], currency);
+        const weeklyChangeStr = `${r.weeklyChangeCAD >= 0 ? '+' : ''}${formatCurrency(r.weeklyChangeCAD, 'CAD')} (${r.weeklyChangePct >= 0 ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%)`;
+        const changeColor = r.weeklyChangeCAD >= 0 ? '#16a34a' : '#cf222e';
 
-            const dateStr = formatDate(r.date);
-            const totalVal = formatCurrency(r[valKey], currency);
-            const weeklyChangeStr = `${r.weeklyChangeCAD >= 0 ? '+' : ''}${formatCurrency(r.weeklyChangeCAD, 'CAD')} (${r.weeklyChangePct >= 0 ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%)`;
-            const changeColor = r.weeklyChangeCAD >= 0 ? '#3fb950' : '#f85149';
+        let xeqtSection = '';
+        if (showXeqt && xeqtSeries[idx]) {
+            const x = xeqtSeries[idx];
+            const xeqtValStr = formatCurrency(x.val, currency);
+            const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
+            const portRetStr = `${x.portfolioReturnPct >= 0 ? '+' : ''}${x.portfolioReturnPct.toFixed(2)}%`;
+            const spreadSign = x.spreadVal >= 0 ? '+' : '';
+            const spreadColor = x.spreadVal >= 0 ? '#16a34a' : '#cf222e';
+            const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
+            const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}%`;
 
-            let xeqtHtml = '';
-            if (showXeqt && xeqtSeries[idx]) {
-                const x = xeqtSeries[idx];
-                const xeqtValStr = formatCurrency(x.val, currency);
-                const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
-                const portRetStr = `${x.portfolioReturnPct >= 0 ? '+' : ''}${x.portfolioReturnPct.toFixed(2)}%`;
-                const spreadSign = x.spreadVal >= 0 ? '+' : '';
-                const spreadColor = x.spreadVal >= 0 ? '#3fb950' : '#f85149';
-                const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
-                const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}%`;
-
-                xeqtHtml = `
-                    <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark (${currency}):</span>
-                            <strong style="color: #4ade80;">${xeqtValStr}</strong>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px;">
-                            <span>Return from Start:</span>
-                            <span>Port: <strong style="color: #58a6ff;">${portRetStr}</strong> vs XEQT: <strong style="color: #4ade80;">${xeqtRetStr}</strong></span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; color: ${spreadColor}; background: rgba(255,255,255,0.06); padding: 3px 6px; border-radius: 4px;">
-                            <span>Outperformance Spread:</span>
-                            <span>${spreadValStr} (${spreadPctStr})</span>
-                        </div>
+            xeqtSection = `
+                <div class="chart-card-section-divider">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                        <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                        <strong style="color: #16a34a;">${xeqtValStr}</strong>
                     </div>
-                `;
-            }
-
-            tooltip.innerHTML = `
-                <div style="font-weight: 700; margin-bottom: 4px;">Week ${r.week} &bull; ${dateStr}</div>
-                <div style="font-size: 1.1rem; font-weight: 800; color: #58a6ff;">${totalVal}</div>
-                <div style="margin-top: 3px; font-size: 0.78rem; color: ${changeColor};">Weekly: ${weeklyChangeStr}</div>
-                ${xeqtHtml}
-                <div style="font-size: 0.74rem; color: #cbd5e1; margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px;">
-                    Stocks: ${formatCurrency(r.stocks)} &bull; Fixed: ${formatCurrency(r.fixed)}<br>
-                    Metals: ${formatCurrency(r.preciousMetals)} &bull; Crypto: ${formatCurrency(r.crypto)}
+                    <div class="chart-card-row" style="color: #64748b;">
+                        <span>Return:</span>
+                        <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xeqtRetStr}</strong></span>
+                    </div>
+                    <div class="chart-card-row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
+                        <span>Spread:</span>
+                        <span>${spreadValStr} (${spreadPctStr})</span>
+                    </div>
                 </div>
             `;
-            tooltip.style.display = 'block';
+        }
 
-            // Positioning
-            const parentRect = document.getElementById('chart-container').getBoundingClientRect();
-            const targetCircle = portPoint || xeqtPoint || circle;
-            const circleRect = targetCircle.getBoundingClientRect();
-            let left = circleRect.left - parentRect.left + 12;
-            let top = circleRect.top - parentRect.top - 70;
+        const badgeHtml = isHover
+            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
 
-            if (left + 220 > parentRect.width) {
-                left -= 230;
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Week ${r.week} &bull; ${dateStr}</span>
+                ${badgeHtml}
+            </div>
+            <div class="chart-card-primary-val">
+                ${totalVal}
+            </div>
+            <div class="chart-card-sub-val" style="color: ${changeColor}; font-weight: 600;">
+                Weekly: ${weeklyChangeStr}
+            </div>
+            ${xeqtSection}
+            <div class="chart-card-section-divider">
+                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                <div class="chart-card-row">
+                    <span>Stocks:</span>
+                    <strong>${formatCurrency(r.stocks)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Fixed Income:</span>
+                    <strong>${formatCurrency(r.fixed)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Precious Metals:</span>
+                    <strong>${formatCurrency(r.preciousMetals)}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Crypto:</span>
+                    <strong>${formatCurrency(r.crypto)}</strong>
+                </div>
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Hover over graph to inspect historical weeks</div>` : ''}
+        `;
+    }
+
+    const svgEl = box.querySelector('#networth-svg');
+    const overlay = box.querySelector('#hist-mouse-overlay');
+    const cursorLine = box.querySelector('#hist-cursor-line');
+    const portDot = box.querySelector('#hist-port-dot');
+    const xeqtDot = box.querySelector('#hist-xeqt-dot');
+
+    function setActivePoint(idx) {
+        if (idx < 0 || idx >= records.length) return;
+        const pt = portPoints[idx];
+        if (cursorLine) {
+            cursorLine.setAttribute('x1', pt.x.toFixed(1));
+            cursorLine.setAttribute('x2', pt.x.toFixed(1));
+            cursorLine.style.display = 'block';
+        }
+        if (portDot) {
+            portDot.setAttribute('cx', pt.x.toFixed(1));
+            portDot.setAttribute('cy', pt.y.toFixed(1));
+            portDot.style.display = 'block';
+        }
+        if (xeqtDot && showXeqt && xeqtPoints[idx]) {
+            xeqtDot.setAttribute('cx', xeqtPoints[idx].x.toFixed(1));
+            xeqtDot.setAttribute('cy', xeqtPoints[idx].y.toFixed(1));
+            xeqtDot.style.display = 'block';
+        } else if (xeqtDot) {
+            xeqtDot.style.display = 'none';
+        }
+        renderHistChartInfoCard(buildHistCardHtml(idx, true), true);
+    }
+
+    function clearActivePoint() {
+        if (cursorLine) cursorLine.style.display = 'none';
+        if (portDot) portDot.style.display = 'none';
+        if (xeqtDot) xeqtDot.style.display = 'none';
+        renderHistChartInfoCard(buildHistCardHtml(records.length - 1, false), false);
+    }
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const svgP = pt.matrixTransform(ctm.inverse());
+                    svgX = svgP.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
             }
-            if (top < 0) {
-                top = circleRect.bottom - parentRect.top + 10;
-            }
-
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${top}px`;
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
+            const frac = (clampedX - padding.left) / plotW;
+            const idx = Math.max(0, Math.min(records.length - 1, Math.round(frac * (records.length - 1))));
+            setActivePoint(idx);
         });
 
-        circle.addEventListener('mouseleave', (e) => {
-            const idx = parseInt(e.target.getAttribute('data-idx'), 10);
-            const portPoint = box.querySelector(`.chart-point[data-idx="${idx}"]`);
-            const xeqtPoint = box.querySelector(`.hist-xeqt-point[data-idx="${idx}"]`);
-
-            if (portPoint) {
-                portPoint.setAttribute('r', '4');
-                portPoint.setAttribute('fill', '#0969da');
-            }
-            if (xeqtPoint) {
-                xeqtPoint.setAttribute('r', '3.2');
-                xeqtPoint.setAttribute('fill', '#ffffff');
-                xeqtPoint.setAttribute('stroke', '#16a34a');
-            }
-            tooltip.style.display = 'none';
+        overlay.addEventListener('mouseleave', () => {
+            clearActivePoint();
         });
-    });
+    }
+
+    // Set initial card state
+    if (records.length > 0) {
+        renderHistChartInfoCard(buildHistCardHtml(records.length - 1, false), false);
+    }
 }
 
 function renderTable(records) {

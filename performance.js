@@ -890,6 +890,15 @@ function renderMonthlyHeatmap() {
     });
 }
 
+function renderPerfCard(cardId, html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById(cardId);
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
 function renderWeeklyBarChart() {
     const container = document.getElementById('bar-chart-container');
     const svgWrap = document.getElementById('bar-svg-wrap') || container;
@@ -913,16 +922,17 @@ function renderWeeklyBarChart() {
     const padding = { top: 15, bottom: 25, left: 10, right: 10 };
     const chartHeight = height - padding.top - padding.bottom;
     const chartWidth = width - padding.left - padding.right;
-    const barWidth = Math.max(3, (chartWidth / records.length) - 2);
+    const stepW = chartWidth / records.length;
+    const barWidth = Math.max(3, stepW - 2);
     const zeroY = padding.top + (chartHeight / 2);
 
-    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible;">`;
+    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible;" id="weekly-bar-svg">`;
 
     // Zero baseline
     svg += `<line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>`;
 
     records.forEach((r, idx) => {
-        const x = padding.left + (idx * (chartWidth / records.length));
+        const x = padding.left + (idx * stepW);
         const change = r.weeklyChangeCAD || 0;
         const normalizedH = (Math.abs(change) / maxAbsChange) * (chartHeight / 2);
         const barH = Math.max(2, normalizedH);
@@ -936,43 +946,105 @@ function renderWeeklyBarChart() {
             color = '#dc2626';
         }
 
-        svg += `<rect x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85"
-            style="cursor: pointer; transition: opacity 0.1s;"
-            onmouseover="showBarTip(event, '${r.date}', ${r.week}, ${change}, ${r.weeklyChangePct})"
-            onmouseout="hideBarTip()" />`;
+        svg += `<rect id="bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
     });
+
+    // Vertical Crosshair Line
+    svg += `<line id="bar-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
+
+    // Full Mouse Capture Overlay
+    svg += `<rect id="bar-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${chartWidth}" height="${chartHeight}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />`;
 
     svg += `</svg>`;
     svgWrap.innerHTML = svg;
 
-    window.showBarTip = function(evt, date, week, change, pct) {
-        if (!tooltip) return;
-        const rect = container.getBoundingClientRect();
-        const mouseX = evt.clientX - rect.left;
-        const mouseY = evt.clientY - rect.top;
+    if (tooltip) tooltip.style.display = 'none';
 
-        tooltip.style.display = 'block';
-        const tipWidth = 200;
-        let tipLeft = mouseX + 12;
-        if (tipLeft + tipWidth > rect.width - 10) {
-            tipLeft = Math.max(10, mouseX - tipWidth - 12);
-        }
-        tooltip.style.left = `${tipLeft}px`;
-        tooltip.style.top = `${Math.max(10, mouseY - 30)}px`;
+    function buildBarCardHtml(idx, isHover = true) {
+        const r = records[idx];
+        if (!r) return '';
+        const change = r.weeklyChangeCAD || 0;
         const sign = change >= 0 ? '+' : '';
-        const pctNum = Number(pct);
-        const pctStr = (pct !== undefined && pct !== null && !isNaN(pctNum))
-            ? ` (${pctNum >= 0 ? '+' : ''}${pctNum.toFixed(2)}%)`
-            : '';
-        tooltip.innerHTML = `
-            <strong>Week ${week} (${date})</strong><br>
-            Net Change: <span style="color: ${change >= 0 ? '#4ade80' : '#f87171'}">${sign}${formatCurrency(change, 'CAD')}${pctStr}</span>
-        `;
-    };
+        const pctNum = Number(r.weeklyChangePct);
+        const pctStr = (!isNaN(pctNum)) ? `${pctNum >= 0 ? '+' : ''}${pctNum.toFixed(2)}%` : '';
+        const changeColor = change >= 0 ? '#16a34a' : '#cf222e';
+        const dateStr = typeof formatDate === 'function' ? formatDate(r.date) : r.date;
+        const totalNet = formatCurrency(r.totalCAD, 'CAD');
 
-    window.hideBarTip = function() {
-        if (tooltip) tooltip.style.display = 'none';
-    };
+        const badgeHtml = isHover
+            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Week ${r.week} &bull; ${dateStr}</span>
+                ${badgeHtml}
+            </div>
+            <div class="chart-card-primary-val" style="color: ${changeColor};">
+                ${sign}${formatCurrency(change, 'CAD')}
+            </div>
+            <div class="chart-card-sub-val" style="color: #64748b;">
+                Weekly Return: <strong style="color: ${changeColor};">${pctStr}</strong>
+            </div>
+            <div class="chart-card-section-divider">
+                <div class="chart-card-row">
+                    <span>Portfolio Net Worth:</span>
+                    <strong>${totalNet}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Performance Context:</span>
+                    <span style="font-weight: 700; color: ${changeColor};">
+                        ${change >= 0 ? '📈 Dollar Gain' : '📉 Dollar Pullback'}
+                    </span>
+                </div>
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across bars to inspect weekly changes</div>` : ''}
+        `;
+    }
+
+    const svgEl = svgWrap.querySelector('#weekly-bar-svg');
+    const overlay = svgWrap.querySelector('#bar-mouse-overlay');
+    const cursorLine = svgWrap.querySelector('#bar-cursor-line');
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const svgP = pt.matrixTransform(ctm.inverse());
+                    svgX = svgP.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
+            }
+
+            const clampedX = Math.max(padding.left, Math.min(padding.left + chartWidth - 1, svgX));
+            const idx = Math.max(0, Math.min(records.length - 1, Math.floor((clampedX - padding.left) / stepW)));
+            const barCenterX = padding.left + (idx * stepW) + (barWidth / 2);
+
+            if (cursorLine) {
+                cursorLine.setAttribute('x1', barCenterX.toFixed(1));
+                cursorLine.setAttribute('x2', barCenterX.toFixed(1));
+                cursorLine.style.display = 'block';
+            }
+            renderPerfCard('bar-chart-info-card', buildBarCardHtml(idx, true), true);
+        });
+
+        overlay.addEventListener('mouseleave', () => {
+            if (cursorLine) cursorLine.style.display = 'none';
+            renderPerfCard('bar-chart-info-card', buildBarCardHtml(records.length - 1, false), false);
+        });
+    }
+
+    // Set initial card state
+    if (records.length > 0) {
+        renderPerfCard('bar-chart-info-card', buildBarCardHtml(records.length - 1, false), false);
+    }
 }
 
 /* ================= Rolling 52-Week Extremes (Best & Worst) ================= */
@@ -1628,120 +1700,109 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         }
 
         if (tooltip) {
-            const containerRect = container.getBoundingClientRect();
-            const dotScreenPt = svgEl.createSVGPoint();
-            dotScreenPt.x = posX;
-            const primaryVal = showCurrent && currentPt ? currentPt.plotVal : (showBest && bestPt ? bestPt.plotVal : (worstPt ? worstPt.plotVal : 0));
-            dotScreenPt.y = getY(primaryVal);
-            const dotScreen = dotScreenPt.matrixTransform(ctm);
-            const localX = dotScreen.x - containerRect.left;
-            const localY = dotScreen.y - containerRect.top;
-
-            const tipWidth = 270;
-            let tipLeft = localX - (tipWidth / 2);
-            if (tipLeft < 10) tipLeft = 10;
-            if (tipLeft + tipWidth > containerRect.width - 10) {
-                tipLeft = containerRect.width - tipWidth - 10;
-            }
-
-            let tipTop = localY - 145;
-            if (tipTop < 10) {
-                tipTop = localY + 25;
-            }
-
-            tooltip.style.left = `${tipLeft}px`;
-            tooltip.style.top = `${tipTop}px`;
-            tooltip.style.display = 'block';
-
-            const signOfVal = v => v >= 0 ? '+' : '';
-            const fmtPrimary = (pt) => {
-                if (!pt) return '';
-                if (overlayMetric === 'cad') return `${signOfVal(pt.gainCAD)}${formatCurrency(pt.gainCAD, 'CAD')}`;
-                if (overlayMetric === 'usd') return `${signOfVal(pt.gainUSD)}${formatCurrency(pt.gainUSD, 'USD')}`;
-                return `${signOfVal(pt.pct)}${pt.pct.toFixed(2)}%`;
-            };
-            const fmtSecondary = (pt) => {
-                if (!pt) return '';
-                const wkInfo = pt.record ? ` &bull; W${pt.record.week}` : '';
-                const dateInfo = pt.date ? ` (${formatDate(pt.date)})` : '';
-                if (overlayMetric === 'cad') {
-                    const s = pt.pctCAD >= 0 ? '+' : '';
-                    return `${s}${pt.pctCAD.toFixed(2)}% &bull; Net Worth: ${formatCurrency(pt.valCAD, 'CAD')}${wkInfo}`;
-                }
-                if (overlayMetric === 'usd') {
-                    const s = pt.pctUSD >= 0 ? '+' : '';
-                    return `${s}${pt.pctUSD.toFixed(2)}% &bull; Net Worth: ${formatCurrency(pt.valUSD, 'USD')}${wkInfo}`;
-                }
-                return `${formatCurrency(pt.val, currency)}${wkInfo}${dateInfo}`;
-            };
-
-            let tipContent = '';
-            if (weekIdx === 0) {
-                const baseLabel = overlayMetric === 'cad' ? '+$0 CAD' : (overlayMetric === 'usd' ? '+US$0 USD' : '0.00%');
-                tipContent = `
-                    <div style="font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 6px;">
-                        Week 0 &bull; Baseline Inception (${baseLabel})
-                    </div>
-                    <div style="font-size: 0.74rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
-                        ${showCurrent && currentPt ? `<div><span style="color: #60a5fa;">● Current 52W Start:</span> <strong>${formatCurrency(currentPt.val, currency)}</strong> (${formatDate(currentPt.date)})</div>` : ''}
-                        ${showBest && bestPt ? `<div><span style="color: #4ade80;">● Best 52W Start:</span> <strong>${formatCurrency(bestPt.val, currency)}</strong> (${formatDate(bestPt.date)})</div>` : ''}
-                        ${showWorst && worstPt ? `<div><span style="color: #f87171;">● Worst 52W Start:</span> <strong>${formatCurrency(worstPt.val, currency)}</strong> (${formatDate(worstPt.date)})</div>` : ''}
-                    </div>
-                `;
-            } else {
-                let spreadStr = '';
-                if (bestPt && worstPt) {
-                    if (overlayMetric === 'cad') {
-                        const sp = bestPt.gainCAD - worstPt.gainCAD;
-                        spreadStr = `${signOfVal(sp)}${formatCurrency(sp, 'CAD')}`;
-                    } else if (overlayMetric === 'usd') {
-                        const sp = bestPt.gainUSD - worstPt.gainUSD;
-                        spreadStr = `${signOfVal(sp)}${formatCurrency(sp, 'USD')}`;
-                    } else {
-                        const sp = bestPt.pct - worstPt.pct;
-                        spreadStr = `${signOfVal(sp)}${sp.toFixed(2)}%`;
-                    }
-                }
-
-                tipContent = `
-                    <div style="font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 6px;">
-                        Elapsed Week ${weekIdx} of 52
-                    </div>
-                    ${showCurrent && currentPt ? `
-                    <div style="margin-bottom: 5px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="color: #60a5fa; font-weight: 700;">🔵 Current 52W:</span>
-                            <strong style="color: #60a5fa; font-size: 0.95rem;">${fmtPrimary(currentPt)}</strong>
-                        </div>
-                        <div style="font-size: 0.71rem; color: #94a3b8;">${fmtSecondary(currentPt)}</div>
-                    </div>` : ''}
-                    ${showBest && bestPt ? `
-                    <div style="margin-bottom: 5px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="color: #4ade80; font-weight: 700;">🟢 Best 52W:</span>
-                            <strong style="color: #4ade80; font-size: 0.95rem;">${fmtPrimary(bestPt)}</strong>
-                        </div>
-                        <div style="font-size: 0.71rem; color: #94a3b8;">${fmtSecondary(bestPt)}</div>
-                    </div>` : ''}
-                    ${showWorst && worstPt ? `
-                    <div style="margin-bottom: 5px;">
-                        <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                            <span style="color: #f87171; font-weight: 700;">🔴 Worst 52W:</span>
-                            <strong style="color: #f87171; font-size: 0.95rem;">${fmtPrimary(worstPt)}</strong>
-                        </div>
-                        <div style="font-size: 0.71rem; color: #94a3b8;">${fmtSecondary(worstPt)}</div>
-                    </div>` : ''}
-                    ${showBest && showWorst && spreadStr ? `
-                    <div style="border-top: 1px solid rgba(255,255,255,0.15); padding-top: 4px; margin-top: 4px; display: flex; justify-content: space-between; align-items: baseline; font-size: 0.76rem;">
-                        <span style="color: #c084fc; font-weight: 700;">⚡ Best/Worst Spread:</span>
-                        <strong style="color: #c084fc;">${spreadStr}</strong>
-                    </div>` : ''}
-                `;
-            }
-
-            tooltip.innerHTML = tipContent;
+            tooltip.style.display = 'none';
         }
+
+        renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(weekIdx, true), true);
     });
+
+    function buildR52OverlayCardHtml(weekIdx, isHover = true) {
+        const bestPt = bestSeries[weekIdx] || bestSeries[bestSeries.length - 1];
+        const worstPt = worstSeries[weekIdx] || worstSeries[worstSeries.length - 1];
+        const currentPt = currentSeries[weekIdx] || currentSeries[currentSeries.length - 1];
+
+        const signOfVal = v => v >= 0 ? '+' : '';
+        const fmtPrimary = (pt) => {
+            if (!pt) return '-';
+            if (overlayMetric === 'cad') return `${signOfVal(pt.gainCAD)}${formatCurrency(pt.gainCAD, 'CAD')}`;
+            if (overlayMetric === 'usd') return `${signOfVal(pt.gainUSD)}${formatCurrency(pt.gainUSD, 'USD')}`;
+            return `${signOfVal(pt.pct)}${pt.pct.toFixed(2)}%`;
+        };
+        const fmtSecondary = (pt) => {
+            if (!pt) return '';
+            const dateInfo = pt.date ? ` (${formatDate(pt.date)})` : '';
+            if (overlayMetric === 'cad') {
+                const s = pt.pctCAD >= 0 ? '+' : '';
+                return `${s}${pt.pctCAD.toFixed(2)}% &bull; Net: ${formatCurrency(pt.valCAD, 'CAD')}${dateInfo}`;
+            }
+            if (overlayMetric === 'usd') {
+                const s = pt.pctUSD >= 0 ? '+' : '';
+                return `${s}${pt.pctUSD.toFixed(2)}% &bull; Net: ${formatCurrency(pt.valUSD, 'USD')}${dateInfo}`;
+            }
+            return `${formatCurrency(pt.val, currency)}${dateInfo}`;
+        };
+
+        const badgeHtml = isHover
+            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">WEEK ${weekIdx}</span>`
+            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">OVERVIEW</span>`;
+
+        let spreadStr = '';
+        if (bestPt && worstPt) {
+            if (overlayMetric === 'cad') {
+                const sp = bestPt.gainCAD - worstPt.gainCAD;
+                spreadStr = `${signOfVal(sp)}${formatCurrency(sp, 'CAD')}`;
+            } else if (overlayMetric === 'usd') {
+                const sp = bestPt.gainUSD - worstPt.gainUSD;
+                spreadStr = `${signOfVal(sp)}${formatCurrency(sp, 'USD')}`;
+            } else {
+                const sp = bestPt.pct - worstPt.pct;
+                spreadStr = `${signOfVal(sp)}${sp.toFixed(2)}%`;
+            }
+        }
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">${weekIdx === 0 ? 'Baseline Inception' : `Elapsed Week ${weekIdx} of 52`}</span>
+                ${badgeHtml}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${showCurrent && currentPt ? `
+                <div>
+                    <div class="chart-card-row">
+                        <span style="display: flex; align-items: center; gap: 5px;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
+                            <strong style="color: #0969da;">Current 52W:</strong>
+                        </span>
+                        <strong style="color: #0969da; font-size: 0.95rem;">${fmtPrimary(currentPt)}</strong>
+                    </div>
+                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(currentPt)}</div>
+                </div>` : ''}
+
+                ${showBest && bestPt ? `
+                <div>
+                    <div class="chart-card-row">
+                        <span style="display: flex; align-items: center; gap: 5px;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                            <strong style="color: #16a34a;">Best 52W:</strong>
+                        </span>
+                        <strong style="color: #16a34a; font-size: 0.95rem;">${fmtPrimary(bestPt)}</strong>
+                    </div>
+                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(bestPt)}</div>
+                </div>` : ''}
+
+                ${showWorst && worstPt ? `
+                <div>
+                    <div class="chart-card-row">
+                        <span style="display: flex; align-items: center; gap: 5px;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cf222e;"></span>
+                            <strong style="color: #cf222e;">Worst 52W:</strong>
+                        </span>
+                        <strong style="color: #cf222e; font-size: 0.95rem;">${fmtPrimary(worstPt)}</strong>
+                    </div>
+                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(worstPt)}</div>
+                </div>` : ''}
+
+                ${spreadStr ? `
+                <div class="chart-card-section-divider">
+                    <div class="chart-card-row" style="color: #8250df; font-weight: 700;">
+                        <span>Best/Worst Spread:</span>
+                        <span>${spreadStr}</span>
+                    </div>
+                </div>` : ''}
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across weeks to compare trajectory</div>` : ''}
+        `;
+    }
 
     overlay.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
@@ -1749,7 +1810,11 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         if (dotBest) dotBest.style.display = 'none';
         if (dotWorst) dotWorst.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';
+        renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(52, false), false);
     });
+
+    // Set initial card state
+    renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(52, false), false);
 }
 
 function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData = null) {
@@ -2110,84 +2175,91 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         }
 
         if (tooltip) {
-            const containerRect = container.getBoundingClientRect();
-            let left = e.clientX - containerRect.left + 14;
-            let top = e.clientY - containerRect.top - 20;
-
-            if (left + 250 > containerRect.width) {
-                left = left - 270;
-            }
-
-            tooltip.style.left = `${left}px`;
-            tooltip.style.top = `${Math.max(10, top)}px`;
-            tooltip.style.display = 'block';
-
-            const signPct = item.pctCAD >= 0 ? '+' : '';
-            const signCad = item.gainCAD >= 0 ? '+' : '';
-            const signUsd = item.gainUSD >= 0 ? '+' : '';
-            const isPeak = item.endWeek === maxItem.endWeek;
-            const isLowest = item.endWeek === minItem.endWeek;
-            const isLatest = idx === N - 1;
-
-            let tag = '';
-            if (isPeak) tag = '<span style="background: #16a34a; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 6px;">PEAK 52W</span>';
-            else if (isLowest) tag = '<span style="background: #cf222e; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 6px;">LOWEST 52W</span>';
-            else if (isLatest) tag = '<span style="background: #0969da; color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; margin-left: 6px;">CURRENT</span>';
-
-            const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
-            const signDiff = diff >= 0 ? '+' : '';
-
-            const baselineDate = (item.window && item.window.startIndex > 0 && allHistory && allHistory[item.window.startIndex - 1])
-                ? allHistory[item.window.startIndex - 1].date
-                : item.startDate;
-
-            tooltip.innerHTML = `
-                <div style="font-weight: 800; font-size: 0.85rem; margin-bottom: 4px; display: flex; align-items: center;">
-                    Week ${item.endWeek} Trailing 52W ${tag}
-                </div>
-                <div style="font-size: 0.72rem; color: #94a3b8; margin-bottom: 8px;">
-                    ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
-                </div>
-                <div style="background: rgba(255,255,255,0.08); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                        <span style="color: #60a5fa; font-weight: 700;">● Portfolio:</span>
-                        <strong style="color: #60a5fa;">${formatMetricVal(item.val)}</strong>
-                    </div>
-                    ${rolling52ShowXeqt && xeqtItem ? `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
-                        <span style="color: #4ade80; font-weight: 700;">● XEQT:</span>
-                        <strong style="color: #4ade80;">${formatMetricVal(xeqtItem.val)}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 3px; font-size: 0.75rem;">
-                        <span style="color: #c084fc; font-weight: 700;">Outperformance:</span>
-                        <strong style="color: ${diff >= 0 ? '#4ade80' : '#f87171'};">${signDiff}${metric === 'pct' ? diff.toFixed(1) + '%' : formatCurrency(diff, metric === 'usd' ? 'USD' : 'CAD')}</strong>
-                    </div>
-                    ` : ''}
-                </div>
-                <div style="background: rgba(255,255,255,0.04); border-radius: 6px; padding: 5px 8px; margin-bottom: 6px; font-size: 0.72rem;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                        <span style="color: #94a3b8;">Dollar Gain:</span>
-                        <span style="color: #e2e8f0;">${signCad}${formatCurrency(item.gainCAD, 'CAD')} (${signUsd}${formatCurrency(item.gainUSD, 'USD')})</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #94a3b8;">Valuation:</span>
-                        <span style="color: #e2e8f0;">${formatCurrency(item.startValCAD, 'CAD')} &rarr; ${formatCurrency(item.endValCAD, 'CAD')}</span>
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8;">
-                    <span>Consistency:</span>
-                    <span style="color: #e2e8f0;">${item.upWeeks} up / ${item.downWeeks} down (${item.winRate.toFixed(1)}%)</span>
-                </div>
-            `;
+            tooltip.style.display = 'none';
         }
+
+        renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(idx, true), true);
     });
+
+    function buildR52TimelineCardHtml(idx, isHover = true) {
+        const item = series[idx];
+        const xeqtItem = xeqtSeries[idx];
+        if (!item) return '';
+
+        const signPct = item.pctCAD >= 0 ? '+' : '';
+        const signCad = item.gainCAD >= 0 ? '+' : '';
+        const signUsd = item.gainUSD >= 0 ? '+' : '';
+        const isPeak = item.endWeek === maxItem.endWeek;
+        const isLowest = item.endWeek === minItem.endWeek;
+        const isLatest = idx === N - 1;
+
+        let tag = '';
+        if (isPeak) tag = '<span class="chart-card-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
+        else if (isLowest) tag = '<span class="chart-card-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
+        else if (isLatest) tag = '<span class="chart-card-badge" style="background: #0969da; color: white;">CURRENT</span>';
+        else tag = isHover ? '<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>' : '<span class="chart-card-badge">WINDOW</span>';
+
+        const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
+        const signDiff = diff >= 0 ? '+' : '';
+
+        const baselineDate = (item.window && item.window.startIndex > 0 && allHistory && allHistory[item.window.startIndex - 1])
+            ? allHistory[item.window.startIndex - 1].date
+            : item.startDate;
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Week ${item.endWeek} Trailing 52W</span>
+                ${tag}
+            </div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 6px;">
+                ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
+            </div>
+            <div class="chart-card-row">
+                <span style="color: #0969da; font-weight: 700;">● Portfolio:</span>
+                <strong style="color: #0969da; font-size: 1.05rem;">${formatMetricVal(item.val)}</strong>
+            </div>
+            ${rolling52ShowXeqt && xeqtItem ? `
+            <div class="chart-card-row">
+                <span style="color: #16a34a; font-weight: 700;">● XEQT:</span>
+                <strong style="color: #16a34a;">${formatMetricVal(xeqtItem.val)}</strong>
+            </div>
+            <div class="chart-card-row" style="font-weight: 700; color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
+                <span>Spread vs XEQT:</span>
+                <span>${signDiff}${metric === 'pct' ? diff.toFixed(1) + '%' : formatCurrency(diff, metric === 'usd' ? 'USD' : 'CAD')}</span>
+            </div>
+            ` : ''}
+            <div class="chart-card-section-divider">
+                <div class="chart-card-row">
+                    <span>Gain (CAD):</span>
+                    <strong>${signCad}${formatCurrency(item.gainCAD, 'CAD')}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Gain (USD):</span>
+                    <strong>${signUsd}${formatCurrency(item.gainUSD, 'USD')}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Window Valuation:</span>
+                    <span>${formatCurrency(item.startValCAD, 'CAD')} &rarr; ${formatCurrency(item.endValCAD, 'CAD')}</span>
+                </div>
+                <div class="chart-card-row">
+                    <span>Win Consistency:</span>
+                    <span>${item.upWeeks} up / ${item.downWeeks} down (${item.winRate.toFixed(1)}%)</span>
+                </div>
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across timeline to inspect rolling 1-year windows</div>` : ''}
+        `;
+    }
 
     overlay.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
         if (dot) dot.style.display = 'none';
         if (dotXeqt) dotXeqt.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';
+        renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(N - 1, false), false);
     });
+
+    // Set initial card state
+    renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(N - 1, false), false);
 }
 
 function setDrawdownMode(mode) {
@@ -2421,49 +2493,67 @@ function renderDrawdownChart() {
             hoverDot.style.display = 'block';
         }
 
-        // Position tooltip in container coordinates
         if (tooltip) {
-            const dotPt = svgEl.createSVGPoint();
-            dotPt.x = nearest.x;
-            dotPt.y = nearest.y;
-            const dotScreen = dotPt.matrixTransform(ctm);
-            const containerRect = container.getBoundingClientRect();
-            const localX = dotScreen.x - containerRect.left;
-            const localY = dotScreen.y - containerRect.top;
-
-            const tipWidth = 230;
-            let tipLeft = localX - (tipWidth / 2);
-            if (tipLeft < 10) tipLeft = 10;
-            if (tipLeft + tipWidth > containerRect.width - 10) {
-                tipLeft = containerRect.width - tipWidth - 10;
-            }
-
-            let tipTop = localY - 80;
-            if (tipTop < 10) {
-                tipTop = localY + 20;
-            }
-
-            tooltip.style.left = `${tipLeft}px`;
-            tooltip.style.top = `${tipTop}px`;
-            tooltip.style.display = 'block';
-
-            const isPeak = Math.abs(nearest.ddCAD) < 1;
-            tooltip.innerHTML = `
-                <div style="font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 4px; margin-bottom: 4px;">
-                    Week ${nearest.r.week} &bull; ${nearest.r.date}
-                </div>
-                <div>Drawdown: <strong style="color: ${isPeak ? '#4ade80' : '#f87171'}">${isPeak ? '0.0% (At Peak)' : formatCurrency(nearest.ddCAD, 'CAD') + ' (' + nearest.ddPct.toFixed(2) + '%)'}</strong></div>
-                <div>Net Worth: <strong>${formatCurrency(nearest.r.totalCAD, 'CAD')}</strong></div>
-                <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Running Peak: ${formatCurrency(nearest.peak, 'CAD')}</div>
-            `;
+            tooltip.style.display = 'none';
         }
+
+        renderPerfCard('drawdown-info-card', buildDrawdownCardHtml(nearest, true), true);
     });
+
+    function buildDrawdownCardHtml(nearest, isHover = true) {
+        if (!nearest || !nearest.r) return '';
+        const isPeak = Math.abs(nearest.ddCAD) < 1;
+        const ddColor = isPeak ? '#16a34a' : '#cf222e';
+        const dateStr = typeof formatDate === 'function' ? formatDate(nearest.r.date) : nearest.r.date;
+        const totalNet = formatCurrency(nearest.r.totalCAD, 'CAD');
+        const peakVal = formatCurrency(nearest.peak, 'CAD');
+
+        const badgeHtml = isHover
+            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">Week ${nearest.r.week} &bull; ${dateStr}</span>
+                ${badgeHtml}
+            </div>
+            <div class="chart-card-primary-val" style="color: ${ddColor};">
+                ${isPeak ? '0.00%' : `${nearest.ddPct.toFixed(2)}%`}
+            </div>
+            <div class="chart-card-sub-val" style="color: #64748b;">
+                Drawdown: <strong style="color: ${ddColor};">${isPeak ? '$0.00 (At Peak)' : formatCurrency(nearest.ddCAD, 'CAD')}</strong>
+            </div>
+            <div class="chart-card-section-divider">
+                <div class="chart-card-row">
+                    <span>Portfolio Net Worth:</span>
+                    <strong>${totalNet}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Previous Peak (ATH):</span>
+                    <strong>${peakVal}</strong>
+                </div>
+                <div class="chart-card-row">
+                    <span>Correction Status:</span>
+                    <span style="font-weight: 700; color: ${ddColor};">
+                        ${isPeak ? '🟢 Peak Reached' : '🔴 Underwater Pullback'}
+                    </span>
+                </div>
+            </div>
+            ${!isHover ? `<div style="margin-top: 8px; font-size: 0.72rem; color: #94a3b8; text-align: center;">💡 Move cursor across underwater curve to inspect historical drawdowns</div>` : ''}
+        `;
+    }
 
     overlay.addEventListener('mouseleave', () => {
         if (cursor) cursor.style.display = 'none';
         if (hoverDot) hoverDot.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';
+        renderPerfCard('drawdown-info-card', buildDrawdownCardHtml(points[points.length - 1], false), false);
     });
+
+    // Set initial card state
+    if (points.length > 0) {
+        renderPerfCard('drawdown-info-card', buildDrawdownCardHtml(points[points.length - 1], false), false);
+    }
 }
 
 function renderAnnualSummary() {

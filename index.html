@@ -176,13 +176,20 @@
                         </div>
                     </div>
                 </div>
-                <div class="chart-container" id="main-chart-container">
-                    <div id="main-chart-svg-box"></div>
-                    <div id="main-chart-tooltip" class="chart-tooltip"></div>
-                </div>
-                <div class="chart-legend" id="main-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
-                    <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
-                        <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
+                <div class="chart-layout-grid">
+                    <div class="chart-canvas-col">
+                        <div class="chart-container" id="main-chart-container" style="margin: 0;">
+                            <div id="main-chart-svg-box"></div>
+                            <div id="main-chart-tooltip" class="chart-tooltip"></div>
+                        </div>
+                        <div class="chart-legend" id="main-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-info-card" id="main-chart-info-card">
+                        <!-- Populated dynamically via main.js -->
                     </div>
                 </div>
             </div>
