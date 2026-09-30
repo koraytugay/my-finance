@@ -11,7 +11,7 @@ const {
   calculatePurchasingPower,
   buildRolling52OverlaySeries
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort } = require('../api.js');
+const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, sanitizeHistory } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -19,6 +19,7 @@ const {
   getHoldingCostAndGain
 } = require('../allocation.js');
 const {
+  calculateMainData,
   renderMainTopStats,
   renderMainYearOverlayChart,
   toggleMainXeqtOverlay,
@@ -1401,4 +1402,65 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     }
   });
 });
+
+test('History Sanitization & Weekly Closed Period Integrity Suite', async (t) => {
+  await t.test('sanitizeHistory excludes placeholder rows (totalCAD <= 0, missing, or empty)', () => {
+    const raw = [
+      { week: 1, date: '2024-08-23', totalCAD: 100000 },
+      { week: 2, date: '2024-08-30', totalCAD: 0 }, // empty placeholder
+      { week: 3, date: '2024-09-06', totalCAD: -500 }, // invalid negative
+      { week: 4, date: '2024-09-13' }, // missing totalCAD
+      null, // invalid entry
+      { week: 5, date: '2024-09-20', totalCAD: 105000 }
+    ];
+
+    const clean = sanitizeHistory(raw);
+    assert.equal(clean.length, 2);
+    assert.equal(clean[0].week, 1);
+    assert.equal(clean[1].week, 5);
+  });
+
+  await t.test('sanitizeHistory excludes future unclosed dates beyond today', () => {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    const nextFriday = new Date(Date.now() + (3 * 86400000)).toISOString().slice(0, 10);
+
+    const raw = [
+      { week: 110, date: '2026-09-25', totalCAD: 350000 },
+      { week: 111, date: nextFriday, totalCAD: 352000 }, // future unclosed week (e.g. Oct 2, 2026)
+      { week: 112, date: tomorrow, totalCAD: 0 } // future placeholder
+    ];
+
+    const clean = sanitizeHistory(raw);
+    assert.equal(clean.length, 1);
+    assert.equal(clean[0].week, 110);
+    assert.equal(clean[0].date, '2026-09-25');
+  });
+
+  await t.test('calculateMainData correctly calculates current in-progress week against last closed week', () => {
+    // Week 110 closed on 2026-09-25 with $300,000 net worth
+    const history = [
+      { week: 109, date: '2026-09-18', totalCAD: 295000, weeklyChangeCAD: 5000, weeklyChangePct: 1.72 },
+      { week: 110, date: '2026-09-25', totalCAD: 300000, weeklyChangeCAD: 5000, weeklyChangePct: 1.69 },
+      // Upcoming Friday placeholder in sheet
+      { week: 111, date: '2026-10-02', totalCAD: 0 }
+    ];
+
+    // Today mid-week holdings live total is $303,000 (+3,000 this week)
+    const holdings = [
+      { sum: 303000, registered: true, count: 1000, averageCost: 200 }
+    ];
+
+    const mainData = calculateMainData(holdings, history);
+    assert.ok(mainData.metrics.currentWeek, 'currentWeek metrics must exist');
+    // Current in-progress week should be Week 111
+    assert.equal(mainData.metrics.currentWeek.weekNumber, 'Week 111');
+    // Change this week should be 303,000 - 300,000 = +3,000
+    assert.equal(mainData.metrics.currentWeek.changeCAD, 3000);
+    assert.equal(mainData.metrics.currentWeek.isUp, true);
+    // Percentage return should be (3000 / 300000) * 100 = 1.0%
+    assert.equal(Number(mainData.metrics.currentWeek.changePct.toFixed(2)), 1.00);
+  });
+});
+
 

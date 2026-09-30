@@ -19,7 +19,12 @@ async function initHistory() {
             getHoldings(),
             typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
         ]);
-        allHistory = hist || [];
+        if (typeof sanitizeHistory === 'function') {
+            allHistory = sanitizeHistory(hist);
+        } else {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            allHistory = (hist || []).filter(r => r && (!r.totalCAD || r.totalCAD > 0) && (!r.date || r.date <= todayStr));
+        }
         allHoldings = h || [];
         allBenchmarks = benchmarks;
 

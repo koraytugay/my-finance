@@ -27,10 +27,11 @@ async function initProjections() {
         document.getElementById('input-starting-nw').value = Math.round(baselineNetWorth);
 
         // Estimate monthly contribution from actual net savings added if history & holdings available
-        if (history && history.length > 10) {
-            const first = history[0];
-            const latest = history[history.length - 1];
-            const weeks = history.length - 1;
+        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
+        if (validHistory && validHistory.length > 10) {
+            const first = validHistory[0];
+            const latest = validHistory[validHistory.length - 1];
+            const weeks = validHistory.length - 1;
             const costBasis = calculateHoldingsCostBasis(holdings);
             const totalGrowth = latest.totalCAD - first.totalCAD;
             const netSavingsAdded = Math.max(0, totalGrowth - costBasis.totalMarketGainsCAD);

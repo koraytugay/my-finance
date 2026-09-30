@@ -120,6 +120,23 @@ function applyLivePricesToHoldings(holdings) {
     // Holdings already have live market prices applied by the sync pipeline
 }
 
+/**
+ * Sanitizes portfolio historical records:
+ * 1. Excludes placeholder/empty rows (totalCAD <= 0 or missing)
+ * 2. Excludes unclosed future dates (date > today)
+ */
+function sanitizeHistory(history) {
+    if (!Array.isArray(history)) return [];
+    const todayStr = new Date().toISOString().slice(0, 10);
+    return history.filter(r => {
+        if (!r || typeof r !== 'object') return false;
+        if (r.week === undefined || r.week === null || isNaN(Number(r.week))) return false;
+        if (typeof r.totalCAD !== 'number' || isNaN(r.totalCAD) || r.totalCAD <= 0) return false;
+        if (r.date && r.date > todayStr) return false;
+        return true;
+    });
+}
+
 async function unlockWithPassword(password, forceRefresh = false) {
     if (!password) {
         throw new Error('Password required');
@@ -156,7 +173,7 @@ async function unlockWithPassword(password, forceRefresh = false) {
         }
 
         cachedHoldings = holdings;
-        cachedHistory = history;
+        cachedHistory = sanitizeHistory(history);
         isSessionUnlocked = true;
 
         await getPrices(true);
@@ -508,7 +525,8 @@ if (typeof module !== 'undefined' && module.exports) {
         formatMonthShort,
         escapeHtml,
         calculateHoldingsCostBasis,
-        computeXeqtProgressionOverlay
+        computeXeqtProgressionOverlay,
+        sanitizeHistory
     };
 }
 

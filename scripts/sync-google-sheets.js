@@ -341,6 +341,13 @@ async function fetchGoogleSheetsData(password, spreadsheetId = SPREADSHEET_ID) {
       const runningPeakCAD = parseNumber(row[11]);
       const drawdownCAD = parseNumber(row[12]);
 
+      // Skip empty or incomplete placeholder rows in spreadsheet
+      if (!totalCAD || totalCAD <= 0) continue;
+
+      // Skip future unclosed weeks (e.g. pre-filled upcoming Friday rows)
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (date && date > todayStr) continue;
+
       history.push({
         week,
         date,

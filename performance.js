@@ -20,7 +20,12 @@ async function initPerformance() {
             typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
         ]);
 
-        allHistory = history;
+        if (typeof sanitizeHistory === 'function') {
+            allHistory = sanitizeHistory(history);
+        } else {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            allHistory = (history || []).filter(r => r && (!r.totalCAD || r.totalCAD > 0) && (!r.date || r.date <= todayStr));
+        }
         allHoldings = holdings;
         allBenchmarks = benchmarks;
 

@@ -16,8 +16,8 @@ async function initStats() {
             getHistory()
         ]);
 
-        holdings = h;
-        history = hist;
+        holdings = h || [];
+        history = typeof sanitizeHistory === 'function' ? sanitizeHistory(hist) : (hist || []);
 
         renderKeyMetrics();
         renderMilestones();

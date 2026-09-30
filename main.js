@@ -27,13 +27,14 @@ async function initMain() {
             typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
         ]);
 
-        rawHistory = history || [];
+        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
+        rawHistory = validHistory;
         rawBenchmarks = benchmarks;
 
         // Calculate all values dynamically from raw data (Holdings + Carry Over history)
-        const mainData = calculateMainData(holdings, history);
+        const mainData = calculateMainData(holdings, validHistory);
 
-        renderMainTopStats(mainData, holdings, history);
+        renderMainTopStats(mainData, holdings, validHistory);
         syncMainTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderAssetClassTable(mainData, holdings);
@@ -110,25 +111,30 @@ function calculateMainData(holdings, history) {
         { name: 'Crypto', value: crypto, percentage: totalCAD > 0 ? (crypto / totalCAD * 100).toFixed(2) + '%' : '0.00%' }
     ];
 
+    const sanitizeHistoryFn = typeof sanitizeHistory === 'function'
+        ? sanitizeHistory
+        : (typeof require !== 'undefined' ? require('./api.js').sanitizeHistory : null);
+    const validHistory = sanitizeHistoryFn ? sanitizeHistoryFn(history) : (history || []);
+
     // 4. 52-Week Performance & Milestone Metrics
     let lastYearVal = totalCAD;
-    if (history && history.length > 0) {
-        const latestRecord = history[history.length - 1];
+    if (validHistory && validHistory.length > 0) {
+        const latestRecord = validHistory[validHistory.length - 1];
         let record52w = null;
 
         // Match exact week 52 weeks prior
         if (latestRecord.week !== undefined) {
-            record52w = history.find(r => r.week === latestRecord.week - 52);
+            record52w = validHistory.find(r => r.week === latestRecord.week - 52);
         }
 
         // Fallback: 52 entries back by index
-        if (!record52w && history.length > 52) {
-            record52w = history[history.length - 1 - 52];
+        if (!record52w && validHistory.length > 52) {
+            record52w = validHistory[validHistory.length - 1 - 52];
         }
 
         // Fallback: earliest recorded week
         if (!record52w) {
-            record52w = history[0];
+            record52w = validHistory[0];
         }
 
         if (record52w) {
@@ -137,8 +143,8 @@ function calculateMainData(holdings, history) {
     }
 
     let athVal = totalCAD;
-    if (history && history.length > 0) {
-        history.forEach(r => {
+    if (validHistory && validHistory.length > 0) {
+        validHistory.forEach(r => {
             if (r.totalCAD > athVal) athVal = r.totalCAD;
         });
     }
@@ -153,15 +159,29 @@ function calculateMainData(holdings, history) {
     let currentWeekNumber = '';
     let currentWeekDate = '';
 
-    if (history && history.length > 0) {
-        const latest = history[history.length - 1];
-        currentWeekNumber = latest.week ? `Week ${latest.week}` : '';
-        currentWeekDate = latest.date || '';
+    if (validHistory && validHistory.length > 0) {
+        const latest = validHistory[validHistory.length - 1];
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const isLatestFutureOrCurrent = latest.date && latest.date >= todayStr;
 
-        const liveDiff = totalCAD - (latest.totalCAD || totalCAD);
-        currentWeekChangeCAD = (latest.weeklyChangeCAD || 0) + liveDiff;
-        const weekStartVal = (latest.totalCAD || totalCAD) - (latest.weeklyChangeCAD || 0);
-        currentWeekChangePct = weekStartVal > 0 ? (currentWeekChangeCAD / weekStartVal) * 100 : (latest.weeklyChangePct || 0);
+        if (isLatestFutureOrCurrent) {
+            currentWeekNumber = latest.week ? `Week ${latest.week}` : '';
+            currentWeekDate = latest.date || '';
+
+            const liveDiff = totalCAD - (latest.totalCAD || totalCAD);
+            currentWeekChangeCAD = (latest.weeklyChangeCAD || 0) + liveDiff;
+            const weekStartVal = (latest.totalCAD || totalCAD) - (latest.weeklyChangeCAD || 0);
+            currentWeekChangePct = weekStartVal > 0 ? (currentWeekChangeCAD / weekStartVal) * 100 : (latest.weeklyChangePct || 0);
+        } else {
+            // Latest record is the previous closed week (e.g. Week 110 on Friday Sep 25)
+            // Current week in progress is the subsequent week (e.g. Week 111)
+            currentWeekNumber = latest.week ? `Week ${latest.week + 1}` : '';
+            currentWeekDate = todayStr;
+
+            currentWeekChangeCAD = totalCAD - (latest.totalCAD || totalCAD);
+            const weekStartVal = latest.totalCAD || totalCAD;
+            currentWeekChangePct = weekStartVal > 0 ? (currentWeekChangeCAD / weekStartVal) * 100 : 0;
+        }
     }
 
     const isWeekUp = currentWeekChangeCAD >= 0;
@@ -191,8 +211,8 @@ function calculateMainData(holdings, history) {
     // 5. Year to Date (YTD) Performance Tracking
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth() + 1;
-    if (history && history.length > 0) {
-        const latest = history[history.length - 1];
+    if (validHistory && validHistory.length > 0) {
+        const latest = validHistory[validHistory.length - 1];
         if (latest.date) {
             const parts = latest.date.split('-');
             if (parts.length >= 2) {
@@ -203,16 +223,16 @@ function calculateMainData(holdings, history) {
     }
 
     let ytdStartVal = totalCAD;
-    if (history && history.length > 0) {
-        const prevYearRecords = history.filter(r => r.date && r.date.startsWith(String(currentYear - 1)));
+    if (validHistory && validHistory.length > 0) {
+        const prevYearRecords = validHistory.filter(r => r.date && r.date.startsWith(String(currentYear - 1)));
         if (prevYearRecords.length > 0) {
             ytdStartVal = prevYearRecords[prevYearRecords.length - 1].totalCAD || 0;
         } else {
-            const thisYearRecords = history.filter(r => r.date && r.date.startsWith(String(currentYear)));
+            const thisYearRecords = validHistory.filter(r => r.date && r.date.startsWith(String(currentYear)));
             if (thisYearRecords.length > 0) {
                 ytdStartVal = thisYearRecords[0].totalCAD || 0;
             } else {
-                ytdStartVal = history[0].totalCAD || 0;
+                ytdStartVal = validHistory[0].totalCAD || 0;
             }
         }
     }
@@ -223,8 +243,8 @@ function calculateMainData(holdings, history) {
     const ytdMonthlyGainCAD = ytdChangeCAD / monthsElapsed;
 
     let ytdPeakVal = totalCAD;
-    if (history && history.length > 0) {
-        const thisYearRecords = history.filter(r => r.date && r.date.startsWith(String(currentYear)));
+    if (validHistory && validHistory.length > 0) {
+        const thisYearRecords = validHistory.filter(r => r.date && r.date.startsWith(String(currentYear)));
         thisYearRecords.forEach(r => {
             if (r.totalCAD > ytdPeakVal) ytdPeakVal = r.totalCAD;
         });
@@ -241,11 +261,14 @@ function calculateMainData(holdings, history) {
     };
 
     // 6. All-Time Wealth & Total Return Metrics
-    const costBasis = calculateHoldingsCostBasis(holdings);
+    const costBasisFn = typeof calculateHoldingsCostBasis === 'function'
+        ? calculateHoldingsCostBasis
+        : (typeof require !== 'undefined' ? require('./api.js').calculateHoldingsCostBasis : null);
+    const costBasis = costBasisFn ? costBasisFn(holdings) : { totalBookCostCAD: 0, totalMarketGainsCAD: 0, marketRoiPct: 0 };
     const totalBookCostCAD = costBasis.totalBookCostCAD;
     const totalMarketGainsCAD = costBasis.totalMarketGainsCAD;
     const marketRoiPct = costBasis.marketRoiPct;
-    const firstHist = history && history.length > 0 ? history[0] : null;
+    const firstHist = validHistory && validHistory.length > 0 ? validHistory[0] : null;
     const startingCAD = firstHist ? (firstHist.totalCAD || 0) : totalCAD;
     const totalGrowthCAD = totalCAD - startingCAD;
     const totalGrowthPct = startingCAD > 0 ? (totalGrowthCAD / startingCAD) * 100 : 0;
@@ -267,7 +290,8 @@ function calculateMainData(holdings, history) {
 
 function renderMainTopStats(mainData, holdings, history) {
     const totalCAD = mainData.metrics && mainData.metrics.totalValue ? mainData.metrics.totalValue : holdings.reduce((s, h) => s + (h.sum || 0), 0);
-    const lastRecord = history && history.length > 0 ? history[history.length - 1] : null;
+    const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
+    const lastRecord = validHistory && validHistory.length > 0 ? validHistory[validHistory.length - 1] : null;
 
     const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
         || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate)
@@ -2269,6 +2293,7 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        calculateMainData,
         renderMainProgressionChart,
         renderMainYearOverlayChart,
         renderMainTopStats,
