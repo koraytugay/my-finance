@@ -123,17 +123,14 @@ function applyLivePricesToHoldings(holdings) {
 /**
  * Sanitizes portfolio historical records:
  * 1. Excludes placeholder/empty rows (totalCAD <= 0 or missing)
- * 2. Excludes unclosed future dates (date > today)
- * 3. Accurately populates running peak, drawdown ($), and drawdown (%) across history
+ * 2. Accurately populates running peak, drawdown ($), and drawdown (%) across history
  */
 function sanitizeHistory(history) {
     if (!Array.isArray(history)) return [];
-    const todayStr = new Date().toISOString().slice(0, 10);
     const valid = history.filter(r => {
         if (!r || typeof r !== 'object') return false;
         if (r.week === undefined || r.week === null || isNaN(Number(r.week))) return false;
         if (typeof r.totalCAD !== 'number' || isNaN(r.totalCAD) || r.totalCAD <= 0) return false;
-        if (r.date && r.date > todayStr) return false;
         return true;
     });
 

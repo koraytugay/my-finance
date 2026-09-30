@@ -344,10 +344,6 @@ async function fetchGoogleSheetsData(password, spreadsheetId = SPREADSHEET_ID) {
       // Skip empty or incomplete placeholder rows in spreadsheet
       if (!totalCAD || totalCAD <= 0) continue;
 
-      // Skip future unclosed weeks (e.g. pre-filled upcoming Friday rows)
-      const todayStr = new Date().toISOString().slice(0, 10);
-      if (date && date > todayStr) continue;
-
       history.push({
         week,
         date,

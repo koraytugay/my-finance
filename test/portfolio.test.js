@@ -1421,21 +1421,23 @@ test('History Sanitization & Weekly Closed Period Integrity Suite', async (t) =>
     assert.equal(clean[1].week, 5);
   });
 
-  await t.test('sanitizeHistory excludes future unclosed dates beyond today', () => {
-    const todayStr = new Date().toISOString().slice(0, 10);
+  await t.test('sanitizeHistory excludes empty placeholder rows but retains valid week-ending records', () => {
     const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     const nextFriday = new Date(Date.now() + (3 * 86400000)).toISOString().slice(0, 10);
 
     const raw = [
       { week: 110, date: '2026-09-25', totalCAD: 350000 },
-      { week: 111, date: nextFriday, totalCAD: 352000 }, // future unclosed week (e.g. Oct 2, 2026)
-      { week: 112, date: tomorrow, totalCAD: 0 } // future placeholder
+      { week: 111, date: nextFriday, totalCAD: 352000 }, // week ending this Friday with entered data
+      { week: 112, date: tomorrow, totalCAD: 0 } // future placeholder with 0 totalCAD
     ];
 
     const clean = sanitizeHistory(raw);
-    assert.equal(clean.length, 1);
+    assert.equal(clean.length, 2);
     assert.equal(clean[0].week, 110);
     assert.equal(clean[0].date, '2026-09-25');
+    assert.equal(clean[1].week, 111);
+    assert.equal(clean[1].date, nextFriday);
+    assert.equal(clean[1].totalCAD, 352000);
   });
 
   await t.test('calculateMainData correctly calculates current in-progress week against last closed week', () => {
