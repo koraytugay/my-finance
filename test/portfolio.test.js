@@ -22,6 +22,7 @@ const {
 const {
   calculateMainData,
   renderMainTopStats,
+  renderMainProgressionChart,
   renderMainYearOverlayChart,
   toggleMainXeqtOverlay,
   calculateTimeBack,
@@ -1177,18 +1178,22 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     }
   });
 
-  await t.test('renderMainYearOverlayChart renders XEQT dashed overlay, points, and legend when single year has XEQT overlay active', async () => {
+  await t.test('renderMainYearOverlayChart renders XEQT dashed overlay, points, legend, and info card when single year has XEQT overlay active', async () => {
     resetMainChartState();
 
     const mockBox = { innerHTML: '', querySelector: () => null };
     const mockTooltip = { innerHTML: '', style: {} };
     const mockTitle = { textContent: '' };
     const mockLegend = { innerHTML: '' };
+    const mockCard = { innerHTML: '', classList: { add: () => {}, remove: () => {} } };
 
     global.document = {
       getElementById: (id) => {
         if (id === 'main-chart-legend') return mockLegend;
         if (id === 'main-chart-title') return mockTitle;
+        if (id === 'main-chart-info-card') return mockCard;
+        if (id === 'main-chart-svg-box') return mockBox;
+        if (id === 'main-chart-tooltip') return mockTooltip;
         return null;
       },
       querySelectorAll: () => []
@@ -1203,9 +1208,9 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
 
       // Provide mock history for 2025 and mock XEQT benchmarks
       const testHistory2025 = [
-        { week: 19, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000, weeklyChangeCAD: 1000, weeklyChangePct: 1.0 },
-        { week: 20, date: '2025-01-10', totalCAD: 102000, totalUSD: 75000, weeklyChangeCAD: 2000, weeklyChangePct: 2.0 },
-        { week: 21, date: '2025-01-17', totalCAD: 105000, totalUSD: 77000, weeklyChangeCAD: 3000, weeklyChangePct: 2.9 }
+        { week: 19, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000, weeklyChangeCAD: 1000, weeklyChangePct: 1.0, stocks: 80000, fixed: 15000, preciousMetals: 3000, crypto: 2000 },
+        { week: 20, date: '2025-01-10', totalCAD: 102000, totalUSD: 75000, weeklyChangeCAD: 2000, weeklyChangePct: 2.0, stocks: 82000, fixed: 15000, preciousMetals: 3000, crypto: 2000 },
+        { week: 21, date: '2025-01-17', totalCAD: 105000, totalUSD: 77000, weeklyChangeCAD: 3000, weeklyChangePct: 2.9, stocks: 85000, fixed: 15000, preciousMetals: 3000, crypto: 2000 }
       ];
       const testBenchmarks = {
         benchmarks: {
@@ -1240,6 +1245,84 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       // Verify legend contains XEQT Benchmark (CAD) and Spread
       assert.ok(mockLegend.innerHTML.includes('XEQT Benchmark (CAD)'), 'Legend must include XEQT Benchmark (CAD)');
       assert.ok(mockLegend.innerHTML.includes('Spread:'), 'Legend must include Spread');
+
+      // Verify right panel info card is updated with XEQT benchmark and spread
+      assert.ok(mockCard.innerHTML.includes('XEQT Benchmark:'), 'Right panel info card must include XEQT Benchmark section');
+      assert.ok(mockCard.innerHTML.includes('Spread:'), 'Right panel info card must include Spread');
+      assert.ok(mockCard.innerHTML.includes('Return:'), 'Right panel info card must include Return comparison');
+
+      // Toggle off XEQT overlay and verify info card updates to remove XEQT
+      await toggleMainXeqtOverlay(false);
+      assert.ok(!mockCard.innerHTML.includes('XEQT Benchmark:'), 'Right panel info card must NOT include XEQT Benchmark after toggling off');
+    } finally {
+      delete global.document;
+      delete global.formatCurrency;
+      delete global.formatDate;
+      delete global.formatPercent;
+      delete global.computeXeqtProgressionOverlay;
+      resetMainChartState();
+      setMainChartData([], null);
+    }
+  });
+
+  await t.test('toggleMainXeqtOverlay dynamically updates right-panel info card in single view (Last 52W)', async () => {
+    resetMainChartState();
+
+    const mockBox = { innerHTML: '', querySelector: () => null };
+    const mockTooltip = { innerHTML: '', style: {} };
+    const mockTitle = { textContent: '' };
+    const mockLegend = { innerHTML: '' };
+    const mockCard = { innerHTML: '', classList: { add: () => {}, remove: () => {} } };
+
+    global.document = {
+      getElementById: (id) => {
+        if (id === 'main-chart-legend') return mockLegend;
+        if (id === 'main-chart-title') return mockTitle;
+        if (id === 'main-chart-info-card') return mockCard;
+        if (id === 'main-chart-svg-box') return mockBox;
+        if (id === 'main-chart-tooltip') return mockTooltip;
+        return null;
+      },
+      querySelectorAll: () => []
+    };
+
+    try {
+      const api = require('../api.js');
+      global.formatCurrency = api.formatCurrency;
+      global.formatDate = api.formatDate;
+      global.formatPercent = api.formatPercent;
+      global.computeXeqtProgressionOverlay = api.computeXeqtProgressionOverlay;
+
+      const testHistory = [
+        { week: 1, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000, weeklyChangeCAD: 0, weeklyChangePct: 0, stocks: 80000, fixed: 20000 },
+        { week: 2, date: '2025-01-10', totalCAD: 103000, totalUSD: 76000, weeklyChangeCAD: 3000, weeklyChangePct: 3.0, stocks: 83000, fixed: 20000 }
+      ];
+      const testBenchmarks = {
+        benchmarks: {
+          XEQT: {
+            id: 'XEQT',
+            symbol: 'XEQT.TO',
+            weeklyPrices: [30, 31],
+            currentPrice: 31.0
+          }
+        }
+      };
+
+      setMainChartData(testHistory, testBenchmarks);
+      setMainTimeframe('last-52');
+
+      // Initially XEQT is off
+      renderMainProgressionChart();
+      assert.ok(!mockCard.innerHTML.includes('XEQT Benchmark:'), 'Initially info card has no XEQT');
+
+      // Toggle XEQT ON
+      await toggleMainXeqtOverlay(true);
+      assert.ok(mockCard.innerHTML.includes('XEQT Benchmark:'), 'After toggling on, info card must contain XEQT Benchmark');
+      assert.ok(mockCard.innerHTML.includes('Spread:'), 'After toggling on, info card must contain Spread');
+
+      // Toggle XEQT OFF
+      await toggleMainXeqtOverlay(false);
+      assert.ok(!mockCard.innerHTML.includes('XEQT Benchmark:'), 'After toggling off, info card must not contain XEQT Benchmark');
     } finally {
       delete global.document;
       delete global.formatCurrency;

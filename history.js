@@ -620,7 +620,7 @@ function renderChart(records, currency = 'CAD') {
             const spreadSign = x.spreadVal >= 0 ? '+' : '';
             const spreadColor = x.spreadVal >= 0 ? '#16a34a' : '#cf222e';
             const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
-            const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}%`;
+            const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
             xeqtSection = `
                 <div class="chart-card-section-divider">

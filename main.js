@@ -976,6 +976,7 @@ async function toggleMainXeqtOverlay(checked) {
             console.warn('Could not load benchmarks:', e);
         }
     }
+    updateMainTimeframeButtonsUI();
     renderMainProgressionChart();
 }
 
@@ -1290,9 +1291,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const xeqtValStr = formatCurrency(x.val, currency);
             const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
             const portRetStr = `${pt.pct >= 0 ? '+' : ''}${pt.pct.toFixed(2)}%`;
-            const spreadSign = x.spreadVal >= 0 ? '+' : '';
-            const spreadColor = x.spreadVal >= 0 ? '#16a34a' : '#cf222e';
-            const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
+            const spreadSign = (isPct ? x.spreadPct : x.spreadVal) >= 0 ? '+' : '';
+            const spreadColor = (isPct ? x.spreadPct : x.spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+            const spreadValStr = `${x.spreadVal >= 0 ? '+' : ''}${formatCurrency(x.spreadVal, currency)}`;
             const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
             xeqtSection = `
@@ -1978,6 +1979,126 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 
     function buildYearOverlayDefaultCardHtml() {
+        const isSingleYear = yearSeries.length === 1;
+
+        let xeqtSection = '';
+        if (showXeqt && xeqtPoints.length > 0) {
+            const nonAnchorXeqt = xeqtPoints.filter(p => !p.isAnchor);
+            const lastX = nonAnchorXeqt.length > 0 ? nonAnchorXeqt[nonAnchorXeqt.length - 1] : xeqtPoints[xeqtPoints.length - 1];
+            if (lastX) {
+                const s0 = yearSeries[0];
+                const lastPort = s0 ? s0.points[s0.points.length - 1] : null;
+                const xVal = lastX.val;
+                const xPct = lastX.pct;
+                const xSign = xPct >= 0 ? '+' : '';
+                const xRetStr = `${xSign}${xPct.toFixed(2)}%`;
+                const xValStr = formatCurrency(xVal, currency);
+
+                const portPct = lastPort ? lastPort.pct : 0;
+                const portVal = lastPort ? lastPort.val : 0;
+                const portRetStr = `${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%`;
+
+                const spreadPct = portPct - xPct;
+                const spreadVal = portVal - xVal;
+                const spreadSign = (isPct ? spreadPct : spreadVal) >= 0 ? '+' : '';
+                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+                const spreadValStr = `${spreadVal >= 0 ? '+' : ''}${formatCurrency(spreadVal, currency)}`;
+                const spreadPctStr = `${spreadPct >= 0 ? '+' : ''}${spreadPct.toFixed(2)}% pts`;
+
+                xeqtSection = `
+                    <div class="chart-card-section-divider">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                            <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                            <strong style="color: #16a34a;">${isPct ? xRetStr : xValStr}</strong>
+                        </div>
+                        <div class="chart-card-row" style="color: #64748b;">
+                            <span>Return:</span>
+                            <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xRetStr}</strong></span>
+                        </div>
+                        <div class="chart-card-row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
+                            <span>Spread:</span>
+                            <span>${isPct ? spreadPctStr : `${spreadValStr} (${spreadPctStr})`}</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        if (isSingleYear) {
+            const s = yearSeries[0];
+            const last = s.points[s.points.length - 1];
+            if (!last) return '';
+
+            const dateStr = formatDate(last.date);
+            const totalVal = formatCurrency(last.val, currency);
+            const pctSign = last.pct >= 0 ? '+' : '';
+            const pctColor = last.pct >= 0 ? '#16a34a' : '#cf222e';
+            const isUSD = currency === 'USD';
+            const r = last.rec;
+            const recRate = (r && r.totalCAD && r.totalUSD)
+                ? (r.totalUSD / r.totalCAD)
+                : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
+
+            const weeklyChgVal = isUSD
+                ? (last.weeklyChangeUSD !== undefined ? last.weeklyChangeUSD : (r?.weeklyChangeUSD || 0))
+                : (last.weeklyChangeCAD !== undefined ? last.weeklyChangeCAD : (r?.weeklyChangeCAD || 0));
+            const weeklySign = weeklyChgVal >= 0 ? '+' : '';
+            const weeklyColor = weeklyChgVal >= 0 ? '#16a34a' : '#cf222e';
+            const weeklyPctVal = (last.weeklyChangePct !== undefined ? last.weeklyChangePct : (r?.weeklyChangePct || 0));
+            const weeklyPctSign = weeklyPctVal >= 0 ? '+' : '';
+            const weeklyChangeStr = `${weeklySign}${formatCurrency(weeklyChgVal, currency)} (${weeklyPctSign}${weeklyPctVal.toFixed(2)}%)`;
+            const weekPrefix = r?.week ? `Week ${r.week} &bull; ` : '';
+
+            let assetBreakdownHtml = '';
+            if (r && (r.stocks !== undefined || r.fixed !== undefined)) {
+                const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
+                const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
+                const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
+                const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
+
+                assetBreakdownHtml = `
+                    <div class="chart-card-section-divider">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                        <div class="chart-card-row">
+                            <span>Stocks:</span>
+                            <strong>${formatCurrency(sVal, currency)}</strong>
+                        </div>
+                        <div class="chart-card-row">
+                            <span>Fixed Income:</span>
+                            <strong>${formatCurrency(fVal, currency)}</strong>
+                        </div>
+                        <div class="chart-card-row">
+                            <span>Precious Metals:</span>
+                            <strong>${formatCurrency(mVal, currency)}</strong>
+                        </div>
+                        <div class="chart-card-row">
+                            <span>Crypto:</span>
+                            <strong>${formatCurrency(cVal, currency)}</strong>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="chart-card-header">
+                    <span class="chart-card-date">${weekPrefix}${dateStr}</span>
+                    <span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>
+                </div>
+                <div class="chart-card-primary-val">
+                    ${isPct ? `${pctSign}${last.pct.toFixed(2)}%` : totalVal}
+                </div>
+                <div class="chart-card-sub-val" style="color: #64748b;">
+                    ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${last.pct.toFixed(2)}%</strong>`}
+                    ${(weeklyChgVal !== 0 || weeklyPctVal !== 0) ? ` &bull; <span style="color: ${weeklyColor}; font-weight: 600;">${weeklyChangeStr}</span>` : ''}
+                </div>
+                ${xeqtSection}
+                ${assetBreakdownHtml}
+                <div class="chart-card-footer">
+                    💡 Hover over graph to inspect historical weeks
+                </div>
+            `;
+        }
+
         let yearRows = yearSeries.map(s => {
             const last = s.points[s.points.length - 1];
             const sign = last.pct >= 0 ? '+' : '';
@@ -2007,6 +2128,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             <div style="display: flex; flex-direction: column; gap: 4px;">
                 ${yearRows}
             </div>
+            ${xeqtSection}
             <div class="chart-card-footer">
                 💡 Hover across calendar months to compare trajectories
             </div>
@@ -2137,11 +2259,10 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             }).join('');
 
             let xeqtCardHtml = '';
-            if (showXeqt && closestXeqt && closestXeqt.p.data) {
+            if (showXeqt && closestXeqt && closestXeqt.p && !closestXeqt.p.isAnchor) {
                 const xPct = closestXeqt.p.pct;
                 const xVal = closestXeqt.p.val;
                 const xSign = xPct >= 0 ? '+' : '';
-                const xColor = xPct >= 0 ? '#16a34a' : '#cf222e';
                 const xValStr = formatCurrency(xVal, currency);
                 const xRetStr = `${xSign}${xPct.toFixed(2)}%`;
 
@@ -2150,8 +2271,10 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const portVal = portPoint ? portPoint.val : 0;
                 const spreadPct = portPct - xPct;
                 const spreadVal = portVal - xVal;
-                const spreadSign = spreadPct >= 0 ? '+' : '';
-                const spreadColor = spreadPct >= 0 ? '#16a34a' : '#cf222e';
+                const spreadSign = (isPct ? spreadPct : spreadVal) >= 0 ? '+' : '';
+                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+                const spreadValStr = `${spreadVal >= 0 ? '+' : ''}${formatCurrency(spreadVal, currency)}`;
+                const spreadPctStr = `${spreadPct >= 0 ? '+' : ''}${spreadPct.toFixed(2)}% pts`;
 
                 xeqtCardHtml = `
                     <div class="chart-card-section-divider">
@@ -2160,8 +2283,12 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                             <strong style="color: #16a34a;">${isPct ? xRetStr : xValStr}</strong>
                         </div>
                         <div class="chart-card-row" style="color: #64748b;">
+                            <span>Return:</span>
+                            <span>Port: <strong style="color: #0969da;">${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong style="color: #16a34a;">${xRetStr}</strong></span>
+                        </div>
+                        <div class="chart-card-row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                             <span>Spread:</span>
-                            <strong style="color: ${spreadColor};">${spreadSign}${spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(spreadVal, currency)})</strong>
+                            <span>${isPct ? spreadPctStr : `${spreadValStr} (${spreadPctStr})`}</span>
                         </div>
                     </div>
                 `;
@@ -2191,14 +2318,56 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 `;
             }
 
+            let hoverAssetBreakdownHtml = '';
+            if (activeYearDetails.length === 1 && activeYearDetails[0].point.rec) {
+                const r = activeYearDetails[0].point.rec;
+                const isUSD = currency === 'USD';
+                const recRate = (r.totalCAD && r.totalUSD)
+                    ? (r.totalUSD / r.totalCAD)
+                    : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
+                if (r.stocks !== undefined || r.fixed !== undefined) {
+                    const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
+                    const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
+                    const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
+                    const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
+
+                    hoverAssetBreakdownHtml = `
+                        <div class="chart-card-section-divider">
+                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                            <div class="chart-card-row">
+                                <span>Stocks:</span>
+                                <strong>${formatCurrency(sVal, currency)}</strong>
+                            </div>
+                            <div class="chart-card-row">
+                                <span>Fixed Income:</span>
+                                <strong>${formatCurrency(fVal, currency)}</strong>
+                            </div>
+                            <div class="chart-card-row">
+                                <span>Precious Metals:</span>
+                                <strong>${formatCurrency(mVal, currency)}</strong>
+                            </div>
+                            <div class="chart-card-row">
+                                <span>Crypto:</span>
+                                <strong>${formatCurrency(cVal, currency)}</strong>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            const singleHoverHeader = activeYearDetails.length === 1 && activeYearDetails[0].point.rec?.week
+                ? `<span class="chart-card-date">Week ${activeYearDetails[0].point.rec.week} &bull; ${formatDate(activeYearDetails[0].point.date)}</span>`
+                : `<span class="chart-card-date">🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}</span>`;
+
             const cardContent = `
                 <div class="chart-card-header">
-                    <span class="chart-card-date">🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}</span>
+                    ${singleHoverHeader}
                     <span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>
                 </div>
                 <div>${yearRows}</div>
                 ${xeqtCardHtml}
                 ${compCardHtml}
+                ${hoverAssetBreakdownHtml}
                 <div class="chart-card-footer">
                     💡 Hover across calendar months to compare trajectories
                 </div>
