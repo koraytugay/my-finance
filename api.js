@@ -152,6 +152,117 @@ function sanitizeHistory(history) {
     });
 }
 
+/**
+ * Synchronizes history with live holdings valuation.
+ * If the latest record is the current week (date >= today), updates its valuation and weekly change with live holdings.
+ * If the latest record is a past week, appends the in-progress week with live holdings.
+ */
+function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
+    if (!Array.isArray(history) || history.length === 0) return history || [];
+    if (!Array.isArray(holdings) || holdings.length === 0) return history;
+
+    // Calculate live portfolio value and asset breakdown
+    let usStocks = 0, devStocks = 0, canStocks = 0, emStocks = 0;
+    let fixed = 0, crypto = 0, metals = 0;
+    let liveTotalCAD = 0;
+
+    holdings.forEach(h => {
+        const sum = Number(h.sum) || 0;
+        liveTotalCAD += sum;
+        const a = h.allocation || {};
+        usStocks += Number(a.us) || 0;
+        devStocks += Number(a.developed) || 0;
+        canStocks += Number(a.canada) || 0;
+        emStocks += Number(a.emerging) || 0;
+        fixed += Number(a.fixedIncome) || 0;
+        crypto += Number(a.crypto) || 0;
+        metals += Number(a.preciousMetals) || 0;
+    });
+
+    if (liveTotalCAD <= 0) return history;
+
+    const totalStocks = usStocks + devStocks + canStocks + emStocks;
+    const fx = Number(cadUsdRate) > 0 ? Number(cadUsdRate) : 0.7073;
+    const liveTotalUSD = Math.round(liveTotalCAD * fx);
+    const todayStr = new Date().toISOString().slice(0, 10);
+
+    const historyCopy = history.map(r => ({ ...r }));
+    const latest = historyCopy[historyCopy.length - 1];
+    const isLatestCurrentOrFuture = latest.date && latest.date >= todayStr;
+
+    if (isLatestCurrentOrFuture) {
+        // The latest record is already the current week (e.g. October 2, 2026)
+        // Determine the previous closed week's total CAD and USD to compute accurate live delta
+        let prevTotalCAD = 0;
+        let prevTotalUSD = 0;
+
+        if (historyCopy.length >= 2) {
+            const prev = historyCopy[historyCopy.length - 2];
+            prevTotalCAD = Number(prev.totalCAD) || 0;
+            prevTotalUSD = Number(prev.totalUSD) || Math.round(prevTotalCAD * fx);
+        } else {
+            prevTotalCAD = (Number(latest.totalCAD) || liveTotalCAD) - (Number(latest.weeklyChangeCAD) || 0);
+            prevTotalUSD = (Number(latest.totalUSD) || liveTotalUSD) - (Number(latest.weeklyChangeUSD) || 0);
+        }
+
+        const liveWeeklyChangeCAD = liveTotalCAD - prevTotalCAD;
+        const liveWeeklyChangePct = prevTotalCAD > 0 ? (liveWeeklyChangeCAD / prevTotalCAD) * 100 : 0;
+        const liveWeeklyChangeUSD = liveTotalUSD - prevTotalUSD;
+        const liveWeeklyChangeUSDPct = prevTotalUSD > 0 ? (liveWeeklyChangeUSD / prevTotalUSD) * 100 : 0;
+
+        latest.totalCAD = liveTotalCAD;
+        latest.totalUSD = liveTotalUSD;
+        latest.weeklyChangeCAD = liveWeeklyChangeCAD;
+        latest.weeklyChangePct = liveWeeklyChangePct;
+        latest.weeklyChangeUSD = liveWeeklyChangeUSD;
+        latest.weeklyChangeUSDPct = liveWeeklyChangeUSDPct;
+        latest.stocks = totalStocks;
+        latest.fixed = fixed;
+        latest.preciousMetals = metals;
+        latest.crypto = crypto;
+        latest.isLive = true;
+    } else {
+        // Latest record is a previous closed week (e.g. Sep 25, 2026)
+        // Append in-progress current week
+        const prevTotalCAD = Number(latest.totalCAD) || 0;
+        const prevTotalUSD = Number(latest.totalUSD) || Math.round(prevTotalCAD * fx);
+
+        const liveWeeklyChangeCAD = liveTotalCAD - prevTotalCAD;
+        const liveWeeklyChangePct = prevTotalCAD > 0 ? (liveWeeklyChangeCAD / prevTotalCAD) * 100 : 0;
+        const liveWeeklyChangeUSD = liveTotalUSD - prevTotalUSD;
+        const liveWeeklyChangeUSDPct = prevTotalUSD > 0 ? (liveWeeklyChangeUSD / prevTotalUSD) * 100 : 0;
+
+        historyCopy.push({
+            week: (Number(latest.week) || 0) + 1,
+            date: todayStr,
+            totalCAD: liveTotalCAD,
+            totalUSD: liveTotalUSD,
+            weeklyChangeCAD: liveWeeklyChangeCAD,
+            weeklyChangePct: liveWeeklyChangePct,
+            weeklyChangeUSD: liveWeeklyChangeUSD,
+            weeklyChangeUSDPct: liveWeeklyChangeUSDPct,
+            stocks: totalStocks,
+            fixed: fixed,
+            preciousMetals: metals,
+            crypto: crypto,
+            note: 'Current live week',
+            isLive: true
+        });
+    }
+
+    // Recompute running peak and drawdown across the enriched history
+    let runningPeak = 0;
+    historyCopy.forEach(r => {
+        const val = Number(r.totalCAD) || 0;
+        if (val > runningPeak) runningPeak = val;
+        r.runningPeakCAD = runningPeak;
+        r.drawdownCAD = val - runningPeak;
+        r.drawdownPct = runningPeak > 0 ? ((val - runningPeak) / runningPeak) * 100 : 0;
+    });
+
+    return historyCopy;
+}
+
 async function unlockWithPassword(password, forceRefresh = false) {
     if (!password) {
         throw new Error('Password required');
@@ -188,10 +299,12 @@ async function unlockWithPassword(password, forceRefresh = false) {
         }
 
         cachedHoldings = holdings;
-        cachedHistory = sanitizeHistory(history);
+        const validHistory = sanitizeHistory(history);
         isSessionUnlocked = true;
 
         await getPrices(true);
+        const rate = (cachedPrices && cachedPrices.cadUsdRate) || 0.7073;
+        cachedHistory = enrichHistoryWithLiveHoldings(validHistory, cachedHoldings, rate);
         sessionStorage.setItem('portfolio_password', password);
 
         return { holdings: cachedHoldings, history: cachedHistory };
@@ -221,7 +334,13 @@ async function getHoldings(forceRefresh = false) {
 }
 
 async function getHistory(forceRefresh = false) {
-    if (cachedHistory && !forceRefresh) return cachedHistory;
+    if (cachedHistory && !forceRefresh) {
+        if (cachedHoldings && cachedHoldings.length > 0) {
+            const rate = (cachedPrices && cachedPrices.cadUsdRate) || 0.7073;
+            cachedHistory = enrichHistoryWithLiveHoldings(cachedHistory, cachedHoldings, rate);
+        }
+        return cachedHistory;
+    }
 
     const savedPassword = sessionStorage.getItem('portfolio_password');
     if (savedPassword) {
@@ -541,7 +660,8 @@ if (typeof module !== 'undefined' && module.exports) {
         escapeHtml,
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay,
-        sanitizeHistory
+        sanitizeHistory,
+        enrichHistoryWithLiveHoldings
     };
 }
 

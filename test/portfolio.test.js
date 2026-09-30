@@ -12,7 +12,7 @@ const {
   buildRolling52OverlaySeries,
   calculateDrawdownMetrics
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, sanitizeHistory } = require('../api.js');
+const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -1608,6 +1608,51 @@ test('Rolling 52-Week Ranking & Overlay Consistency Suite', async (t) => {
   });
 });
 
+test('Live Holdings History Enrichment & Graph Consistency Suite', async (t) => {
+  await t.test('enrichHistoryWithLiveHoldings updates current week row with live holdings valuation and weekly change', () => {
+    // Week 110 closed on Sep 25 with $300,000.
+    // Week 111 had recorded -$314 in Carry Over sheet.
+    const rawHistory = [
+      { week: 109, date: '2026-09-18', totalCAD: 295000, weeklyChangeCAD: 5000, weeklyChangePct: 1.72 },
+      { week: 110, date: '2026-09-25', totalCAD: 300000, weeklyChangeCAD: 5000, weeklyChangePct: 1.69 },
+      { week: 111, date: '2026-10-02', totalCAD: 299686, weeklyChangeCAD: -314, weeklyChangePct: -0.10 }
+    ];
 
+    // Current live holdings reflect a $3,052 loss relative to Week 110 ($300,000 - $3,052 = $296,948)
+    const holdings = [
+      { ticker: 'TSE:XEQT', sum: 200000, allocation: { us: 90000, canada: 50000, developed: 40000, emerging: 20000 } },
+      { ticker: 'Cash', sum: 96948, allocation: { fixedIncome: 96948 } }
+    ];
 
+    const enriched = enrichHistoryWithLiveHoldings(rawHistory, holdings, 0.7073);
+    assert.equal(enriched.length, 3);
+    const latest = enriched[2];
+    assert.equal(latest.week, 111);
+    assert.equal(latest.date, '2026-10-02');
+    assert.equal(latest.totalCAD, 296948);
+    // Weekly change must be -$3,052 CAD (not the stale -$314 CAD)
+    assert.equal(latest.weeklyChangeCAD, -3052);
+    assert.equal(Number(latest.weeklyChangePct.toFixed(2)), -1.02);
+    assert.equal(latest.isLive, true);
+    assert.equal(latest.stocks, 200000);
+    assert.equal(latest.fixed, 96948);
+  });
 
+  await t.test('enrichHistoryWithLiveHoldings appends in-progress week when latest history is a past closed week', () => {
+    const rawHistory = [
+      { week: 110, date: '2026-09-25', totalCAD: 300000, weeklyChangeCAD: 5000, weeklyChangePct: 1.69 }
+    ];
+
+    const holdings = [
+      { sum: 296948, allocation: { us: 100000 } }
+    ];
+
+    const enriched = enrichHistoryWithLiveHoldings(rawHistory, holdings, 0.7073);
+    assert.equal(enriched.length, 2);
+    const liveWeek = enriched[1];
+    assert.equal(liveWeek.week, 111);
+    assert.equal(liveWeek.totalCAD, 296948);
+    assert.equal(liveWeek.weeklyChangeCAD, -3052);
+    assert.equal(liveWeek.isLive, true);
+  });
+});

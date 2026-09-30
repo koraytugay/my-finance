@@ -17,7 +17,11 @@ async function initStats() {
         ]);
 
         holdings = h || [];
-        history = typeof sanitizeHistory === 'function' ? sanitizeHistory(hist) : (hist || []);
+        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(hist) : (hist || []);
+        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || 0.7073;
+        history = typeof enrichHistoryWithLiveHoldings === 'function'
+            ? enrichHistoryWithLiveHoldings(validHistory, holdings, cadUsdRate)
+            : validHistory;
 
         renderKeyMetrics();
         renderMilestones();

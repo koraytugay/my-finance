@@ -28,6 +28,13 @@ async function initPerformance() {
         allHoldings = holdings;
         allBenchmarks = benchmarks;
 
+        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+            || (typeof benchmarks !== 'undefined' && benchmarks?.fx?.cadUsdRate)
+            || 0.7073;
+        if (typeof enrichHistoryWithLiveHoldings === 'function') {
+            allHistory = enrichHistoryWithLiveHoldings(allHistory, allHoldings, cadUsdRate);
+        }
+
         if (!allHistory || allHistory.length === 0) {
             throw new Error('No historical records found');
         }

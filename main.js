@@ -28,17 +28,23 @@ async function initMain() {
         ]);
 
         const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
-        rawHistory = validHistory;
+        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+            || (benchmarks?.fx?.cadUsdRate)
+            || 0.7073;
+        const enrichedHistory = typeof enrichHistoryWithLiveHoldings === 'function'
+            ? enrichHistoryWithLiveHoldings(validHistory, holdings, cadUsdRate)
+            : validHistory;
+        rawHistory = enrichedHistory;
         rawBenchmarks = benchmarks;
 
         // Calculate all values dynamically from raw data (Holdings + Carry Over history)
-        const mainData = calculateMainData(holdings, validHistory);
+        const mainData = calculateMainData(holdings, enrichedHistory);
 
-        renderMainTopStats(mainData, holdings, validHistory);
+        renderMainTopStats(mainData, holdings, enrichedHistory);
         syncMainTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderAssetClassTable(mainData, holdings);
-        renderAccountTypeTable(mainData, holdings, history);
+        renderAccountTypeTable(mainData, holdings, enrichedHistory);
         renderCategoryTable(mainData, holdings);
         renderPerformanceCards(mainData);
 

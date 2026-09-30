@@ -27,6 +27,13 @@ async function initHistory() {
         allHoldings = h || [];
         allBenchmarks = benchmarks;
 
+        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+            || (typeof benchmarks !== 'undefined' && benchmarks?.fx?.cadUsdRate)
+            || 0.7073;
+        if (typeof enrichHistoryWithLiveHoldings === 'function') {
+            allHistory = enrichHistoryWithLiveHoldings(allHistory, allHoldings, cadUsdRate);
+        }
+
         updateStatCards();
         applyHistoryFilter();
 
