@@ -19,6 +19,8 @@ const {
   getHoldingCostAndGain
 } = require('../allocation.js');
 const {
+  renderMainYearOverlayChart,
+  toggleMainXeqtOverlay,
   calculateTimeBack,
   getDayOfYearFraction,
   getMainYearColor,
@@ -27,6 +29,7 @@ const {
   setMainUnit,
   getMainChartState,
   resetMainChartState,
+  setMainChartData,
   buildMainYearOverlaySeries,
   syncMainTimeframeButtons
 } = require('../main.js');
@@ -669,10 +672,40 @@ test('Net Worth Progression XEQT Overlay Suite', async (t) => {
       for (let i = 0; i < cadOverlay.length; i++) {
         assert.ok(Number.isFinite(cadOverlay[i].val), `${tf.id} CAD point ${i} is finite`);
         assert.ok(Number.isFinite(cadOverlay[i].returnPct), `${tf.id} CAD returnPct ${i} is finite`);
-        assert.ok(Number.isFinite(usdOverlay[i].val), `${tf.id} USD point ${i} is finite`);
-        assert.ok(Number.isFinite(usdOverlay[i].returnPct), `${tf.id} USD returnPct ${i} is finite`);
       }
     }
+  });
+
+  await t.test('computeXeqtProgressionOverlay reflects currency-adjusted return: CAD (~18%) vs USD (~13%)', () => {
+    // Over the last 52 weeks in benchmarks.json:
+    // Starting week 58 price is 38.69 CAD (idx 57)
+    // Ending price is 45.64 CAD (idx 110)
+    // In CAD: (45.64 - 38.69) / 38.69 = +17.96%
+    // In USD: with CAD weakening from ~0.74 to ~0.707, USD return is ~12.99% (~13%)
+    const recs52 = [];
+    let curD = new Date('2025-09-26T12:00:00Z');
+    for (let w = 58; w <= 110; w++) {
+      const cad = 100000;
+      // Exchange rate drops from 0.74 to 0.707 over 52 weeks
+      const rate = 0.74 - ((w - 58) / 52) * (0.74 - 0.707);
+      recs52.push({
+        week: w,
+        date: curD.toISOString().slice(0, 10),
+        totalCAD: cad,
+        totalUSD: Math.round(cad * rate)
+      });
+      curD.setUTCDate(curD.getUTCDate() + 7);
+    }
+
+    const livePrice = 45.64;
+    const overlayCAD = computeXeqtProgressionOverlay(recs52, recs52, xeqtPrices, 'CAD', livePrice);
+    const overlayUSD = computeXeqtProgressionOverlay(recs52, recs52, xeqtPrices, 'USD', livePrice);
+
+    const lastCAD = overlayCAD[overlayCAD.length - 1];
+    const lastUSD = overlayUSD[overlayUSD.length - 1];
+
+    assert.equal(lastCAD.returnPct, 17.96, 'CAD 52W return should be +17.96%');
+    assert.equal(Math.round(lastUSD.returnPct), 13, 'USD 52W return should be ~13% due to CAD depreciation');
   });
 });
 
@@ -998,12 +1031,13 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     }
   });
 
-  await t.test('setMainUnit manages CAD, USD, and PCT states and updates UI correctly', () => {
+  await t.test('Separated currency (CAD/USD) and unit ($/%) toggles maintain independent states and update UI', () => {
     resetMainChartState();
 
     const mockButtons = {
       'btn-main-cur-cad': { classList: new Set(), style: {} },
       'btn-main-cur-usd': { classList: new Set(), style: {} },
+      'btn-main-unit-val': { classList: new Set(), style: {} },
       'btn-main-unit-pct': { classList: new Set(), style: {} }
     };
 
@@ -1019,61 +1053,163 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     };
 
     try {
-      // Default: CAD
+      // Default: CAD and VAL ($)
       let state = getMainChartState();
-      assert.equal(state.currentMainUnit, 'CAD');
+      assert.equal(state.currentMainUnit, 'VAL');
       assert.equal(state.currentMainCurrency, 'CAD');
 
-      // Switch to USD
-      setMainUnit('USD');
+      // Switch currency to USD
+      setMainCurrency('USD');
       state = getMainChartState();
-      assert.equal(state.currentMainUnit, 'USD');
       assert.equal(state.currentMainCurrency, 'USD');
+      assert.equal(state.currentMainUnit, 'VAL');
       assert.ok(mockButtons['btn-main-cur-usd'].classList.has('active'));
       assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-unit-val'].classList.has('active'));
       assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
 
-      // Switch to % (PCT)
+      // Switch unit to % (PCT) - currency remains USD and stays highlighted!
       setMainUnit('PCT');
       state = getMainChartState();
       assert.equal(state.currentMainUnit, 'PCT');
-      // Currency remains preserved
       assert.equal(state.currentMainCurrency, 'USD');
       assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-cur-usd'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-unit-val'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('active'), 'USD remains active even when in % mode');
       assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
 
-      // Switch to CAD via setMainCurrency alias
+      // Switch currency to CAD - unit remains % and stays highlighted!
       setMainCurrency('CAD');
       state = getMainChartState();
-      assert.equal(state.currentMainUnit, 'CAD');
       assert.equal(state.currentMainCurrency, 'CAD');
-      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
-
-      // Entering year mode auto-switches unit to PCT
-      setMainTimeframe('2025');
-      state = getMainChartState();
-      assert.equal(state.currentMainMode, 'years');
       assert.equal(state.currentMainUnit, 'PCT');
-      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-cur-usd'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'), '% remains active when switching currency');
 
-      // While in year mode, user can manually switch unit to CAD or USD
-      setMainUnit('USD');
+      // Switch unit to $ (VAL)
+      setMainUnit('VAL');
       state = getMainChartState();
-      assert.equal(state.currentMainMode, 'years');
-      assert.equal(state.currentMainUnit, 'USD');
-      assert.equal(state.currentMainCurrency, 'USD');
+      assert.equal(state.currentMainUnit, 'VAL');
+      assert.equal(state.currentMainCurrency, 'CAD');
+      assert.ok(mockButtons['btn-main-unit-val'].classList.has('active'));
+      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
 
-      // Reset restores CAD
+      // Reset restores CAD and VAL
       resetMainChartState();
       state = getMainChartState();
-      assert.equal(state.currentMainUnit, 'CAD');
+      assert.equal(state.currentMainUnit, 'VAL');
       assert.equal(state.currentMainCurrency, 'CAD');
       assert.equal(state.currentMainMode, 'single');
     } finally {
       delete global.document;
       resetMainChartState();
+    }
+  });
+
+  await t.test('XEQT overlay is enabled on single year view (e.g. 2025) and disabled only on multi-year overlay', () => {
+    resetMainChartState();
+
+    const mockXeqtInput = { checked: false, disabled: false };
+    const mockXeqtLabel = { style: {}, title: '' };
+    mockXeqtInput.closest = (sel) => sel === 'label' ? mockXeqtLabel : null;
+
+    global.document = {
+      getElementById: (id) => id === 'main-overlay-xeqt' ? mockXeqtInput : null,
+      querySelectorAll: () => []
+    };
+
+    try {
+      // In single mode (Last 52W or All Time): enabled
+      setMainTimeframe('last-52');
+      assert.equal(mockXeqtInput.disabled, false, 'XEQT overlay enabled in Last 52W');
+
+      // Selecting single year (2025): enabled!
+      setMainTimeframe('2025');
+      let state = getMainChartState();
+      assert.equal(state.currentMainMode, 'years');
+      assert.equal(state.currentMainSelectedYears.size, 1);
+      assert.equal(mockXeqtInput.disabled, false, 'XEQT overlay MUST be enabled when a single year is selected');
+
+      // Selecting another year (2024 + 2025 multi-year overlay): disabled!
+      setMainTimeframe('2024');
+      state = getMainChartState();
+      assert.equal(state.currentMainSelectedYears.size, 2);
+      assert.equal(mockXeqtInput.disabled, true, 'XEQT overlay MUST be disabled when multiple years are overlaid');
+
+      // Deselecting 2024 (returning to single year 2025): re-enabled!
+      setMainTimeframe('2024');
+      state = getMainChartState();
+      assert.equal(state.currentMainSelectedYears.size, 1);
+      assert.equal(mockXeqtInput.disabled, false, 'XEQT overlay re-enabled when back to single year');
+    } finally {
+      delete global.document;
+      resetMainChartState();
+    }
+  });
+
+  await t.test('renderMainYearOverlayChart renders XEQT dashed overlay, points, and legend when single year has XEQT overlay active', async () => {
+    resetMainChartState();
+
+    const mockBox = { innerHTML: '', querySelector: () => null };
+    const mockTooltip = { innerHTML: '', style: {} };
+    const mockTitle = { textContent: '' };
+    const mockLegend = { innerHTML: '' };
+
+    global.document = {
+      getElementById: (id) => {
+        if (id === 'main-chart-legend') return mockLegend;
+        if (id === 'main-chart-title') return mockTitle;
+        return null;
+      },
+      querySelectorAll: () => []
+    };
+
+    try {
+      // Provide mock history for 2025 and mock XEQT benchmarks
+      const testHistory2025 = [
+        { week: 19, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000, weeklyChangeCAD: 1000, weeklyChangePct: 1.0 },
+        { week: 20, date: '2025-01-10', totalCAD: 102000, totalUSD: 75000, weeklyChangeCAD: 2000, weeklyChangePct: 2.0 },
+        { week: 21, date: '2025-01-17', totalCAD: 105000, totalUSD: 77000, weeklyChangeCAD: 3000, weeklyChangePct: 2.9 }
+      ];
+      const testBenchmarks = {
+        benchmarks: {
+          XEQT: {
+            id: 'XEQT',
+            symbol: 'XEQT.TO',
+            weeklyPrices: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50],
+            currentPrice: 50.0
+          }
+        }
+      };
+
+      setMainChartData(testHistory2025, testBenchmarks);
+      setMainTimeframe('2025');
+      await toggleMainXeqtOverlay(true);
+
+      const width = 1000;
+      const height = 220;
+      const padding = { top: 18, right: 25, bottom: 32, left: 65 };
+      const plotW = width - padding.left - padding.right;
+      const plotH = height - padding.top - padding.bottom;
+
+      renderMainYearOverlayChart(mockBox, mockTooltip, 'totalCAD', 'CAD', width, height, padding, plotW, plotH, mockTitle);
+
+      // Verify Title includes currency
+      assert.ok(mockTitle.textContent.includes('2025 - CAD'), `Title should include 2025 and CAD, got: ${mockTitle.textContent}`);
+
+      // Verify SVG contains XEQT dashed path and point markers
+      assert.ok(mockBox.innerHTML.includes('stroke="#16a34a" stroke-width="2.2" stroke-dasharray="4,4"'), 'SVG must include green dashed XEQT path');
+      assert.ok(mockBox.innerHTML.includes('class="main-year-xeqt-point"'), 'SVG must include XEQT point markers');
+
+      // Verify legend contains XEQT Benchmark (CAD) and Spread
+      assert.ok(mockLegend.innerHTML.includes('XEQT Benchmark (CAD)'), 'Legend must include XEQT Benchmark (CAD)');
+      assert.ok(mockLegend.innerHTML.includes('Spread:'), 'Legend must include Spread');
+    } finally {
+      delete global.document;
+      resetMainChartState();
+      setMainChartData([], null);
     }
   });
 

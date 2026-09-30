@@ -551,7 +551,7 @@ function renderChart(records, currency = 'CAD') {
                 </div>
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark</strong> (Simulated from ${formatCurrency(startVal, currency)})
+                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
                 </div>
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
                     Spread: ${spreadSign}${formatCurrency(lastItem.spreadVal, currency)} (${spreadSign}${lastItem.spreadPct.toFixed(2)}%)
@@ -603,7 +603,7 @@ function renderChart(records, currency = 'CAD') {
                 xeqtHtml = `
                     <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark (${currency}):</span>
                             <strong style="color: #4ade80;">${xeqtValStr}</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px;">

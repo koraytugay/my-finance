@@ -6,6 +6,21 @@
  * 3. Category (High-level asset categories)
  */
 
+const formatCurrency = (typeof globalThis !== 'undefined' && typeof globalThis.formatCurrency === 'function' ? globalThis.formatCurrency : null)
+    || (typeof require !== 'undefined' ? require('./api.js').formatCurrency : null)
+    || ((val, curr) => (curr === 'USD' ? `US$${Number(val).toLocaleString()}` : `$${Number(val).toLocaleString()}`));
+
+const formatDate = (typeof globalThis !== 'undefined' && typeof globalThis.formatDate === 'function' ? globalThis.formatDate : null)
+    || (typeof require !== 'undefined' ? require('./api.js').formatDate : null)
+    || ((d) => d);
+
+const formatPercent = (typeof globalThis !== 'undefined' && typeof globalThis.formatPercent === 'function' ? globalThis.formatPercent : null)
+    || (typeof require !== 'undefined' ? require('./api.js').formatPercent : null)
+    || ((p) => `${p}%`);
+
+const computeXeqtProgressionOverlay = (typeof globalThis !== 'undefined' && typeof globalThis.computeXeqtProgressionOverlay === 'function' ? globalThis.computeXeqtProgressionOverlay : null)
+    || (typeof require !== 'undefined' ? require('./api.js').computeXeqtProgressionOverlay : null);
+
 let rawHistory = [];
 let rawBenchmarks = null;
 let currentMainTimeframe = 'last-52';
@@ -13,7 +28,7 @@ let currentMainMode = 'single'; // 'single' | 'years'
 let currentMainSingleTimeframe = 'last-52'; // 'last-52' | 'all'
 let currentMainSelectedYears = new Set(); // Set of active year strings, e.g. Set(['2026', '2025'])
 let currentMainCurrency = 'CAD';
-let currentMainUnit = 'CAD'; // 'CAD' | 'USD' | 'PCT'
+let currentMainUnit = 'VAL'; // 'VAL' | 'PCT'
 let currentMainOverlayXeqt = false;
 
 async function initMain() {
@@ -763,21 +778,25 @@ function updateMainTimeframeButtonsUI() {
     const xeqtInput = document.getElementById('main-overlay-xeqt');
     if (xeqtInput) {
         const xeqtLabel = xeqtInput.closest('label');
-        if (currentMainMode === 'years') {
+        const isMultiYear = currentMainMode === 'years' && currentMainSelectedYears.size > 1;
+        if (isMultiYear) {
             if (xeqtLabel) {
                 xeqtLabel.style.opacity = '0.4';
                 xeqtLabel.style.cursor = 'not-allowed';
-                xeqtLabel.title = 'XEQT benchmark overlay is available in All Time and Last 52W views';
+                xeqtLabel.title = 'XEQT benchmark overlay is available when viewing a single year, Last 52W, or All Time';
             }
             xeqtInput.disabled = true;
         } else {
             if (xeqtLabel) {
                 xeqtLabel.style.opacity = '1';
                 xeqtLabel.style.cursor = 'pointer';
-                xeqtLabel.title = 'Compare your portfolio growth with holding 100% XEQT over the selected timeframe';
+                xeqtLabel.title = currentMainMode === 'years'
+                    ? 'Compare your portfolio growth with holding 100% XEQT over the selected year'
+                    : 'Compare your portfolio growth with holding 100% XEQT over the selected timeframe';
             }
             xeqtInput.disabled = false;
         }
+        xeqtInput.checked = currentMainOverlayXeqt;
     }
 }
 
@@ -816,7 +835,7 @@ function syncMainTimeframeButtons(history) {
     container.innerHTML = html;
 }
 
-function setMainTimeframe(tf) {
+async function setMainTimeframe(tf) {
     if (tf === 'all' || tf === 'last-52') {
         currentMainMode = 'single';
         currentMainSingleTimeframe = tf;
@@ -849,6 +868,14 @@ function setMainTimeframe(tf) {
         }
     }
 
+    if (currentMainOverlayXeqt && (!rawBenchmarks || !rawBenchmarks.benchmarks) && typeof getBenchmarks === 'function') {
+        try {
+            rawBenchmarks = await getBenchmarks();
+        } catch (e) {
+            console.warn('Could not load benchmarks:', e);
+        }
+    }
+
     updateMainTimeframeButtonsUI();
     renderMainProgressionChart();
 }
@@ -856,38 +883,53 @@ function setMainTimeframe(tf) {
 function setMainUnit(unit) {
     if (unit === 'CAD' || unit === 'USD') {
         currentMainCurrency = unit;
-        currentMainUnit = unit;
+        currentMainUnit = 'VAL';
     } else if (unit === 'PCT' || unit === '%') {
         currentMainUnit = 'PCT';
+    } else if (unit === 'VAL' || unit === '$') {
+        currentMainUnit = 'VAL';
     }
     updateMainUnitButtonsUI();
     renderMainProgressionChart();
 }
 
 function setMainCurrency(curr) {
-    setMainUnit(curr);
+    if (curr === 'CAD' || curr === 'USD') {
+        currentMainCurrency = curr;
+    }
+    updateMainUnitButtonsUI();
+    renderMainProgressionChart();
 }
 
 function updateMainUnitButtonsUI() {
     if (typeof document === 'undefined') return;
     const btnCad = document.getElementById('btn-main-cur-cad');
     const btnUsd = document.getElementById('btn-main-cur-usd');
+    const btnVal = document.getElementById('btn-main-unit-val');
     const btnPct = document.getElementById('btn-main-unit-pct');
 
     if (btnCad) {
-        const isActive = currentMainUnit === 'CAD';
+        const isActive = currentMainCurrency === 'CAD';
         btnCad.classList.toggle('active', isActive);
         btnCad.style.background = isActive ? '#1f2328' : 'white';
         btnCad.style.color = isActive ? 'white' : '#24292f';
     }
     if (btnUsd) {
-        const isActive = currentMainUnit === 'USD';
+        const isActive = currentMainCurrency === 'USD';
         btnUsd.classList.toggle('active', isActive);
         btnUsd.style.background = isActive ? '#1f2328' : 'white';
         btnUsd.style.color = isActive ? 'white' : '#24292f';
     }
+
+    const isPct = currentMainUnit === 'PCT';
+    if (btnVal) {
+        const isActive = !isPct;
+        btnVal.classList.toggle('active', isActive);
+        btnVal.style.background = isActive ? '#1f2328' : 'white';
+        btnVal.style.color = isActive ? 'white' : '#24292f';
+    }
     if (btnPct) {
-        const isActive = currentMainUnit === 'PCT';
+        const isActive = isPct;
         btnPct.classList.toggle('active', isActive);
         btnPct.style.background = isActive ? '#1f2328' : 'white';
         btnPct.style.color = isActive ? 'white' : '#24292f';
@@ -939,12 +981,12 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     const isPct = currentMainUnit === 'PCT';
 
     if (titleEl) {
+        const curLabel = currency === 'USD' ? 'USD' : 'CAD';
         if (isPct) {
             titleEl.textContent = timeframe === 'all'
-                ? '📈 Net Worth Progression (% Return - All Time)'
-                : '📈 Net Worth Progression (% Return - Last 52 Weeks)';
+                ? `📈 Net Worth Progression (% Return - All Time - ${curLabel})`
+                : `📈 Net Worth Progression (% Return - Last 52 Weeks - ${curLabel})`;
         } else {
-            const curLabel = currency === 'USD' ? 'USD' : 'CAD';
             titleEl.textContent = timeframe === 'all'
                 ? `📈 Net Worth Progression (All Time - ${curLabel})`
                 : `📈 Net Worth Progression (Last 52 Weeks - ${curLabel})`;
@@ -1146,7 +1188,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 </div>
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
+                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
                 </div>
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
                     Spread: ${spreadSign}${lastItem.spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(lastItem.spreadVal, currency)})
@@ -1204,7 +1246,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 xeqtHtml = `
                     <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                            <span style="color: #4ade80; font-weight: 700;">🟢 XEQT Benchmark (${currency}):</span>
                             <strong style="color: #4ade80;">${isPct ? xeqtRetStr : xeqtValStr}</strong>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-bottom: 4px;">
@@ -1295,7 +1337,7 @@ function buildMainYearOverlaySeries(history, selectedYears, currency = 'CAD', un
         if (year === '2024' && is2024Overlay && yearSeries.length > 0) {
             const firstRec = recs[0];
             const firstFrac = getDayOfYearFraction(firstRec.date);
-            const isCurrencyUnit = unit === 'CAD' || unit === 'USD';
+            const isCurrencyUnit = unit !== 'PCT';
 
             // Find candidate nodes across all other overlaid years near 2024's start week
             const candidateNodes = [];
@@ -1536,14 +1578,14 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const selectedYearsList = Array.from(currentMainSelectedYears).sort();
     const isPct = currentMainUnit === 'PCT';
 
+    const curLabel = currency === 'USD' ? 'USD' : 'CAD';
     if (titleEl) {
         const sortedDesc = [...selectedYearsList].reverse();
         if (isPct) {
             titleEl.textContent = sortedDesc.length > 1
                 ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression (% Year ${sortedDesc[0]})`;
+                : `📈 Net Worth Progression (% Year ${sortedDesc[0]} - ${curLabel})`;
         } else {
-            const curLabel = currency === 'USD' ? 'USD' : 'CAD';
             titleEl.textContent = sortedDesc.length > 1
                 ? `📈 Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
                 : `📈 Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
@@ -1551,11 +1593,75 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 
     const overlayData = buildMainYearOverlaySeries(rawHistory, currentMainSelectedYears, currency, currentMainUnit);
-    const { yearSeries, paddedMin, paddedMax, paddedDollarMin, paddedDollarMax, step } = overlayData;
+    let { yearSeries, paddedMin, paddedMax, paddedDollarMin, paddedDollarMax, step } = overlayData;
 
     if (yearSeries.length === 0) {
         box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
         return;
+    }
+
+    const isSingleYear = selectedYearsList.length === 1;
+    const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
+    const currentXeqtPrice = xeqtBenchmark?.currentPrice;
+    const showXeqt = isSingleYear && currentMainOverlayXeqt && xeqtPrices.length > 0;
+    let xeqtPoints = [];
+
+    if (showXeqt && typeof computeXeqtProgressionOverlay === 'function') {
+        const s0 = yearSeries[0];
+        const recs = s0.records || [];
+        if (recs.length > 0) {
+            const xeqtOverlayData = computeXeqtProgressionOverlay(recs, rawHistory, xeqtPrices, currency, currentXeqtPrice);
+
+            // Jan 1 Anchor if portfolio series has an anchor
+            if (s0.points.length > 0 && s0.points[0].isAnchor) {
+                xeqtPoints.push({
+                    date: s0.points[0].date,
+                    fraction: 0.0,
+                    pct: 0.0,
+                    val: s0.points[0].val,
+                    isAnchor: true,
+                    data: null
+                });
+            }
+
+            xeqtOverlayData.forEach((item, idx) => {
+                xeqtPoints.push({
+                    date: item.date,
+                    fraction: getDayOfYearFraction(item.date),
+                    pct: item.returnPct,
+                    val: item.val,
+                    isAnchor: false,
+                    data: item,
+                    idx: idx
+                });
+            });
+
+            // Adjust min/max bounds so XEQT is fully visible and not clipped
+            const allPcts = [...overlayData.allPcts, ...xeqtPoints.map(p => p.pct)];
+            const allVals = [...overlayData.allVals, ...xeqtPoints.map(p => p.val)];
+
+            if (isPct) {
+                const minPct = Math.min(...allPcts);
+                const maxPct = Math.max(...allPcts);
+                const span = maxPct - minPct;
+                const pad = span > 0 ? Math.max(1, span * 0.1) : 4;
+
+                step = 5;
+                if (span + 2 * pad > 40) step = 10;
+                else if (span + 2 * pad <= 14) step = 2;
+                else if (span + 2 * pad <= 6) step = 1;
+
+                paddedMin = Math.floor((minPct - pad) / step) * step;
+                paddedMax = Math.ceil((maxPct + pad) / step) * step;
+            } else {
+                const minVal = Math.min(...allVals);
+                const maxVal = Math.max(...allVals);
+                const dollarRange = maxVal - minVal || 10000;
+                paddedDollarMin = Math.floor(Math.max(0, minVal - dollarRange * 0.08) / 10000) * 10000;
+                paddedDollarMax = Math.ceil((maxVal + dollarRange * 0.08) / 10000) * 10000;
+            }
+        }
     }
 
     let getY;
@@ -1667,6 +1773,28 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         }).join('');
     });
 
+    let xeqtPathHtml = '';
+    let xeqtPointsHtml = '';
+    let xeqtPlotPoints = [];
+
+    if (showXeqt && xeqtPoints.length > 0) {
+        xeqtPlotPoints = xeqtPoints.map((p, i) => ({
+            x: padding.left + p.fraction * plotW,
+            y: getY(isPct ? p.pct : p.val),
+            p,
+            idx: i
+        }));
+
+        const xeqtLinePathD = 'M ' + xeqtPlotPoints.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' L ');
+        xeqtPathHtml = `
+            <path d="${xeqtLinePathD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="4,4" stroke-linecap="round" stroke-linejoin="round" />
+        `;
+
+        xeqtPointsHtml = xeqtPlotPoints.filter(pt => !pt.p.isAnchor).map(pt => `
+            <circle class="main-year-xeqt-point" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" />
+        `).join('');
+    }
+
     const crosshairHtml = `
         <line id="main-overlay-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
         <g id="main-overlay-hover-dots" style="pointer-events: none;"></g>
@@ -1681,7 +1809,9 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             ${yGridHtml}
             ${xGridHtml}
             ${pathsHtml}
+            ${xeqtPathHtml}
             ${pointsHtml}
+            ${xeqtPointsHtml}
             ${crosshairHtml}
         </svg>
     `;
@@ -1742,6 +1872,24 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 }
             });
 
+            let closestXeqt = null;
+            if (showXeqt && xeqtPlotPoints.length > 0) {
+                let closestXeqtDist = Infinity;
+                xeqtPlotPoints.forEach(pt => {
+                    const dist = Math.abs(pt.p.fraction - frac);
+                    if (dist < closestXeqtDist) {
+                        closestXeqtDist = dist;
+                        closestXeqt = pt;
+                    }
+                });
+
+                if (closestXeqt && closestXeqtDist <= 0.05) {
+                    hoverDotsHtml += `
+                        <circle cx="${closestXeqt.x.toFixed(1)}" cy="${closestXeqt.y.toFixed(1)}" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" />
+                    `;
+                }
+            }
+
             hoverDotsGroup.innerHTML = hoverDotsHtml;
 
             const approxMonthIdx = Math.max(0, Math.min(11, Math.floor(frac * 12)));
@@ -1794,6 +1942,47 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     </div>
                 `;
             });
+
+            if (showXeqt && closestXeqt && closestXeqt.p.data) {
+                const xPct = closestXeqt.p.pct;
+                const xVal = closestXeqt.p.val;
+                const xSign = xPct >= 0 ? '+' : '';
+                const xColor = xPct >= 0 ? '#4ade80' : '#f87171';
+                const xValStr = formatCurrency(xVal, currency);
+                const xRetStr = `${xSign}${xPct.toFixed(2)}%`;
+
+                const portPoint = activeYearDetails[0]?.point;
+                const portPct = portPoint ? portPoint.pct : 0;
+                const portVal = portPoint ? portPoint.val : 0;
+                const spreadPct = portPct - xPct;
+                const spreadVal = portVal - xVal;
+                const spreadSign = spreadPct >= 0 ? '+' : '';
+                const spreadColor = spreadPct >= 0 ? '#4ade80' : '#f87171';
+
+                tipHtml += `
+                    <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.15);">
+                        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px;">
+                            <span style="display: flex; align-items: center; gap: 5px;">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                                <strong style="color: #4ade80;">🟢 XEQT Benchmark (${currency}):</strong>
+                            </span>
+                            <span style="display: flex; align-items: baseline; gap: 6px;">
+                                ${isPct ? `
+                                    <strong style="color: ${xColor}; font-size: 0.88rem;">${xRetStr}</strong>
+                                    <span style="color: #cbd5e1; font-size: 0.74rem;">(${xValStr})</span>
+                                ` : `
+                                    <strong style="color: #ffffff; font-size: 0.88rem;">${xValStr}</strong>
+                                    <span style="color: ${xColor}; font-size: 0.74rem;">(${xRetStr})</span>
+                                `}
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                            <span>Spread:</span>
+                            <strong style="color: ${spreadColor};">${spreadSign}${spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(spreadVal, currency)})</strong>
+                        </div>
+                    </div>
+                `;
+            }
 
             if (activeYearDetails.length >= 2) {
                 const newest = activeYearDetails[0];
@@ -1882,6 +2071,30 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             `;
         }
 
+        if (showXeqt && xeqtPlotPoints.length > 0) {
+            const lastXeqt = xeqtPlotPoints[xeqtPlotPoints.length - 1].p;
+            const lastPort = yearSeries[0].points[yearSeries[0].points.length - 1];
+            const xeqtSign = lastXeqt.pct >= 0 ? '+' : '';
+            const xeqtColor = lastXeqt.pct >= 0 ? '#16a34a' : '#cf222e';
+            const spreadPct = lastPort.pct - lastXeqt.pct;
+            const spreadVal = lastPort.val - lastXeqt.val;
+            const spreadSign = spreadPct >= 0 ? '+' : '';
+            const spreadColor = spreadPct >= 0 ? '#16a34a' : '#cf222e';
+            const spreadBg = spreadPct >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+
+            itemsHtml += `
+                <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
+                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong>:
+                    <span style="font-weight: 700; color: ${xeqtColor};">${isPct ? `${xeqtSign}${lastXeqt.pct.toFixed(2)}%` : formatCurrency(lastXeqt.val, currency)}</span>
+                    <span style="color: #64748b; font-size: 0.74rem;">(${isPct ? formatCurrency(lastXeqt.val, currency) : `${xeqtSign}${lastXeqt.pct.toFixed(2)}%`})</span>
+                </div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
+                    Spread: ${spreadSign}${spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(spreadVal, currency)})
+                </div>
+            `;
+        }
+
         legendEl.innerHTML = itemsHtml;
     }
 }
@@ -1903,6 +2116,7 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         renderMainProgressionChart,
+        renderMainYearOverlayChart,
         toggleMainXeqtOverlay,
         calculateTimeBack,
         setMainTimeframe,
@@ -1926,7 +2140,12 @@ if (typeof module !== 'undefined' && module.exports) {
             currentMainSelectedYears.clear();
             currentMainTimeframe = 'last-52';
             currentMainCurrency = 'CAD';
-            currentMainUnit = 'CAD';
+            currentMainUnit = 'VAL';
+            currentMainOverlayXeqt = false;
+        },
+        setMainChartData: (history, benchmarks) => {
+            rawHistory = history || [];
+            rawBenchmarks = benchmarks;
         }
     };
 }
