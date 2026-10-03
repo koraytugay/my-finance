@@ -188,7 +188,10 @@ function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
 
     const historyCopy = history.map(r => ({ ...r }));
     const latest = historyCopy[historyCopy.length - 1];
-    const isLatestCurrentOrFuture = latest.date && latest.date >= todayStr;
+    const latestDate = latest && latest.date ? new Date(latest.date + 'T00:00:00Z') : null;
+    const todayDate = new Date(todayStr + 'T00:00:00Z');
+    const diffDays = latestDate ? Math.round((todayDate - latestDate) / (1000 * 60 * 60 * 24)) : 999;
+    const isLatestCurrentOrFuture = diffDays <= 6;
 
     if (isLatestCurrentOrFuture) {
         // The latest record is already the current week (e.g. October 2, 2026)

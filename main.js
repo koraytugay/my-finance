@@ -1171,8 +1171,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     // XEQT Benchmark line and points
     let xeqtPathHtml = '';
     let xeqtPointsHtml = '';
+    let xeqtPoints = [];
     if (showXeqt && xeqtSeries.length > 0) {
-        const xeqtPoints = xeqtSeries.map((x, i) => {
+        xeqtPoints = xeqtSeries.map((x, i) => {
             const plotVal = isPct ? x.returnPct : x.val;
             return {
                 x: getX(i),
@@ -2209,6 +2210,8 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     hoverDotsHtml += `
                         <circle cx="${closestXeqt.x.toFixed(1)}" cy="${closestXeqt.y.toFixed(1)}" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" />
                     `;
+                } else {
+                    closestXeqt = null;
                 }
             }
 

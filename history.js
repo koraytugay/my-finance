@@ -419,7 +419,7 @@ async function toggleHistXeqtOverlay(checked) {
             console.warn('Could not load benchmarks:', e);
         }
     }
-    const currency = document.getElementById('currency-toggle')?.value || 'CAD';
+    const currency = (typeof document !== 'undefined' && document.getElementById('currency-toggle')?.value) || 'CAD';
     renderChart(currentChartRecords && currentChartRecords.length > 0 ? currentChartRecords : filteredHistory, currency);
 }
 
@@ -496,35 +496,47 @@ function renderChart(records, currency = 'CAD') {
     }
 
     // Main line path & area path
-    const points = records.map((r, i) => `${getX(i).toFixed(1)},${getY(r[valKey]).toFixed(1)}`);
+    const portPoints = records.map((r, i) => {
+        const cx = getX(i);
+        const cy = getY(r[valKey]);
+        return {
+            x: cx,
+            y: cy,
+            item: r,
+            idx: i
+        };
+    });
+    const points = portPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`);
     const linePathD = 'M ' + points.join(' L ');
     const areaPathD = `${linePathD} L ${getX(records.length - 1).toFixed(1)},${padding.top + plotH} L ${getX(0).toFixed(1)},${padding.top + plotH} Z`;
 
     // Interactive hover points
-    const hoverPointsHtml = records.map((r, i) => {
-        const cx = getX(i).toFixed(1);
-        const cy = getY(r[valKey]).toFixed(1);
-        return `
-            <circle class="chart-point" data-idx="${i}" cx="${cx}" cy="${cy}" r="4" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
-        `;
-    }).join('');
+    const hoverPointsHtml = portPoints.map((p, i) => `
+        <circle class="chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+    `).join('');
 
     // XEQT Benchmark line and points
     let xeqtPathHtml = '';
     let xeqtPointsHtml = '';
+    let xeqtPoints = [];
     if (showXeqt && xeqtSeries.length > 0) {
-        const xeqtPoints = xeqtSeries.map((x, i) => `${getX(i).toFixed(1)},${getY(x.val).toFixed(1)}`);
-        const xeqtLineD = 'M ' + xeqtPoints.join(' L ');
+        xeqtPoints = xeqtSeries.map((x, i) => {
+            const cx = getX(i);
+            const cy = getY(x.val);
+            return {
+                x: cx,
+                y: cy,
+                item: x,
+                idx: i
+            };
+        });
+        const xeqtLineD = 'M ' + xeqtPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
         xeqtPathHtml = `
             <path d="${xeqtLineD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
         `;
-        xeqtPointsHtml = xeqtSeries.map((x, i) => {
-            const cx = getX(i).toFixed(1);
-            const cy = getY(x.val).toFixed(1);
-            return `
-                <circle class="hist-xeqt-point" data-idx="${i}" cx="${cx}" cy="${cy}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
-            `;
-        }).join('');
+        xeqtPointsHtml = xeqtPoints.map((p, i) => `
+            <circle class="hist-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
+        `).join('');
     }
 
     const svg = `
@@ -608,8 +620,24 @@ function renderChart(records, currency = 'CAD') {
         if (!r || !pt) return '';
         const dateStr = formatDate(r.date);
         const totalVal = formatCurrency(r[valKey], currency);
-        const weeklyChangeStr = `${r.weeklyChangeCAD >= 0 ? '+' : ''}${formatCurrency(r.weeklyChangeCAD, 'CAD')} (${r.weeklyChangePct >= 0 ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%)`;
-        const changeColor = r.weeklyChangeCAD >= 0 ? '#16a34a' : '#cf222e';
+        const isUSD = currency === 'USD';
+        const recRate = (r.totalCAD && r.totalUSD)
+            ? (r.totalUSD / r.totalCAD)
+            : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof allBenchmarks !== 'undefined' && allBenchmarks?.fx?.cadUsdRate) || 0.7073);
+        const weeklyChangeVal = isUSD
+            ? (r.weeklyChangeUSD !== undefined
+                ? r.weeklyChangeUSD
+                : (idx > 0 && records[idx - 1].totalUSD !== undefined
+                    ? (r.totalUSD - records[idx - 1].totalUSD)
+                    : (r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD * recRate : 0)))
+            : (r.weeklyChangeCAD || 0);
+        const weeklyPct = isUSD && idx > 0 && records[idx - 1].totalUSD > 0
+            ? ((r.totalUSD - records[idx - 1].totalUSD) / records[idx - 1].totalUSD) * 100
+            : (r.weeklyChangePct || 0);
+        const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
+        const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
+        const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
+        const changeColor = weeklyChangeVal >= 0 ? '#16a34a' : '#cf222e';
 
         let xeqtSection = '';
         if (showXeqt && xeqtSeries[idx]) {
@@ -640,13 +668,20 @@ function renderChart(records, currency = 'CAD') {
             `;
         }
 
+        const sVal = isUSD ? (r.stocks * recRate) : r.stocks;
+        const fVal = isUSD ? (r.fixed * recRate) : r.fixed;
+        const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
+        const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
+
         const badgeHtml = isHover
             ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
             : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
 
+        const weekPrefix = r.week ? `Week ${r.week} &bull; ` : '';
+
         return `
             <div class="chart-card-header">
-                <span class="chart-card-date">Week ${r.week} &bull; ${dateStr}</span>
+                <span class="chart-card-date">${weekPrefix}${dateStr}</span>
                 ${badgeHtml}
             </div>
             <div class="chart-card-primary-val">
@@ -660,19 +695,19 @@ function renderChart(records, currency = 'CAD') {
                 <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
                 <div class="chart-card-row">
                     <span>Stocks:</span>
-                    <strong>${formatCurrency(r.stocks)}</strong>
+                    <strong>${formatCurrency(sVal, currency)}</strong>
                 </div>
                 <div class="chart-card-row">
                     <span>Fixed Income:</span>
-                    <strong>${formatCurrency(r.fixed)}</strong>
+                    <strong>${formatCurrency(fVal, currency)}</strong>
                 </div>
                 <div class="chart-card-row">
                     <span>Precious Metals:</span>
-                    <strong>${formatCurrency(r.preciousMetals)}</strong>
+                    <strong>${formatCurrency(mVal, currency)}</strong>
                 </div>
                 <div class="chart-card-row">
                     <span>Crypto:</span>
-                    <strong>${formatCurrency(r.crypto)}</strong>
+                    <strong>${formatCurrency(cVal, currency)}</strong>
                 </div>
             </div>
             <div class="chart-card-footer">
@@ -826,6 +861,12 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         renderChart,
-        toggleHistXeqtOverlay
+        toggleHistXeqtOverlay,
+        setHistChartData: (history, benchmarks) => {
+            allHistory = history || [];
+            filteredHistory = history || [];
+            currentChartRecords = history || [];
+            allBenchmarks = benchmarks;
+        }
     };
 }
