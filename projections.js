@@ -90,12 +90,18 @@ function runProjections() {
     const inflationRate = parseFloat(document.getElementById('input-inflation-rate').value) / 100;
     const swrRate = parseFloat(document.getElementById('input-swr-rate').value) / 100;
     const targetSpend = parseFloat(document.getElementById('input-target-spend').value) || 60000;
+    const horizonInput = document.getElementById('input-horizon-years');
+    const horizonYears = horizonInput ? (parseInt(horizonInput.value, 10) || 20) : 20;
 
     // Update labels
     document.getElementById('label-monthly-save').textContent = formatCurrency(monthlySave);
     document.getElementById('label-return-rate').textContent = `${(nomReturnRate * 100).toFixed(2)}%`;
     document.getElementById('label-inflation-rate').textContent = `${(inflationRate * 100).toFixed(2)}%`;
     document.getElementById('label-swr-rate').textContent = `${(swrRate * 100).toFixed(1)}%`;
+    const labelHorizon = document.getElementById('label-horizon-years');
+    if (labelHorizon) {
+        labelHorizon.textContent = `${horizonYears} Years`;
+    }
 
     // Effective return based on mode
     let effectiveReturn = nomReturnRate;
@@ -115,10 +121,6 @@ function runProjections() {
 
     const fireProgressPct = fireTarget > 0 ? Math.min(100, (startingNW / fireTarget) * 100) : 100;
     document.getElementById('stat-fire-progress').textContent = `${fireProgressPct.toFixed(1)}% of freedom goal reached`;
-
-    // Coast FIRE in 20 years ($0 additions)
-    const coast20 = startingNW * Math.pow(1 + effectiveReturn, 20);
-    document.getElementById('stat-coast-20yr').textContent = formatCurrency(coast20);
 
     // Milestones Calculation
     const milestones = [
@@ -206,7 +208,27 @@ function runProjections() {
         });
     }
 
-    renderTable(tableData);
+    // Horizon Projection & Coast FIRE
+    const coastBal = startingNW * Math.pow(1 + effectiveReturn, horizonYears);
+    const projectedBal = chartPoints[horizonYears] ? chartPoints[horizonYears].expected : coastBal;
+
+    const statCoastVal = document.getElementById('stat-coast-20yr');
+    const statCoastLabel = document.getElementById('stat-coast-label');
+    const statCoastSub = document.getElementById('stat-coast-sub');
+
+    if (statCoastVal) {
+        if (monthlySave > 0) {
+            statCoastVal.textContent = formatCurrency(projectedBal);
+            if (statCoastLabel) statCoastLabel.textContent = `Projection in ${horizonYears} Yrs`;
+            if (statCoastSub) statCoastSub.textContent = `Coast ($0 added): ${formatCurrency(coastBal)}`;
+        } else {
+            statCoastVal.textContent = formatCurrency(coastBal);
+            if (statCoastLabel) statCoastLabel.textContent = `Coast FIRE in ${horizonYears} Yrs`;
+            if (statCoastSub) statCoastSub.textContent = `With $0 further savings`;
+        }
+    }
+
+    renderTable(tableData, horizonYears);
     renderProjectionChart();
 }
 
@@ -326,14 +348,18 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
     document.getElementById('stat-fire-date').textContent = fireDateStr;
 }
 
-function renderTable(tableData) {
+function renderTable(tableData, highlightYear = null) {
     const tbody = document.getElementById('projections-table-body');
     tbody.innerHTML = '';
 
     tableData.forEach(row => {
+        const isTarget = highlightYear && row.year === highlightYear;
         const tr = document.createElement('tr');
+        if (isTarget) {
+            tr.style.background = '#f0f9ff';
+        }
         tr.innerHTML = `
-            <td style="font-weight: 700;">Year ${row.year}</td>
+            <td style="font-weight: 700;">Year ${row.year}${isTarget ? ' <span style="font-size: 0.72rem; color: #0969da; font-weight: 800; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
             <td style="color: #64748b;">${row.timeline}</td>
             <td style="text-align: right;">${formatCurrency(row.startBalance)}</td>
             <td style="text-align: right; color: #0969da;">+${formatCurrency(row.annualContribution)}</td>
@@ -470,9 +496,17 @@ function buildProjectionCardHtml(point, isHover = false) {
     const annualSWR = point.expected * swrRate;
     const monthlySWR = annualSWR / 12;
 
-    const badgeHtml = isHover
-        ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-        : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
+    const horizonInput = document.getElementById('input-horizon-years');
+    const horizonYears = horizonInput ? (parseInt(horizonInput.value, 10) || 20) : 20;
+
+    let badgeHtml = '';
+    if (isHover) {
+        badgeHtml = `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`;
+    } else if (point.year === horizonYears) {
+        badgeHtml = `<span class="chart-card-badge" style="background: #ede9fe; color: #6d28d9;">TARGET (YR ${point.year})</span>`;
+    } else {
+        badgeHtml = `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
+    }
 
     return `
         <div class="chart-card-header">
@@ -539,7 +573,7 @@ function attachChartTooltip(wrap, padL, padT, padB, plotW, plotH, width, height,
         return padT + plotH - (val / maxVal) * plotH;
     }
 
-    function setActiveYear(yearIndex) {
+    function setActiveYear(yearIndex, isHover = true) {
         const point = chartPoints[yearIndex];
         if (!point) return;
 
@@ -571,20 +605,14 @@ function attachChartTooltip(wrap, padL, padT, padB, plotW, plotH, width, height,
             dotInv.style.display = 'block';
         }
 
-        renderProjectionInfoCard(buildProjectionCardHtml(point, true), true);
+        renderProjectionInfoCard(buildProjectionCardHtml(point, isHover), isHover);
     }
 
     function clearActive() {
-        if (crosshair) crosshair.style.display = 'none';
-        if (dotExp) dotExp.style.display = 'none';
-        if (dotOpt) dotOpt.style.display = 'none';
-        if (dotCons) dotCons.style.display = 'none';
-        if (dotInv) dotInv.style.display = 'none';
-
-        const defaultPt = chartPoints[chartPoints.length - 1];
-        if (defaultPt) {
-            renderProjectionInfoCard(buildProjectionCardHtml(defaultPt, false), false);
-        }
+        const horizonInput = document.getElementById('input-horizon-years');
+        const horizonYears = horizonInput ? (parseInt(horizonInput.value, 10) || 20) : 20;
+        const targetYear = Math.min(30, Math.max(0, horizonYears));
+        setActiveYear(targetYear, false);
     }
 
     const targetEl = overlay || svgEl;
@@ -612,18 +640,15 @@ function attachChartTooltip(wrap, padL, padT, padB, plotW, plotH, width, height,
 
         const pct = (svgMouseX - padL) / plotW;
         const yearIndex = Math.min(30, Math.max(0, Math.round(pct * 30)));
-        setActiveYear(yearIndex);
+        setActiveYear(yearIndex, true);
     });
 
     targetEl.addEventListener('mouseleave', () => {
         clearActive();
     });
 
-    // Default to 30-year end state
-    const defaultPt = chartPoints[chartPoints.length - 1];
-    if (defaultPt) {
-        renderProjectionInfoCard(buildProjectionCardHtml(defaultPt, false), false);
-    }
+    // Default to chosen horizon state
+    clearActive();
 }
 
 function formatCurrencyShort(val) {

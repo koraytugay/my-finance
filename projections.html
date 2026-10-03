@@ -144,8 +144,8 @@
                 </div>
                 <div class="stat-card">
                     <span class="stat-number" id="stat-coast-20yr">$0.00</span>
-                    <span class="stat-label">Coast FIRE in 20 Yrs</span>
-                    <span class="stat-sub">With $0 further savings</span>
+                    <span class="stat-label" id="stat-coast-label">Projection in 20 Yrs</span>
+                    <span class="stat-sub" id="stat-coast-sub">With $0 further savings</span>
                 </div>
             </div>
 
@@ -214,6 +214,14 @@
                             <span>Target Annual Spend ($ CAD/yr)</span>
                         </label>
                         <input type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
+                    </div>
+
+                    <div class="param-item">
+                        <label for="input-horizon-years">
+                            <span>Projection Horizon</span>
+                            <span id="label-horizon-years" style="color: #6366f1;">20 Years</span>
+                        </label>
+                        <input type="range" id="input-horizon-years" min="5" max="20" step="1" value="20" oninput="runProjections()">
                     </div>
                 </div>
             </div>
@@ -298,6 +306,6 @@
     </div>
 
     <script src="api.js?v=3.2"></script>
-    <script src="projections.js?v=3.3"></script>
+    <script src="projections.js?v=3.4"></script>
 </body>
 </html>
