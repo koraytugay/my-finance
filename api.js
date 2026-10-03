@@ -184,74 +184,39 @@ function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
     const totalStocks = usStocks + devStocks + canStocks + emStocks;
     const fx = Number(cadUsdRate) > 0 ? Number(cadUsdRate) : 0.7073;
     const liveTotalUSD = Math.round(liveTotalCAD * fx);
-    const todayStr = new Date().toISOString().slice(0, 10);
-
     const historyCopy = history.map(r => ({ ...r }));
     const latest = historyCopy[historyCopy.length - 1];
-    const latestDate = latest && latest.date ? new Date(latest.date + 'T00:00:00Z') : null;
-    const todayDate = new Date(todayStr + 'T00:00:00Z');
-    const diffDays = latestDate ? Math.round((todayDate - latestDate) / (1000 * 60 * 60 * 24)) : 999;
-    const isLatestCurrentOrFuture = diffDays <= 6;
 
-    if (isLatestCurrentOrFuture) {
-        // The latest record is already the current week (e.g. October 2, 2026)
-        // Determine the previous closed week's total CAD and USD to compute accurate live delta
-        let prevTotalCAD = 0;
-        let prevTotalUSD = 0;
+    // The latest record from Google Sheets is always THIS active week.
+    // Determine the previous closed week's total CAD and USD to compute accurate live delta.
+    let prevTotalCAD = 0;
+    let prevTotalUSD = 0;
 
-        if (historyCopy.length >= 2) {
-            const prev = historyCopy[historyCopy.length - 2];
-            prevTotalCAD = Number(prev.totalCAD) || 0;
-            prevTotalUSD = Number(prev.totalUSD) || Math.round(prevTotalCAD * fx);
-        } else {
-            prevTotalCAD = (Number(latest.totalCAD) || liveTotalCAD) - (Number(latest.weeklyChangeCAD) || 0);
-            prevTotalUSD = (Number(latest.totalUSD) || liveTotalUSD) - (Number(latest.weeklyChangeUSD) || 0);
-        }
-
-        const liveWeeklyChangeCAD = liveTotalCAD - prevTotalCAD;
-        const liveWeeklyChangePct = prevTotalCAD > 0 ? (liveWeeklyChangeCAD / prevTotalCAD) * 100 : 0;
-        const liveWeeklyChangeUSD = liveTotalUSD - prevTotalUSD;
-        const liveWeeklyChangeUSDPct = prevTotalUSD > 0 ? (liveWeeklyChangeUSD / prevTotalUSD) * 100 : 0;
-
-        latest.totalCAD = liveTotalCAD;
-        latest.totalUSD = liveTotalUSD;
-        latest.weeklyChangeCAD = liveWeeklyChangeCAD;
-        latest.weeklyChangePct = liveWeeklyChangePct;
-        latest.weeklyChangeUSD = liveWeeklyChangeUSD;
-        latest.weeklyChangeUSDPct = liveWeeklyChangeUSDPct;
-        latest.stocks = totalStocks;
-        latest.fixed = fixed;
-        latest.preciousMetals = metals;
-        latest.crypto = crypto;
-        latest.isLive = true;
+    if (historyCopy.length >= 2) {
+        const prev = historyCopy[historyCopy.length - 2];
+        prevTotalCAD = Number(prev.totalCAD) || 0;
+        prevTotalUSD = Number(prev.totalUSD) || Math.round(prevTotalCAD * fx);
     } else {
-        // Latest record is a previous closed week (e.g. Sep 25, 2026)
-        // Append in-progress current week
-        const prevTotalCAD = Number(latest.totalCAD) || 0;
-        const prevTotalUSD = Number(latest.totalUSD) || Math.round(prevTotalCAD * fx);
-
-        const liveWeeklyChangeCAD = liveTotalCAD - prevTotalCAD;
-        const liveWeeklyChangePct = prevTotalCAD > 0 ? (liveWeeklyChangeCAD / prevTotalCAD) * 100 : 0;
-        const liveWeeklyChangeUSD = liveTotalUSD - prevTotalUSD;
-        const liveWeeklyChangeUSDPct = prevTotalUSD > 0 ? (liveWeeklyChangeUSD / prevTotalUSD) * 100 : 0;
-
-        historyCopy.push({
-            week: (Number(latest.week) || 0) + 1,
-            date: todayStr,
-            totalCAD: liveTotalCAD,
-            totalUSD: liveTotalUSD,
-            weeklyChangeCAD: liveWeeklyChangeCAD,
-            weeklyChangePct: liveWeeklyChangePct,
-            weeklyChangeUSD: liveWeeklyChangeUSD,
-            weeklyChangeUSDPct: liveWeeklyChangeUSDPct,
-            stocks: totalStocks,
-            fixed: fixed,
-            preciousMetals: metals,
-            crypto: crypto,
-            note: 'Current live week',
-            isLive: true
-        });
+        prevTotalCAD = (Number(latest.totalCAD) || liveTotalCAD) - (Number(latest.weeklyChangeCAD) || 0);
+        prevTotalUSD = (Number(latest.totalUSD) || liveTotalUSD) - (Number(latest.weeklyChangeUSD) || 0);
     }
+
+    const liveWeeklyChangeCAD = liveTotalCAD - prevTotalCAD;
+    const liveWeeklyChangePct = prevTotalCAD > 0 ? (liveWeeklyChangeCAD / prevTotalCAD) * 100 : 0;
+    const liveWeeklyChangeUSD = liveTotalUSD - prevTotalUSD;
+    const liveWeeklyChangeUSDPct = prevTotalUSD > 0 ? (liveWeeklyChangeUSD / prevTotalUSD) * 100 : 0;
+
+    latest.totalCAD = liveTotalCAD;
+    latest.totalUSD = liveTotalUSD;
+    latest.weeklyChangeCAD = liveWeeklyChangeCAD;
+    latest.weeklyChangePct = liveWeeklyChangePct;
+    latest.weeklyChangeUSD = liveWeeklyChangeUSD;
+    latest.weeklyChangeUSDPct = liveWeeklyChangeUSDPct;
+    latest.stocks = totalStocks;
+    latest.fixed = fixed;
+    latest.preciousMetals = metals;
+    latest.crypto = crypto;
+    latest.isLive = true;
 
     // Recompute running peak and drawdown across the enriched history
     let runningPeak = 0;
