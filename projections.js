@@ -129,14 +129,16 @@ function runProjections() {
         { label: `FIRE Goal (${formatCurrency(fireTarget)})`, target: fireTarget, isFire: true }
     ];
 
-    // Remove duplicates if fireTarget is close to one of the presets
-    const uniqueMilestones = milestones.filter((m, idx, arr) => {
-        if (!m.isFire) return true;
-        const existsClose = arr.some((other, oIdx) => !other.isFire && Math.abs(other.target - m.target) < 25000);
-        return !existsClose;
-    });
+    // Remove duplicate presets if the FIRE Goal is close to one of them (keep the FIRE Goal!)
+    const uniqueMilestones = milestones
+        .filter(m => {
+            if (m.isFire) return true; // Always preserve the user's FIRE Goal
+            const isOverlappedByFire = Math.abs(m.target - fireTarget) < 25000;
+            return !isOverlappedByFire; // Drop generic preset if overlapped
+        })
+        .sort((a, b) => a.target - b.target);
 
-    renderMilestones(uniqueMilestones, startingNW, monthlySave, effectiveReturn);
+    renderMilestones(uniqueMilestones, startingNW, monthlySave, effectiveReturn, fireTarget);
 
     // 30-Year Table & Chart Data
     const tableData = [];
@@ -208,7 +210,7 @@ function runProjections() {
     renderProjectionChart();
 }
 
-function renderMilestones(milestones, startingNW, monthlySave, rate) {
+function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget) {
     const container = document.getElementById('milestones-container');
     container.innerHTML = '';
 
@@ -216,6 +218,39 @@ function renderMilestones(milestones, startingNW, monthlySave, rate) {
     const curDate = new Date();
     let fireTimeStr = '-';
     let fireDateStr = '-';
+
+    // Calculate FIRE projection directly from fireTarget (defensive against milestone list filtering)
+    const effectiveFireTarget = (typeof fireTarget === 'number' && fireTarget > 0)
+        ? fireTarget
+        : (milestones.find(m => m.isFire)?.target || 0);
+
+    if (effectiveFireTarget > 0) {
+        let fMonths = 0;
+        let fBal = startingNW;
+        let fReached = fBal >= effectiveFireTarget;
+
+        if (!fReached) {
+            while (fBal < effectiveFireTarget && fMonths < 600) {
+                fMonths++;
+                fBal = (fBal + monthlySave) * (1 + monthlyRate);
+            }
+        }
+
+        const fYearsRem = (fMonths / 12).toFixed(1);
+        const fTargetDate = new Date(curDate.getFullYear(), curDate.getMonth() + fMonths);
+        const fMonthYearStr = fTargetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+        if (fReached) {
+            fireTimeStr = 'Reached!';
+            fireDateStr = 'Financial Freedom Achieved';
+        } else if (fMonths >= 600) {
+            fireTimeStr = '> 50 yrs';
+            fireDateStr = 'Increase savings or returns';
+        } else {
+            fireTimeStr = `${fYearsRem} yrs`;
+            fireDateStr = `Projected ${fMonthYearStr} (${fMonths} mos)`;
+        }
+    }
 
     milestones.forEach(m => {
         let months = 0;
@@ -233,7 +268,7 @@ function renderMilestones(milestones, startingNW, monthlySave, rate) {
         const targetDate = new Date(curDate.getFullYear(), curDate.getMonth() + months);
         const monthYearStr = targetDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
 
-        if (m.isFire) {
+        if (m.isFire && (!effectiveFireTarget || effectiveFireTarget <= 0)) {
             if (reached) {
                 fireTimeStr = 'Reached!';
                 fireDateStr = 'Financial Freedom Achieved';
