@@ -183,7 +183,7 @@ function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
 
     const totalStocks = usStocks + devStocks + canStocks + emStocks;
     const fx = Number(cadUsdRate) > 0 ? Number(cadUsdRate) : 0.7073;
-    const liveTotalUSD = Math.round(liveTotalCAD * fx);
+    const liveTotalUSD = Number((liveTotalCAD * fx).toFixed(2));
     const historyCopy = history.map(r => ({ ...r }));
     const latest = historyCopy[historyCopy.length - 1];
 
@@ -195,7 +195,7 @@ function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
     if (historyCopy.length >= 2) {
         const prev = historyCopy[historyCopy.length - 2];
         prevTotalCAD = Number(prev.totalCAD) || 0;
-        prevTotalUSD = Number(prev.totalUSD) || Math.round(prevTotalCAD * fx);
+        prevTotalUSD = Number(prev.totalUSD) || Number((prevTotalCAD * fx).toFixed(2));
     } else {
         prevTotalCAD = (Number(latest.totalCAD) || liveTotalCAD) - (Number(latest.weeklyChangeCAD) || 0);
         prevTotalUSD = (Number(latest.totalUSD) || liveTotalUSD) - (Number(latest.weeklyChangeUSD) || 0);

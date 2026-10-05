@@ -400,7 +400,7 @@ function renderMainTopStats(mainData, holdings, history) {
  * Finds the earliest consecutive historical week that had a balance >= currentVal.
  */
 function calculateTimeBack(history, currentVal, currencyKey) {
-    if (!history || history.length === 0 || !currentVal || currentVal <= 0) {
+    if (!history || history.length <= 1 || !currentVal || currentVal <= 0) {
         return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
     }
 
@@ -414,8 +414,8 @@ function calculateTimeBack(history, currentVal, currencyKey) {
         return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
     }
 
-    // Walk backwards from latest history to find records >= currentVal
-    let i = history.length - 1;
+    // Walk backwards from previous historical record (excluding current active week) to find records >= currentVal
+    let i = history.length - 2;
     while (i >= 0 && (history[i][currencyKey] || 0) < currentVal) {
         i--;
     }

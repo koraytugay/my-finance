@@ -327,6 +327,30 @@ test('Financial Calculations Suite', async (t) => {
     assert.equal(athBack.weeks, 0);
   });
 
+  await t.test('Time setback correctly ignores self-comparison when latest week bounces during drawdown', () => {
+    // History where portfolio peaked at week 107 (491k), was 482k at week 103 (Aug 7),
+    // dropped to 477k at week 111, and bounced to 478.9k at week 112.
+    const reboundHistory = [
+      { week: 101, date: '2026-07-24', totalUSD: 462927 },
+      { week: 102, date: '2026-07-31', totalUSD: 469487 },
+      { week: 103, date: '2026-08-07', totalUSD: 482415 },
+      { week: 104, date: '2026-08-14', totalUSD: 489499 },
+      { week: 107, date: '2026-09-04', totalUSD: 491082 },
+      { week: 110, date: '2026-09-25', totalUSD: 480813 },
+      { week: 111, date: '2026-10-02', totalUSD: 477923 },
+      { week: 112, date: '2026-10-09', totalUSD: 478978.95 }
+    ];
+
+    const currentUSD = 478978.95;
+    const res = calculateTimeBack(reboundHistory, currentUSD, 'totalUSD');
+    assert.equal(res.isAth, false);
+    assert.equal(res.weeks, 10, 'Must be 10 weeks back to Jul 31, 2026 baseline before week 103 (Aug 7)');
+    assert.equal(res.record.week, 102);
+    assert.equal(res.record.date, '2026-07-31');
+    assert.equal(res.label, '10 weeks');
+    assert.ok(res.sub.includes('Jul 31, 2026'));
+  });
+
   await t.test('Rolling 52-week percentage overlay series normalization with current window', () => {
     const extremes = computeRolling52Windows(history, 'pct');
     assert.ok(extremes, 'computeRolling52Windows should return results for >=52 records');
