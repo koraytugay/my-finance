@@ -1504,6 +1504,28 @@ test('History Sanitization & Weekly Closed Period Integrity Suite', async (t) =>
     // Percentage return should be (3000 / 300000) * 100 = 1.0%
     assert.equal(Number(mainData.metrics.currentWeek.changePct.toFixed(2)), 1.00);
   });
+
+  await t.test('calculateMainData populates allTimeMetrics matching 52-week and YTD metrics structure', () => {
+    const history = [
+      { week: 1, date: '2024-01-01', totalCAD: 100000 },
+      { week: 26, date: '2024-07-01', totalCAD: 120000 },
+      { week: 52, date: '2025-01-01', totalCAD: 110000 }
+    ];
+    const holdings = [
+      { sum: 130000, registered: true, count: 1000, averageCost: 100 }
+    ];
+
+    const mainData = calculateMainData(holdings, history);
+    const atm = mainData.allTimeMetrics;
+
+    assert.ok(atm, 'allTimeMetrics must exist');
+    assert.equal(atm.totalValue, 130000);
+    assert.equal(atm.startValue, 100000);
+    assert.equal(atm.changeCAD, 30000);
+    assert.equal(atm.returnPct, '30.00%');
+    assert.equal(atm.peakValue, 130000);
+    assert.ok(atm.monthlyGainCAD > 0, 'monthlyGainCAD should be positive');
+  });
 });
 
 test('Portfolio Drawdown & High-Water Mark Integrity Suite', async (t) => {

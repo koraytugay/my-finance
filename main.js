@@ -278,17 +278,41 @@ function calculateMainData(holdings, history) {
     const startingCAD = firstHist ? (firstHist.totalCAD || 0) : totalCAD;
     const totalGrowthCAD = totalCAD - startingCAD;
     const totalGrowthPct = startingCAD > 0 ? (totalGrowthCAD / startingCAD) * 100 : 0;
+    const allTimeReturnPct = startingCAD > 0 ? (totalGrowthCAD / startingCAD * 100).toFixed(2) + '%' : '0.00%';
     const netSavingsCAD = Math.max(0, totalGrowthCAD - totalMarketGainsCAD);
+
+    let allTimeMonths = 1;
+    if (validHistory && validHistory.length > 1) {
+        const latestRecord = validHistory[validHistory.length - 1];
+        if (firstHist && firstHist.date && latestRecord && latestRecord.date) {
+            const d1 = new Date(firstHist.date + 'T00:00:00');
+            const d2 = new Date(latestRecord.date + 'T00:00:00');
+            const diffDays = (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
+            if (diffDays > 0) {
+                allTimeMonths = Math.max(1, diffDays / 30.4375);
+            }
+        }
+        if (allTimeMonths === 1 && validHistory.length > 1) {
+            allTimeMonths = Math.max(1, (validHistory.length - 1) / (52 / 12));
+        }
+    }
+    const allTimeMonthlyGainCAD = totalGrowthCAD / allTimeMonths;
 
     const allTimeMetrics = {
         totalCAD,
+        totalValue: totalCAD,
         totalBookCostCAD,
         totalMarketGainsCAD,
         marketRoiPct,
         startingCAD,
+        startValue: startingCAD,
         netSavingsCAD,
         totalGrowthCAD,
-        totalGrowthPct
+        changeCAD: totalGrowthCAD,
+        totalGrowthPct,
+        returnPct: allTimeReturnPct,
+        monthlyGainCAD: allTimeMonthlyGainCAD,
+        peakValue: athVal
     };
 
     return { assetClasses, accountTypes, categories, metrics, ytd, allTimeMetrics };
@@ -703,14 +727,47 @@ function renderPerformanceCards(mainData) {
     const ytdPeakEl = document.getElementById('ytd-peak-val');
     if (ytdPeakEl) ytdPeakEl.textContent = formatCurrency(y.peakValue !== undefined ? y.peakValue : (m.athValue || 0), 'CAD');
 
-    // --- 3. All-Time Wealth & Growth Decomposition Card ---
+    // --- 3. All-Time Wealth & Growth Tracking Card ---
     const atm = mainData.allTimeMetrics || {};
-    const atTotalEl = document.getElementById('alltime-net-worth');
-    if (atTotalEl) atTotalEl.textContent = formatCurrency(atm.totalCAD !== undefined ? atm.totalCAD : totalVal52, 'CAD');
 
-    const atBaselineEl = document.getElementById('alltime-baseline-val');
-    if (atBaselineEl) atBaselineEl.textContent = formatCurrency(atm.startingCAD || 0, 'CAD');
+    const atTotalVal = atm.totalValue !== undefined ? atm.totalValue : (atm.totalCAD !== undefined ? atm.totalCAD : totalVal52);
+    const atTotalValEl = document.getElementById('alltime-total-val') || document.getElementById('alltime-net-worth');
+    if (atTotalValEl) atTotalValEl.textContent = formatCurrency(atTotalVal, 'CAD');
 
+    const atStartVal = atm.startValue !== undefined ? atm.startValue : (atm.startingCAD || 0);
+    const atStartValEl = document.getElementById('alltime-start-val') || document.getElementById('alltime-baseline-val');
+    if (atStartValEl) atStartValEl.textContent = formatCurrency(atStartVal, 'CAD');
+
+    const atChangeVal = atm.changeCAD !== undefined ? atm.changeCAD : (atm.totalGrowthCAD || 0);
+    const atSign = atChangeVal >= 0 ? '+' : '';
+    const atColor = atChangeVal >= 0 ? '#16a34a' : '#dc2626';
+
+    const atGainEl = document.getElementById('alltime-total-gain') || document.getElementById('alltime-growth-val');
+    if (atGainEl) {
+        atGainEl.textContent = `${atSign}${formatCurrency(atChangeVal, 'CAD')}`;
+        atGainEl.style.color = atColor;
+    }
+
+    const atReturnPct = atm.returnPct || (atm.totalGrowthPct !== undefined ? `${(atm.totalGrowthPct || 0).toFixed(2)}%` : '0.00%');
+    const atHasSign = atReturnPct.startsWith('+') || atReturnPct.startsWith('-');
+    const atPctEl = document.getElementById('alltime-gain-pct') || document.getElementById('alltime-roi-pct');
+    if (atPctEl) {
+        atPctEl.textContent = `${!atHasSign ? atSign : ''}${atReturnPct}`;
+        atPctEl.style.color = atColor;
+    }
+
+    const atMonthlyEl = document.getElementById('alltime-monthly-rate');
+    const atMonthlyGain = atm.monthlyGainCAD || 0;
+    const atMonthlySign = atMonthlyGain >= 0 ? '+' : '';
+    if (atMonthlyEl) {
+        atMonthlyEl.textContent = `${atMonthlySign}${formatCurrency(atMonthlyGain, 'CAD')} / mo`;
+        atMonthlyEl.style.color = atMonthlyGain >= 0 ? '#16a34a' : '#dc2626';
+    }
+
+    const atPeakEl = document.getElementById('alltime-peak-val');
+    if (atPeakEl) atPeakEl.textContent = formatCurrency(atm.peakValue !== undefined ? atm.peakValue : (m.athValue || 0), 'CAD');
+
+    // Backward-compatibility hooks for legacy elements if present
     const atContribEl = document.getElementById('alltime-contributions-val');
     if (atContribEl) {
         atContribEl.textContent = `+${formatCurrency(atm.netSavingsCAD || 0, 'CAD')}`;
@@ -721,20 +778,6 @@ function renderPerformanceCards(mainData) {
         const sign = (atm.totalMarketGainsCAD || 0) >= 0 ? '+' : '';
         atEtfEl.textContent = `${sign}${formatCurrency(atm.totalMarketGainsCAD || 0, 'CAD')}`;
         atEtfEl.style.color = (atm.totalMarketGainsCAD || 0) >= 0 ? '#16a34a' : '#dc2626';
-    }
-
-    const atGrowthEl = document.getElementById('alltime-growth-val');
-    if (atGrowthEl) {
-        const sign = (atm.totalGrowthCAD || 0) >= 0 ? '+' : '';
-        atGrowthEl.textContent = `${sign}${formatCurrency(atm.totalGrowthCAD || 0, 'CAD')}`;
-        atGrowthEl.style.color = (atm.totalGrowthCAD || 0) >= 0 ? '#0969da' : '#dc2626';
-    }
-
-    const atRoiEl = document.getElementById('alltime-roi-pct');
-    if (atRoiEl) {
-        const sign = (atm.totalGrowthPct || 0) >= 0 ? '+' : '';
-        atRoiEl.textContent = `${sign}${(atm.totalGrowthPct || 0).toFixed(1)}% Growth since Week 1`;
-        atRoiEl.style.color = (atm.totalGrowthCAD || 0) >= 0 ? '#0969da' : '#dc2626';
     }
 }
 
