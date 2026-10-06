@@ -2,10 +2,10 @@ name: Sync Google Sheets Portfolio
 
 on:
   schedule:
-    # Monday to Friday every hour from 8:00 AM to 5:00 PM EDT (UTC-4 -> 12:00 to 21:00 UTC)
-    - cron: "0 12-21 * * 1-5"
-    # Saturday noon (16:00 UTC / 12:00 PM EDT) to capture Friday evening weekly carryover updates
-    - cron: "0 16 * * 6"
+    # Monday to Friday every hour from 8:23 AM to 5:23 PM EDT (UTC-4 -> 12:23 to 21:23 UTC)
+    - cron: "23 12-21 * * 1-5"
+    # Saturday 12:23 PM EDT (16:23 UTC) to capture Friday evening weekly carryover updates
+    - cron: "23 16 * * 6"
   workflow_dispatch:
 
 permissions:
@@ -18,7 +18,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: 1. Checkout Repository
         uses: actions/checkout@v4
