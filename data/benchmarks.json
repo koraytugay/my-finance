@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-07T18:59:32.298Z",
+  "updatedAt": "2026-10-07T23:37:42.310Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-07",
@@ -10,7 +10,7 @@
     "symbol": "USDCAD=X",
     "usdCadRate": 1.4255,
     "cadUsdRate": 0.7015,
-    "updatedAt": "2026-10-07T18:59:32.298Z"
+    "updatedAt": "2026-10-07T23:37:42.309Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -20,8 +20,8 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 45.93,
-      "returnPct": 44.25,
+      "currentPrice": 45.91,
+      "returnPct": 44.19,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
@@ -137,7 +137,7 @@
         45.41,
         45.97,
         45.95,
-        45.93
+        45.91
       ]
     },
     "VFV": {
@@ -147,8 +147,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 197.25,
-      "returnPct": 45.95,
+      "currentPrice": 197.26,
+      "returnPct": 45.96,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
@@ -264,7 +264,7 @@
         190.07,
         194.55,
         195.08,
-        197.25
+        197.26
       ]
     },
     "XBAL": {
@@ -274,8 +274,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.89,
-      "returnPct": 22.58,
+      "currentPrice": 35.87,
+      "returnPct": 22.51,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
@@ -391,7 +391,7 @@
         35.82,
         35.94,
         35.89,
-        35.89
+        35.87
       ]
     },
     "XCB": {
@@ -402,7 +402,7 @@
       "color": "#64748b",
       "startPrice": 20.03,
       "currentPrice": 19.64,
-      "returnPct": -1.95,
+      "returnPct": -1.97,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
