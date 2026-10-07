@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-07T18:08:20.533Z",
+  "updatedAt": "2026-10-07T18:59:32.298Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-07",
@@ -10,7 +10,7 @@
     "symbol": "USDCAD=X",
     "usdCadRate": 1.4255,
     "cadUsdRate": 0.7015,
-    "updatedAt": "2026-10-07T18:08:20.533Z"
+    "updatedAt": "2026-10-07T18:59:32.298Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -20,8 +20,8 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 45.94,
-      "returnPct": 44.28,
+      "currentPrice": 45.93,
+      "returnPct": 44.25,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
@@ -137,7 +137,7 @@
         45.41,
         45.97,
         45.95,
-        45.94
+        45.93
       ]
     },
     "VFV": {
@@ -401,8 +401,8 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.63,
-      "returnPct": -2,
+      "currentPrice": 19.64,
+      "returnPct": -1.95,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-07",
@@ -518,7 +518,7 @@
         19.72,
         19.65,
         19.64,
-        19.63
+        19.64
       ]
     }
   }
