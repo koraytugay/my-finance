@@ -1159,11 +1159,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     if (titleEl) {
         const curLabel = currency === 'USD' ? 'USD' : 'CAD';
         const tfLabel = timeframe === 'all' ? 'All Time' : 'Last 52 Weeks';
-        if (currentMainFilterAths) {
-            titleEl.textContent = isPct
-                ? `📈 Net Worth Progression (ATHs Only - % Return - ${tfLabel} - ${curLabel})`
-                : `📈 Net Worth Progression (ATHs Only - ${tfLabel} - ${curLabel})`;
-        } else if (isPct) {
+        if (isPct) {
             titleEl.textContent = `📈 Net Worth Progression (% Return - ${tfLabel} - ${curLabel})`;
         } else {
             titleEl.textContent = `📈 Net Worth Progression (${tfLabel} - ${curLabel})`;
@@ -1995,15 +1991,14 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const curLabel = currency === 'USD' ? 'USD' : 'CAD';
     if (titleEl) {
         const sortedDesc = [...selectedYearsList].reverse();
-        const athLabel = currentMainFilterAths ? ' (ATHs Only)' : '';
         if (isPct) {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression${athLabel} (% Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression${athLabel} (% Year ${sortedDesc[0]} - ${curLabel})`;
+                ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression (% Year ${sortedDesc[0]} - ${curLabel})`;
         } else {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression${athLabel} (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression${athLabel} (${curLabel} - Year ${sortedDesc[0]})`;
+                ? `📈 Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
         }
     }
 
