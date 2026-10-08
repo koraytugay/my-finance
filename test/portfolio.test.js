@@ -25,6 +25,8 @@ const {
   renderMainProgressionChart,
   renderMainYearOverlayChart,
   toggleMainXeqtOverlay,
+  toggleMainAthsFilter,
+  filterHistoryAths,
   calculateTimeBack,
   getDayOfYearFraction,
   getMainYearColor,
@@ -1616,6 +1618,155 @@ test('Portfolio Drawdown & High-Water Mark Integrity Suite', async (t) => {
     assert.equal(clean[2].runningPeakCAD, 60000);
     assert.equal(clean[2].drawdownCAD, -6000);
     assert.equal(clean[2].drawdownPct, -10);
+  });
+
+  await t.test('filterHistoryAths returns empty array on empty or invalid records', () => {
+    assert.deepEqual(filterHistoryAths([]), []);
+    assert.deepEqual(filterHistoryAths(null), []);
+  });
+
+  await t.test('filterHistoryAths filters to ATH milestones and numbers them chronologically', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000 }, // ATH #1
+      { week: 2, date: '2025-01-10', totalCAD: 95000 },  // down
+      { week: 3, date: '2025-01-17', totalCAD: 105000 }, // ATH #2
+      { week: 4, date: '2025-01-24', totalCAD: 102000 }, // down
+      { week: 5, date: '2025-01-31', totalCAD: 110000 }  // ATH #3 (and final record)
+    ];
+
+    const nodes = filterHistoryAths(history, history, 'totalCAD');
+    assert.equal(nodes.length, 3);
+    assert.equal(nodes[0].rec.week, 1);
+    assert.equal(nodes[0].athNumber, 1);
+    assert.equal(nodes[0].isAth, true);
+    assert.equal(nodes[0].timeIndex, 0);
+
+    assert.equal(nodes[1].rec.week, 3);
+    assert.equal(nodes[1].athNumber, 2);
+    assert.equal(nodes[1].isAth, true);
+    assert.equal(nodes[1].timeIndex, 2);
+
+    assert.equal(nodes[2].rec.week, 5);
+    assert.equal(nodes[2].athNumber, 3);
+    assert.equal(nodes[2].isAth, true);
+    assert.equal(nodes[2].timeIndex, 4);
+  });
+
+  await t.test('filterHistoryAths includes final node with drawdown stats when latest week is below peak', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000 }, // ATH #1
+      { week: 2, date: '2025-01-10', totalCAD: 120000 }, // ATH #2 (Peak)
+      { week: 3, date: '2025-01-17', totalCAD: 115000 }, // down
+      { week: 4, date: '2025-01-24', totalCAD: 108000 }  // down & latest (-12k, -10%)
+    ];
+
+    const nodes = filterHistoryAths(history, history, 'totalCAD');
+    assert.equal(nodes.length, 3); // ATH #1, ATH #2, and final down node
+    assert.equal(nodes[0].isAth, true);
+    assert.equal(nodes[0].athNumber, 1);
+    assert.equal(nodes[1].isAth, true);
+    assert.equal(nodes[1].athNumber, 2);
+
+    const finalNode = nodes[2];
+    assert.equal(finalNode.rec.week, 4);
+    assert.equal(finalNode.isAth, false);
+    assert.equal(finalNode.athNumber, null);
+    assert.equal(finalNode.timeIndex, 3);
+    assert.equal(finalNode.downCAD, -12000);
+    assert.equal(finalNode.downPct, -10);
+    assert.equal(finalNode.peakVal, 120000);
+  });
+
+  await t.test('filterHistoryAths preserves chronological numbering and peak tracking across sliced window and USD currency', () => {
+    const fullHistory = [
+      { week: 1, date: '2024-01-05', totalCAD: 100000, totalUSD: 75000 },  // ATH 1
+      { week: 2, date: '2024-01-12', totalCAD: 150000, totalUSD: 110000 }, // ATH 2
+      { week: 3, date: '2025-01-03', totalCAD: 140000, totalUSD: 105000 }, // down
+      { week: 4, date: '2025-01-10', totalCAD: 180000, totalUSD: 130000 }, // ATH 3
+      { week: 5, date: '2025-01-17', totalCAD: 171000, totalUSD: 123500 }  // down & latest
+    ];
+
+    // Window: only weeks 3..5 (2025)
+    const windowRecords = fullHistory.slice(2);
+    const nodes = filterHistoryAths(windowRecords, fullHistory, 'totalUSD');
+
+    // ATH 3 (week 4) and Final node (week 5) should be present in this window
+    assert.equal(nodes.length, 2);
+    assert.equal(nodes[0].rec.week, 4);
+    assert.equal(nodes[0].isAth, true);
+    assert.equal(nodes[0].athNumber, 3);
+    assert.equal(nodes[0].timeIndex, 1); // relative to windowRecords
+
+    const finalNode = nodes[1];
+    assert.equal(finalNode.rec.week, 5);
+    assert.equal(finalNode.isAth, false);
+    assert.equal(finalNode.downCAD, 123500 - 130000); // -6500 USD
+    assert.equal(finalNode.downPct, ((123500 - 130000) / 130000) * 100); // -5%
+    assert.equal(finalNode.timeIndex, 2);
+  });
+
+  await t.test('toggleMainAthsFilter toggles ATH filter state and preserves multi-year selections', async () => {
+    resetMainChartState();
+    assert.equal(getMainChartState().currentMainFilterAths, false);
+
+    await toggleMainAthsFilter(true);
+    assert.equal(getMainChartState().currentMainFilterAths, true);
+
+    // In multi-year mode, toggling ATHs preserves selected years
+    setMainTimeframe('2025');
+    assert.equal(getMainChartState().currentMainMode, 'years');
+    assert.deepEqual(Array.from(getMainChartState().currentMainSelectedYears), ['2025']);
+
+    // Selecting additional year (e.g. 2024) works seamlessly in ATH mode
+    setMainTimeframe('2024');
+    assert.equal(getMainChartState().currentMainMode, 'years');
+    assert.deepEqual(Array.from(getMainChartState().currentMainSelectedYears).sort(), ['2024', '2025']);
+    assert.equal(getMainChartState().currentMainFilterAths, true);
+
+    await toggleMainAthsFilter(false);
+    assert.equal(getMainChartState().currentMainFilterAths, false);
+    assert.equal(getMainChartState().currentMainMode, 'years');
+    assert.deepEqual(Array.from(getMainChartState().currentMainSelectedYears).sort(), ['2024', '2025']);
+    resetMainChartState();
+  });
+
+  await t.test('filterHistoryAths correctly distributes ATH milestones across multi-year overlay series', () => {
+    const history = [
+      { week: 1, date: '2024-11-01', totalCAD: 100000 }, // 2024 ATH 1
+      { week: 2, date: '2024-12-06', totalCAD: 120000 }, // 2024 ATH 2
+      { week: 3, date: '2025-02-14', totalCAD: 110000 }, // 2025 down
+      { week: 4, date: '2025-06-20', totalCAD: 130000 }, // 2025 ATH 3
+      { week: 5, date: '2026-01-09', totalCAD: 140000 }, // 2026 ATH 4
+      { week: 6, date: '2026-03-13', totalCAD: 135000 }  // 2026 down & current
+    ];
+
+    const allAths = filterHistoryAths(history, history, 'totalCAD');
+    assert.equal(allAths.length, 5); // 4 ATHs + 1 final down node
+
+    const athDateMap = new Map();
+    allAths.forEach(n => athDateMap.set(n.rec.date, n));
+
+    const overlay = buildMainYearOverlaySeries(history, ['2024', '2025', '2026'], 'CAD', 'PCT');
+    assert.equal(overlay.yearSeries.length, 3);
+
+    // 2024 ATH points
+    const s2024 = overlay.yearSeries.find(s => s.year === '2024');
+    const pts2024 = s2024.points.filter(p => !p.isAnchor && athDateMap.has(p.date));
+    assert.equal(pts2024.length, 2);
+
+    // 2025 ATH points
+    const s2025 = overlay.yearSeries.find(s => s.year === '2025');
+    const pts2025 = s2025.points.filter(p => !p.isAnchor && athDateMap.has(p.date));
+    assert.equal(pts2025.length, 1);
+    assert.equal(athDateMap.get(pts2025[0].date).athNumber, 3);
+
+    // 2026 ATH + Drawdown points
+    const s2026 = overlay.yearSeries.find(s => s.year === '2026');
+    const pts2026 = s2026.points.filter(p => !p.isAnchor && athDateMap.has(p.date));
+    assert.equal(pts2026.length, 2); // 1 ATH + 1 final down node
+    assert.equal(athDateMap.get(pts2026[0].date).isAth, true);
+    assert.equal(athDateMap.get(pts2026[1].date).isAth, false);
+    assert.equal(athDateMap.get(pts2026[1].date).downCAD, -5000);
   });
 });
 

@@ -14,6 +14,7 @@ let currentMainSelectedYears = new Set(); // Set of active year strings, e.g. Se
 let currentMainCurrency = 'CAD';
 let currentMainUnit = 'VAL'; // 'VAL' | 'PCT'
 let currentMainOverlayXeqt = false;
+let currentMainFilterAths = false;
 
 async function initMain() {
     const loadingEl = document.getElementById('loading');
@@ -847,17 +848,31 @@ function updateMainTimeframeButtonsUI() {
         }
     });
 
+    const athInput = document.getElementById('main-filter-aths');
+    if (athInput) {
+        athInput.checked = currentMainFilterAths;
+    }
+
     const xeqtInput = document.getElementById('main-overlay-xeqt');
     if (xeqtInput) {
         const xeqtLabel = xeqtInput.closest('label');
         const isMultiYear = currentMainMode === 'years' && currentMainSelectedYears.size > 1;
-        if (isMultiYear) {
+        if (currentMainFilterAths) {
+            if (xeqtLabel) {
+                xeqtLabel.style.opacity = '0.4';
+                xeqtLabel.style.cursor = 'not-allowed';
+                xeqtLabel.title = 'XEQT overlay is disabled while viewing All-Time Highs (ATHs) only';
+            }
+            xeqtInput.disabled = true;
+            xeqtInput.checked = false;
+        } else if (isMultiYear) {
             if (xeqtLabel) {
                 xeqtLabel.style.opacity = '0.4';
                 xeqtLabel.style.cursor = 'not-allowed';
                 xeqtLabel.title = 'XEQT benchmark overlay is available when viewing a single year, Last 52W, or All Time';
             }
             xeqtInput.disabled = true;
+            xeqtInput.checked = false;
         } else {
             if (xeqtLabel) {
                 xeqtLabel.style.opacity = '1';
@@ -867,8 +882,8 @@ function updateMainTimeframeButtonsUI() {
                     : 'Compare your portfolio growth with holding 100% XEQT over the selected timeframe';
             }
             xeqtInput.disabled = false;
+            xeqtInput.checked = currentMainOverlayXeqt;
         }
-        xeqtInput.checked = currentMainOverlayXeqt;
     }
 }
 
@@ -1023,6 +1038,82 @@ async function toggleMainXeqtOverlay(checked) {
     renderMainProgressionChart();
 }
 
+async function toggleMainAthsFilter(checked) {
+    currentMainFilterAths = !!checked;
+    updateMainTimeframeButtonsUI();
+    renderMainProgressionChart();
+}
+
+/**
+ * Filters history records to only those that set an All-Time High (ATH) milestone,
+ * plus the final record if it is not currently at an all-time high.
+ */
+function filterHistoryAths(records, fullHistory = records, valKey = 'totalCAD') {
+    if (!records || records.length === 0) return [];
+    const full = (fullHistory && fullHistory.length > 0) ? fullHistory : records;
+
+    // 1. Traverse full history from Week 1 to identify true chronological ATHs
+    let runningPeak = 0;
+    const athSet = new Set();
+    const peakAtRecord = new Map();
+
+    full.forEach((r, idx) => {
+        const val = Number(r[valKey]) || 0;
+        if (val <= 0) return;
+        if (idx === 0 || val > runningPeak) {
+            runningPeak = val;
+            athSet.add(r);
+        }
+        peakAtRecord.set(r, runningPeak);
+    });
+
+    // 2. Count ATH numbers across full history
+    let athCounter = 0;
+    full.forEach(r => {
+        if (athSet.has(r)) {
+            athCounter++;
+            r._athNumber = athCounter;
+        }
+    });
+
+    // 3. Collect ATH records in the active window
+    const nodes = [];
+    records.forEach((r, idx) => {
+        if (athSet.has(r)) {
+            nodes.push({
+                rec: r,
+                isAth: true,
+                athNumber: r._athNumber || (nodes.length + 1),
+                timeIndex: idx,
+                downCAD: 0,
+                downPct: 0,
+                peakVal: Number(r[valKey]) || 0
+            });
+        }
+    });
+
+    // 4. Check final record: "If the final node is not at all time highs, include it as well so I can see how down we are.."
+    const lastRecord = records[records.length - 1];
+    if (lastRecord && !athSet.has(lastRecord)) {
+        const currentVal = Number(lastRecord[valKey]) || 0;
+        const peakVal = peakAtRecord.get(lastRecord) || runningPeak || currentVal;
+        const downCAD = currentVal - peakVal;
+        const downPct = peakVal > 0 ? (downCAD / peakVal) * 100 : 0;
+
+        nodes.push({
+            rec: lastRecord,
+            isAth: false,
+            athNumber: null,
+            timeIndex: records.length - 1,
+            downCAD,
+            downPct,
+            peakVal
+        });
+    }
+
+    return nodes;
+}
+
 function renderMainProgressionChart() {
     if (typeof document === 'undefined') return;
     const box = document.getElementById('main-chart-svg-box');
@@ -1067,14 +1158,15 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
     if (titleEl) {
         const curLabel = currency === 'USD' ? 'USD' : 'CAD';
-        if (isPct) {
-            titleEl.textContent = timeframe === 'all'
-                ? `📈 Net Worth Progression (% Return - All Time - ${curLabel})`
-                : `📈 Net Worth Progression (% Return - Last 52 Weeks - ${curLabel})`;
+        const tfLabel = timeframe === 'all' ? 'All Time' : 'Last 52 Weeks';
+        if (currentMainFilterAths) {
+            titleEl.textContent = isPct
+                ? `📈 Net Worth Progression (ATHs Only - % Return - ${tfLabel} - ${curLabel})`
+                : `📈 Net Worth Progression (ATHs Only - ${tfLabel} - ${curLabel})`;
+        } else if (isPct) {
+            titleEl.textContent = `📈 Net Worth Progression (% Return - ${tfLabel} - ${curLabel})`;
         } else {
-            titleEl.textContent = timeframe === 'all'
-                ? `📈 Net Worth Progression (All Time - ${curLabel})`
-                : `📈 Net Worth Progression (Last 52 Weeks - ${curLabel})`;
+            titleEl.textContent = `📈 Net Worth Progression (${tfLabel} - ${curLabel})`;
         }
     }
 
@@ -1091,23 +1183,53 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
     const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
-    const showXeqt = currentMainOverlayXeqt && xeqtPrices.length > 0;
+    const showXeqt = !currentMainFilterAths && currentMainOverlayXeqt && xeqtPrices.length > 0;
     let xeqtSeries = [];
     if (showXeqt && typeof computeXeqtProgressionOverlay === 'function') {
         xeqtSeries = computeXeqtProgressionOverlay(records, rawHistory, xeqtPrices, currency, currentXeqtPrice);
     }
 
     const baseVal = records[0][valKey] || 1;
-    const portPoints = records.map((r, i) => {
-        const val = r[valKey] || 0;
-        const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
-        return {
-            val: val,
-            pct: pct,
-            rec: r,
-            idx: i
-        };
-    });
+    let portPoints = [];
+
+    if (currentMainFilterAths) {
+        const athNodes = filterHistoryAths(records, rawHistory, valKey);
+        portPoints = athNodes.map((node, i) => {
+            const r = node.rec;
+            const val = r[valKey] || 0;
+            const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
+            return {
+                val: val,
+                pct: pct,
+                rec: r,
+                idx: i,
+                timeIndex: node.timeIndex,
+                isAth: node.isAth,
+                athNumber: node.athNumber,
+                downCAD: node.downCAD,
+                downPct: node.downPct,
+                peakVal: node.peakVal
+            };
+        });
+    } else {
+        portPoints = records.map((r, i) => {
+            const val = r[valKey] || 0;
+            const pct = baseVal > 0 ? ((val - baseVal) / baseVal) * 100 : 0;
+            return {
+                val: val,
+                pct: pct,
+                rec: r,
+                idx: i,
+                timeIndex: i,
+                isAth: true
+            };
+        });
+    }
+
+    if (portPoints.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes found in this timeframe.</p>';
+        return;
+    }
 
     let minVal, maxVal, step;
     let getY;
@@ -1147,10 +1269,10 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal)) * plotH;
     }
 
-    const getX = (idx) => padding.left + (idx / (records.length - 1 || 1)) * plotW;
+    const getX = (timeIndex) => padding.left + (timeIndex / (records.length - 1 || 1)) * plotW;
 
     portPoints.forEach(p => {
-        p.x = getX(p.idx);
+        p.x = getX(p.timeIndex);
         p.y = getY(isPct ? p.pct : p.val);
     });
 
@@ -1204,12 +1326,27 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
     // Portfolio line and area
     const pointsStr = portPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`);
-    const linePathD = 'M ' + pointsStr.join(' L ');
-    const areaPathD = `${linePathD} L ${getX(records.length - 1).toFixed(1)},${padding.top + plotH} L ${getX(0).toFixed(1)},${padding.top + plotH} Z`;
+    const linePathD = pointsStr.length > 0 ? ('M ' + pointsStr.join(' L ')) : '';
+    const firstX = portPoints.length > 0 ? portPoints[0].x : padding.left;
+    const lastX = portPoints.length > 0 ? portPoints[portPoints.length - 1].x : (padding.left + plotW);
+    const areaPathD = linePathD ? `${linePathD} L ${lastX.toFixed(1)},${padding.top + plotH} L ${firstX.toFixed(1)},${padding.top + plotH} Z` : '';
 
-    const hoverPointsHtml = portPoints.map((p, i) => `
-        <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
-    `).join('');
+    const strokeColor = currentMainFilterAths ? '#8250df' : '#0969da';
+    const areaGradColor = currentMainFilterAths ? '#8250df' : '#0969da';
+
+    const hoverPointsHtml = portPoints.map((p, i) => {
+        if (currentMainFilterAths) {
+            const isDown = !p.isAth;
+            const fill = isDown ? '#ef4444' : '#16a34a';
+            const radius = isDown ? 5.5 : 4.0;
+            return `
+                <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+            `;
+        }
+        return `
+            <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+        `;
+    }).join('');
 
     // XEQT Benchmark line and points
     let xeqtPathHtml = '';
@@ -1238,14 +1375,14 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="main-networth-svg" style="width: 100%; max-height: 220px; display: block; overflow: visible;">
             <defs>
                 <linearGradient id="mainAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0969da" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#0969da" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="${areaGradColor}" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="${areaGradColor}" stop-opacity="0.0" />
                 </linearGradient>
             </defs>
             ${gridLinesHtml}
             ${xTicksHtml}
             <path d="${areaPathD}" fill="url(#mainAreaGradient)" />
-            <path d="${linePathD}" fill="none" stroke="#0969da" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${linePathD}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
             ${xeqtPathHtml}
             ${hoverPointsHtml}
             ${xeqtPointsHtml}
@@ -1264,10 +1401,46 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     // Update legend
     const legendEl = document.getElementById('main-chart-legend');
     if (legendEl) {
-        const lastPort = portPoints[portPoints.length - 1];
-        const portSign = lastPort.pct >= 0 ? '+' : '';
+        if (currentMainFilterAths) {
+            const athNodesOnly = portPoints.filter(p => p.isAth);
+            const athCount = athNodesOnly.length;
+            const lastPort = portPoints[portPoints.length - 1];
+            const isDown = lastPort && !lastPort.isAth;
+            const peakVal = athNodesOnly.length > 0 ? Math.max(...athNodesOnly.map(p => p.val)) : (lastPort ? lastPort.val : 0);
+            const peakPct = athNodesOnly.length > 0 ? Math.max(...athNodesOnly.map(p => p.pct)) : (lastPort ? lastPort.pct : 0);
 
-        if (showXeqt && xeqtSeries.length > 0) {
+            let statusHtml = '';
+            if (isDown) {
+                const downValStr = formatCurrency(Math.abs(lastPort.downCAD), currency);
+                const downPctStr = Math.abs(lastPort.downPct).toFixed(2);
+                statusHtml = `
+                    <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span>
+                        <strong style="color: #b91c1c;">Current Drawdown</strong>: <span style="color: #dc2626; font-weight: 700;">-${downValStr} (-${downPctStr}%)</span>
+                    </div>
+                `;
+            } else {
+                statusHtml = `
+                    <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 0.8rem;">🎉</span>
+                        <strong style="color: #16a34a;">Sitting at All-Time High!</strong>
+                    </div>
+                `;
+            }
+
+            legendEl.innerHTML = `
+                <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #16a34a;"></span>
+                    <strong style="color: #1f2328;">${athCount} All-Time Highs</strong> (${isPct ? `Peak Return: +${peakPct.toFixed(2)}%` : `Peak: ${formatCurrency(peakVal, currency)}`})
+                </div>
+                ${statusHtml}
+                <div style="font-size: 0.72rem; color: #64748b;">
+                    Hover any node to inspect details
+                </div>
+            `;
+        } else if (showXeqt && xeqtSeries.length > 0) {
+            const lastPort = portPoints[portPoints.length - 1];
+            const portSign = lastPort.pct >= 0 ? '+' : '';
             const lastItem = xeqtSeries[xeqtSeries.length - 1];
             const spreadSign = lastItem.spreadVal >= 0 ? '+' : '';
             const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
@@ -1288,6 +1461,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 </div>
             `;
         } else {
+            const lastPort = portPoints[portPoints.length - 1];
+            const portSign = lastPort.pct >= 0 ? '+' : '';
             legendEl.innerHTML = `
                 <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
@@ -1302,9 +1477,10 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     function buildSingleCardHtml(idx, isHover = true) {
-        const r = records[idx];
         const pt = portPoints[idx];
-        if (!r || !pt) return '';
+        if (!pt) return '';
+        const r = pt.rec;
+        if (!r) return '';
         const dateStr = formatDate(r.date);
         const totalVal = formatCurrency(r[valKey], currency);
         const pctSign = pt.pct >= 0 ? '+' : '';
@@ -1316,12 +1492,12 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const weeklyChangeVal = isUSD
             ? (r.weeklyChangeUSD !== undefined
                 ? r.weeklyChangeUSD
-                : (idx > 0 && records[idx - 1].totalUSD !== undefined
-                    ? (r.totalUSD - records[idx - 1].totalUSD)
+                : (pt.timeIndex > 0 && records[pt.timeIndex - 1]?.totalUSD !== undefined
+                    ? (r.totalUSD - records[pt.timeIndex - 1].totalUSD)
                     : (r.weeklyChangeCAD !== undefined ? r.weeklyChangeCAD * recRate : 0)))
             : (r.weeklyChangeCAD || 0);
-        const weeklyPct = isUSD && idx > 0 && records[idx - 1].totalUSD > 0
-            ? ((r.totalUSD - records[idx - 1].totalUSD) / records[idx - 1].totalUSD) * 100
+        const weeklyPct = isUSD && pt.timeIndex > 0 && records[pt.timeIndex - 1]?.totalUSD > 0
+            ? ((r.totalUSD - records[pt.timeIndex - 1].totalUSD) / records[pt.timeIndex - 1].totalUSD) * 100
             : (r.weeklyChangePct || 0);
 
         const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
@@ -1363,9 +1539,37 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const mVal = isUSD ? (r.preciousMetals * recRate) : r.preciousMetals;
         const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
 
-        const badgeHtml = isHover
-            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        let badgeHtml = '';
+        if (currentMainFilterAths) {
+            if (pt.isAth) {
+                badgeHtml = `<span class="chart-card-badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">🟢 ATH #${pt.athNumber || (idx + 1)}</span>`;
+            } else {
+                badgeHtml = `<span class="chart-card-badge" style="background: #fee2e2; color: #b91c1c; font-weight: 700;">🔴 CURRENT (-${Math.abs(pt.downPct).toFixed(2)}%)</span>`;
+            }
+        } else {
+            badgeHtml = isHover
+                ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+                : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        }
+
+        let subValHtml = '';
+        if (currentMainFilterAths && !pt.isAth) {
+            const downValStr = formatCurrency(Math.abs(pt.downCAD), currency);
+            const downPctStr = Math.abs(pt.downPct).toFixed(2);
+            subValHtml = `
+                ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
+                &bull; <span style="color: #dc2626; font-weight: 700;">Drawdown: -${downValStr} (-${downPctStr}% from peak)</span>
+            `;
+        } else {
+            subValHtml = `
+                ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
+                &bull; <span style="color: ${changeColor}; font-weight: 600;">${weeklyChangeStr}</span>
+            `;
+        }
+
+        const footerText = currentMainFilterAths
+            ? `💡 Showing only All-Time High nodes (and current position)`
+            : `💡 Hover over graph to inspect historical weeks`;
 
         return `
             <div class="chart-card-header">
@@ -1376,8 +1580,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 ${isPct ? `${pctSign}${pt.pct.toFixed(2)}%` : totalVal}
             </div>
             <div class="chart-card-sub-val" style="color: #64748b;">
-                ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
-                &bull; <span style="color: ${changeColor}; font-weight: 600;">${weeklyChangeStr}</span>
+                ${subValHtml}
             </div>
             ${xeqtSection}
             <div class="chart-card-section-divider">
@@ -1400,7 +1603,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 </div>
             </div>
             <div class="chart-card-footer">
-                💡 Hover over graph to inspect historical weeks
+                ${footerText}
             </div>
         `;
     }
@@ -1412,7 +1615,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     const xeqtDot = box.querySelector('#main-single-xeqt-dot');
 
     function setActivePoint(idx) {
-        if (idx < 0 || idx >= records.length) return;
+        if (idx < 0 || idx >= portPoints.length) return;
         const pt = portPoints[idx];
         if (cursorLine) {
             cursorLine.setAttribute('x1', pt.x.toFixed(1));
@@ -1422,6 +1625,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         if (portDot) {
             portDot.setAttribute('cx', pt.x.toFixed(1));
             portDot.setAttribute('cy', pt.y.toFixed(1));
+            const dotFill = currentMainFilterAths ? (pt.isAth ? '#16a34a' : '#ef4444') : '#0969da';
+            portDot.setAttribute('fill', dotFill);
             portDot.style.display = 'block';
         }
         if (xeqtDot && showXeqt && xeqtPoints[idx]) {
@@ -1438,7 +1643,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         if (cursorLine) cursorLine.style.display = 'none';
         if (portDot) portDot.style.display = 'none';
         if (xeqtDot) xeqtDot.style.display = 'none';
-        renderMainChartInfoCard(buildSingleCardHtml(records.length - 1, false), false);
+        if (portPoints.length > 0) {
+            renderMainChartInfoCard(buildSingleCardHtml(portPoints.length - 1, false), false);
+        }
     }
 
     if (overlay && svgEl) {
@@ -1458,9 +1665,22 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
             }
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
-            const frac = (clampedX - padding.left) / plotW;
-            const idx = Math.max(0, Math.min(records.length - 1, Math.round(frac * (records.length - 1))));
-            setActivePoint(idx);
+
+            let targetIdx = 0;
+            if (currentMainFilterAths) {
+                let minDiff = Infinity;
+                portPoints.forEach((p, i) => {
+                    const diff = Math.abs(p.x - clampedX);
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        targetIdx = i;
+                    }
+                });
+            } else {
+                const frac = (clampedX - padding.left) / plotW;
+                targetIdx = Math.max(0, Math.min(portPoints.length - 1, Math.round(frac * (portPoints.length - 1))));
+            }
+            setActivePoint(targetIdx);
         });
 
         overlay.addEventListener('mouseleave', () => {
@@ -1469,8 +1689,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     // Set initial card state
-    if (records.length > 0) {
-        renderMainChartInfoCard(buildSingleCardHtml(records.length - 1, false), false);
+    if (portPoints.length > 0) {
+        renderMainChartInfoCard(buildSingleCardHtml(portPoints.length - 1, false), false);
     }
 }
 
@@ -1775,14 +1995,15 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const curLabel = currency === 'USD' ? 'USD' : 'CAD';
     if (titleEl) {
         const sortedDesc = [...selectedYearsList].reverse();
+        const athLabel = currentMainFilterAths ? ' (ATHs Only)' : '';
         if (isPct) {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression (% Year ${sortedDesc[0]} - ${curLabel})`;
+                ? `📈 Net Worth Progression${athLabel} (% Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression${athLabel} (% Year ${sortedDesc[0]} - ${curLabel})`;
         } else {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
+                ? `📈 Net Worth Progression${athLabel} (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
+                : `📈 Net Worth Progression${athLabel} (${curLabel} - Year ${sortedDesc[0]})`;
         }
     }
 
@@ -1794,11 +2015,70 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         return;
     }
 
+    if (currentMainFilterAths) {
+        const allAthNodes = filterHistoryAths(rawHistory, rawHistory, valKey);
+        const athDateMap = new Map();
+        allAthNodes.forEach(node => {
+            if (node.rec && node.rec.date) {
+                athDateMap.set(node.rec.date, node);
+            }
+        });
+
+        yearSeries.forEach(s => {
+            s.points = s.points.filter(p => !p.isAnchor && athDateMap.has(p.date || p.rec?.date)).map(p => {
+                const info = athDateMap.get(p.date || p.rec?.date);
+                return {
+                    ...p,
+                    isAth: info.isAth,
+                    athNumber: info.athNumber,
+                    downCAD: info.downCAD,
+                    downPct: info.downPct,
+                    peakVal: info.peakVal
+                };
+            });
+        });
+
+        const totalAthPoints = yearSeries.reduce((acc, s) => acc + s.points.length, 0);
+        if (totalAthPoints === 0) {
+            box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes recorded in the selected years.</p>';
+            return;
+        }
+
+        const athPcts = [];
+        const athVals = [];
+        if (isPct) athPcts.push(0);
+        yearSeries.forEach(s => {
+            s.points.forEach(p => {
+                if (typeof p.pct === 'number' && Number.isFinite(p.pct)) athPcts.push(p.pct);
+                if (typeof p.val === 'number' && Number.isFinite(p.val)) athVals.push(p.val);
+            });
+        });
+
+        if (isPct && athPcts.length > 0) {
+            const minPct = Math.min(...athPcts);
+            const maxPct = Math.max(...athPcts);
+            const span = maxPct - minPct;
+            const pad = span > 0 ? Math.max(1, span * 0.1) : 4;
+            step = 5;
+            if (span + 2 * pad > 40) step = 10;
+            else if (span + 2 * pad <= 14) step = 2;
+            else if (span + 2 * pad <= 6) step = 1;
+            paddedMin = Math.floor((minPct - pad) / step) * step;
+            paddedMax = Math.ceil((maxPct + pad) / step) * step;
+        } else if (!isPct && athVals.length > 0) {
+            const minVal = Math.min(...athVals);
+            const maxVal = Math.max(...athVals);
+            const dollarRange = maxVal - minVal || 10000;
+            paddedDollarMin = Math.floor(Math.max(0, minVal - dollarRange * 0.08) / 10000) * 10000;
+            paddedDollarMax = Math.ceil((maxVal + dollarRange * 0.08) / 10000) * 10000;
+        }
+    }
+
     const isSingleYear = selectedYearsList.length === 1;
     const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
     const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
-    const showXeqt = isSingleYear && currentMainOverlayXeqt && xeqtPrices.length > 0;
+    const showXeqt = !currentMainFilterAths && isSingleYear && currentMainOverlayXeqt && xeqtPrices.length > 0;
     let xeqtPoints = [];
 
     if (showXeqt && typeof computeXeqtProgressionOverlay === 'function') {
@@ -1936,9 +2216,11 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
         if (pts.length === 0) return;
 
-        const linePathD = 'M ' + pts.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' L ');
+        const linePathD = pts.length > 1
+            ? 'M ' + pts.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' L ')
+            : '';
 
-        if (yearSeries.length === 1) {
+        if (!currentMainFilterAths && yearSeries.length === 1 && linePathD) {
             const areaPathD = `${linePathD} L ${pts[pts.length - 1].x.toFixed(1)},${padding.top + plotH} L ${pts[0].x.toFixed(1)},${padding.top + plotH} Z`;
             defsHtml += `
                 <linearGradient id="mainAreaGrad_${s.year}" x1="0" y1="0" x2="0" y2="1">
@@ -1951,11 +2233,21 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             `;
         }
 
-        pathsHtml += `
-            <path d="${linePathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
-        `;
+        if (linePathD) {
+            pathsHtml += `
+                <path d="${linePathD}" fill="none" stroke="${s.color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            `;
+        }
 
         pointsHtml += pts.filter(pt => !pt.p.isAnchor).map(pt => {
+            if (currentMainFilterAths) {
+                const isDown = !pt.p.isAth;
+                const fill = isDown ? '#ef4444' : s.color;
+                const radius = isDown ? '5.5' : '4.2';
+                return `
+                    <circle class="main-overlay-point" data-year="${s.year}" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+                `;
+            }
             const isStart = pt.p.isOverlayStart;
             const r = isStart ? '4.5' : '3.2';
             const strokeW = isStart ? '2.4' : '1.8';
@@ -2023,6 +2315,48 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 
     function buildYearOverlayDefaultCardHtml() {
+        if (currentMainFilterAths) {
+            let yearRows = yearSeries.map(s => {
+                const athCount = s.points.filter(p => p.isAth).length;
+                const downNode = s.points.find(p => !p.isAth);
+                let downText = '';
+                if (downNode) {
+                    downText = ` &bull; <span style="color: #ef4444; font-weight: 700;">Current: -${Math.abs(downNode.downPct).toFixed(2)}%</span>`;
+                }
+                const latestPt = s.points[s.points.length - 1];
+                const valStr = latestPt ? formatCurrency(latestPt.val, currency) : '$0.00';
+                return `
+                    <div class="chart-card-row">
+                        <span style="display: flex; align-items: center; gap: 6px;">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color}; display: inline-block;"></span>
+                            <strong style="color: ${s.color}">${s.year}</strong>:
+                        </span>
+                        <span>
+                            <strong style="color: #15803d;">${athCount} ATHs</strong>
+                            <span style="color: #64748b; font-size: 0.72rem;">(Peak: ${valStr})</span>
+                            ${downText}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+
+            return `
+                <div class="chart-card-header">
+                    <span class="chart-card-date">${yearSeries.map(s => s.year).join(' vs ')} ATH Comparison</span>
+                    <span class="chart-card-badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">ATHs ONLY</span>
+                </div>
+                <div class="chart-card-sub-val" style="color: #64748b; margin-bottom: 8px;">
+                    All-Time High milestones plotted across calendar days (Jan–Dec)
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    ${yearRows}
+                </div>
+                <div class="chart-card-footer">
+                    💡 Hover across calendar months to inspect ATH milestones
+                </div>
+            `;
+        }
+
         const isSingleYear = yearSeries.length === 1;
 
         let xeqtSection = '';
@@ -2207,9 +2541,13 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const activeYearDetails = [];
 
             yearSeries.forEach(s => {
-                const startFrac = s.points[0] ? s.points[0].fraction : 0;
-                if (frac < startFrac - 0.02) {
-                    return;
+                if (s.points.length === 0) return;
+
+                if (!currentMainFilterAths) {
+                    const startFrac = s.points[0] ? s.points[0].fraction : 0;
+                    if (frac < startFrac - 0.02) {
+                        return;
+                    }
                 }
 
                 let closest = s.points[0];
@@ -2222,11 +2560,13 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     }
                 });
 
-                if (closest && closestDist <= 0.05) {
+                const threshold = currentMainFilterAths ? 0.12 : 0.05;
+                if (closest && closestDist <= threshold) {
                     const cx = (padding.left + closest.fraction * plotW).toFixed(1);
                     const cy = getY(isPct ? closest.pct : closest.val).toFixed(1);
+                    const dotFill = currentMainFilterAths ? (closest.isAth ? s.color : '#ef4444') : s.color;
                     hoverDotsHtml += `
-                        <circle cx="${cx}" cy="${cy}" r="5.5" fill="${s.color}" stroke="#ffffff" stroke-width="2" />
+                        <circle cx="${cx}" cy="${cy}" r="5.5" fill="${dotFill}" stroke="#ffffff" stroke-width="2" />
                     `;
                     activeYearDetails.push({
                         year: s.year,
@@ -2267,6 +2607,34 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const p = d.point;
                 const pctSign = p.pct >= 0 ? '+' : '';
                 const pctColor = p.pct >= 0 ? '#16a34a' : '#cf222e';
+
+                if (currentMainFilterAths) {
+                    const athBadge = p.isAth
+                        ? `<span style="color: #15803d; font-weight: 700;">🟢 ATH #${p.athNumber}</span>`
+                        : `<span style="color: #dc2626; font-weight: 700;">🔴 CURRENT (-${Math.abs(p.downPct).toFixed(2)}%)</span>`;
+                    const subText = p.isAth
+                        ? `${formatDate(p.date)} &bull; ${formatCurrency(p.val, currency)} (${pctSign}${p.pct.toFixed(2)}%)`
+                        : `${formatDate(p.date)} &bull; ${formatCurrency(p.val, currency)} &bull; Drawdown: -${formatCurrency(Math.abs(p.downCAD), currency)}`;
+
+                    return `
+                        <div style="margin-bottom: 6px;">
+                            <div class="chart-card-row">
+                                <span style="display: flex; align-items: center; gap: 5px;">
+                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${d.color};"></span>
+                                    <strong style="color: ${d.color}; font-size: 0.82rem;">${d.year}:</strong>
+                                    ${athBadge}
+                                </span>
+                                <span>
+                                    <strong style="color: #1e293b;">${formatCurrency(p.val, currency)}</strong>
+                                </span>
+                            </div>
+                            <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">
+                                ${subText}
+                            </div>
+                        </div>
+                    `;
+                }
+
                 const weeklyChgVal = currency === 'USD'
                     ? (p.weeklyChangeUSD !== undefined ? p.weeklyChangeUSD : (p.rec?.weeklyChangeUSD || 0))
                     : (p.weeklyChangeCAD !== undefined ? p.weeklyChangeCAD : (p.rec?.weeklyChangeCAD || 0));
@@ -2436,6 +2804,19 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     const legendEl = document.getElementById('main-chart-legend');
     if (legendEl) {
         let itemsHtml = yearSeries.map(s => {
+            if (currentMainFilterAths) {
+                const athCount = s.points.filter(p => p.isAth).length;
+                const last = s.points[s.points.length - 1];
+                const valStr = last ? formatCurrency(last.val, currency) : '$0.00';
+                return `
+                    <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
+                        <strong style="color: ${s.color};">${s.year}</strong>:
+                        <span style="font-weight: 700; color: #15803d;">${athCount} ATHs</span>
+                        <span style="color: #64748b; font-size: 0.74rem;">(Peak: ${valStr})</span>
+                    </div>
+                `;
+            }
             const last = s.points[s.points.length - 1];
             const sign = last.pct >= 0 ? '+' : '';
             const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
@@ -2452,7 +2833,14 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             `;
         }).join('');
 
-        if (yearSeries.length >= 2) {
+        if (currentMainFilterAths && yearSeries.length >= 2) {
+            const totalAths = yearSeries.reduce((acc, s) => acc + s.points.filter(p => p.isAth).length, 0);
+            itemsHtml += `
+                <div style="font-size: 0.75rem; font-weight: 700; color: #15803d; background: rgba(22, 163, 74, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid #16a34a30;">
+                    Total ATH Milestones in selection: ${totalAths}
+                </div>
+            `;
+        } else if (yearSeries.length >= 2) {
             const sortedDesc = [...yearSeries].sort((a, b) => parseInt(b.year, 10) - parseInt(a.year, 10));
             const newest = sortedDesc[0].points[sortedDesc[0].points.length - 1];
             const prior = sortedDesc[1].points[sortedDesc[1].points.length - 1];
@@ -2519,6 +2907,8 @@ if (typeof module !== 'undefined' && module.exports) {
         renderMainYearOverlayChart,
         renderMainTopStats,
         toggleMainXeqtOverlay,
+        toggleMainAthsFilter,
+        filterHistoryAths,
         calculateTimeBack,
         setMainTimeframe,
         setMainCurrency,
@@ -2533,7 +2923,8 @@ if (typeof module !== 'undefined' && module.exports) {
             currentMainSelectedYears: new Set(currentMainSelectedYears),
             currentMainTimeframe,
             currentMainCurrency,
-            currentMainUnit
+            currentMainUnit,
+            currentMainFilterAths
         }),
         resetMainChartState: () => {
             currentMainMode = 'single';
@@ -2543,6 +2934,7 @@ if (typeof module !== 'undefined' && module.exports) {
             currentMainCurrency = 'CAD';
             currentMainUnit = 'VAL';
             currentMainOverlayXeqt = false;
+            currentMainFilterAths = false;
         },
         setMainChartData: (history, benchmarks) => {
             rawHistory = history || [];

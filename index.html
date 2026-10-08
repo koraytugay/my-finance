@@ -153,6 +153,10 @@
                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <h2 class="section-title" id="main-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Net Worth Progression</h2>
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #8250df; cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
+                            <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: #8250df; cursor: pointer; width: 14px; height: 14px;">
+                            ATHs
+                        </label>
                         <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
                             <input type="checkbox" id="main-overlay-xeqt" onchange="toggleMainXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             Overlay XEQT
