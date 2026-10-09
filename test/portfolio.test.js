@@ -39,6 +39,7 @@ const {
   buildMainYearOverlaySeries,
   syncMainTimeframeButtons,
   computeAthDiffs,
+  calculateNiceYTicks,
   setAthBarCurrency,
   setAthBarUnit,
   getAthBarChartState,
@@ -1964,5 +1965,51 @@ test('All-Time High Increments Calculation Suite', async (t) => {
     assert.equal(state.currentAthBarCurrency, 'CAD');
     assert.equal(state.currentAthBarUnit, 'VAL');
   });
+
+  await t.test('calculateNiceYTicks computes clean, round ticks for dollar currency increments', () => {
+    // Current CAD max ATH jump is ~$15,346.84 -> step should be 5000, ticks: 0, 5000, 10000, 15000, 20000
+    const cadResult = calculateNiceYTicks(15346.84, false);
+    assert.equal(cadResult.step, 5000);
+    assert.equal(cadResult.yMax, 20000);
+    assert.deepEqual(cadResult.ticks, [0, 5000, 10000, 15000, 20000]);
+
+    // Current USD max ATH jump is ~$12,927.31 -> step should be 5000, ticks: 0, 5000, 10000, 15000
+    const usdResult = calculateNiceYTicks(12927.31, false);
+    assert.equal(usdResult.step, 5000);
+    assert.equal(usdResult.yMax, 15000);
+    assert.deepEqual(usdResult.ticks, [0, 5000, 10000, 15000]);
+
+    // Edge case: zero or missing value returns sensible fallback without crashing
+    const zeroResult = calculateNiceYTicks(0, false);
+    assert.ok(zeroResult.yMax > 0);
+    assert.ok(zeroResult.ticks.length >= 3);
+  });
+
+  await t.test('calculateNiceYTicks computes clean, round ticks for percentage increments', () => {
+    // Current CAD max percentage jump is ~3.33% -> step should be 1%, ticks: 0, 1, 2, 3, 4
+    const pctResult = calculateNiceYTicks(3.33, true);
+    assert.equal(pctResult.step, 1);
+    assert.equal(pctResult.yMax, 4);
+    assert.deepEqual(pctResult.ticks, [0, 1, 2, 3, 4]);
+
+    // Current USD max percentage jump is ~3.35% -> step should be 1%, ticks: 0, 1, 2, 3, 4
+    const usdPctResult = calculateNiceYTicks(3.35, true);
+    assert.equal(usdPctResult.step, 1);
+    assert.equal(usdPctResult.yMax, 4);
+    assert.deepEqual(usdPctResult.ticks, [0, 1, 2, 3, 4]);
+
+    // Small percentage jump (e.g. 1.4%) -> step should be 0.5%, ticks: 0, 0.5, 1, 1.5
+    const smallPctResult = calculateNiceYTicks(1.4, true);
+    assert.equal(smallPctResult.step, 0.5);
+    assert.equal(smallPctResult.yMax, 1.5);
+    assert.deepEqual(smallPctResult.ticks, [0, 0.5, 1, 1.5]);
+
+    // Zero or missing percentage returns clean fallback
+    const zeroPctResult = calculateNiceYTicks(0, true);
+    assert.equal(zeroPctResult.step, 1);
+    assert.equal(zeroPctResult.yMax, 4);
+    assert.deepEqual(zeroPctResult.ticks, [0, 1, 2, 3, 4]);
+  });
 });
+
 

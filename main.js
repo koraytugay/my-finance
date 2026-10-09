@@ -3002,7 +3002,7 @@ function selectAthMilestone(idx) {
     renderAthBarChart();
 }
 
-function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
+function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
     if (!m) {
         return `
             <div class="chart-card-header">
@@ -3029,6 +3029,26 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
         : `Percentage Gain: <strong>+${m.diffPct.toFixed(2)}%</strong> over prior ATH`;
 
     const timeStr = `${m.weeksBetween} ${m.weeksBetween === 1 ? 'week' : 'weeks'}${m.weeksBetween > 1 ? ` (${m.weeksBetween * 7} days)` : ''}`;
+
+    let avgCompHtml = '';
+    if (avgVal !== undefined && avgVal !== null) {
+        const avgFormatted = isPctUnit
+            ? `+${avgVal.toFixed(2)}%`
+            : `+${typeof formatCurrency === 'function' ? formatCurrency(avgVal, currency) : `$${avgVal.toFixed(2)}`}`;
+        const diffVal = isPctUnit ? m.diffPct : m.diffVal;
+        const compDiff = diffVal - avgVal;
+        const compStr = compDiff >= 0
+            ? (isPctUnit ? `+${compDiff.toFixed(2)}% vs avg` : `+${typeof formatCurrency === 'function' ? formatCurrency(compDiff, currency) : `$${compDiff.toFixed(2)}`} vs avg`)
+            : (isPctUnit ? `${compDiff.toFixed(2)}% vs avg` : `-${typeof formatCurrency === 'function' ? formatCurrency(Math.abs(compDiff), currency) : `$${Math.abs(compDiff).toFixed(2)}`} vs avg`);
+        const compColor = compDiff >= 0 ? '#16a34a' : '#d97706';
+
+        avgCompHtml = `
+            <div class="chart-card-row" style="margin-top: 2px;">
+                <span>Historical Average:</span>
+                <span><strong style="color: #b45309;">${avgFormatted}</strong> (<span style="color: ${compColor}; font-weight: 600;">${compStr}</span>)</span>
+            </div>
+        `;
+    }
 
     return `
         <div class="chart-card-header">
@@ -3063,6 +3083,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
                 <span>Increment (%):</span>
                 <strong style="color: #16a34a;">+${m.diffPct.toFixed(2)}%</strong>
             </div>
+            ${avgCompHtml}
             <div class="chart-card-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
                 <span>Time Between Peaks:</span>
                 <strong style="color: #0969da;">${timeStr}</strong>
@@ -3072,6 +3093,68 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
             💡 Click or hover any bar to inspect that All-Time High milestone
         </div>
     `;
+}
+
+/**
+ * Computes logical, rounded Y-axis tick values and maximum for ATH charts.
+ * Avoids unrounded limits (e.g. 17648.87) by stepping in clean, intuitive increments
+ * (e.g. $5,000, $10,000, $15,000, $20,000 for dollars or 1%, 2%, 3%, 4% for percentages).
+ *
+ * @param {number} maxVal Maximum data value to plot
+ * @param {boolean} isPct Whether chart is in percentage mode
+ * @returns {{ yMax: number, ticks: number[], step: number }}
+ */
+function calculateNiceYTicks(maxVal, isPct) {
+    const safeMax = Math.max(0, Number(maxVal) || 0);
+    if (safeMax <= 0) {
+        return isPct
+            ? { yMax: 4, ticks: [0, 1, 2, 3, 4], step: 1 }
+            : { yMax: 20000, ticks: [0, 5000, 10000, 15000, 20000], step: 5000 };
+    }
+
+    if (isPct) {
+        const candidates = [0.1, 0.2, 0.5, 1, 2, 2.5, 5, 10, 20, 25, 50];
+        let chosenStep = candidates[candidates.length - 1];
+        for (const step of candidates) {
+            const count = Math.ceil(safeMax / step);
+            if (count >= 3 && count <= 5) {
+                chosenStep = step;
+                break;
+            }
+            if (count < 3) {
+                chosenStep = step;
+                break;
+            }
+        }
+        const count = Math.max(1, Math.ceil(safeMax / chosenStep));
+        const yMax = count * chosenStep;
+        const ticks = [];
+        for (let i = 0; i <= count; i++) {
+            ticks.push(Number((i * chosenStep).toFixed(chosenStep < 1 ? 2 : 1)));
+        }
+        return { yMax, ticks, step: chosenStep };
+    } else {
+        const roughStep = safeMax / 3.5;
+        const exponent = Math.floor(Math.log10(roughStep));
+        const power = Math.pow(10, exponent);
+        const fraction = roughStep / power;
+
+        let stepMultiplier;
+        if (fraction <= 1.2) stepMultiplier = 1;
+        else if (fraction <= 2.5) stepMultiplier = 2;
+        else if (fraction <= 3.5) stepMultiplier = 2.5;
+        else if (fraction <= 7.5) stepMultiplier = 5;
+        else stepMultiplier = 10;
+
+        const chosenStep = Math.max(1, stepMultiplier * power);
+        const count = Math.max(1, Math.ceil(safeMax / chosenStep));
+        const yMax = count * chosenStep;
+        const ticks = [];
+        for (let i = 0; i <= count; i++) {
+            ticks.push(Math.round(i * chosenStep));
+        }
+        return { yMax, ticks, step: chosenStep };
+    }
 }
 
 function renderAthBarChart() {
@@ -3093,16 +3176,35 @@ function renderAthBarChart() {
             ? `🏆 All-Time High Increments (% Return - ${currency})`
             : `🏆 All-Time High Increments (${currency} $)`;
     }
-    if (subTitleEl) {
-        subTitleEl.textContent = `${milestones.length} All-Time High milestones recorded • Click or hover bars to inspect`;
-    }
 
     if (milestones.length === 0) {
+        if (subTitleEl) {
+            subTitleEl.textContent = '0 All-Time High milestones recorded';
+        }
         box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High increments recorded yet.</p>';
         if (infoCard) {
             infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No ATH records available.</p>';
         }
         return;
+    }
+
+    // Determine max value and calculate clean, round Y-ticks
+    const maxVal = Math.max(...milestones.map(m => isPct ? m.diffPct : m.diffVal));
+    const { yMax, ticks, step: yStep } = calculateNiceYTicks(maxVal, isPct);
+
+    // Calculate historical average increment
+    const avgVal = milestones.reduce((sum, m) => sum + (isPct ? m.diffPct : m.diffVal), 0) / milestones.length;
+    const avgStr = isPct
+        ? `+${avgVal.toFixed(2)}%`
+        : `+${formatCurrency(avgVal, currency)}`;
+
+    if (subTitleEl) {
+        subTitleEl.textContent = `${milestones.length} All-Time High milestones recorded • Average jump: ${avgStr} • Click or hover bars to inspect`;
+    }
+
+    const legendAvgEl = document.getElementById('ath-legend-avg-text');
+    if (legendAvgEl) {
+        legendAvgEl.innerHTML = `Average Increment: <strong style="color: #b45309;">${avgStr}</strong>`;
     }
 
     const width = 1000;
@@ -3111,33 +3213,51 @@ function renderAthBarChart() {
     const plotW = width - padding.left - padding.right;
     const plotH = height - padding.top - padding.bottom;
 
-    // Determine max value for Y-scale
-    const maxVal = Math.max(...milestones.map(m => isPct ? m.diffPct : m.diffVal));
-    const yMax = Math.max(0.01, maxVal * 1.15);
-
     // Default or active milestone index
     let currentIdx = (selectedAthMilestoneIdx !== null && selectedAthMilestoneIdx >= 0 && selectedAthMilestoneIdx < milestones.length)
         ? selectedAthMilestoneIdx
         : (milestones.length - 1);
 
-    // Y Grid lines (4 intervals)
-    const numYTicks = 4;
+    // Y Grid lines and ticks
     let gridLinesSvg = '';
-    for (let i = 0; i <= numYTicks; i++) {
-        const tickFrac = i / numYTicks;
-        const tickVal = tickFrac * yMax;
+    ticks.forEach(tickVal => {
+        const tickFrac = yMax > 0 ? (tickVal / yMax) : 0;
         const yPos = padding.top + plotH - (tickFrac * plotH);
 
         let labelText = '';
         if (isPct) {
-            labelText = `+${tickVal.toFixed(1)}%`;
+            labelText = `${tickVal.toFixed(yStep < 1 ? 1 : 0)}%`;
         } else {
-            labelText = formatCurrency(tickVal, currency);
+            const prefix = currency === 'USD' ? 'US$' : '$';
+            labelText = `${prefix}${Math.round(tickVal).toLocaleString('en-US')}`;
         }
 
+        const isBaseline = tickVal === 0;
+        const strokeColor = isBaseline ? '#94a3b8' : '#cbd5e1';
+        const strokeWidth = isBaseline ? '1.2' : '1';
+        const strokeDash = isBaseline ? '' : 'stroke-dasharray="4 3"';
+
         gridLinesSvg += `
-            <line x1="${padding.left}" y1="${yPos.toFixed(1)}" x2="${padding.left + plotW}" y2="${yPos.toFixed(1)}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${padding.left - 10}" y="${(yPos + 3.5).toFixed(1)}" font-size="10" fill="#94a3b8" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${labelText}</text>
+            <line x1="${padding.left}" y1="${yPos.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${yPos.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
+            <text x="${padding.left - 10}" y="${(yPos + 3.5).toFixed(1)}" font-size="10.5" font-weight="500" fill="#64748b" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${labelText}</text>
+        `;
+    });
+
+    // Average value line across the chart
+    let avgLineSvg = '';
+    if (yMax > 0) {
+        const clampedAvgFrac = Math.max(0, Math.min(1, avgVal / yMax));
+        const avgY = padding.top + plotH - (clampedAvgFrac * plotH);
+        const badgeW = 120;
+        const badgeX = padding.left + plotW - badgeW;
+        const badgeY = Math.max(padding.top + 2, avgY - 14);
+
+        avgLineSvg = `
+            <g class="ath-avg-line-group" pointer-events="none">
+                <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5 3" />
+                <rect x="${badgeX.toFixed(1)}" y="${badgeY.toFixed(1)}" width="${badgeW}" height="13.5" rx="3" fill="#fffbeb" stroke="#fcd34d" stroke-width="0.8" opacity="0.95" />
+                <text x="${(padding.left + plotW - 5).toFixed(1)}" y="${(badgeY + 9.5).toFixed(1)}" font-size="9" font-weight="700" fill="#b45309" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">AVG: ${avgStr}</text>
+            </g>
         `;
     }
 
@@ -3176,7 +3296,7 @@ function renderAthBarChart() {
 
     // Baseline axis
     const axisSvg = `
-        <line x1="${padding.left}" y1="${padding.top + plotH}" x2="${padding.left + plotW}" y2="${padding.top + plotH}" stroke="#cbd5e1" stroke-width="1" />
+        <line x1="${padding.left}" y1="${padding.top + plotH}" x2="${padding.left + plotW}" y2="${padding.top + plotH}" stroke="#94a3b8" stroke-width="1.2" />
         <text x="${padding.left + plotW / 2}" y="${height - 6}" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">All-Time High Milestone Number (1 to ${N})</text>
     `;
 
@@ -3191,13 +3311,14 @@ function renderAthBarChart() {
             ${axisSvg}
             ${xTicksSvg}
             ${barsSvg}
+            ${avgLineSvg}
             ${overlaySvg}
         </svg>
     `;
 
     // Render info card for current milestone
     if (infoCard) {
-        infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[currentIdx], currency, isPct, false);
+        infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[currentIdx], currency, isPct, false, avgVal);
     }
 
     // Attach event listeners
@@ -3209,7 +3330,7 @@ function renderAthBarChart() {
 
             // Update info card without active highlight flash
             if (infoCard) {
-                infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, false);
+                infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, false, avgVal);
             }
 
             // Position and show tooltip
@@ -3249,7 +3370,7 @@ function renderAthBarChart() {
                 : (milestones.length - 1);
 
             if (infoCard) {
-                infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[activeIdx], currency, isPct, false);
+                infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[activeIdx], currency, isPct, false, avgVal);
             }
         };
 
@@ -3312,6 +3433,7 @@ if (typeof module !== 'undefined' && module.exports) {
         syncMainTimeframeButtons,
         buildMainYearOverlaySeries,
         computeAthDiffs,
+        calculateNiceYTicks,
         renderAthBarChart,
         setAthBarCurrency,
         setAthBarUnit,
