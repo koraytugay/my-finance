@@ -3300,9 +3300,14 @@ function renderAthBarChart() {
         <text x="${padding.left + plotW / 2}" y="${height - 6}" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">All-Time High Milestone Number (1 to ${N})</text>
     `;
 
+    // Vertical Crosshair Cursor Line
+    const cursorLineSvg = `
+        <line id="ath-chart-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+    `;
+
     // Overlay for smooth scrubbing & click detection
     const overlaySvg = `
-        <rect id="ath-chart-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: pointer;" />
+        <rect id="ath-chart-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
     `;
 
     box.innerHTML = `
@@ -3312,6 +3317,7 @@ function renderAthBarChart() {
             ${xTicksSvg}
             ${barsSvg}
             ${avgLineSvg}
+            ${cursorLineSvg}
             ${overlaySvg}
         </svg>
     `;
@@ -3323,6 +3329,7 @@ function renderAthBarChart() {
 
     // Attach event listeners
     const overlay = document.getElementById('ath-chart-overlay');
+    const cursorLine = document.getElementById('ath-chart-cursor-line');
     if (overlay) {
         const updateHoverState = (targetIdx, isClick = false) => {
             if (targetIdx < 0 || targetIdx >= milestones.length) return;
@@ -3333,9 +3340,17 @@ function renderAthBarChart() {
                 infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, false, avgVal);
             }
 
+            const slotCenterX = padding.left + targetIdx * slotW + slotW / 2;
+
+            // Position and show vertical crosshair cursor line
+            if (cursorLine) {
+                cursorLine.setAttribute('x1', slotCenterX.toFixed(1));
+                cursorLine.setAttribute('x2', slotCenterX.toFixed(1));
+                cursorLine.style.display = 'block';
+            }
+
             // Position and show tooltip
             if (tooltip) {
-                const slotCenterX = padding.left + targetIdx * slotW + slotW / 2;
                 const svgRect = box.getBoundingClientRect();
                 const scaleX = svgRect.width / width;
                 const clientX = slotCenterX * scaleX;
@@ -3364,6 +3379,7 @@ function renderAthBarChart() {
 
         const resetToDefault = () => {
             if (tooltip) tooltip.style.display = 'none';
+            if (cursorLine) cursorLine.style.display = 'none';
 
             const activeIdx = (selectedAthMilestoneIdx !== null && selectedAthMilestoneIdx >= 0 && selectedAthMilestoneIdx < milestones.length)
                 ? selectedAthMilestoneIdx
