@@ -16,6 +16,11 @@ let currentMainUnit = 'VAL'; // 'VAL' | 'PCT'
 let currentMainOverlayXeqt = false;
 let currentMainFilterAths = false;
 
+// ATH Increments Bar Chart State
+let currentAthBarCurrency = 'CAD';
+let currentAthBarUnit = 'VAL'; // 'VAL' | 'PCT'
+let selectedAthMilestoneIdx = null;
+
 async function initMain() {
     const loadingEl = document.getElementById('loading');
     const contentEl = document.getElementById('main-content');
@@ -44,6 +49,7 @@ async function initMain() {
         renderMainTopStats(mainData, holdings, enrichedHistory);
         syncMainTimeframeButtons(rawHistory);
         renderMainProgressionChart();
+        renderAthBarChart();
         renderAssetClassTable(mainData, holdings);
         renderAccountTypeTable(mainData, holdings, enrichedHistory);
         renderCategoryTable(mainData, holdings);
@@ -2881,10 +2887,447 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 }
 
+/* ================= All-Time High Increments Bar Chart ================= */
+
+/**
+ * Pure calculation function: Computes chronological All-Time High milestones and their diffs.
+ * @param {Array} history Array of history records
+ * @param {string} currency 'CAD' or 'USD'
+ * @returns {Array} Array of ATH milestone objects
+ */
+function computeAthDiffs(history, currency = 'CAD') {
+    if (!history || history.length === 0) return [];
+    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+
+    // Sort chronologically
+    const sorted = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    let peak = 0;
+    let prevRecord = null;
+    let prevAthNumber = 0;
+    const milestones = [];
+    let counter = 0;
+    let totalAthCounter = 0;
+
+    sorted.forEach((r, idx) => {
+        const val = Number(r[valKey]) || 0;
+        if (val <= 0) return;
+
+        if (idx === 0) {
+            peak = val;
+            prevRecord = r;
+            totalAthCounter = 1;
+            prevAthNumber = 1;
+            return;
+        }
+
+        if (val > peak) {
+            counter++;
+            totalAthCounter++;
+            const diffVal = val - peak;
+            const diffPct = peak > 0 ? (diffVal / peak) * 100 : 0;
+            const weeksBetween = (r.week !== undefined && prevRecord.week !== undefined && r.week >= prevRecord.week)
+                ? (r.week - prevRecord.week)
+                : Math.max(1, Math.round((new Date(r.date) - new Date(prevRecord.date)) / (7 * 86400000)));
+
+            milestones.push({
+                index: counter,              // 1, 2, 3 ... (X-axis milestone number)
+                athNumber: totalAthCounter,   // Overall ATH count (e.g. ATH #2)
+                week: r.week,
+                date: r.date,
+                val: val,
+                prevVal: peak,
+                prevDate: prevRecord.date,
+                prevWeek: prevRecord.week,
+                prevAthNumber: prevAthNumber,
+                diffVal: diffVal,
+                diffPct: diffPct,
+                weeksBetween: Math.max(1, weeksBetween)
+            });
+
+            peak = val;
+            prevRecord = r;
+            prevAthNumber = totalAthCounter;
+        }
+    });
+
+    return milestones;
+}
+
+function setAthBarCurrency(currency) {
+    if (currentAthBarCurrency === currency) return;
+    currentAthBarCurrency = currency;
+    selectedAthMilestoneIdx = null;
+
+    if (typeof document !== 'undefined') {
+        const btnCad = document.getElementById('btn-ath-cur-cad');
+        const btnUsd = document.getElementById('btn-ath-cur-usd');
+        if (btnCad && btnUsd) {
+            btnCad.classList.toggle('active', currency === 'CAD');
+            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
+            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
+            btnUsd.classList.toggle('active', currency === 'USD');
+            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
+            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+        }
+    }
+    renderAthBarChart();
+}
+
+function setAthBarUnit(unit) {
+    if (currentAthBarUnit === unit) return;
+    currentAthBarUnit = unit;
+
+    if (typeof document !== 'undefined') {
+        const btnVal = document.getElementById('btn-ath-unit-val');
+        const btnPct = document.getElementById('btn-ath-unit-pct');
+        if (btnVal && btnPct) {
+            btnVal.classList.toggle('active', unit === 'VAL');
+            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
+            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
+            btnPct.classList.toggle('active', unit === 'PCT');
+            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
+            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+        }
+    }
+    renderAthBarChart();
+}
+
+function selectAthMilestone(idx) {
+    if (selectedAthMilestoneIdx === idx) {
+        selectedAthMilestoneIdx = null;
+    } else {
+        selectedAthMilestoneIdx = idx;
+    }
+    renderAthBarChart();
+}
+
+function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
+    if (!m) {
+        return `
+            <div class="chart-card-header">
+                <span class="chart-card-date">All-Time High Milestones</span>
+                <span class="chart-card-badge">INFO</span>
+            </div>
+            <div style="padding: 24px 8px; text-align: center; color: #64748b; font-size: 0.85rem;">
+                No All-Time High data available.
+            </div>
+        `;
+    }
+
+    const badgeLabel = `🏆 ATH MILESTONE #${m.index}`;
+    const badgeHtml = `<span class="chart-card-badge" style="background: #f3e8ff; color: #7e22ce; font-weight: 700;">${badgeLabel}</span>`;
+    const dateStr = typeof formatDate === 'function' ? formatDate(m.date) : m.date;
+    const prevDateStr = typeof formatDate === 'function' ? formatDate(m.prevDate) : m.prevDate;
+    const diffValStr = typeof formatCurrency === 'function' ? formatCurrency(m.diffVal, currency) : `$${m.diffVal.toFixed(2)}`;
+    const prevValStr = typeof formatCurrency === 'function' ? formatCurrency(m.prevVal, currency) : `$${m.prevVal.toFixed(2)}`;
+    const currValStr = typeof formatCurrency === 'function' ? formatCurrency(m.val, currency) : `$${m.val.toFixed(2)}`;
+
+    const primaryVal = isPctUnit ? `+${m.diffPct.toFixed(2)}%` : `+${diffValStr}`;
+    const subValText = isPctUnit
+        ? `Dollar Gain: <strong>+${diffValStr}</strong> over prior ATH`
+        : `Percentage Gain: <strong>+${m.diffPct.toFixed(2)}%</strong> over prior ATH`;
+
+    const timeStr = `${m.weeksBetween} ${m.weeksBetween === 1 ? 'week' : 'weeks'}${m.weeksBetween > 1 ? ` (${m.weeksBetween * 7} days)` : ''}`;
+
+    return `
+        <div class="chart-card-header">
+            <span class="chart-card-date">Week ${m.week} &bull; ${dateStr}</span>
+            ${badgeHtml}
+        </div>
+        <div class="chart-card-primary-val" style="color: #7e22ce;">
+            ${primaryVal}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b;">
+            ${subValText}
+        </div>
+        <div class="chart-card-section-divider">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Milestone Comparison</div>
+            <div class="chart-card-row">
+                <span>Previous ATH:</span>
+                <strong>${prevValStr}</strong>
+            </div>
+            <div class="chart-card-row" style="color: #64748b;">
+                <span>Previous Date:</span>
+                <span>Week ${m.prevWeek} &bull; ${prevDateStr}</span>
+            </div>
+            <div class="chart-card-row" style="margin-top: 4px;">
+                <span>New Peak at Node:</span>
+                <strong style="color: #15803d;">${currValStr}</strong>
+            </div>
+            <div class="chart-card-row" style="margin-top: 2px;">
+                <span>Increment (${currency}):</span>
+                <strong style="color: #7e22ce;">+${diffValStr}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Increment (%):</span>
+                <strong style="color: #7e22ce;">+${m.diffPct.toFixed(2)}%</strong>
+            </div>
+            <div class="chart-card-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
+                <span>Time Between Peaks:</span>
+                <strong style="color: #0969da;">${timeStr}</strong>
+            </div>
+        </div>
+        <div class="chart-card-footer" style="margin-top: auto; padding-top: 8px; font-size: 0.72rem; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+            💡 Click or hover any bar to inspect that All-Time High milestone
+        </div>
+    `;
+}
+
+function renderAthBarChart() {
+    if (typeof document === 'undefined') return;
+    const box = document.getElementById('ath-chart-svg-box');
+    const tooltip = document.getElementById('ath-chart-tooltip');
+    const infoCard = document.getElementById('ath-chart-info-card');
+    const titleEl = document.getElementById('ath-bar-chart-title');
+    const subTitleEl = document.getElementById('ath-bar-chart-subtitle');
+
+    if (!box || !rawHistory || rawHistory.length === 0) return;
+
+    const currency = currentAthBarCurrency;
+    const isPct = currentAthBarUnit === 'PCT';
+    const milestones = computeAthDiffs(rawHistory, currency);
+
+    if (titleEl) {
+        titleEl.textContent = isPct
+            ? `🏆 All-Time High Increments (% Return - ${currency})`
+            : `🏆 All-Time High Increments (${currency} $)`;
+    }
+    if (subTitleEl) {
+        subTitleEl.textContent = `${milestones.length} All-Time High milestones recorded • Click or hover bars to inspect`;
+    }
+
+    if (milestones.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High increments recorded yet.</p>';
+        if (infoCard) {
+            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No ATH records available.</p>';
+        }
+        return;
+    }
+
+    const width = 1000;
+    const height = 220;
+    const padding = { top: 20, right: 25, bottom: 38, left: 70 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+
+    // Determine max value for Y-scale
+    const maxVal = Math.max(...milestones.map(m => isPct ? m.diffPct : m.diffVal));
+    const yMax = Math.max(0.01, maxVal * 1.15);
+
+    // Default or active milestone index
+    let currentIdx = (selectedAthMilestoneIdx !== null && selectedAthMilestoneIdx >= 0 && selectedAthMilestoneIdx < milestones.length)
+        ? selectedAthMilestoneIdx
+        : (milestones.length - 1);
+
+    // Y Grid lines (4 intervals)
+    const numYTicks = 4;
+    let gridLinesSvg = '';
+    for (let i = 0; i <= numYTicks; i++) {
+        const tickFrac = i / numYTicks;
+        const tickVal = tickFrac * yMax;
+        const yPos = padding.top + plotH - (tickFrac * plotH);
+
+        let labelText = '';
+        if (isPct) {
+            labelText = `+${tickVal.toFixed(1)}%`;
+        } else {
+            labelText = formatCurrency(tickVal, currency);
+        }
+
+        gridLinesSvg += `
+            <line x1="${padding.left}" y1="${yPos.toFixed(1)}" x2="${padding.left + plotW}" y2="${yPos.toFixed(1)}" stroke="#f1f5f9" stroke-width="1" />
+            <text x="${padding.left - 10}" y="${(yPos + 3.5).toFixed(1)}" font-size="10" fill="#94a3b8" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${labelText}</text>
+        `;
+    }
+
+    // X Axis and Bars
+    const N = milestones.length;
+    const slotW = plotW / N;
+    const barW = Math.max(3, Math.min(slotW * 0.78, 22));
+
+    // Show ticks: milestone 1, every 5th or 10th, and final milestone N
+    const step = N > 50 ? 5 : (N > 25 ? 5 : 1);
+
+    let xTicksSvg = '';
+    let barsSvg = '';
+
+    milestones.forEach((m, idx) => {
+        const val = isPct ? m.diffPct : m.diffVal;
+        const barH = Math.max(2, (val / yMax) * plotH);
+        const barX = padding.left + idx * slotW + (slotW - barW) / 2;
+        const barY = padding.top + plotH - barH;
+        const isSelected = idx === currentIdx;
+
+        // X Tick Label
+        const showLabel = (m.index === 1) || (m.index === N) || (m.index % step === 0);
+        if (showLabel) {
+            const centerX = padding.left + idx * slotW + slotW / 2;
+            xTicksSvg += `
+                <line x1="${centerX.toFixed(1)}" y1="${padding.top + plotH}" x2="${centerX.toFixed(1)}" y2="${padding.top + plotH + 4}" stroke="#cbd5e1" stroke-width="1" />
+                <text x="${centerX.toFixed(1)}" y="${padding.top + plotH + 16}" font-size="9.5" font-weight="${isSelected ? '700' : '500'}" fill="${isSelected ? '#7e22ce' : '#64748b'}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${m.index}</text>
+            `;
+        }
+
+        // Bar Colors
+        const fill = isSelected ? '#7e22ce' : '#a855f7';
+        const stroke = isSelected ? '#581c87' : 'none';
+        const strokeWidth = isSelected ? '1.5' : '0';
+        const opacity = isSelected ? '1' : '0.85';
+
+        barsSvg += `
+            <rect id="ath-bar-${idx}" class="ath-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" ry="2" fill="${fill}" opacity="${opacity}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor: pointer; transition: fill 0.15s ease, opacity 0.15s ease;" />
+        `;
+    });
+
+    // Baseline axis
+    const axisSvg = `
+        <line x1="${padding.left}" y1="${padding.top + plotH}" x2="${padding.left + plotW}" y2="${padding.top + plotH}" stroke="#cbd5e1" stroke-width="1" />
+        <text x="${padding.left + plotW / 2}" y="${height - 6}" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">All-Time High Milestone Number (1 to ${N})</text>
+    `;
+
+    // Overlay for smooth scrubbing & click detection
+    const overlaySvg = `
+        <rect id="ath-chart-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: pointer;" />
+    `;
+
+    box.innerHTML = `
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" style="width: 100%; height: auto; display: block; overflow: visible;">
+            ${gridLinesSvg}
+            ${axisSvg}
+            ${xTicksSvg}
+            ${barsSvg}
+            ${overlaySvg}
+        </svg>
+    `;
+
+    // Render info card for current milestone
+    if (infoCard) {
+        infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[currentIdx], currency, isPct, selectedAthMilestoneIdx !== null);
+    }
+
+    // Attach event listeners
+    const overlay = document.getElementById('ath-chart-overlay');
+    if (overlay) {
+        const updateHoverState = (targetIdx, isClick = false) => {
+            if (targetIdx < 0 || targetIdx >= milestones.length) return;
+            const m = milestones[targetIdx];
+
+            // Highlight bar in SVG
+            milestones.forEach((_, i) => {
+                const barEl = document.getElementById(`ath-bar-${i}`);
+                if (barEl) {
+                    if (i === targetIdx) {
+                        barEl.setAttribute('fill', '#7e22ce');
+                        barEl.setAttribute('opacity', '1');
+                        barEl.setAttribute('stroke', '#581c87');
+                        barEl.setAttribute('stroke-width', '2');
+                    } else {
+                        barEl.setAttribute('fill', '#a855f7');
+                        barEl.setAttribute('opacity', '0.65');
+                        barEl.setAttribute('stroke', 'none');
+                        barEl.setAttribute('stroke-width', '0');
+                    }
+                }
+            });
+
+            // Update info card
+            if (infoCard) {
+                infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, true);
+                infoCard.classList.add('active');
+            }
+
+            // Position and show tooltip
+            if (tooltip) {
+                const slotCenterX = padding.left + targetIdx * slotW + slotW / 2;
+                const svgRect = box.getBoundingClientRect();
+                const scaleX = svgRect.width / width;
+                const clientX = slotCenterX * scaleX;
+                const diffStr = isPct ? `+${m.diffPct.toFixed(2)}%` : `+${formatCurrency(m.diffVal, currency)}`;
+
+                tooltip.style.display = 'block';
+                tooltip.innerHTML = `
+                    <div style="font-weight: 700; color: #7e22ce; margin-bottom: 2px;">🏆 Milestone #${m.index} (Week ${m.week})</div>
+                    <div style="font-size: 0.76rem; color: #64748b; margin-bottom: 4px;">${formatDate(m.date)}</div>
+                    <div>Jump: <strong style="color: #15803d;">${diffStr}</strong> (+${m.diffPct.toFixed(2)}%)</div>
+                    <div style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">Prior ATH: ${formatCurrency(m.prevVal, currency)} &bull; ${m.weeksBetween}w ago</div>
+                `;
+
+                const ttRect = tooltip.getBoundingClientRect();
+                let leftPos = clientX - (ttRect.width / 2);
+                if (leftPos < 0) leftPos = 4;
+                if (leftPos + ttRect.width > svgRect.width) leftPos = svgRect.width - ttRect.width - 4;
+                tooltip.style.left = `${leftPos}px`;
+                tooltip.style.top = `10px`;
+            }
+
+            if (isClick) {
+                selectedAthMilestoneIdx = targetIdx;
+            }
+        };
+
+        const resetToDefault = () => {
+            if (tooltip) tooltip.style.display = 'none';
+
+            const activeIdx = (selectedAthMilestoneIdx !== null && selectedAthMilestoneIdx >= 0 && selectedAthMilestoneIdx < milestones.length)
+                ? selectedAthMilestoneIdx
+                : (milestones.length - 1);
+
+            milestones.forEach((_, i) => {
+                const barEl = document.getElementById(`ath-bar-${i}`);
+                if (barEl) {
+                    if (i === activeIdx) {
+                        barEl.setAttribute('fill', '#7e22ce');
+                        barEl.setAttribute('opacity', '1');
+                        barEl.setAttribute('stroke', '#581c87');
+                        barEl.setAttribute('stroke-width', '1.5');
+                    } else {
+                        barEl.setAttribute('fill', '#a855f7');
+                        barEl.setAttribute('opacity', '0.85');
+                        barEl.setAttribute('stroke', 'none');
+                        barEl.setAttribute('stroke-width', '0');
+                    }
+                }
+            });
+
+            if (infoCard) {
+                infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[activeIdx], currency, isPct, selectedAthMilestoneIdx !== null);
+                if (selectedAthMilestoneIdx !== null) infoCard.classList.add('active');
+                else infoCard.classList.remove('active');
+            }
+        };
+
+        overlay.addEventListener('mousemove', (e) => {
+            const svgRect = box.getBoundingClientRect();
+            const mouseX = e.clientX - svgRect.left;
+            const svgX = (mouseX / svgRect.width) * width;
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
+            const frac = (clampedX - padding.left) / plotW;
+            const targetIdx = Math.max(0, Math.min(milestones.length - 1, Math.floor(frac * milestones.length)));
+            updateHoverState(targetIdx, false);
+        });
+
+        overlay.addEventListener('click', (e) => {
+            const svgRect = box.getBoundingClientRect();
+            const mouseX = e.clientX - svgRect.left;
+            const svgX = (mouseX / svgRect.width) * width;
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
+            const frac = (clampedX - padding.left) / plotW;
+            const targetIdx = Math.max(0, Math.min(milestones.length - 1, Math.floor(frac * milestones.length)));
+            updateHoverState(targetIdx, true);
+        });
+
+        overlay.addEventListener('mouseleave', () => {
+            resetToDefault();
+        });
+    }
+}
+
 if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('resize', () => {
         if (rawHistory && rawHistory.length > 0) {
             renderMainProgressionChart();
+            renderAthBarChart();
         }
     });
 }
@@ -2912,6 +3355,21 @@ if (typeof module !== 'undefined' && module.exports) {
         getMainYearColor,
         syncMainTimeframeButtons,
         buildMainYearOverlaySeries,
+        computeAthDiffs,
+        renderAthBarChart,
+        setAthBarCurrency,
+        setAthBarUnit,
+        selectAthMilestone,
+        getAthBarChartState: () => ({
+            currentAthBarCurrency,
+            currentAthBarUnit,
+            selectedAthMilestoneIdx
+        }),
+        resetAthBarChartState: () => {
+            currentAthBarCurrency = 'CAD';
+            currentAthBarUnit = 'VAL';
+            selectedAthMilestoneIdx = null;
+        },
         getMainChartState: () => ({
             currentMainMode,
             currentMainSingleTimeframe,
@@ -2937,3 +3395,4 @@ if (typeof module !== 'undefined' && module.exports) {
         }
     };
 }
+

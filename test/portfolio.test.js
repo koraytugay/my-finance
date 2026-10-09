@@ -37,7 +37,12 @@ const {
   resetMainChartState,
   setMainChartData,
   buildMainYearOverlaySeries,
-  syncMainTimeframeButtons
+  syncMainTimeframeButtons,
+  computeAthDiffs,
+  setAthBarCurrency,
+  setAthBarUnit,
+  getAthBarChartState,
+  resetAthBarChartState
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -1868,3 +1873,96 @@ test('Live Holdings History Enrichment & Graph Consistency Suite', async (t) => 
     assert.equal(liveWeek.isLive, true);
   });
 });
+
+test('All-Time High Increments Calculation Suite', async (t) => {
+  await t.test('computeAthDiffs returns empty array on empty inputs or single-record history', () => {
+    assert.deepEqual(computeAthDiffs([]), []);
+    assert.deepEqual(computeAthDiffs([{ week: 1, date: '2024-08-23', totalCAD: 340000 }]), []);
+  });
+
+  await t.test('computeAthDiffs accurately computes diffVal, diffPct, and weeksBetween on synthetic data', () => {
+    const synthetic = [
+      { week: 1, date: '2024-08-23', totalCAD: 340000, totalUSD: 250000 },
+      { week: 2, date: '2024-08-30', totalCAD: 345000, totalUSD: 252000 }, // ATH #1: +$5,000, 1 wk
+      { week: 3, date: '2024-09-06', totalCAD: 342000, totalUSD: 251000 }, // dip
+      { week: 4, date: '2024-09-13', totalCAD: 348000, totalUSD: 256000 }, // ATH #2: +$3,000, 2 wks
+      { week: 5, date: '2024-09-20', totalCAD: 356000, totalUSD: 260000 }  // ATH #3: +$8,000, 1 wk
+    ];
+
+    const diffsCAD = computeAthDiffs(synthetic, 'CAD');
+    assert.equal(diffsCAD.length, 3);
+
+    // Milestone 1
+    assert.equal(diffsCAD[0].index, 1);
+    assert.equal(diffsCAD[0].athNumber, 2);
+    assert.equal(diffsCAD[0].week, 2);
+    assert.equal(diffsCAD[0].date, '2024-08-30');
+    assert.equal(diffsCAD[0].val, 345000);
+    assert.equal(diffsCAD[0].prevVal, 340000);
+    assert.equal(diffsCAD[0].prevWeek, 1);
+    assert.equal(diffsCAD[0].diffVal, 5000);
+    assert.equal(Number(diffsCAD[0].diffPct.toFixed(4)), Number(((5000 / 340000) * 100).toFixed(4)));
+    assert.equal(diffsCAD[0].weeksBetween, 1);
+
+    // Milestone 2
+    assert.equal(diffsCAD[1].index, 2);
+    assert.equal(diffsCAD[1].athNumber, 3);
+    assert.equal(diffsCAD[1].week, 4);
+    assert.equal(diffsCAD[1].val, 348000);
+    assert.equal(diffsCAD[1].prevVal, 345000);
+    assert.equal(diffsCAD[1].prevWeek, 2);
+    assert.equal(diffsCAD[1].diffVal, 3000);
+    assert.equal(Number(diffsCAD[1].diffPct.toFixed(4)), Number(((3000 / 345000) * 100).toFixed(4)));
+    assert.equal(diffsCAD[1].weeksBetween, 2);
+
+    // Milestone 3
+    assert.equal(diffsCAD[2].index, 3);
+    assert.equal(diffsCAD[2].athNumber, 4);
+    assert.equal(diffsCAD[2].week, 5);
+    assert.equal(diffsCAD[2].val, 356000);
+    assert.equal(diffsCAD[2].prevVal, 348000);
+    assert.equal(diffsCAD[2].prevWeek, 4);
+    assert.equal(diffsCAD[2].diffVal, 8000);
+    assert.equal(Number(diffsCAD[2].diffPct.toFixed(4)), Number(((8000 / 348000) * 100).toFixed(4)));
+    assert.equal(diffsCAD[2].weeksBetween, 1);
+  });
+
+  await t.test('computeAthDiffs correctly switches currency to USD and uses totalUSD', () => {
+    const synthetic = [
+      { week: 1, date: '2024-08-23', totalCAD: 340000, totalUSD: 250000 },
+      { week: 2, date: '2024-08-30', totalCAD: 345000, totalUSD: 248000 }, // CAD ATH, but USD dipped!
+      { week: 3, date: '2024-09-06', totalCAD: 342000, totalUSD: 255000 }  // USD ATH (+5,000, 2 wks)
+    ];
+
+    const diffsUSD = computeAthDiffs(synthetic, 'USD');
+    assert.equal(diffsUSD.length, 1);
+    assert.equal(diffsUSD[0].index, 1);
+    assert.equal(diffsUSD[0].week, 3);
+    assert.equal(diffsUSD[0].val, 255000);
+    assert.equal(diffsUSD[0].prevVal, 250000);
+    assert.equal(diffsUSD[0].prevWeek, 1);
+    assert.equal(diffsUSD[0].diffVal, 5000);
+    assert.equal(diffsUSD[0].weeksBetween, 2);
+  });
+
+  await t.test('setAthBarCurrency and setAthBarUnit manage state transitions correctly', () => {
+    resetAthBarChartState();
+    let state = getAthBarChartState();
+    assert.equal(state.currentAthBarCurrency, 'CAD');
+    assert.equal(state.currentAthBarUnit, 'VAL');
+
+    setAthBarCurrency('USD');
+    state = getAthBarChartState();
+    assert.equal(state.currentAthBarCurrency, 'USD');
+
+    setAthBarUnit('PCT');
+    state = getAthBarChartState();
+    assert.equal(state.currentAthBarUnit, 'PCT');
+
+    resetAthBarChartState();
+    state = getAthBarChartState();
+    assert.equal(state.currentAthBarCurrency, 'CAD');
+    assert.equal(state.currentAthBarUnit, 'VAL');
+  });
+});
+

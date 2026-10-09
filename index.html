@@ -198,6 +198,42 @@
                 </div>
             </div>
 
+            <!-- All-Time High Increments (ATH Diffs) Bar Chart -->
+            <div class="chart-wrapper" id="ath-diffs-wrapper" style="margin-top: 24px;">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="ath-bar-chart-title" style="margin: 0; font-size: 1.15rem;">🏆 All-Time High Increments</h2>
+                        <span id="ath-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Growth jump per All-Time High milestone</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <div class="currency-toggle" id="ath-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-ath-cur-cad" class="btn-secondary active" onclick="setAthBarCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display increments in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-ath-cur-usd" class="btn-secondary" onclick="setAthBarCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display increments in US Dollars (USD $)">USD ($)</button>
+                        </div>
+                        <div class="unit-toggle" id="ath-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-ath-unit-val" class="btn-secondary active" onclick="setAthBarUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display dollar increment ($)">$</button>
+                            <button type="button" id="btn-ath-unit-pct" class="btn-secondary" onclick="setAthBarUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display percentage increment (%)">%</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-layout-grid">
+                    <div class="chart-canvas-col">
+                        <div class="chart-container" id="ath-chart-container" style="margin: 0; position: relative;">
+                            <div id="ath-chart-svg-box"></div>
+                            <div id="ath-chart-tooltip" class="chart-tooltip"></div>
+                        </div>
+                        <div class="chart-legend" id="ath-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #8250df;"></span> ATH Milestone Increments &bull; Click or hover any bar to inspect previous ATH details
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-info-card" id="ath-chart-info-card">
+                        <!-- Populated dynamically via main.js -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Google Sheets Main Tab 3-Column Tables Layout -->
             <div class="main-grid">
                 <!-- 1. Asset Class Table -->
