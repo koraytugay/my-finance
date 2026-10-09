@@ -3248,15 +3248,10 @@ function renderAthBarChart() {
     if (yMax > 0) {
         const clampedAvgFrac = Math.max(0, Math.min(1, avgVal / yMax));
         const avgY = padding.top + plotH - (clampedAvgFrac * plotH);
-        const badgeW = 120;
-        const badgeX = padding.left + plotW - badgeW;
-        const badgeY = Math.max(padding.top + 2, avgY - 14);
 
         avgLineSvg = `
             <g class="ath-avg-line-group" pointer-events="none">
                 <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5 3" />
-                <rect x="${badgeX.toFixed(1)}" y="${badgeY.toFixed(1)}" width="${badgeW}" height="13.5" rx="3" fill="#fffbeb" stroke="#fcd34d" stroke-width="0.8" opacity="0.95" />
-                <text x="${(padding.left + plotW - 5).toFixed(1)}" y="${(badgeY + 9.5).toFixed(1)}" font-size="9" font-weight="700" fill="#b45309" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">AVG: ${avgStr}</text>
             </g>
         `;
     }
