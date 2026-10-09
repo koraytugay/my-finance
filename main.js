@@ -3016,7 +3016,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
     }
 
     const badgeLabel = `🏆 ATH MILESTONE #${m.index}`;
-    const badgeHtml = `<span class="chart-card-badge" style="background: #f3e8ff; color: #7e22ce; font-weight: 700;">${badgeLabel}</span>`;
+    const badgeHtml = `<span class="chart-card-badge" style="background: #dcfce7; color: #15803d; font-weight: 700;">${badgeLabel}</span>`;
     const dateStr = typeof formatDate === 'function' ? formatDate(m.date) : m.date;
     const prevDateStr = typeof formatDate === 'function' ? formatDate(m.prevDate) : m.prevDate;
     const diffValStr = typeof formatCurrency === 'function' ? formatCurrency(m.diffVal, currency) : `$${m.diffVal.toFixed(2)}`;
@@ -3035,7 +3035,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
             <span class="chart-card-date">Week ${m.week} &bull; ${dateStr}</span>
             ${badgeHtml}
         </div>
-        <div class="chart-card-primary-val" style="color: #7e22ce;">
+        <div class="chart-card-primary-val" style="color: #16a34a;">
             ${primaryVal}
         </div>
         <div class="chart-card-sub-val" style="color: #64748b;">
@@ -3057,11 +3057,11 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive) {
             </div>
             <div class="chart-card-row" style="margin-top: 2px;">
                 <span>Increment (${currency}):</span>
-                <strong style="color: #7e22ce;">+${diffValStr}</strong>
+                <strong style="color: #16a34a;">+${diffValStr}</strong>
             </div>
             <div class="chart-card-row">
                 <span>Increment (%):</span>
-                <strong style="color: #7e22ce;">+${m.diffPct.toFixed(2)}%</strong>
+                <strong style="color: #16a34a;">+${m.diffPct.toFixed(2)}%</strong>
             </div>
             <div class="chart-card-row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
                 <span>Time Between Peaks:</span>
@@ -3157,7 +3157,6 @@ function renderAthBarChart() {
         const barH = Math.max(2, (val / yMax) * plotH);
         const barX = padding.left + idx * slotW + (slotW - barW) / 2;
         const barY = padding.top + plotH - barH;
-        const isSelected = idx === currentIdx;
 
         // X Tick Label
         const showLabel = (m.index === 1) || (m.index === N) || (m.index % step === 0);
@@ -3165,18 +3164,13 @@ function renderAthBarChart() {
             const centerX = padding.left + idx * slotW + slotW / 2;
             xTicksSvg += `
                 <line x1="${centerX.toFixed(1)}" y1="${padding.top + plotH}" x2="${centerX.toFixed(1)}" y2="${padding.top + plotH + 4}" stroke="#cbd5e1" stroke-width="1" />
-                <text x="${centerX.toFixed(1)}" y="${padding.top + plotH + 16}" font-size="9.5" font-weight="${isSelected ? '700' : '500'}" fill="${isSelected ? '#7e22ce' : '#64748b'}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${m.index}</text>
+                <text x="${centerX.toFixed(1)}" y="${padding.top + plotH + 16}" font-size="9.5" font-weight="500" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${m.index}</text>
             `;
         }
 
-        // Bar Colors
-        const fill = isSelected ? '#7e22ce' : '#a855f7';
-        const stroke = isSelected ? '#581c87' : 'none';
-        const strokeWidth = isSelected ? '1.5' : '0';
-        const opacity = isSelected ? '1' : '0.85';
-
+        // Static green bar with no hover highlight / border / opacity flashing
         barsSvg += `
-            <rect id="ath-bar-${idx}" class="ath-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" ry="2" fill="${fill}" opacity="${opacity}" stroke="${stroke}" stroke-width="${strokeWidth}" style="cursor: pointer; transition: fill 0.15s ease, opacity 0.15s ease;" />
+            <rect id="ath-bar-${idx}" class="ath-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" ry="2" fill="#16a34a" opacity="1" stroke="none" stroke-width="0" style="cursor: pointer;" />
         `;
     });
 
@@ -3203,7 +3197,7 @@ function renderAthBarChart() {
 
     // Render info card for current milestone
     if (infoCard) {
-        infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[currentIdx], currency, isPct, selectedAthMilestoneIdx !== null);
+        infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[currentIdx], currency, isPct, false);
     }
 
     // Attach event listeners
@@ -3213,28 +3207,9 @@ function renderAthBarChart() {
             if (targetIdx < 0 || targetIdx >= milestones.length) return;
             const m = milestones[targetIdx];
 
-            // Highlight bar in SVG
-            milestones.forEach((_, i) => {
-                const barEl = document.getElementById(`ath-bar-${i}`);
-                if (barEl) {
-                    if (i === targetIdx) {
-                        barEl.setAttribute('fill', '#7e22ce');
-                        barEl.setAttribute('opacity', '1');
-                        barEl.setAttribute('stroke', '#581c87');
-                        barEl.setAttribute('stroke-width', '2');
-                    } else {
-                        barEl.setAttribute('fill', '#a855f7');
-                        barEl.setAttribute('opacity', '0.65');
-                        barEl.setAttribute('stroke', 'none');
-                        barEl.setAttribute('stroke-width', '0');
-                    }
-                }
-            });
-
-            // Update info card
+            // Update info card without active highlight flash
             if (infoCard) {
-                infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, true);
-                infoCard.classList.add('active');
+                infoCard.innerHTML = buildAthBarInfoCardHtml(m, currency, isPct, false);
             }
 
             // Position and show tooltip
@@ -3247,7 +3222,7 @@ function renderAthBarChart() {
 
                 tooltip.style.display = 'block';
                 tooltip.innerHTML = `
-                    <div style="font-weight: 700; color: #7e22ce; margin-bottom: 2px;">🏆 Milestone #${m.index} (Week ${m.week})</div>
+                    <div style="font-weight: 700; color: #15803d; margin-bottom: 2px;">🏆 Milestone #${m.index} (Week ${m.week})</div>
                     <div style="font-size: 0.76rem; color: #64748b; margin-bottom: 4px;">${formatDate(m.date)}</div>
                     <div>Jump: <strong style="color: #15803d;">${diffStr}</strong> (+${m.diffPct.toFixed(2)}%)</div>
                     <div style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">Prior ATH: ${formatCurrency(m.prevVal, currency)} &bull; ${m.weeksBetween}w ago</div>
@@ -3273,27 +3248,8 @@ function renderAthBarChart() {
                 ? selectedAthMilestoneIdx
                 : (milestones.length - 1);
 
-            milestones.forEach((_, i) => {
-                const barEl = document.getElementById(`ath-bar-${i}`);
-                if (barEl) {
-                    if (i === activeIdx) {
-                        barEl.setAttribute('fill', '#7e22ce');
-                        barEl.setAttribute('opacity', '1');
-                        barEl.setAttribute('stroke', '#581c87');
-                        barEl.setAttribute('stroke-width', '1.5');
-                    } else {
-                        barEl.setAttribute('fill', '#a855f7');
-                        barEl.setAttribute('opacity', '0.85');
-                        barEl.setAttribute('stroke', 'none');
-                        barEl.setAttribute('stroke-width', '0');
-                    }
-                }
-            });
-
             if (infoCard) {
-                infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[activeIdx], currency, isPct, selectedAthMilestoneIdx !== null);
-                if (selectedAthMilestoneIdx !== null) infoCard.classList.add('active');
-                else infoCard.classList.remove('active');
+                infoCard.innerHTML = buildAthBarInfoCardHtml(milestones[activeIdx], currency, isPct, false);
             }
         };
 
