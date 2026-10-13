@@ -406,8 +406,8 @@ function renderMainTopStats(mainData, holdings, history) {
     }
 
     // Time Back in Terms of Money (CAD & USD)
-    const timeBackCAD = calculateTimeBack(history, totalCAD, 'totalCAD');
-    const timeBackUSD = calculateTimeBack(history, totalUSD, 'totalUSD');
+    const timeBackCAD = calculateTimeBack(validHistory, totalCAD, 'totalCAD');
+    const timeBackUSD = calculateTimeBack(validHistory, totalUSD, 'totalUSD');
 
     const tbCadEl = document.getElementById('main-stat-timeback-cad');
     const tbCadSubEl = document.getElementById('main-stat-timeback-cad-sub');
@@ -428,54 +428,57 @@ function renderMainTopStats(mainData, holdings, history) {
 
 /**
  * Calculates how far back in time the portfolio's current wealth is set back.
- * Finds the earliest consecutive historical week that had a balance >= currentVal.
+ * During a drawdown from the all-time peak (high-water mark), it finds the historical
+ * baseline record BEFORE the peak when wealth first crossed above currentVal (i.e. was last
+ * at or below currentVal). This correctly ignores interim bounces/dips during the drawdown.
  */
 function calculateTimeBack(history, currentVal, currencyKey) {
-    if (!history || history.length <= 1 || !currentVal || currentVal <= 0) {
+    const list = (typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : history) || [];
+    if (!list || list.length <= 1 || !currentVal || currentVal <= 0) {
         return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
     }
 
+    // 1. Find the highest historical peak (high-water mark) up to now
     let maxVal = -Infinity;
-    history.forEach(r => {
-        const val = r[currencyKey] || 0;
-        if (val > maxVal) maxVal = val;
+    let peakIdx = -1;
+    list.forEach((r, idx) => {
+        const val = Number(r[currencyKey]) || 0;
+        if (val >= maxVal) {
+            maxVal = val;
+            peakIdx = idx;
+        }
     });
 
+    // 2. If current valuation is at or above the historical peak, we are at ATH
     if (currentVal >= maxVal - 1.0) {
         return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
     }
 
-    // Walk backwards from previous historical record (excluding current active week) to find records >= currentVal
-    let i = history.length - 2;
-    while (i >= 0 && (history[i][currencyKey] || 0) < currentVal) {
-        i--;
+    // 3. We are in a drawdown below peakIdx.
+    // Walk backwards from before the peak to find when wealth was last at or below currentVal.
+    let targetIdx = peakIdx - 1;
+    while (targetIdx >= 0 && (Number(list[targetIdx][currencyKey]) || 0) >= currentVal) {
+        targetIdx--;
     }
 
-    if (i < 0) {
-        return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+    // If even the earliest history record was >= currentVal, clamp to index 0
+    if (targetIdx < 0) {
+        targetIdx = 0;
     }
 
-    // Walk backwards as long as consecutive records are >= currentVal
-    let streakStartIdx = i;
-    while (streakStartIdx >= 0 && (history[streakStartIdx][currencyKey] || 0) >= currentVal) {
-        streakStartIdx--;
-    }
+    const targetRecord = list[targetIdx];
+    const latestRecord = list[list.length - 1];
 
-    // The baseline historical record where wealth was last at or below currentVal
-    const targetIdx = Math.max(0, streakStartIdx);
-    const targetRecord = history[targetIdx];
-    const latestRecord = history[history.length - 1];
-
-    let weeksDiff = (latestRecord.week && targetRecord.week)
+    let weeksDiff = (latestRecord.week && targetRecord.week && latestRecord.week >= targetRecord.week)
         ? (latestRecord.week - targetRecord.week)
-        : (history.length - 1 - targetIdx);
+        : (list.length - 1 - targetIdx);
 
-    if (weeksDiff === 0 && (targetRecord[currencyKey] || 0) > currentVal) {
+    if (weeksDiff === 0 && (Number(targetRecord[currencyKey]) || 0) > currentVal) {
         weeksDiff = 1;
     }
 
     const weeksStr = weeksDiff === 1 ? '1 week' : `${weeksDiff} weeks`;
-    const targetVal = targetRecord[currencyKey] || 0;
+    const targetVal = Number(targetRecord[currencyKey]) || 0;
     const currency = currencyKey === 'totalUSD' ? 'USD' : 'CAD';
     const prefix = currency === 'USD' ? 'US$' : '$';
     const formattedVal = `${prefix}${(targetVal / 1000).toFixed(0)}k`;

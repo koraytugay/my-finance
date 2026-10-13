@@ -359,6 +359,30 @@ test('Financial Calculations Suite', async (t) => {
     assert.ok(res.sub.includes('Jul 31, 2026'));
   });
 
+  await t.test('Time setback correctly ignores interim fluctuations during drawdown and tracks back to Jul 31 baseline', () => {
+    const drawdownHistory = [
+      { week: 101, date: '2026-07-24', totalUSD: 462927 },
+      { week: 102, date: '2026-07-31', totalUSD: 469487 },
+      { week: 103, date: '2026-08-07', totalUSD: 482415 },
+      { week: 104, date: '2026-08-14', totalUSD: 489499 },
+      { week: 107, date: '2026-09-04', totalUSD: 491082 },
+      { week: 110, date: '2026-09-25', totalUSD: 480813 },
+      { week: 111, date: '2026-10-02', totalUSD: 477923 },
+      { week: 112, date: '2026-10-09', totalUSD: 478978.95 },
+      { week: 113, date: '2026-10-13', totalUSD: 478237.00 }
+    ];
+
+    const currentUSD = 478237.00;
+    const res = calculateTimeBack(drawdownHistory, currentUSD, 'totalUSD');
+    assert.equal(res.isAth, false);
+    assert.equal(res.weeks, 11, 'Must be 11 weeks back to Jul 31, 2026 baseline (week 102) before week 103 (Aug 7)');
+    assert.equal(res.record.week, 102);
+    assert.equal(res.record.date, '2026-07-31');
+    assert.equal(res.label, '11 weeks');
+    assert.ok(res.sub.includes('Jul 31, 2026'));
+    assert.ok(res.sub.includes('US$469k'));
+  });
+
   await t.test('Rolling 52-week percentage overlay series normalization with current window', () => {
     const extremes = computeRolling52Windows(history, 'pct');
     assert.ok(extremes, 'computeRolling52Windows should return results for >=52 records');
