@@ -7,6 +7,8 @@ on:
     # Saturday 12:23 PM EDT (16:23 UTC) to capture Friday evening weekly carryover updates
     - cron: "23 16 * * 6"
   workflow_dispatch:
+  repository_dispatch:
+    types: [sync-portfolio]
 
 permissions:
   contents: write
