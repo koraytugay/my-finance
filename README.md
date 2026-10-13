@@ -14,7 +14,7 @@ Running at: `https://koraytugay.github.io/my-finance/`
 - **End-to-End Encryption (AES-256-GCM)**: All private financial records are encrypted using AES-256-GCM with PBKDF2 (100,000 SHA-256 iterations). The repository contains only encrypted ciphertext files (`encrypted/*.enc`).
 - **No Data Folder Needed**: No unencrypted JSON or CSV data files exist in the repository.
 - **Encrypted Google Cloud Service Account Key**: The key used by GitHub Actions to read Google Sheets is itself AES-256-GCM encrypted ([`encrypted/google-key.enc`](encrypted/google-key.enc)).
-- **Automated GitHub Actions Pipeline**: Runs every weekday every 2 hours during market hours (10:00 AM, 12:00 PM, 2:00 PM, and 4:00 PM Toronto Time):
+- **Automated Pipeline & Sync (External Cron + GitHub Actions)**: Triggered hourly during market hours via external cron job (`repository_dispatch`), internal cron, or manual trigger:
   1. Decrypts `encrypted/google-key.enc` in memory using `PORTFOLIO_PASSWORD` secret.
   2. Reads `ETF Facts`, `Holdings`, and `Carry Over` from Google Sheet `July2026`.
   3. Encrypts `encrypted/holdings.enc` and `encrypted/history.enc`.
@@ -40,6 +40,33 @@ Running at: `https://koraytugay.github.io/my-finance/`
 - **Google Sheet (Portfolio)**: [July2026 Spreadsheet](https://docs.google.com/spreadsheets/d/1ofMWRVDjxR1DsEkqWkURfTTyvbO23k2l4YBXUpSx4fM/edit)
 - **Google Cloud IAM Console**: [Service Account Details & Key Management](https://console.cloud.google.com/iam-admin/serviceaccounts/details/117152471666773814465;edit=true?project=gen-lang-client-0273341539)
 - **Service Account Email**: `my-finance-webapp@gen-lang-client-0273341539.iam.gserviceaccount.com`
+- **External Cron Service**: [cron-job.org Console](https://cron-job.org/) (triggers `repository_dispatch` webhook)
+
+---
+
+## ⏰ Scheduled Sync (External Cron Job)
+
+GitHub Actions' internal `schedule` (cron) runs on a best-effort queue and frequently drops or delays runs by 45–90+ minutes during peak business hours. To ensure 100% reliable execution during market hours, an external cron service (such as [cron-job.org](https://cron-job.org)) triggers the pipeline via GitHub's `repository_dispatch` API.
+
+### Webhook Configuration
+
+| Parameter | Setting |
+| :--- | :--- |
+| **URL** | `https://api.github.com/repos/koraytugay/my-finance/dispatches` |
+| **HTTP Method** | `POST` |
+| **Headers** | `Accept: application/vnd.github.v3+json`<br>`Authorization: Bearer <GITHUB_PAT>` |
+| **Request Body (JSON)** | `{"event_type": "sync-portfolio"}` |
+| **Schedule** | Hourly Monday–Friday during trading hours (e.g. 9:23 AM to 4:23 PM EDT / 13:23 to 20:23 UTC), plus Saturday noon |
+
+> [!NOTE]
+> The GitHub Personal Access Token (`GITHUB_PAT`) requires `repo` scope (Classic) or **Contents: Read and write** (Fine-grained) on this repository.
+
+### Pipeline Execution Flow
+1. The cron service sends the POST request to the GitHub dispatches endpoint.
+2. GitHub Actions fires `.github/workflows/daily-pipeline.yml` immediately (typically starts within 5–15 seconds).
+3. The job decrypts `encrypted/google-key.enc` using `PORTFOLIO_PASSWORD`.
+4. It reads current holdings and carry-over history from Google Sheets, updates benchmark prices & FX rates, encrypts `encrypted/holdings.enc` and `encrypted/history.enc`, and commits back to `main`.
+5. GitHub Pages updates automatically.
 
 ---
 

@@ -14,6 +14,7 @@ This web project is a **direct frontend for your Google Sheet (`July2026`)**. Al
 | **Google Cloud IAM Console** | Service Account details & key management | [Open Service Account Console](https://console.cloud.google.com/iam-admin/serviceaccounts/details/117152471666773814465;edit=true?project=gen-lang-client-0273341539) |
 | **Service Account Email** | OAuth2 identity for Sheets API read access | `my-finance-webapp@gen-lang-client-0273341539.iam.gserviceaccount.com` |
 | **GitHub Actions Sync** | Automation workflow & on-demand runs | [GitHub Actions Workflows](https://github.com/koraytugay/my-finance/actions) |
+| **External Cron Trigger** | Scheduled webhook ping (cron-job.org) | [cron-job.org Console](https://cron-job.org/) |
 | **Live Web App** | Portfolio website (GitHub Pages) | `https://koraytugay.github.io/my-finance/` |
 
 ---
