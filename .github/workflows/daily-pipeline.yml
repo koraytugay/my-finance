@@ -45,10 +45,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
-          # Stage encrypted files and public benchmark data
+          # Stage encrypted files and public benchmark / sync metadata
           git add encrypted/*.enc
           git add data/benchmarks.json 2>/dev/null || true
           git add data/fx.json 2>/dev/null || true
+          git add data/sync.json 2>/dev/null || true
           
           if ! git diff --quiet --staged; then
             git commit -m "chore: automated sync ($(date -u +'%Y-%m-%d %H:%M UTC'))"

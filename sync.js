@@ -55,6 +55,17 @@ async function syncPortfolio(password = process.env.PORTFOLIO_PASSWORD || proces
         console.warn('Benchmark update non-fatal warning:', benchErr.message);
       }
 
+      // 4. Update Sync Status Metadata
+      const DATA_DIR = path.join(ROOT_DIR, 'data');
+      if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+      }
+      const syncInfo = {
+        lastSynced: new Date().toISOString()
+      };
+      fs.writeFileSync(path.join(DATA_DIR, 'sync.json'), JSON.stringify(syncInfo, null, 2));
+      log(`Sync status recorded in data/sync.json (${syncInfo.lastSynced}).`);
+
       log('Sync completed successfully. Encrypted data and benchmarks updated with live market quotes.');
       return;
     } catch (err) {

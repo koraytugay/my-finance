@@ -12,7 +12,7 @@ const {
   buildRolling52OverlaySeries,
   calculateDrawdownMetrics
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
+const { computeXeqtProgressionOverlay, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -2033,6 +2033,25 @@ test('All-Time High Increments Calculation Suite', async (t) => {
     assert.equal(zeroPctResult.step, 1);
     assert.equal(zeroPctResult.yMax, 4);
     assert.deepEqual(zeroPctResult.ticks, [0, 1, 2, 3, 4]);
+  });
+});
+
+test('Sync Metadata & Date Formatting Suite', async (t) => {
+  await t.test('formatDateTime returns empty string on empty or null input', () => {
+    assert.equal(formatDateTime(null), '');
+    assert.equal(formatDateTime(undefined), '');
+    assert.equal(formatDateTime(''), '');
+  });
+
+  await t.test('formatDateTime returns original string if date is invalid', () => {
+    assert.equal(formatDateTime('not-a-valid-date'), 'not-a-valid-date');
+  });
+
+  await t.test('formatDateTime correctly formats valid ISO date string with date, time, and timezone', () => {
+    const formatted = formatDateTime('2026-10-13T14:40:41.078Z');
+    assert.ok(formatted.includes('2026'), 'Includes year');
+    assert.ok(formatted.includes('Oct'), 'Includes month abbreviation');
+    assert.ok(formatted.includes('13'), 'Includes day');
   });
 });
 

@@ -27,11 +27,14 @@ async function initMain() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [holdings, history, benchmarks] = await Promise.all([
+        const [holdings, history, benchmarks, syncStatus] = await Promise.all([
             getHoldings(),
             getHistory(),
-            typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
+            typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null),
+            typeof getSyncStatus === 'function' ? getSyncStatus().catch(() => null) : Promise.resolve(null)
         ]);
+
+        renderMainLastSynced(syncStatus, benchmarks);
 
         const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
         const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
@@ -3414,6 +3417,24 @@ function renderAthBarChart() {
     }
 }
 
+function renderMainLastSynced(syncStatus, benchmarks) {
+    if (typeof document === 'undefined') return;
+    const wrapper = document.getElementById('main-last-synced-wrapper');
+    const valEl = document.getElementById('main-last-synced-time');
+    if (!wrapper || !valEl) return;
+
+    const timeIso = syncStatus?.lastSynced || benchmarks?.updatedAt || benchmarks?.fx?.updatedAt;
+    if (!timeIso) {
+        wrapper.style.display = 'none';
+        return;
+    }
+
+    const formatted = typeof formatDateTime === 'function' ? formatDateTime(timeIso) : timeIso;
+    valEl.textContent = formatted;
+    valEl.setAttribute('title', timeIso);
+    wrapper.style.display = 'inline';
+}
+
 if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
     window.addEventListener('resize', () => {
         if (rawHistory && rawHistory.length > 0) {
@@ -3425,6 +3446,11 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
 
 if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
     document.addEventListener('DOMContentLoaded', () => {
+        if (typeof getSyncStatus === 'function') {
+            getSyncStatus().then(status => {
+                if (status) renderMainLastSynced(status);
+            }).catch(() => {});
+        }
         initMain();
     });
 }
@@ -3439,6 +3465,7 @@ if (typeof module !== 'undefined' && module.exports) {
         toggleMainAthsFilter,
         filterHistoryAths,
         calculateTimeBack,
+        renderMainLastSynced,
         setMainTimeframe,
         setMainCurrency,
         setMainUnit,

@@ -360,6 +360,29 @@ async function getBenchmarks(forceRefresh = false) {
     return null;
 }
 
+let cachedSyncStatus = null;
+
+async function getSyncStatus(forceRefresh = false) {
+    if (cachedSyncStatus && !forceRefresh) return cachedSyncStatus;
+    try {
+        const res = await fetch(`data/sync.json?t=${Date.now()}`);
+        if (res.ok) {
+            cachedSyncStatus = await res.json();
+            return cachedSyncStatus;
+        }
+    } catch (_) {}
+
+    try {
+        const bench = typeof getBenchmarks === 'function' ? await getBenchmarks() : null;
+        if (bench && (bench.updatedAt || bench.fx?.updatedAt)) {
+            cachedSyncStatus = { lastSynced: bench.updatedAt || bench.fx?.updatedAt };
+            return cachedSyncStatus;
+        }
+    } catch (_) {}
+
+    return null;
+}
+
 function lockPortfolio() {
     cachedHoldings = null;
     cachedHistory = null;
@@ -479,6 +502,24 @@ function formatMonthShort(dateStr) {
     const monthIdx = parseInt(parts[1], 10) - 1;
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return monthNames[monthIdx] || dateStr;
+}
+
+function formatDateTime(isoStr) {
+    if (!isoStr) return '';
+    const date = new Date(isoStr);
+    if (isNaN(date.getTime())) return isoStr;
+    try {
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            timeZoneName: 'short'
+        }).format(date);
+    } catch (_) {
+        return date.toLocaleString();
+    }
 }
 
 function escapeHtml(str) {
@@ -629,7 +670,9 @@ if (typeof module !== 'undefined' && module.exports) {
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay,
         sanitizeHistory,
-        enrichHistoryWithLiveHoldings
+        enrichHistoryWithLiveHoldings,
+        formatDateTime,
+        getSyncStatus
     };
 }
 
