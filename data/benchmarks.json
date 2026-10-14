@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-14T19:45:22.717Z",
+  "updatedAt": "2026-10-14T20:15:20.619Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-14",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4245,
-    "cadUsdRate": 0.702,
-    "updatedAt": "2026-10-14T19:45:22.717Z"
+    "usdCadRate": 1.4242,
+    "cadUsdRate": 0.7021,
+    "updatedAt": "2026-10-14T20:15:20.619Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -148,8 +148,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 194.85,
-      "returnPct": 44.17,
+      "currentPrice": 194.88,
+      "returnPct": 44.2,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-14",
@@ -266,7 +266,7 @@
         194.55,
         195.08,
         197.56,
-        194.85
+        194.88
       ]
     },
     "XBAL": {
@@ -276,8 +276,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.81,
-      "returnPct": 22.3,
+      "currentPrice": 35.82,
+      "returnPct": 22.34,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-10-14",
@@ -394,7 +394,7 @@
         35.94,
         35.89,
         36.06,
-        35.81
+        35.82
       ]
     },
     "XCB": {
