@@ -31,7 +31,7 @@ This web project is a **direct frontend for your Google Sheet (`July2026`)**. Al
                                  ▼
   ┌──────────────────────────────────────────────────────────────┐
   │ GitHub Actions Workflow (daily-pipeline.yml)                 │
-  │ Runs weekdays every 2 hrs (10am, 12pm, 2pm, 4pm) / On Demand │
+  │ Triggered by cron-job.org (hourly) or On Demand (Manual)     │
   │                                                              │
   │  1. Decrypts `encrypted/google-key.enc` in RAM (password)    │
   │  2. Reads 'Holdings', 'Carry Over', and 'ETF Facts'          │
@@ -101,7 +101,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 2. Go to the **`Holdings`** tab.
 3. Simply change the number in the **`Count`** column for that holding or cash row.
 4. Save (Google Sheets saves automatically).
-5. Trigger the sync in GitHub Actions (or wait for the daily run).
+5. Trigger the sync in GitHub Actions (or wait for the next cron-job.org scheduled sync).
 
 ---
 
