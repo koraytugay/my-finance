@@ -43,7 +43,6 @@ async function initPerformance() {
         contentEl.style.display = 'block';
 
         renderOverviewCards();
-        renderMonthlyHeatmap();
         renderWeeklyBarChart();
         renderRolling52Charts();
         renderDrawdownChart();
@@ -828,77 +827,6 @@ function renderWealthDecomposition(startingCAD, savingsCAD, gainsCAD, currentCAD
         document.getElementById('wealth-bar-label-savings').textContent = `■ Contributions & Realized: +${formatCurrency(savingsCAD, 'CAD')} (${savPct.toFixed(1)}%)`;
         document.getElementById('wealth-bar-label-gains').textContent = `■ Current Unrealized Gains: +${formatCurrency(gainsCAD, 'CAD')} (${gainPct.toFixed(1)}%)`;
     }
-}
-
-function renderMonthlyHeatmap() {
-    const yearsMap = {};
-
-    allHistory.forEach(r => {
-        if (!r.date) return;
-        const [yStr, mStr] = r.date.split('-');
-        const year = parseInt(yStr, 10);
-        const month = parseInt(mStr, 10) - 1; // 0-indexed
-
-        if (!yearsMap[year]) {
-            yearsMap[year] = Array.from({ length: 12 }, () => []);
-        }
-        yearsMap[year][month].push(r);
-    });
-
-    const tbody = document.getElementById('heatmap-body');
-    tbody.innerHTML = '';
-
-    const years = Object.keys(yearsMap).map(Number).sort((a, b) => b - a);
-
-    years.forEach(year => {
-        const tr = document.createElement('tr');
-        let rowHtml = `<td><strong>${year}</strong></td>`;
-
-        let yearStartVal = null;
-        let yearEndVal = null;
-
-        for (let m = 0; m < 12; m++) {
-            const records = yearsMap[year][m];
-            if (!records || records.length === 0) {
-                rowHtml += `<td class="heatmap-cell heat-neutral">-</td>`;
-                continue;
-            }
-
-            const monthStart = records[0].totalCAD - (records[0].weeklyChangeCAD || 0);
-            const monthEnd = records[records.length - 1].totalCAD;
-            const mGainPct = monthStart > 0 ? ((monthEnd - monthStart) / monthStart) * 100 : 0;
-
-            if (yearStartVal === null) yearStartVal = monthStart;
-            yearEndVal = monthEnd;
-
-            let heatClass = 'heat-neutral';
-            if (mGainPct >= 4.0) heatClass = 'heat-green-deep';
-            else if (mGainPct >= 1.5) heatClass = 'heat-green-med';
-            else if (mGainPct > 0) heatClass = 'heat-green-soft';
-            else if (mGainPct <= -4.0) heatClass = 'heat-red-deep';
-            else if (mGainPct <= -1.5) heatClass = 'heat-red-med';
-            else if (mGainPct < 0) heatClass = 'heat-red-soft';
-
-            const sign = mGainPct > 0 ? '+' : '';
-            rowHtml += `<td class="heatmap-cell ${heatClass}" title="${sign}${mGainPct.toFixed(2)}% (${formatCurrency(monthEnd - monthStart, 'CAD')})">
-                ${sign}${mGainPct.toFixed(1)}%
-            </td>`;
-        }
-
-        // Full Year Total
-        let fullYearPct = 0;
-        if (yearStartVal && yearEndVal) {
-            fullYearPct = ((yearEndVal - yearStartVal) / yearStartVal) * 100;
-        }
-        const ySign = fullYearPct > 0 ? '+' : '';
-        const yColor = fullYearPct >= 0 ? '#166534' : '#991b1b';
-        rowHtml += `<td style="text-align: center; font-weight: 800; color: ${yColor}; background: ${fullYearPct >= 0 ? '#dcfce7' : '#fee2e2'};">
-            ${ySign}${fullYearPct.toFixed(1)}%
-        </td>`;
-
-        tr.innerHTML = rowHtml;
-        tbody.appendChild(tr);
-    });
 }
 
 function renderPerfCard(cardId, html, isActive = false) {

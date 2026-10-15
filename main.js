@@ -21,6 +21,10 @@ let currentAthBarCurrency = 'CAD';
 let currentAthBarUnit = 'VAL'; // 'VAL' | 'PCT'
 let selectedAthMilestoneIdx = null;
 
+// Monthly Returns Heatmap State
+let currentHeatmapCurrency = 'CAD';
+let currentHeatmapUnit = 'PCT'; // 'PCT' | 'VAL'
+
 async function initMain() {
     const loadingEl = document.getElementById('loading');
     const contentEl = document.getElementById('main-content');
@@ -53,6 +57,7 @@ async function initMain() {
         syncMainTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderAthBarChart();
+        renderMonthlyHeatmap();
         renderAssetClassTable(mainData, holdings);
         renderAccountTypeTable(mainData, holdings, enrichedHistory);
         renderCategoryTable(mainData, holdings);
@@ -3417,6 +3422,266 @@ function renderAthBarChart() {
     }
 }
 
+/* ================= Monthly Returns Heatmap ================= */
+
+/**
+ * Pure calculation function: Groups chronological history into monthly performance metrics.
+ * @param {Array} history Array of history records
+ * @param {string} currency 'CAD' or 'USD'
+ * @returns {Array} Array of year objects sorted descending by year
+ */
+function computeMonthlyHeatmap(history, currency = 'CAD') {
+    if (!history || history.length === 0) return [];
+
+    const isUSD = currency === 'USD';
+    const valKey = isUSD ? 'totalUSD' : 'totalCAD';
+    const yearsMap = {};
+
+    // Filter valid dates and sort chronologically
+    const sorted = [...history]
+        .filter(r => r && r.date)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    sorted.forEach(r => {
+        const [yStr, mStr] = r.date.split('-');
+        const year = parseInt(yStr, 10);
+        const month = parseInt(mStr, 10) - 1; // 0-indexed: 0 = Jan, 11 = Dec
+
+        if (isNaN(year) || isNaN(month) || month < 0 || month > 11) return;
+
+        if (!yearsMap[year]) {
+            yearsMap[year] = Array.from({ length: 12 }, () => []);
+        }
+        yearsMap[year][month].push(r);
+    });
+
+    const years = Object.keys(yearsMap).map(Number).sort((a, b) => b - a);
+
+    return years.map(year => {
+        let yearStartVal = null;
+        let yearEndVal = null;
+
+        const months = [];
+        for (let m = 0; m < 12; m++) {
+            const records = yearsMap[year][m];
+            if (!records || records.length === 0) {
+                months.push({
+                    month: m,
+                    hasData: false,
+                    startVal: null,
+                    endVal: null,
+                    diffVal: 0,
+                    diffPct: 0
+                });
+                continue;
+            }
+
+            const firstRec = records[0];
+            const lastRec = records[records.length - 1];
+
+            let monthStart = 0;
+            let monthEnd = Number(lastRec[valKey]) || 0;
+
+            if (isUSD) {
+                if (firstRec.weeklyChangeUSD !== undefined && firstRec.weeklyChangeUSD !== null) {
+                    monthStart = (Number(firstRec.totalUSD) || 0) - Number(firstRec.weeklyChangeUSD);
+                } else {
+                    const fx = (Number(firstRec.totalCAD) > 0 && Number(firstRec.totalUSD) > 0)
+                        ? (Number(firstRec.totalUSD) / Number(firstRec.totalCAD))
+                        : 0.7073;
+                    const chgUSD = (Number(firstRec.weeklyChangeCAD) || 0) * fx;
+                    monthStart = (Number(firstRec.totalUSD) || 0) - chgUSD;
+                }
+            } else {
+                monthStart = (Number(firstRec.totalCAD) || 0) - (Number(firstRec.weeklyChangeCAD) || 0);
+            }
+
+            const diffVal = monthEnd - monthStart;
+            const diffPct = monthStart > 0 ? (diffVal / monthStart) * 100 : 0;
+
+            if (yearStartVal === null) yearStartVal = monthStart;
+            yearEndVal = monthEnd;
+
+            months.push({
+                month: m,
+                hasData: true,
+                startVal: monthStart,
+                endVal: monthEnd,
+                diffVal,
+                diffPct
+            });
+        }
+
+        let fullYearDiff = 0;
+        let fullYearPct = 0;
+        if (yearStartVal !== null && yearEndVal !== null) {
+            fullYearDiff = yearEndVal - yearStartVal;
+            if (yearStartVal > 0) {
+                fullYearPct = (fullYearDiff / yearStartVal) * 100;
+            }
+        }
+
+        return {
+            year,
+            months,
+            yearStartVal,
+            yearEndVal,
+            fullYearDiff,
+            fullYearPct
+        };
+    });
+}
+
+function setHeatmapCurrency(currency) {
+    if (currentHeatmapCurrency === currency) return;
+    currentHeatmapCurrency = currency;
+
+    if (typeof document !== 'undefined') {
+        const btnCad = document.getElementById('btn-heatmap-cur-cad');
+        const btnUsd = document.getElementById('btn-heatmap-cur-usd');
+        if (btnCad && btnUsd) {
+            btnCad.classList.toggle('active', currency === 'CAD');
+            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
+            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
+            btnUsd.classList.toggle('active', currency === 'USD');
+            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
+            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+        }
+    }
+    renderMonthlyHeatmap();
+}
+
+function setHeatmapUnit(unit) {
+    if (currentHeatmapUnit === unit) return;
+    currentHeatmapUnit = unit;
+
+    if (typeof document !== 'undefined') {
+        const btnVal = document.getElementById('btn-heatmap-unit-val');
+        const btnPct = document.getElementById('btn-heatmap-unit-pct');
+        if (btnVal && btnPct) {
+            btnVal.classList.toggle('active', unit === 'VAL');
+            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
+            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
+            btnPct.classList.toggle('active', unit === 'PCT');
+            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
+            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+        }
+    }
+    renderMonthlyHeatmap();
+}
+
+function renderMonthlyHeatmap() {
+    if (typeof document === 'undefined') return;
+    const tbody = document.getElementById('heatmap-body');
+    if (!tbody) return;
+
+    const titleEl = document.getElementById('heatmap-title');
+    const subTitleEl = document.getElementById('heatmap-subtitle');
+    const currency = currentHeatmapCurrency;
+    const isPct = currentHeatmapUnit === 'PCT';
+
+    if (titleEl) {
+        titleEl.textContent = isPct
+            ? `🗓️ Monthly Returns Heatmap (% Return - ${currency})`
+            : `🗓️ Monthly Returns Heatmap (${currency} $)`;
+    }
+
+    if (subTitleEl) {
+        subTitleEl.textContent = isPct
+            ? `Percentage net worth growth by calendar month derived from your history log (${currency})`
+            : `Net worth dollar change by calendar month derived from your history log (${currency} $)`;
+    }
+
+    if (!rawHistory || rawHistory.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="14" style="text-align: center; padding: 20px; color: #64748b;">No historical monthly data recorded yet.</td></tr>';
+        return;
+    }
+
+    const yearsData = computeMonthlyHeatmap(rawHistory, currency);
+    tbody.innerHTML = '';
+
+    if (yearsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="14" style="text-align: center; padding: 20px; color: #64748b;">No historical monthly data recorded yet.</td></tr>';
+        return;
+    }
+
+    const formatVal = (val, cur) => {
+        if (typeof formatCurrency === 'function') {
+            return formatCurrency(val, cur);
+        }
+        const num = Number(val || 0);
+        const prefix = cur === 'USD' ? 'US$' : '$';
+        const absStr = Math.abs(num).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        return num < 0 ? `-${prefix}${absStr}` : `${prefix}${absStr}`;
+    };
+
+    yearsData.forEach(yData => {
+        const tr = document.createElement('tr');
+        let rowHtml = `<td style="font-weight: 700; color: #1f2328; white-space: nowrap;"><strong>${yData.year}</strong></td>`;
+
+        for (let m = 0; m < 12; m++) {
+            const mInfo = yData.months[m];
+            if (!mInfo || !mInfo.hasData) {
+                rowHtml += `<td class="heatmap-cell heat-neutral">-</td>`;
+                continue;
+            }
+
+            const mGainPct = mInfo.diffPct;
+            const diffVal = mInfo.diffVal;
+
+            let heatClass = 'heat-neutral';
+            if (mGainPct >= 4.0) heatClass = 'heat-green-deep';
+            else if (mGainPct >= 1.5) heatClass = 'heat-green-med';
+            else if (mGainPct > 0) heatClass = 'heat-green-soft';
+            else if (mGainPct <= -4.0) heatClass = 'heat-red-deep';
+            else if (mGainPct <= -1.5) heatClass = 'heat-red-med';
+            else if (mGainPct < 0) heatClass = 'heat-red-soft';
+
+            const pSign = mGainPct > 0 ? '+' : '';
+            const vSign = diffVal > 0 ? '+' : '';
+            const pctFormatted = `${pSign}${mGainPct.toFixed(1)}%`;
+            const pctPrecise = `${pSign}${mGainPct.toFixed(2)}%`;
+            const valFormatted = `${vSign}${formatVal(diffVal, currency)}`;
+
+            const cellText = isPct ? pctFormatted : valFormatted;
+            const cellTitle = isPct
+                ? `${pctPrecise} (${valFormatted})`
+                : `${valFormatted} (${pctPrecise})`;
+
+            rowHtml += `<td class="heatmap-cell ${heatClass}" title="${cellTitle}">
+                ${cellText}
+            </td>`;
+        }
+
+        // Full Year Total
+        const fullYearPct = yData.fullYearPct;
+        const fullYearDiff = yData.fullYearDiff;
+        const ySign = fullYearPct > 0 ? '+' : '';
+        const yVSign = fullYearDiff > 0 ? '+' : '';
+        const yColor = fullYearPct >= 0 ? '#166534' : '#991b1b';
+        const yBg = fullYearPct >= 0 ? '#dcfce7' : '#fee2e2';
+
+        const fyPctFormatted = `${ySign}${fullYearPct.toFixed(1)}%`;
+        const fyPctPrecise = `${ySign}${fullYearPct.toFixed(2)}%`;
+        const fyValFormatted = `${yVSign}${formatVal(fullYearDiff, currency)}`;
+
+        const fyText = isPct ? fyPctFormatted : fyValFormatted;
+        const fyTitle = isPct
+            ? `Full Year ${yData.year}: ${fyPctPrecise} (${fyValFormatted})`
+            : `Full Year ${yData.year}: ${fyValFormatted} (${fyPctPrecise})`;
+
+        rowHtml += `<td style="text-align: center; font-weight: 800; color: ${yColor}; background: ${yBg}; padding: 8px 6px; white-space: nowrap; font-size: 0.78rem;" title="${fyTitle}">
+            ${fyText}
+        </td>`;
+
+        tr.innerHTML = rowHtml;
+        tbody.appendChild(tr);
+    });
+}
+
 function renderMainLastSynced(syncStatus, benchmarks) {
     if (typeof document === 'undefined') return;
     const wrapper = document.getElementById('main-last-synced-wrapper');
@@ -3440,6 +3705,7 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
         if (rawHistory && rawHistory.length > 0) {
             renderMainProgressionChart();
             renderAthBarChart();
+            renderMonthlyHeatmap();
         }
     });
 }
@@ -3511,6 +3777,18 @@ if (typeof module !== 'undefined' && module.exports) {
         setMainChartData: (history, benchmarks) => {
             rawHistory = history || [];
             rawBenchmarks = benchmarks;
+        },
+        computeMonthlyHeatmap,
+        renderMonthlyHeatmap,
+        setHeatmapCurrency,
+        setHeatmapUnit,
+        getHeatmapState: () => ({
+            currentHeatmapCurrency,
+            currentHeatmapUnit
+        }),
+        resetHeatmapState: () => {
+            currentHeatmapCurrency = 'CAD';
+            currentHeatmapUnit = 'PCT';
         }
     };
 }

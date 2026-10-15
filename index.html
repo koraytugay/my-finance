@@ -238,6 +238,51 @@
                 </div>
             </div>
 
+            <!-- Monthly Returns Heatmap -->
+            <div class="chart-wrapper" id="monthly-heatmap-wrapper" style="margin-top: 24px;">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="heatmap-title" style="margin: 0; font-size: 1.15rem;">🗓️ Monthly Returns Heatmap</h2>
+                        <span id="heatmap-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <div class="currency-toggle" id="heatmap-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-heatmap-cur-cad" class="btn-secondary active" onclick="setHeatmapCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-heatmap-cur-usd" class="btn-secondary" onclick="setHeatmapCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>
+                        </div>
+                        <div class="unit-toggle" id="heatmap-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-heatmap-unit-val" class="btn-secondary" onclick="setHeatmapUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display dollar gain/loss ($)">$</button>
+                            <button type="button" id="btn-heatmap-unit-pct" class="btn-secondary active" onclick="setHeatmapUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display percentage return (%)">%</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table class="data-table" id="heatmap-table" style="font-size: 0.82rem;">
+                        <thead>
+                            <tr>
+                                <th>Year</th>
+                                <th style="text-align: center;">Jan</th>
+                                <th style="text-align: center;">Feb</th>
+                                <th style="text-align: center;">Mar</th>
+                                <th style="text-align: center;">Apr</th>
+                                <th style="text-align: center;">May</th>
+                                <th style="text-align: center;">Jun</th>
+                                <th style="text-align: center;">Jul</th>
+                                <th style="text-align: center;">Aug</th>
+                                <th style="text-align: center;">Sep</th>
+                                <th style="text-align: center;">Oct</th>
+                                <th style="text-align: center;">Nov</th>
+                                <th style="text-align: center;">Dec</th>
+                                <th style="text-align: center; font-weight: 800;">Full Year</th>
+                            </tr>
+                        </thead>
+                        <tbody id="heatmap-body">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Google Sheets Main Tab 3-Column Tables Layout -->
             <div class="main-grid">
                 <!-- 1. Asset Class Table -->

@@ -397,6 +397,42 @@ header h1 {
     font-weight: 700;
 }
 
+/* ================= Monthly Returns Heatmap ================= */
+.heatmap-cell {
+    padding: 8px 6px;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+#heatmap-table th,
+#heatmap-table td {
+    cursor: default;
+}
+
+#heatmap-table th {
+    transition: none;
+}
+
+#heatmap-table th:hover {
+    background: #f8fafc;
+}
+
+#heatmap-table tr:hover td {
+    cursor: default;
+    background-color: transparent;
+}
+
+.heat-green-deep { background: #15803d !important; color: #fff; }
+.heat-green-med  { background: #22c55e !important; color: #fff; }
+.heat-green-soft { background: #bbf7d0 !important; color: #166534; }
+.heat-red-soft   { background: #fecaca !important; color: #991b1b; }
+.heat-red-med    { background: #ef4444 !important; color: #fff; }
+.heat-red-deep   { background: #b91c1c !important; color: #fff; }
+.heat-neutral    { background: #f1f5f9 !important; color: #64748b; }
+
 /* ================= Badges & Pills ================= */
 .badge {
     display: inline-flex;

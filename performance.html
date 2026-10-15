@@ -5,36 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Performance &amp; Return Analytics</title>
     <link rel="stylesheet" href="styles.css?v=3.2">
-    <style>
-        .heatmap-cell {
-            padding: 8px 6px;
-            text-align: center;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border-radius: 4px;
-        }
-        #heatmap-table th,
-        #heatmap-table td {
-            cursor: default;
-        }
-        #heatmap-table th {
-            transition: none;
-        }
-        #heatmap-table th:hover {
-            background: #f8fafc;
-        }
-        #heatmap-table tr:hover td {
-            cursor: default;
-            background-color: transparent;
-        }
-        .heat-green-deep { background: #15803d !important; color: #fff; }
-        .heat-green-med  { background: #22c55e !important; color: #fff; }
-        .heat-green-soft { background: #bbf7d0 !important; color: #166534; }
-        .heat-red-soft   { background: #fecaca !important; color: #991b1b; }
-        .heat-red-med    { background: #ef4444 !important; color: #fff; }
-        .heat-red-deep   { background: #b91c1c !important; color: #fff; }
-        .heat-neutral    { background: #f1f5f9 !important; color: #64748b; }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -380,40 +350,7 @@
 
             </div>
 
-            <!-- Monthly Returns Calendar Heatmap -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
-                <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
-                    🗓️ Monthly Returns Heatmap
-                </h3>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
-                    Percentage net worth growth by calendar month derived from your history log.
-                </p>
-                <div class="table-responsive" style="overflow-x: auto;">
-                    <table class="data-table" id="heatmap-table" style="font-size: 0.82rem;">
-                        <thead>
-                            <tr>
-                                <th>Year</th>
-                                <th style="text-align: center;">Jan</th>
-                                <th style="text-align: center;">Feb</th>
-                                <th style="text-align: center;">Mar</th>
-                                <th style="text-align: center;">Apr</th>
-                                <th style="text-align: center;">May</th>
-                                <th style="text-align: center;">Jun</th>
-                                <th style="text-align: center;">Jul</th>
-                                <th style="text-align: center;">Aug</th>
-                                <th style="text-align: center;">Sep</th>
-                                <th style="text-align: center;">Oct</th>
-                                <th style="text-align: center;">Nov</th>
-                                <th style="text-align: center;">Dec</th>
-                                <th style="text-align: center; font-weight: 800;">Full Year</th>
-                            </tr>
-                        </thead>
-                        <tbody id="heatmap-body">
-                            <!-- Injected via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
 
             <!-- Weekly Returns Distribution SVG Bar Chart -->
             <div class="controls" style="padding: 20px; margin-bottom: 24px;">

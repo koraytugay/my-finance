@@ -43,7 +43,12 @@ const {
   setAthBarCurrency,
   setAthBarUnit,
   getAthBarChartState,
-  resetAthBarChartState
+  resetAthBarChartState,
+  computeMonthlyHeatmap,
+  setHeatmapCurrency,
+  setHeatmapUnit,
+  getHeatmapState,
+  resetHeatmapState
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -2054,5 +2059,106 @@ test('Sync Metadata & Date Formatting Suite', async (t) => {
     assert.ok(formatted.includes('13'), 'Includes day');
   });
 });
+
+test('Monthly Returns Heatmap Calculation Suite', async (t) => {
+  await t.test('computeMonthlyHeatmap returns empty array on empty or invalid inputs', () => {
+    assert.deepEqual(computeMonthlyHeatmap([]), []);
+    assert.deepEqual(computeMonthlyHeatmap(null), []);
+    assert.deepEqual(computeMonthlyHeatmap(undefined), []);
+  });
+
+  await t.test('computeMonthlyHeatmap correctly aggregates records by year and month for CAD', () => {
+    const synthetic = [
+      // 2025 Jan (2 weeks)
+      { date: '2025-01-10', totalCAD: 102000, weeklyChangeCAD: 2000, totalUSD: 75000, weeklyChangeUSD: 1500 },
+      { date: '2025-01-17', totalCAD: 105000, weeklyChangeCAD: 3000, totalUSD: 77000, weeklyChangeUSD: 2000 },
+      // 2025 Feb (1 week)
+      { date: '2025-02-07', totalCAD: 104000, weeklyChangeCAD: -1000, totalUSD: 76000, weeklyChangeUSD: -1000 },
+      // 2026 Jan (1 week)
+      { date: '2026-01-09', totalCAD: 110000, weeklyChangeCAD: 6000, totalUSD: 82000, weeklyChangeUSD: 5000 }
+    ];
+
+    const result = computeMonthlyHeatmap(synthetic, 'CAD');
+    assert.equal(result.length, 2, 'Should have 2 years: 2026 and 2025');
+
+    // Years sorted descending: 2026 first
+    const y2026 = result[0];
+    assert.equal(y2026.year, 2026);
+    assert.equal(y2026.months[0].hasData, true, '2026 Jan has data');
+    assert.equal(y2026.months[0].startVal, 104000); // 110000 - 6000
+    assert.equal(y2026.months[0].endVal, 110000);
+    assert.equal(y2026.months[0].diffVal, 6000);
+    assert.equal(Number(y2026.months[0].diffPct.toFixed(4)), Number(((6000 / 104000) * 100).toFixed(4)));
+    assert.equal(y2026.months[1].hasData, false, '2026 Feb has no data');
+    assert.equal(y2026.fullYearDiff, 6000);
+
+    // 2025
+    const y2025 = result[1];
+    assert.equal(y2025.year, 2025);
+    // Jan: start = 102000 - 2000 = 100000; end = 105000; diff = 5000; pct = 5%
+    assert.equal(y2025.months[0].hasData, true);
+    assert.equal(y2025.months[0].startVal, 100000);
+    assert.equal(y2025.months[0].endVal, 105000);
+    assert.equal(y2025.months[0].diffVal, 5000);
+    assert.equal(y2025.months[0].diffPct, 5.0);
+
+    // Feb: start = 104000 - (-1000) = 105000; end = 104000; diff = -1000
+    assert.equal(y2025.months[1].hasData, true);
+    assert.equal(y2025.months[1].startVal, 105000);
+    assert.equal(y2025.months[1].endVal, 104000);
+    assert.equal(y2025.months[1].diffVal, -1000);
+    assert.equal(Number(y2025.months[1].diffPct.toFixed(4)), Number(((-1000 / 105000) * 100).toFixed(4)));
+
+    // Full year 2025: start = 100000, end = 104000 -> diff = 4000, pct = 4%
+    assert.equal(y2025.fullYearDiff, 4000);
+    assert.equal(y2025.fullYearPct, 4.0);
+  });
+
+  await t.test('computeMonthlyHeatmap correctly switches to USD and computes USD diffs', () => {
+    const synthetic = [
+      { date: '2025-01-10', totalCAD: 102000, weeklyChangeCAD: 2000, totalUSD: 74000, weeklyChangeUSD: 1000 },
+      { date: '2025-01-17', totalCAD: 105000, weeklyChangeCAD: 3000, totalUSD: 77000, weeklyChangeUSD: 3000 }
+    ];
+
+    const resultUSD = computeMonthlyHeatmap(synthetic, 'USD');
+    assert.equal(resultUSD.length, 1);
+    const janUSD = resultUSD[0].months[0];
+    assert.equal(janUSD.hasData, true);
+    // startUSD = 74000 - 1000 = 73000; endUSD = 77000; diff = 4000
+    assert.equal(janUSD.startVal, 73000);
+    assert.equal(janUSD.endVal, 77000);
+    assert.equal(janUSD.diffVal, 4000);
+    assert.equal(Number(janUSD.diffPct.toFixed(4)), Number(((4000 / 73000) * 100).toFixed(4)));
+  });
+
+  await t.test('setHeatmapCurrency and setHeatmapUnit manage state transitions correctly', () => {
+    resetHeatmapState();
+    let state = getHeatmapState();
+    assert.equal(state.currentHeatmapCurrency, 'CAD');
+    assert.equal(state.currentHeatmapUnit, 'PCT');
+
+    setHeatmapCurrency('USD');
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapCurrency, 'USD');
+
+    // Setting same currency should be no-op
+    setHeatmapCurrency('USD');
+    assert.equal(getHeatmapState().currentHeatmapCurrency, 'USD');
+
+    setHeatmapUnit('VAL');
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapUnit, 'VAL');
+
+    // Setting same unit should be no-op
+    setHeatmapUnit('VAL');
+    assert.equal(getHeatmapState().currentHeatmapUnit, 'VAL');
+
+    resetHeatmapState();
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapCurrency, 'CAD');
+    assert.equal(state.currentHeatmapUnit, 'PCT');
+  });
+});
+
 
 
