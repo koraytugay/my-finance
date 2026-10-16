@@ -3965,9 +3965,7 @@ function renderWeeklyBarChart() {
     else if (/^\d{4}$/.test(timeframe)) tfLabel = timeframe;
 
     if (titleEl) {
-        titleEl.textContent = isPct
-            ? `📊 Weekly Net Worth Change (% Return - ${tfLabel} - ${currency})`
-            : `📊 Weekly Net Worth Change (${tfLabel} - ${currency} $)`;
+        titleEl.textContent = '📊 Weekly Net Worth Change';
     }
 
     if (!rawHistory || rawHistory.length <= 1) {
@@ -3999,9 +3997,7 @@ function renderWeeklyBarChart() {
     }
 
     if (subTitleEl) {
-        subTitleEl.textContent = isPct
-            ? `Interactive timeline of weekly percentage returns • Average: ${avgStr} • Hover over any bar to view details.`
-            : `Interactive timeline of weekly dollar gains (green) and pullbacks (red) • Average: ${avgStr} • Hover over any bar to view details.`;
+        subTitleEl.textContent = `Weekly gain and pullback timeline • Average: ${avgStr}`;
     }
 
     let maxAbsVal = 0;
@@ -4042,19 +4038,6 @@ function renderWeeklyBarChart() {
 
         svg += `<rect id="weekly-bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
     });
-
-    // Average line and printed value badge across the chart
-    const avgY = zeroY - (avgVal / maxAbsVal) * (chartHeight / 2);
-    const clampedAvgY = Math.max(padding.top + 2, Math.min(height - padding.bottom - 2, avgY));
-    const badgeW = isPct ? 90 : 115;
-    const badgeX = width - padding.right - badgeW - 6;
-    const badgeY = clampedAvgY > zeroY ? (clampedAvgY - 18) : (clampedAvgY + 4);
-
-    svg += `<g id="weekly-avg-line-group" pointer-events="none">`;
-    svg += `<line x1="${padding.left}" y1="${clampedAvgY.toFixed(1)}" x2="${width - padding.right}" y2="${clampedAvgY.toFixed(1)}" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5,3"/>`;
-    svg += `<rect x="${badgeX}" y="${badgeY.toFixed(1)}" width="${badgeW}" height="15" rx="3" fill="#fffbeb" stroke="#fde68a" stroke-width="1" opacity="0.95" />`;
-    svg += `<text x="${(badgeX + badgeW / 2).toFixed(1)}" y="${(badgeY + 11).toFixed(1)}" font-size="10" font-weight="700" fill="#b45309" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">Avg: ${avgStr}</text>`;
-    svg += `</g>`;
 
     // Vertical Crosshair Line
     svg += `<line id="weekly-bar-cursor-line" x1="0" y1="${padding.top}" x2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
