@@ -72,14 +72,14 @@ Synchronization is driven reliably via an external cron service (such as [cron-j
 
 ## 🧭 Navigation & Views
 
-1. **Executive Dashboard (`index.html`)**: Real-time portfolio overview, current week status, net worth progression, ATH increments, monthly returns heatmap, 52-week wealth creation and performance metrics, and asset class summaries.
+1. **Executive Dashboard (`index.html`)**: Real-time portfolio overview, current week status, net worth progression, ATH increments, monthly returns heatmap, weekly net worth change bar chart, 52-week wealth creation and performance metrics, and asset class summaries.
 2. **Holdings (`holdings.html`)**: Complete portfolio view with interactive search, multi-criteria filtering (Brokerage, Account, Strategy), Table & Card display modes, and holding detail modal.
 3. **Net Worth History (`history.html`)**: Historical tracking with interactive SVG area growth chart, tooltips, currency toggle (CAD/USD), and weekly logs.
 4. **Asset Allocation (`allocation.html`)**: Geographic equity diversification, asset classes, factor tilts, and dynamic currency scenario simulator.
 5. **Accounts & Brokerages (`accounts.html`)**: Institution breakdown and tax wrapper structure (RRSP, TFSA, FHSA, Non-Registered, Cash).
 6. **Dividends (`dividends.html`)**: Annual and monthly dividend income projections, portfolio yields, withholding tax breakdown, and calendar schedule.
 7. **Financial Stats (`stats.html`)**: Top holdings, asset allocation rankings, and annual performance records.
-8. **Performance Analytics (`performance.html`)**: Interactive weekly gain/loss SVG bar chart, win/loss week ratios, drawdown underwater chart, CAGR, and Sharpe ratio.
+8. **Performance Analytics (`performance.html`)**: Interactive rolling 52-week trailing extremes (best & worst periods), win/loss week ratios, drawdown underwater chart, CAGR, and Sharpe ratio.
 9. **Projections (`projections.html`)**: Multi-decade compound growth modeling, Monte Carlo simulation percentiles, and financial freedom milestones.
 10. **Tax Location (`tax.html`)**: Tax-sheltered vs. taxable wealth distribution, cross-account asset placement matrix, and withholding tax optimizations.
 

@@ -48,7 +48,12 @@ const {
   setHeatmapCurrency,
   setHeatmapUnit,
   getHeatmapState,
-  resetHeatmapState
+  resetHeatmapState,
+  computeWeeklyBarData,
+  setWeeklyBarCurrency,
+  setWeeklyBarUnit,
+  getWeeklyBarChartState,
+  resetWeeklyBarChartState
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -2157,6 +2162,108 @@ test('Monthly Returns Heatmap Calculation Suite', async (t) => {
     state = getHeatmapState();
     assert.equal(state.currentHeatmapCurrency, 'CAD');
     assert.equal(state.currentHeatmapUnit, 'PCT');
+  });
+});
+
+test('Weekly Net Worth Change Calculation Suite', async (t) => {
+  await t.test('computeWeeklyBarData returns empty array on empty inputs or single-record history', () => {
+    assert.deepEqual(computeWeeklyBarData([]), []);
+    assert.deepEqual(computeWeeklyBarData(null), []);
+    assert.deepEqual(computeWeeklyBarData(undefined), []);
+    assert.deepEqual(computeWeeklyBarData([{ week: 1, date: '2025-01-03', totalCAD: 100000 }]), []);
+  });
+
+  await t.test('computeWeeklyBarData correctly maps weekly changes in CAD for both dollar value and percentage', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000 },
+      { week: 2, date: '2025-01-10', totalCAD: 102500, totalUSD: 75500, weeklyChangeCAD: 2500, weeklyChangePct: 2.50 },
+      { week: 3, date: '2025-01-17', totalCAD: 101000, totalUSD: 74200, weeklyChangeCAD: -1500, weeklyChangePct: -1.46 }
+    ];
+
+    const valCAD = computeWeeklyBarData(history, 'CAD', 'VAL');
+    assert.equal(valCAD.length, 2);
+    assert.equal(valCAD[0].week, 2);
+    assert.equal(valCAD[0].changeCAD, 2500);
+    assert.equal(valCAD[0].pctCAD, 2.50);
+    assert.equal(valCAD[0].chartVal, 2500);
+
+    assert.equal(valCAD[1].week, 3);
+    assert.equal(valCAD[1].changeCAD, -1500);
+    assert.equal(valCAD[1].pctCAD, -1.46);
+    assert.equal(valCAD[1].chartVal, -1500);
+
+    const pctCAD = computeWeeklyBarData(history, 'CAD', 'PCT');
+    assert.equal(pctCAD[0].chartVal, 2.50);
+    assert.equal(pctCAD[1].chartVal, -1.46);
+  });
+
+  await t.test('computeWeeklyBarData correctly calculates weekly changes in USD for both dollar value and percentage', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000, totalUSD: 74000 },
+      { week: 2, date: '2025-01-10', totalCAD: 102500, totalUSD: 75500, weeklyChangeCAD: 2500, weeklyChangePct: 2.50, weeklyChangeUSD: 1500, weeklyChangeUSDPct: 2.03 },
+      { week: 3, date: '2025-01-17', totalCAD: 101000, totalUSD: 74200, weeklyChangeCAD: -1500, weeklyChangePct: -1.46, weeklyChangeUSD: -1300, weeklyChangeUSDPct: -1.72 }
+    ];
+
+    const valUSD = computeWeeklyBarData(history, 'USD', 'VAL');
+    assert.equal(valUSD.length, 2);
+    assert.equal(valUSD[0].changeUSD, 1500);
+    assert.equal(valUSD[0].pctUSD, 2.03);
+    assert.equal(valUSD[0].chartVal, 1500);
+
+    assert.equal(valUSD[1].changeUSD, -1300);
+    assert.equal(valUSD[1].pctUSD, -1.72);
+    assert.equal(valUSD[1].chartVal, -1300);
+
+    const pctUSD = computeWeeklyBarData(history, 'USD', 'PCT');
+    assert.equal(pctUSD[0].chartVal, 2.03);
+    assert.equal(pctUSD[1].chartVal, -1.72);
+  });
+
+  await t.test('computeWeeklyBarData gracefully derives changes from totals when weeklyChange fields are omitted', () => {
+    const history = [
+      { week: 10, date: '2025-03-07', totalCAD: 200000, totalUSD: 148000 },
+      { week: 11, date: '2025-03-14', totalCAD: 206000, totalUSD: 151000 }
+    ];
+
+    const cadRes = computeWeeklyBarData(history, 'CAD', 'VAL');
+    assert.equal(cadRes.length, 1);
+    assert.equal(cadRes[0].changeCAD, 6000);
+    assert.equal(cadRes[0].pctCAD, 3.0);
+    assert.equal(cadRes[0].chartVal, 6000);
+
+    const usdRes = computeWeeklyBarData(history, 'USD', 'PCT');
+    assert.equal(usdRes.length, 1);
+    assert.equal(usdRes[0].changeUSD, 3000);
+    assert.equal(Number(usdRes[0].pctUSD.toFixed(2)), Number(((3000 / 148000) * 100).toFixed(2)));
+    assert.equal(Number(usdRes[0].chartVal.toFixed(2)), Number(((3000 / 148000) * 100).toFixed(2)));
+  });
+
+  await t.test('setWeeklyBarCurrency and setWeeklyBarUnit manage state transitions correctly', () => {
+    resetWeeklyBarChartState();
+    let state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarCurrency, 'CAD');
+    assert.equal(state.currentWeeklyBarUnit, 'VAL');
+
+    setWeeklyBarCurrency('USD');
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarCurrency, 'USD');
+
+    // Setting same currency should be no-op
+    setWeeklyBarCurrency('USD');
+    assert.equal(getWeeklyBarChartState().currentWeeklyBarCurrency, 'USD');
+
+    setWeeklyBarUnit('PCT');
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarUnit, 'PCT');
+
+    // Setting same unit should be no-op
+    setWeeklyBarUnit('PCT');
+    assert.equal(getWeeklyBarChartState().currentWeeklyBarUnit, 'PCT');
+
+    resetWeeklyBarChartState();
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarCurrency, 'CAD');
+    assert.equal(state.currentWeeklyBarUnit, 'VAL');
   });
 });
 

@@ -58,6 +58,7 @@ async function initMain() {
         renderMainProgressionChart();
         renderAthBarChart();
         renderMonthlyHeatmap();
+        renderWeeklyBarChart();
         renderAssetClassTable(mainData, holdings);
         renderAccountTypeTable(mainData, holdings, enrichedHistory);
         renderCategoryTable(mainData, holdings);
@@ -3693,6 +3694,312 @@ function renderMonthlyHeatmap() {
     });
 }
 
+let currentWeeklyBarCurrency = 'CAD';
+let currentWeeklyBarUnit = 'VAL'; // 'VAL' | 'PCT'
+
+function setWeeklyBarCurrency(currency) {
+    if (currentWeeklyBarCurrency === currency) return;
+    currentWeeklyBarCurrency = currency;
+
+    if (typeof document !== 'undefined') {
+        const btnCad = document.getElementById('btn-weekly-cur-cad');
+        const btnUsd = document.getElementById('btn-weekly-cur-usd');
+        if (btnCad && btnUsd) {
+            btnCad.classList.toggle('active', currency === 'CAD');
+            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
+            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
+            btnUsd.classList.toggle('active', currency === 'USD');
+            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
+            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+        }
+    }
+    renderWeeklyBarChart();
+}
+
+function setWeeklyBarUnit(unit) {
+    if (currentWeeklyBarUnit === unit) return;
+    currentWeeklyBarUnit = unit;
+
+    if (typeof document !== 'undefined') {
+        const btnVal = document.getElementById('btn-weekly-unit-val');
+        const btnPct = document.getElementById('btn-weekly-unit-pct');
+        if (btnVal && btnPct) {
+            btnVal.classList.toggle('active', unit === 'VAL');
+            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
+            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
+            btnPct.classList.toggle('active', unit === 'PCT');
+            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
+            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+        }
+    }
+    renderWeeklyBarChart();
+}
+
+function computeWeeklyBarData(history, currency = 'CAD', unit = 'VAL') {
+    if (!history || history.length <= 1) return [];
+
+    const isUsd = currency === 'USD';
+    const isPct = unit === 'PCT';
+    const records = history.slice(1);
+
+    return records.map((r, idx) => {
+        const prev = history[idx];
+
+        let changeCAD = (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null)
+            ? Number(r.weeklyChangeCAD)
+            : (Number(r.totalCAD || 0) - Number(prev.totalCAD || 0));
+        let pctCAD = (r.weeklyChangePct !== undefined && r.weeklyChangePct !== null)
+            ? Number(r.weeklyChangePct)
+            : (prev.totalCAD ? ((changeCAD / Number(prev.totalCAD)) * 100) : 0);
+
+        let changeUSD;
+        if (r.weeklyChangeUSD !== undefined && r.weeklyChangeUSD !== null) {
+            changeUSD = Number(r.weeklyChangeUSD);
+        } else if (r.totalUSD !== undefined && prev.totalUSD !== undefined) {
+            changeUSD = Number(r.totalUSD) - Number(prev.totalUSD);
+        } else {
+            const fx = (r.totalUSD && r.totalCAD) ? (r.totalUSD / r.totalCAD) : 0.74;
+            changeUSD = changeCAD * fx;
+        }
+
+        let pctUSD;
+        if (r.weeklyChangeUSDPct !== undefined && r.weeklyChangeUSDPct !== null) {
+            pctUSD = Number(r.weeklyChangeUSDPct);
+        } else if (prev.totalUSD) {
+            pctUSD = (changeUSD / Number(prev.totalUSD)) * 100;
+        } else {
+            pctUSD = pctCAD;
+        }
+
+        const changeVal = isUsd ? changeUSD : changeCAD;
+        const changePct = isUsd ? pctUSD : pctCAD;
+        const chartVal = isPct ? changePct : changeVal;
+
+        return {
+            week: r.week,
+            date: r.date,
+            totalCAD: r.totalCAD,
+            totalUSD: r.totalUSD,
+            changeCAD,
+            pctCAD,
+            changeUSD,
+            pctUSD,
+            changeVal,
+            changePct,
+            chartVal
+        };
+    });
+}
+
+function renderWeeklyBarInfoCard(html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById('weekly-bar-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
+function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = true) {
+    if (!item) return '';
+    const isPct = unit === 'PCT';
+    const isUsd = currency === 'USD';
+    const dateStr = typeof formatDate === 'function' ? formatDate(item.date) : item.date;
+
+    const changeVal = item.changeVal;
+    const changePct = item.changePct;
+    const isPositive = isPct ? changePct >= 0 : changeVal >= 0;
+    const changeColor = isPositive ? '#16a34a' : '#cf222e';
+
+    const signVal = changeVal >= 0 ? '+' : '';
+    const signPct = changePct >= 0 ? '+' : '';
+    const formattedVal = `${signVal}${typeof formatCurrency === 'function' ? formatCurrency(changeVal, currency) : (signVal + changeVal.toFixed(2))}`;
+    const formattedPct = `${signPct}${changePct.toFixed(2)}%`;
+
+    const primaryVal = isPct ? formattedPct : formattedVal;
+    const subLabel = isPct ? 'Weekly Dollar Change' : 'Weekly Return';
+    const subVal = isPct ? formattedVal : formattedPct;
+
+    const totalNet = typeof formatCurrency === 'function'
+        ? formatCurrency(isUsd ? item.totalUSD : item.totalCAD, currency)
+        : `$${(isUsd ? item.totalUSD : item.totalCAD).toFixed(2)}`;
+
+    const badgeHtml = isHover
+        ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+        : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+    const contextText = isPct
+        ? (changePct >= 0 ? '📈 Percentage Gain' : '📉 Percentage Pullback')
+        : (changeVal >= 0 ? '📈 Dollar Gain' : '📉 Dollar Pullback');
+
+    return `
+        <div class="chart-card-header">
+            <span class="chart-card-date">Week ${item.week} &bull; ${dateStr}</span>
+            ${badgeHtml}
+        </div>
+        <div class="chart-card-primary-val" style="color: ${changeColor};">
+            ${primaryVal}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b;">
+            ${subLabel}: <strong style="color: ${changeColor};">${subVal}</strong>
+        </div>
+        <div class="chart-card-section-divider">
+            <div class="chart-card-row">
+                <span>Portfolio Net Worth:</span>
+                <strong>${totalNet}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Performance Context:</span>
+                <span style="font-weight: 700; color: ${changeColor};">
+                    ${contextText}
+                </span>
+            </div>
+        </div>
+        <div class="chart-card-footer">
+            💡 Move cursor across bars to inspect weekly changes
+        </div>
+    `;
+}
+
+function renderWeeklyBarChart() {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('weekly-bar-chart-container');
+    const svgWrap = document.getElementById('weekly-bar-svg-wrap') || container;
+    const tooltip = document.getElementById('weekly-bar-tooltip');
+    const infoCard = document.getElementById('weekly-bar-info-card');
+    const titleEl = document.getElementById('weekly-bar-chart-title');
+    const subTitleEl = document.getElementById('weekly-bar-chart-subtitle');
+
+    if (!container || !svgWrap) return;
+
+    const currency = currentWeeklyBarCurrency;
+    const unit = currentWeeklyBarUnit;
+    const isPct = unit === 'PCT';
+
+    if (titleEl) {
+        titleEl.textContent = isPct
+            ? `📊 Weekly Net Worth Change (% Return - ${currency})`
+            : `📊 Weekly Net Worth Change (${currency} $)`;
+    }
+
+    if (subTitleEl) {
+        subTitleEl.textContent = isPct
+            ? `Interactive timeline of every weekly percentage gain (green) and pullback (red). Hover over any bar to view details.`
+            : `Interactive timeline of every weekly dollar gain (green) and pullback (red). Hover over any bar to view details.`;
+    }
+
+    if (!rawHistory || rawHistory.length <= 1) {
+        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
+        if (infoCard) {
+            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>';
+        }
+        return;
+    }
+
+    const items = computeWeeklyBarData(rawHistory, currency, unit);
+    if (items.length === 0) {
+        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
+        if (infoCard) {
+            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>';
+        }
+        return;
+    }
+
+    let maxAbsVal = 0;
+    items.forEach(item => {
+        const abs = Math.abs(item.chartVal || 0);
+        if (abs > maxAbsVal) maxAbsVal = abs;
+    });
+    if (maxAbsVal === 0) maxAbsVal = (isPct ? 5 : 1000);
+
+    const width = container.clientWidth || 900;
+    const height = 220;
+    const padding = { top: 15, bottom: 25, left: 10, right: 10 };
+    const chartHeight = height - padding.top - padding.bottom;
+    const chartWidth = width - padding.left - padding.right;
+    const stepW = chartWidth / items.length;
+    const barWidth = Math.max(3, stepW - 2);
+    const zeroY = padding.top + (chartHeight / 2);
+
+    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible;" id="weekly-bar-svg">`;
+
+    // Zero baseline
+    svg += `<line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+
+    items.forEach((item, idx) => {
+        const x = padding.left + (idx * stepW);
+        const val = item.chartVal || 0;
+        const normalizedH = (Math.abs(val) / maxAbsVal) * (chartHeight / 2);
+        const barH = Math.max(2, normalizedH);
+
+        let barY, color;
+        if (val >= 0) {
+            barY = zeroY - barH;
+            color = '#16a34a';
+        } else {
+            barY = zeroY;
+            color = '#dc2626';
+        }
+
+        svg += `<rect id="weekly-bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
+    });
+
+    // Vertical Crosshair Line
+    svg += `<line id="weekly-bar-cursor-line" x1="0" y1="${padding.top}" x2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
+
+    // Full Mouse Capture Overlay
+    svg += `<rect id="weekly-bar-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${chartWidth}" height="${chartHeight}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />`;
+
+    svg += `</svg>`;
+    svgWrap.innerHTML = svg;
+
+    if (tooltip) tooltip.style.display = 'none';
+
+    const svgEl = svgWrap.querySelector('#weekly-bar-svg');
+    const overlay = svgWrap.querySelector('#weekly-bar-mouse-overlay');
+    const cursorLine = svgWrap.querySelector('#weekly-bar-cursor-line');
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const svgP = pt.matrixTransform(ctm.inverse());
+                    svgX = svgP.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
+            }
+
+            const clampedX = Math.max(padding.left, Math.min(padding.left + chartWidth - 1, svgX));
+            const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
+            const barCenterX = padding.left + (idx * stepW) + (barWidth / 2);
+
+            if (cursorLine) {
+                cursorLine.setAttribute('x1', barCenterX.toFixed(1));
+                cursorLine.setAttribute('x2', barCenterX.toFixed(1));
+                cursorLine.style.display = 'block';
+            }
+            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[idx], currency, unit, true), true);
+        });
+
+        overlay.addEventListener('mouseleave', () => {
+            if (cursorLine) cursorLine.style.display = 'none';
+            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false), false);
+        });
+    }
+
+    // Set initial card state
+    if (items.length > 0) {
+        renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false), false);
+    }
+}
+
 function renderMainLastSynced(syncStatus, benchmarks) {
     if (typeof document === 'undefined') return;
     const wrapper = document.getElementById('main-last-synced-wrapper');
@@ -3717,6 +4024,7 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
             renderMainProgressionChart();
             renderAthBarChart();
             renderMonthlyHeatmap();
+            renderWeeklyBarChart();
         }
     });
 }
@@ -3800,6 +4108,18 @@ if (typeof module !== 'undefined' && module.exports) {
         resetHeatmapState: () => {
             currentHeatmapCurrency = 'CAD';
             currentHeatmapUnit = 'PCT';
+        },
+        computeWeeklyBarData,
+        renderWeeklyBarChart,
+        setWeeklyBarCurrency,
+        setWeeklyBarUnit,
+        getWeeklyBarChartState: () => ({
+            currentWeeklyBarCurrency,
+            currentWeeklyBarUnit
+        }),
+        resetWeeklyBarChartState: () => {
+            currentWeeklyBarCurrency = 'CAD';
+            currentWeeklyBarUnit = 'VAL';
         }
     };
 }

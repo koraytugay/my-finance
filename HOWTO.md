@@ -82,7 +82,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 | Page | File | Purpose & Key Features |
 | :--- | :--- | :--- |
-| **Main** | `index.html` | High-level executive dashboard, total net worth, net worth progression, ATH increments, monthly returns heatmap, 52-week & YTD stats. |
+| **Main** | `index.html` | High-level executive dashboard, total net worth, net worth progression, ATH increments, monthly returns heatmap, weekly net worth change, 52-week & YTD stats. |
 | **Holdings** | `holdings.html` | Searchable, sortable holdings table and card view with asset class breakdown. |
 | **Net Worth History** | `history.html` | Comprehensive weekly history log, interactive SVG timeline chart, and milestone markers. |
 | **Asset Allocation** | `allocation.html` | Geographic diversification (US, Canada, Developed, Emerging) and factor tilt analysis. |

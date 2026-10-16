@@ -43,7 +43,6 @@ async function initPerformance() {
         contentEl.style.display = 'block';
 
         renderOverviewCards();
-        renderWeeklyBarChart();
         renderRolling52Charts();
         renderDrawdownChart();
         renderAnnualSummary();
@@ -51,7 +50,6 @@ async function initPerformance() {
         renderCrisisStressTest();
 
         window.addEventListener('resize', () => {
-            renderWeeklyBarChart();
             renderRolling52Charts();
             renderDrawdownChart();
         });
@@ -838,155 +836,6 @@ function renderPerfCard(cardId, html, isActive = false) {
     else card.classList.remove('active');
 }
 
-function renderWeeklyBarChart() {
-    const container = document.getElementById('bar-chart-container');
-    const svgWrap = document.getElementById('bar-svg-wrap') || container;
-    const tooltip = document.getElementById('chart-tooltip');
-    if (!container || !svgWrap) return;
-    svgWrap.innerHTML = '';
-
-    const records = allHistory.slice(1);
-    if (records.length === 0) return;
-
-    let maxAbsChange = 0;
-    records.forEach(r => {
-        const absVal = Math.abs(r.weeklyChangeCAD || 0);
-        if (absVal > maxAbsChange) maxAbsChange = absVal;
-    });
-
-    if (maxAbsChange === 0) maxAbsChange = 1000;
-
-    const width = container.clientWidth || 900;
-    const height = 220;
-    const padding = { top: 15, bottom: 25, left: 10, right: 10 };
-    const chartHeight = height - padding.top - padding.bottom;
-    const chartWidth = width - padding.left - padding.right;
-    const stepW = chartWidth / records.length;
-    const barWidth = Math.max(3, stepW - 2);
-    const zeroY = padding.top + (chartHeight / 2);
-
-    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible;" id="weekly-bar-svg">`;
-
-    // Zero baseline
-    svg += `<line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>`;
-
-    records.forEach((r, idx) => {
-        const x = padding.left + (idx * stepW);
-        const change = r.weeklyChangeCAD || 0;
-        const normalizedH = (Math.abs(change) / maxAbsChange) * (chartHeight / 2);
-        const barH = Math.max(2, normalizedH);
-
-        let barY, color;
-        if (change >= 0) {
-            barY = zeroY - barH;
-            color = '#16a34a';
-        } else {
-            barY = zeroY;
-            color = '#dc2626';
-        }
-
-        svg += `<rect id="bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
-    });
-
-    // Vertical Crosshair Line
-    svg += `<line id="bar-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
-
-    // Full Mouse Capture Overlay
-    svg += `<rect id="bar-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${chartWidth}" height="${chartHeight}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />`;
-
-    svg += `</svg>`;
-    svgWrap.innerHTML = svg;
-
-    if (tooltip) tooltip.style.display = 'none';
-
-    function buildBarCardHtml(idx, isHover = true) {
-        const r = records[idx];
-        if (!r) return '';
-        const change = r.weeklyChangeCAD || 0;
-        const sign = change >= 0 ? '+' : '';
-        const pctNum = Number(r.weeklyChangePct);
-        const pctStr = (!isNaN(pctNum)) ? `${pctNum >= 0 ? '+' : ''}${pctNum.toFixed(2)}%` : '';
-        const changeColor = change >= 0 ? '#16a34a' : '#cf222e';
-        const dateStr = typeof formatDate === 'function' ? formatDate(r.date) : r.date;
-        const totalNet = formatCurrency(r.totalCAD, 'CAD');
-
-        const badgeHtml = isHover
-            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
-
-        return `
-            <div class="chart-card-header">
-                <span class="chart-card-date">Week ${r.week} &bull; ${dateStr}</span>
-                ${badgeHtml}
-            </div>
-            <div class="chart-card-primary-val" style="color: ${changeColor};">
-                ${sign}${formatCurrency(change, 'CAD')}
-            </div>
-            <div class="chart-card-sub-val" style="color: #64748b;">
-                Weekly Return: <strong style="color: ${changeColor};">${pctStr}</strong>
-            </div>
-            <div class="chart-card-section-divider">
-                <div class="chart-card-row">
-                    <span>Portfolio Net Worth:</span>
-                    <strong>${totalNet}</strong>
-                </div>
-                <div class="chart-card-row">
-                    <span>Performance Context:</span>
-                    <span style="font-weight: 700; color: ${changeColor};">
-                        ${change >= 0 ? '📈 Dollar Gain' : '📉 Dollar Pullback'}
-                    </span>
-                </div>
-            </div>
-            <div class="chart-card-footer">
-                💡 Move cursor across bars to inspect weekly changes
-            </div>
-        `;
-    }
-
-    const svgEl = svgWrap.querySelector('#weekly-bar-svg');
-    const overlay = svgWrap.querySelector('#bar-mouse-overlay');
-    const cursorLine = svgWrap.querySelector('#bar-cursor-line');
-
-    if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const svgP = pt.matrixTransform(ctm.inverse());
-                    svgX = svgP.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
-
-            const clampedX = Math.max(padding.left, Math.min(padding.left + chartWidth - 1, svgX));
-            const idx = Math.max(0, Math.min(records.length - 1, Math.floor((clampedX - padding.left) / stepW)));
-            const barCenterX = padding.left + (idx * stepW) + (barWidth / 2);
-
-            if (cursorLine) {
-                cursorLine.setAttribute('x1', barCenterX.toFixed(1));
-                cursorLine.setAttribute('x2', barCenterX.toFixed(1));
-                cursorLine.style.display = 'block';
-            }
-            renderPerfCard('bar-chart-info-card', buildBarCardHtml(idx, true), true);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
-            if (cursorLine) cursorLine.style.display = 'none';
-            renderPerfCard('bar-chart-info-card', buildBarCardHtml(records.length - 1, false), false);
-        });
-    }
-
-    // Set initial card state
-    if (records.length > 0) {
-        renderPerfCard('bar-chart-info-card', buildBarCardHtml(records.length - 1, false), false);
-    }
-}
 
 /* ================= Rolling 52-Week Extremes (Best & Worst) ================= */
 
