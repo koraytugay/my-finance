@@ -398,13 +398,26 @@ header h1 {
 }
 
 /* ================= Monthly Returns Heatmap ================= */
+#heatmap-table {
+    border-collapse: separate;
+    border-spacing: 3px 3px;
+    width: 100%;
+}
+
 .heatmap-cell {
-    padding: 8px 6px;
+    padding: 7px 4px;
     text-align: center;
-    font-size: 0.8rem;
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 600;
     border-radius: 4px;
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    transition: filter 0.15s ease;
+}
+
+.heatmap-cell:hover {
+    filter: brightness(1.12);
 }
 
 #heatmap-table th,
@@ -414,24 +427,36 @@ header h1 {
 
 #heatmap-table th {
     transition: none;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748b;
+    padding: 6px 4px;
+    text-align: center;
+    border-bottom: none;
+    background: #f8fafc;
+    border-radius: 4px;
 }
 
 #heatmap-table th:hover {
-    background: #f8fafc;
+    background: #f1f5f9;
+}
+
+#heatmap-table tr:hover {
+    background-color: transparent;
 }
 
 #heatmap-table tr:hover td {
     cursor: default;
-    background-color: transparent;
+    background-color: initial;
 }
 
-.heat-green-deep { background: #15803d !important; color: #fff; }
-.heat-green-med  { background: #22c55e !important; color: #fff; }
-.heat-green-soft { background: #bbf7d0 !important; color: #166534; }
-.heat-red-soft   { background: #fecaca !important; color: #991b1b; }
-.heat-red-med    { background: #ef4444 !important; color: #fff; }
-.heat-red-deep   { background: #b91c1c !important; color: #fff; }
-.heat-neutral    { background: #f1f5f9 !important; color: #64748b; }
+.heat-green-deep { background: #14532d !important; color: #ffffff !important; }
+.heat-green-med  { background: #15803d !important; color: #ffffff !important; }
+.heat-green-soft { background: #16a34a !important; color: #ffffff !important; }
+.heat-red-soft   { background: #dc2626 !important; color: #ffffff !important; }
+.heat-red-med    { background: #b91c1c !important; color: #ffffff !important; }
+.heat-red-deep   { background: #7f1d1d !important; color: #ffffff !important; }
+.heat-neutral    { background: #f1f5f9 !important; color: #94a3b8 !important; }
 
 /* ================= Badges & Pills ================= */
 .badge {

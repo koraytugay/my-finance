@@ -3618,9 +3618,19 @@ function renderMonthlyHeatmap() {
         return num < 0 ? `-${prefix}${absStr}` : `${prefix}${absStr}`;
     };
 
+    const formatHeatmapVal = (val, cur) => {
+        const num = Number(val || 0);
+        const prefix = cur === 'USD' ? 'US$' : '$';
+        const isSmall = Math.abs(num) < 100 && num !== 0 && num % 1 !== 0;
+        const absStr = isSmall
+            ? Math.abs(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            : Math.abs(Math.round(num)).toLocaleString('en-US');
+        return num < 0 ? `-${prefix}${absStr}` : `${prefix}${absStr}`;
+    };
+
     yearsData.forEach(yData => {
         const tr = document.createElement('tr');
-        let rowHtml = `<td style="font-weight: 700; color: #1f2328; white-space: nowrap;"><strong>${yData.year}</strong></td>`;
+        let rowHtml = `<td style="font-weight: 700; color: #1f2328; white-space: nowrap; font-size: 0.78rem; padding: 7px 6px;"><strong>${yData.year}</strong></td>`;
 
         for (let m = 0; m < 12; m++) {
             const mInfo = yData.months[m];
@@ -3644,12 +3654,13 @@ function renderMonthlyHeatmap() {
             const vSign = diffVal > 0 ? '+' : '';
             const pctFormatted = `${pSign}${mGainPct.toFixed(1)}%`;
             const pctPrecise = `${pSign}${mGainPct.toFixed(2)}%`;
-            const valFormatted = `${vSign}${formatVal(diffVal, currency)}`;
+            const valCompact = `${vSign}${formatHeatmapVal(diffVal, currency)}`;
+            const valPrecise = `${vSign}${formatVal(diffVal, currency)}`;
 
-            const cellText = isPct ? pctFormatted : valFormatted;
+            const cellText = isPct ? pctFormatted : valCompact;
             const cellTitle = isPct
-                ? `${pctPrecise} (${valFormatted})`
-                : `${valFormatted} (${pctPrecise})`;
+                ? `${pctPrecise} (${valPrecise})`
+                : `${valPrecise} (${pctPrecise})`;
 
             rowHtml += `<td class="heatmap-cell ${heatClass}" title="${cellTitle}">
                 ${cellText}
@@ -3661,19 +3672,19 @@ function renderMonthlyHeatmap() {
         const fullYearDiff = yData.fullYearDiff;
         const ySign = fullYearPct > 0 ? '+' : '';
         const yVSign = fullYearDiff > 0 ? '+' : '';
-        const yColor = fullYearPct >= 0 ? '#166534' : '#991b1b';
-        const yBg = fullYearPct >= 0 ? '#dcfce7' : '#fee2e2';
+        const yBg = fullYearPct >= 0 ? '#166534' : '#991b1b';
 
         const fyPctFormatted = `${ySign}${fullYearPct.toFixed(1)}%`;
         const fyPctPrecise = `${ySign}${fullYearPct.toFixed(2)}%`;
-        const fyValFormatted = `${yVSign}${formatVal(fullYearDiff, currency)}`;
+        const fyValCompact = `${yVSign}${formatHeatmapVal(fullYearDiff, currency)}`;
+        const fyValPrecise = `${yVSign}${formatVal(fullYearDiff, currency)}`;
 
-        const fyText = isPct ? fyPctFormatted : fyValFormatted;
+        const fyText = isPct ? fyPctFormatted : fyValCompact;
         const fyTitle = isPct
-            ? `Full Year ${yData.year}: ${fyPctPrecise} (${fyValFormatted})`
-            : `Full Year ${yData.year}: ${fyValFormatted} (${fyPctPrecise})`;
+            ? `Full Year ${yData.year}: ${fyPctPrecise} (${fyValPrecise})`
+            : `Full Year ${yData.year}: ${fyValPrecise} (${fyPctPrecise})`;
 
-        rowHtml += `<td style="text-align: center; font-weight: 800; color: ${yColor}; background: ${yBg}; padding: 8px 6px; white-space: nowrap; font-size: 0.78rem;" title="${fyTitle}">
+        rowHtml += `<td style="text-align: center; font-weight: 700; color: #ffffff !important; background: ${yBg} !important; padding: 7px 4px; white-space: nowrap; font-size: 0.72rem; border-radius: 4px; font-variant-numeric: tabular-nums;" title="${fyTitle}">
             ${fyText}
         </td>`;
 
