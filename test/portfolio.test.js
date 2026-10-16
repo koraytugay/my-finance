@@ -52,6 +52,8 @@ const {
   computeWeeklyBarData,
   setWeeklyBarCurrency,
   setWeeklyBarUnit,
+  setWeeklyBarTimeframe,
+  syncWeeklyTimeframeButtons,
   getWeeklyBarChartState,
   resetWeeklyBarChartState
 } = require('../main.js');
@@ -2264,6 +2266,68 @@ test('Weekly Net Worth Change Calculation Suite', async (t) => {
     state = getWeeklyBarChartState();
     assert.equal(state.currentWeeklyBarCurrency, 'CAD');
     assert.equal(state.currentWeeklyBarUnit, 'VAL');
+  });
+
+  await t.test('computeWeeklyBarData correctly filters records by timeframe (2024, 2025, 2026, last-52, all)', () => {
+    const history = [
+      { week: 1, date: '2024-09-06', totalCAD: 100000 },
+      { week: 2, date: '2024-09-13', totalCAD: 101000, weeklyChangeCAD: 1000, weeklyChangePct: 1.0 },
+      { week: 3, date: '2024-12-27', totalCAD: 105000, weeklyChangeCAD: 4000, weeklyChangePct: 3.96 },
+      { week: 4, date: '2025-01-03', totalCAD: 107000, weeklyChangeCAD: 2000, weeklyChangePct: 1.90 },
+      { week: 5, date: '2025-06-20', totalCAD: 110000, weeklyChangeCAD: 3000, weeklyChangePct: 2.80 },
+      { week: 6, date: '2026-01-02', totalCAD: 115000, weeklyChangeCAD: 5000, weeklyChangePct: 4.55 }
+    ];
+
+    // All Time (default)
+    const allRes = computeWeeklyBarData(history, 'CAD', 'VAL', 'all');
+    assert.equal(allRes.length, 5); // 5 change records (weeks 2, 3, 4, 5, 6)
+
+    // Year 2024
+    const res2024 = computeWeeklyBarData(history, 'CAD', 'VAL', '2024');
+    assert.equal(res2024.length, 2);
+    assert.equal(res2024[0].week, 2);
+    assert.equal(res2024[1].week, 3);
+
+    // Year 2025
+    const res2025 = computeWeeklyBarData(history, 'CAD', 'VAL', '2025');
+    assert.equal(res2025.length, 2);
+    assert.equal(res2025[0].week, 4);
+    assert.equal(res2025[1].week, 5);
+
+    // Year 2026
+    const res2026 = computeWeeklyBarData(history, 'CAD', 'VAL', '2026');
+    assert.equal(res2026.length, 1);
+    assert.equal(res2026[0].week, 6);
+
+    // Last 52W (when history has fewer than 52 records, returns all available)
+    const res52 = computeWeeklyBarData(history, 'CAD', 'VAL', 'last-52');
+    assert.equal(res52.length, 5);
+
+    // Non-existent year returns empty array
+    const res2030 = computeWeeklyBarData(history, 'CAD', 'VAL', '2030');
+    assert.equal(res2030.length, 0);
+  });
+
+  await t.test('setWeeklyBarTimeframe manages state transitions correctly', () => {
+    resetWeeklyBarChartState();
+    let state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarTimeframe, 'all');
+
+    setWeeklyBarTimeframe('2025');
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarTimeframe, '2025');
+
+    // Setting same timeframe should be no-op
+    setWeeklyBarTimeframe('2025');
+    assert.equal(getWeeklyBarChartState().currentWeeklyBarTimeframe, '2025');
+
+    setWeeklyBarTimeframe('last-52');
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarTimeframe, 'last-52');
+
+    resetWeeklyBarChartState();
+    state = getWeeklyBarChartState();
+    assert.equal(state.currentWeeklyBarTimeframe, 'all');
   });
 });
 

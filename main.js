@@ -55,6 +55,7 @@ async function initMain() {
 
         renderMainTopStats(mainData, holdings, enrichedHistory);
         syncMainTimeframeButtons(rawHistory);
+        syncWeeklyTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderAthBarChart();
         renderMonthlyHeatmap();
@@ -3696,6 +3697,62 @@ function renderMonthlyHeatmap() {
 
 let currentWeeklyBarCurrency = 'CAD';
 let currentWeeklyBarUnit = 'VAL'; // 'VAL' | 'PCT'
+let currentWeeklyBarTimeframe = 'all'; // 'all' | 'last-52' | '2024' | '2025' | '2026' ...
+
+function setWeeklyBarTimeframe(tf) {
+    if (currentWeeklyBarTimeframe === tf) return;
+    currentWeeklyBarTimeframe = tf;
+
+    if (typeof document !== 'undefined') {
+        const container = document.getElementById('weekly-timeframe-toggle');
+        if (container) {
+            const buttons = container.querySelectorAll('button[data-timeframe]');
+            buttons.forEach(btn => {
+                const btnTf = btn.getAttribute('data-timeframe');
+                const isActive = btnTf === tf;
+                btn.classList.toggle('active', isActive);
+                btn.style.background = isActive ? '#1f2328' : 'white';
+                btn.style.color = isActive ? 'white' : '#24292f';
+            });
+        }
+    }
+    renderWeeklyBarChart();
+}
+
+function syncWeeklyTimeframeButtons(history) {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('weekly-timeframe-toggle');
+    if (!container || !history || history.length === 0) return;
+
+    // Chronological order: 2024, 2025, 2026...
+    const availableYears = [...new Set(
+        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
+    )].sort();
+
+    if (availableYears.length === 0) return;
+
+    let html = '';
+
+    availableYears.forEach((year, idx) => {
+        const isActive = currentWeeklyBarTimeframe === year;
+        const bg = isActive ? '#1f2328' : 'white';
+        const color = isActive ? 'white' : '#24292f';
+        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
+        html += `
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setWeeklyBarTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} weekly changes">${year}</button>
+        `;
+    });
+
+    const isLast52Active = currentWeeklyBarTimeframe === 'last-52';
+    const isAllActive = currentWeeklyBarTimeframe === 'all';
+
+    html += `
+        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setWeeklyBarTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks weekly changes">Last 52W</button>
+        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setWeeklyBarTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time weekly changes">All Time</button>
+    `;
+
+    container.innerHTML = html;
+}
 
 function setWeeklyBarCurrency(currency) {
     if (currentWeeklyBarCurrency === currency) return;
@@ -3735,14 +3792,14 @@ function setWeeklyBarUnit(unit) {
     renderWeeklyBarChart();
 }
 
-function computeWeeklyBarData(history, currency = 'CAD', unit = 'VAL') {
+function computeWeeklyBarData(history, currency = 'CAD', unit = 'VAL', timeframe = 'all') {
     if (!history || history.length <= 1) return [];
 
     const isUsd = currency === 'USD';
     const isPct = unit === 'PCT';
     const records = history.slice(1);
 
-    return records.map((r, idx) => {
+    const allItems = records.map((r, idx) => {
         const prev = history[idx];
 
         let changeCAD = (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null)
@@ -3789,6 +3846,20 @@ function computeWeeklyBarData(history, currency = 'CAD', unit = 'VAL') {
             chartVal
         };
     });
+
+    if (!timeframe || timeframe === 'all') {
+        return allItems;
+    }
+
+    if (timeframe === 'last-52') {
+        return allItems.length > 52 ? allItems.slice(-52) : allItems;
+    }
+
+    if (/^\d{4}$/.test(timeframe)) {
+        return allItems.filter(item => item.date && item.date.startsWith(timeframe));
+    }
+
+    return allItems;
 }
 
 function renderWeeklyBarInfoCard(html, isActive = false) {
@@ -3874,12 +3945,17 @@ function renderWeeklyBarChart() {
 
     const currency = currentWeeklyBarCurrency;
     const unit = currentWeeklyBarUnit;
+    const timeframe = currentWeeklyBarTimeframe || 'all';
     const isPct = unit === 'PCT';
+
+    let tfLabel = 'All Time';
+    if (timeframe === 'last-52') tfLabel = 'Last 52 Weeks';
+    else if (/^\d{4}$/.test(timeframe)) tfLabel = timeframe;
 
     if (titleEl) {
         titleEl.textContent = isPct
-            ? `📊 Weekly Net Worth Change (% Return - ${currency})`
-            : `📊 Weekly Net Worth Change (${currency} $)`;
+            ? `📊 Weekly Net Worth Change (% Return - ${tfLabel} - ${currency})`
+            : `📊 Weekly Net Worth Change (${tfLabel} - ${currency} $)`;
     }
 
     if (subTitleEl) {
@@ -3896,11 +3972,11 @@ function renderWeeklyBarChart() {
         return;
     }
 
-    const items = computeWeeklyBarData(rawHistory, currency, unit);
+    const items = computeWeeklyBarData(rawHistory, currency, unit, timeframe);
     if (items.length === 0) {
-        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
+        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded for this timeframe.</p>';
         if (infoCard) {
-            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>';
+            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available for this timeframe.</p>';
         }
         return;
     }
@@ -4113,13 +4189,17 @@ if (typeof module !== 'undefined' && module.exports) {
         renderWeeklyBarChart,
         setWeeklyBarCurrency,
         setWeeklyBarUnit,
+        setWeeklyBarTimeframe,
+        syncWeeklyTimeframeButtons,
         getWeeklyBarChartState: () => ({
             currentWeeklyBarCurrency,
-            currentWeeklyBarUnit
+            currentWeeklyBarUnit,
+            currentWeeklyBarTimeframe
         }),
         resetWeeklyBarChartState: () => {
             currentWeeklyBarCurrency = 'CAD';
             currentWeeklyBarUnit = 'VAL';
+            currentWeeklyBarTimeframe = 'all';
         }
     };
 }
