@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-16T20:15:24.050Z",
+  "updatedAt": "2026-10-16T20:45:20.521Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-16",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4138,
-    "cadUsdRate": 0.7073,
-    "updatedAt": "2026-10-16T20:15:24.050Z"
+    "usdCadRate": 1.4137,
+    "cadUsdRate": 0.7074,
+    "updatedAt": "2026-10-16T20:45:20.521Z"
   },
   "benchmarks": {
     "XEQT": {
