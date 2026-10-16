@@ -3862,6 +3862,12 @@ function computeWeeklyBarData(history, currency = 'CAD', unit = 'VAL', timeframe
     return allItems;
 }
 
+function computeWeeklyAverage(items) {
+    if (!items || items.length === 0) return 0;
+    const sum = items.reduce((acc, it) => acc + (it.chartVal !== undefined ? it.chartVal : (it.changeVal || 0)), 0);
+    return sum / items.length;
+}
+
 function renderWeeklyBarInfoCard(html, isActive = false) {
     if (typeof document === 'undefined') return;
     const card = document.getElementById('weekly-bar-info-card');
@@ -3871,7 +3877,7 @@ function renderWeeklyBarInfoCard(html, isActive = false) {
     else card.classList.remove('active');
 }
 
-function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = true) {
+function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = true, avgStr = '') {
     if (!item) return '';
     const isPct = unit === 'PCT';
     const isUsd = currency === 'USD';
@@ -3925,6 +3931,12 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
                     ${contextText}
                 </span>
             </div>
+            ${avgStr ? `
+            <div class="chart-card-row">
+                <span>Timeline Average:</span>
+                <strong style="color: #b45309;">${avgStr}</strong>
+            </div>
+            ` : ''}
         </div>
         <div class="chart-card-footer">
             💡 Move cursor across bars to inspect weekly changes
@@ -3958,12 +3970,6 @@ function renderWeeklyBarChart() {
             : `📊 Weekly Net Worth Change (${tfLabel} - ${currency} $)`;
     }
 
-    if (subTitleEl) {
-        subTitleEl.textContent = isPct
-            ? `Interactive timeline of every weekly percentage gain (green) and pullback (red). Hover over any bar to view details.`
-            : `Interactive timeline of every weekly dollar gain (green) and pullback (red). Hover over any bar to view details.`;
-    }
-
     if (!rawHistory || rawHistory.length <= 1) {
         svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
         if (infoCard) {
@@ -3979,6 +3985,23 @@ function renderWeeklyBarChart() {
             infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available for this timeframe.</p>';
         }
         return;
+    }
+
+    const avgVal = computeWeeklyAverage(items);
+    const avgSign = avgVal >= 0 ? '+' : '';
+    const avgStr = isPct
+        ? `${avgSign}${avgVal.toFixed(2)}%`
+        : `${avgSign}${typeof formatCurrency === 'function' ? formatCurrency(avgVal, currency) : (avgSign + avgVal.toFixed(2))}`;
+
+    const legendAvgEl = document.getElementById('weekly-legend-avg-text');
+    if (legendAvgEl) {
+        legendAvgEl.innerHTML = `Average: <strong style="color: #b45309;">${avgStr}</strong>`;
+    }
+
+    if (subTitleEl) {
+        subTitleEl.textContent = isPct
+            ? `Interactive timeline of weekly percentage returns • Average: ${avgStr} • Hover over any bar to view details.`
+            : `Interactive timeline of weekly dollar gains (green) and pullbacks (red) • Average: ${avgStr} • Hover over any bar to view details.`;
     }
 
     let maxAbsVal = 0;
@@ -4019,6 +4042,19 @@ function renderWeeklyBarChart() {
 
         svg += `<rect id="weekly-bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
     });
+
+    // Average line and printed value badge across the chart
+    const avgY = zeroY - (avgVal / maxAbsVal) * (chartHeight / 2);
+    const clampedAvgY = Math.max(padding.top + 2, Math.min(height - padding.bottom - 2, avgY));
+    const badgeW = isPct ? 90 : 115;
+    const badgeX = width - padding.right - badgeW - 6;
+    const badgeY = clampedAvgY > zeroY ? (clampedAvgY - 18) : (clampedAvgY + 4);
+
+    svg += `<g id="weekly-avg-line-group" pointer-events="none">`;
+    svg += `<line x1="${padding.left}" y1="${clampedAvgY.toFixed(1)}" x2="${width - padding.right}" y2="${clampedAvgY.toFixed(1)}" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5,3"/>`;
+    svg += `<rect x="${badgeX}" y="${badgeY.toFixed(1)}" width="${badgeW}" height="15" rx="3" fill="#fffbeb" stroke="#fde68a" stroke-width="1" opacity="0.95" />`;
+    svg += `<text x="${(badgeX + badgeW / 2).toFixed(1)}" y="${(badgeY + 11).toFixed(1)}" font-size="10" font-weight="700" fill="#b45309" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">Avg: ${avgStr}</text>`;
+    svg += `</g>`;
 
     // Vertical Crosshair Line
     svg += `<line id="weekly-bar-cursor-line" x1="0" y1="${padding.top}" x2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
@@ -4061,18 +4097,18 @@ function renderWeeklyBarChart() {
                 cursorLine.setAttribute('x2', barCenterX.toFixed(1));
                 cursorLine.style.display = 'block';
             }
-            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[idx], currency, unit, true), true);
+            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[idx], currency, unit, true, avgStr), true);
         });
 
         overlay.addEventListener('mouseleave', () => {
             if (cursorLine) cursorLine.style.display = 'none';
-            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false), false);
+            renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false, avgStr), false);
         });
     }
 
     // Set initial card state
     if (items.length > 0) {
-        renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false), false);
+        renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false, avgStr), false);
     }
 }
 
@@ -4186,6 +4222,7 @@ if (typeof module !== 'undefined' && module.exports) {
             currentHeatmapUnit = 'PCT';
         },
         computeWeeklyBarData,
+        computeWeeklyAverage,
         renderWeeklyBarChart,
         setWeeklyBarCurrency,
         setWeeklyBarUnit,

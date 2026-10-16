@@ -50,6 +50,7 @@ const {
   getHeatmapState,
   resetHeatmapState,
   computeWeeklyBarData,
+  computeWeeklyAverage,
   setWeeklyBarCurrency,
   setWeeklyBarUnit,
   setWeeklyBarTimeframe,
@@ -2328,6 +2329,28 @@ test('Weekly Net Worth Change Calculation Suite', async (t) => {
     resetWeeklyBarChartState();
     state = getWeeklyBarChartState();
     assert.equal(state.currentWeeklyBarTimeframe, 'all');
+  });
+
+  await t.test('computeWeeklyAverage calculates accurate arithmetic mean across weekly changes', () => {
+    assert.equal(computeWeeklyAverage([]), 0);
+    assert.equal(computeWeeklyAverage(null), 0);
+    assert.equal(computeWeeklyAverage(undefined), 0);
+
+    const itemsVal = [
+      { chartVal: 1000 },
+      { chartVal: 2000 },
+      { chartVal: -600 }
+    ];
+    // (1000 + 2000 - 600) / 3 = 2400 / 3 = 800
+    assert.equal(computeWeeklyAverage(itemsVal), 800);
+
+    const itemsPct = [
+      { chartVal: 1.5 },
+      { chartVal: -0.5 },
+      { chartVal: 2.0 }
+    ];
+    // (1.5 - 0.5 + 2.0) / 3 = 3.0 / 3 = 1.0
+    assert.equal(computeWeeklyAverage(itemsPct), 1.0);
   });
 });
 

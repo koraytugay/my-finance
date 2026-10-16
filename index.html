@@ -314,6 +314,18 @@
                             <div id="weekly-bar-svg-wrap" style="width: 100%; height: 100%;"></div>
                             <div id="weekly-bar-tooltip" class="chart-tooltip" style="display: none;"></div>
                         </div>
+                        <div class="chart-legend" id="weekly-bar-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> Weekly Gain
+                            </div>
+                            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span> Weekly Pullback
+                            </div>
+                            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed #d97706;"></span>
+                                <span id="weekly-legend-avg-text">Average Weekly Change</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="chart-info-card" id="weekly-bar-info-card">
                         <!-- Populated dynamically via main.js -->
