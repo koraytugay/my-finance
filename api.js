@@ -67,6 +67,105 @@ async function decryptPayloadWebCrypto(payload, password) {
     return JSON.parse(dec.decode(decryptedBuf));
 }
 
+/* ================= Scramble (Demo) Mode ================= */
+/**
+ * ?scramble=true      -> multiply every monetary value by a random hidden factor
+ * ?scramble=250000    -> pick the factor so the current portfolio shows ~$250,000
+ * ?scramble=false     -> back to real values
+ * The setting persists in sessionStorage so navigation keeps it.
+ * Ratios/percentages are preserved because all money fields scale by the same factor.
+ */
+function getScrambleSetting() {
+    if (typeof window === 'undefined') return null;
+    try {
+        const param = new URLSearchParams(window.location.search).get('scramble');
+        if (param !== null) {
+            if (param === 'false' || param === '0' || param === 'off') {
+                sessionStorage.removeItem('scramble_mode');
+                sessionStorage.removeItem('scramble_k');
+            } else if (sessionStorage.getItem('scramble_mode') !== param) {
+                sessionStorage.setItem('scramble_mode', param);
+                sessionStorage.removeItem('scramble_k');
+            }
+        }
+        return sessionStorage.getItem('scramble_mode');
+    } catch (_) {
+        return null;
+    }
+}
+
+function scaleFields(obj, fields, k) {
+    fields.forEach(f => {
+        if (typeof obj[f] === 'number' && isFinite(obj[f])) obj[f] = obj[f] * k;
+    });
+}
+
+function roundLikeOriginal(original, scaled) {
+    // Whole-share positions stay whole; fractional ones (e.g. crypto) keep their precision
+    if (Number.isInteger(original)) return Math.max(original > 0 ? 1 : 0, Math.round(scaled));
+    const decimals = Math.min(8, (String(original).split('.')[1] || '').length);
+    return Number(scaled.toFixed(decimals));
+}
+
+function applyScramble(holdings, history) {
+    const mode = getScrambleSetting();
+    if (!mode) return { holdings, history };
+
+    const realTotal = holdings.reduce((s, h) => s + (Number(h.sum) || 0), 0);
+    let k = Number(sessionStorage.getItem('scramble_k'));
+    if (!k || !isFinite(k)) {
+        const target = Number(mode);
+        if (target > 0 && realTotal > 0) {
+            k = target / realTotal;
+        } else {
+            // Random factor in [0.3, 3], log-uniform so it is equally likely to shrink or grow
+            k = Math.exp(Math.log(0.3) + Math.random() * (Math.log(3) - Math.log(0.3)));
+        }
+        sessionStorage.setItem('scramble_k', String(k));
+    }
+
+    const scrambledHoldings = holdings.map(h => {
+        const c = { ...h };
+        scaleFields(c, ['sum', 'totalCost', 'unrealizedGainCAD'], k);
+        if (typeof h.count === 'number') c.count = roundLikeOriginal(h.count, h.count * k);
+        if (h.allocation) {
+            c.allocation = { ...h.allocation };
+            Object.keys(c.allocation).forEach(key => {
+                if (typeof c.allocation[key] === 'number') c.allocation[key] *= k;
+            });
+        }
+        return c;
+    });
+
+    const moneyFields = ['stocks', 'fixed', 'preciousMetals', 'crypto', 'totalCAD', 'totalUSD',
+        'weeklyChangeCAD', 'weeklyChangeUSD', 'runningPeakCAD', 'drawdownCAD'];
+    const scrambledHistory = (history || []).map(r => {
+        const c = { ...r };
+        scaleFields(c, moneyFields, k);
+        if (c.note) c.note = ''; // free-text notes may contain real dollar amounts
+        return c;
+    });
+
+    return { holdings: scrambledHoldings, history: scrambledHistory };
+}
+
+function showScrambleBadge() {
+    if (typeof document === 'undefined' || !getScrambleSetting()) return;
+    const add = () => {
+        if (document.getElementById('scramble-badge')) return;
+        const b = document.createElement('div');
+        b.id = 'scramble-badge';
+        b.textContent = '🔀 Scrambled';
+        b.title = 'Demo mode: monetary values are scaled. Open with ?scramble=false to disable.';
+        b.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;padding:4px 10px;' +
+            'border-radius:999px;background:rgba(234,179,8,0.9);color:#000;font:600 12px system-ui;' +
+            'box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:auto;cursor:default;';
+        document.body.appendChild(b);
+    };
+    if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
+}
+showScrambleBadge();
+
 /* ================= Data Retrieval with Decryption ================= */
 
 async function getPrices(forceRefresh = false) {
@@ -266,8 +365,9 @@ async function unlockWithPassword(password, forceRefresh = false) {
             }
         }
 
-        cachedHoldings = holdings;
-        const validHistory = sanitizeHistory(history);
+        const scrambled = applyScramble(holdings, history);
+        cachedHoldings = scrambled.holdings;
+        const validHistory = sanitizeHistory(scrambled.history);
         isSessionUnlocked = true;
 
         await getPrices(true);
