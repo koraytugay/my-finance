@@ -130,6 +130,57 @@ header h1 {
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
+/* 7-Column Executive Stat Grids (CAD & USD Rows) */
+.stats-grid-7 {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.stats-grid-7 .stat-card {
+    padding: 12px 6px;
+    min-width: 0;
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.stats-cad-row .stat-card {
+    border-top: 3px solid #0969da;
+}
+
+.stats-usd-row .stat-card {
+    border-top: 3px solid #16a34a;
+}
+
+.stats-grid-7 .stat-number {
+    font-size: 1.32rem;
+    white-space: nowrap;
+}
+
+.stats-grid-7 .stat-label {
+    font-size: 0.70rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.stats-grid-7 .stat-sub {
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+@media (max-width: 1150px) {
+    .stats-grid-7 {
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    }
+}
+
 .stat-card-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;

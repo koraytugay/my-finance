@@ -165,10 +165,20 @@ function calculateMainData(holdings, history) {
         }
     }
 
+    const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate)
+        || (validHistory && validHistory.length > 0 && validHistory[validHistory.length - 1].totalCAD && validHistory[validHistory.length - 1].totalUSD
+            ? (validHistory[validHistory.length - 1].totalUSD / validHistory[validHistory.length - 1].totalCAD)
+            : 0.7073);
+    const totalUSD = totalCAD * cadUsdRate;
+
     let athVal = totalCAD;
+    let athValUSD = totalUSD;
     if (validHistory && validHistory.length > 0) {
         validHistory.forEach(r => {
             if (r.totalCAD > athVal) athVal = r.totalCAD;
+            const rUsd = r.totalUSD || (r.totalCAD ? r.totalCAD * cadUsdRate : 0);
+            if (rUsd > athValUSD) athValUSD = rUsd;
         });
     }
 
@@ -179,6 +189,8 @@ function calculateMainData(holdings, history) {
     // Current Week Status (Cell F9 in Google Sheets Main Tab)
     let currentWeekChangeCAD = 0;
     let currentWeekChangePct = 0;
+    let currentWeekChangeUSD = 0;
+    let currentWeekChangeUSDPct = 0;
     let currentWeekNumber = '';
     let currentWeekDate = '';
 
@@ -192,9 +204,16 @@ function calculateMainData(holdings, history) {
             currentWeekDate = latest.date || '';
 
             const liveDiff = totalCAD - (latest.totalCAD || totalCAD);
-            currentWeekChangeCAD = (latest.weeklyChangeCAD || 0) + liveDiff;
+            currentWeekChangeCAD = (latest.weeklyChangeCAD !== undefined ? latest.weeklyChangeCAD : 0) + liveDiff;
             const weekStartVal = (latest.totalCAD || totalCAD) - (latest.weeklyChangeCAD || 0);
             currentWeekChangePct = weekStartVal > 0 ? (currentWeekChangeCAD / weekStartVal) * 100 : (latest.weeklyChangePct || 0);
+
+            const latestTotalUSD = latest.totalUSD || ((latest.totalCAD || totalCAD) * cadUsdRate);
+            const liveDiffUSD = totalUSD - latestTotalUSD;
+            const baseChangeUSD = latest.weeklyChangeUSD !== undefined ? latest.weeklyChangeUSD : (currentWeekChangeCAD * cadUsdRate);
+            currentWeekChangeUSD = baseChangeUSD + liveDiffUSD;
+            const weekStartValUSD = latestTotalUSD - (latest.weeklyChangeUSD !== undefined ? latest.weeklyChangeUSD : (latest.weeklyChangeCAD !== undefined ? latest.weeklyChangeCAD * cadUsdRate : 0));
+            currentWeekChangeUSDPct = weekStartValUSD > 0 ? (currentWeekChangeUSD / weekStartValUSD) * 100 : (latest.weeklyChangeUSDPct || currentWeekChangePct);
         } else {
             // Latest record is the previous closed week (e.g. Week 110 on Friday Sep 25)
             // Current week in progress is the subsequent week (e.g. Week 111)
@@ -204,27 +223,40 @@ function calculateMainData(holdings, history) {
             currentWeekChangeCAD = totalCAD - (latest.totalCAD || totalCAD);
             const weekStartVal = latest.totalCAD || totalCAD;
             currentWeekChangePct = weekStartVal > 0 ? (currentWeekChangeCAD / weekStartVal) * 100 : 0;
+
+            const prevUSD = latest.totalUSD || ((latest.totalCAD || totalCAD) * cadUsdRate);
+            currentWeekChangeUSD = totalUSD - prevUSD;
+            currentWeekChangeUSDPct = prevUSD > 0 ? (currentWeekChangeUSD / prevUSD) * 100 : 0;
         }
     }
 
     const isWeekUp = currentWeekChangeCAD >= 0;
+    const isWeekUpUSD = currentWeekChangeUSD >= 0;
     const currentWeek = {
         weekNumber: currentWeekNumber,
         date: currentWeekDate,
         changeCAD: currentWeekChangeCAD,
         changePct: currentWeekChangePct,
         isUp: isWeekUp,
-        statusText: isWeekUp ? 'Up this week' : 'Down this week'
+        statusText: isWeekUp ? 'Up this week' : 'Down this week',
+        changeUSD: currentWeekChangeUSD,
+        changeUSDPct: currentWeekChangeUSDPct,
+        isUpUSD: isWeekUpUSD,
+        statusTextUSD: isWeekUpUSD ? 'Up this week' : 'Down this week'
     };
 
+    const formatCurrencyFn = typeof formatCurrency === 'function' ? formatCurrency : null;
     const metrics = {
         totalValue: totalCAD,
+        totalUSD,
         lastYearValue: lastYearVal,
         costBasis: lastYearVal,
         oneYearReturnPct,
         gainPct: oneYearReturnPct,
         athValue: athVal,
-        athStatus: totalCAD >= athVal ? 'ATH!' : formatCurrency(totalCAD - athVal, 'CAD'),
+        athValueUSD: athValUSD,
+        athStatus: totalCAD >= athVal ? 'ATH!' : (formatCurrencyFn ? formatCurrencyFn(totalCAD - athVal, 'CAD') : `${totalCAD - athVal}`),
+        athStatusUSD: totalUSD >= athValUSD ? 'ATH!' : (formatCurrencyFn ? formatCurrencyFn(totalUSD - athValUSD, 'USD') : `${totalUSD - athValUSD}`),
         oneYearChangeCAD,
         totalGainCAD: oneYearChangeCAD,
         monthlyGainCAD,
@@ -347,10 +379,22 @@ function renderMainTopStats(mainData, holdings, history) {
             : 0.7073);
     const totalUSD = totalCAD * cadUsdRate;
 
-    document.getElementById('main-stat-total-cad').textContent = formatCurrency(totalCAD, 'CAD');
-    document.getElementById('main-stat-total-usd').textContent = `≈ ${formatCurrency(totalUSD, 'USD')}`;
+    const formatCurr = typeof formatCurrency === 'function'
+        ? formatCurrency
+        : (typeof require !== 'undefined' ? require('./api.js').formatCurrency : ((v) => `$${v.toFixed(2)}`));
 
-    // Current Week Top Stat Card
+    // 1. Total Portfolio (CAD & USD)
+    const totalCadEl = document.getElementById('main-stat-total-cad');
+    if (totalCadEl) totalCadEl.textContent = formatCurr(totalCAD, 'CAD');
+    const totalCadSubEl = document.getElementById('main-stat-total-cad-sub');
+    if (totalCadSubEl) totalCadSubEl.textContent = 'Net Worth (CAD)';
+
+    const totalUsdEl = document.getElementById('main-stat-total-usd');
+    if (totalUsdEl) totalUsdEl.textContent = formatCurr(totalUSD, 'USD');
+    const totalUsdSubEl = document.getElementById('main-stat-total-usd-sub');
+    if (totalUsdSubEl) totalUsdSubEl.textContent = `≈ 1 CAD = ${cadUsdRate.toFixed(4)} USD`;
+
+    // 2. Current Week (CAD & USD)
     const cw = mainData.metrics?.currentWeek;
     const weekChangeEl = document.getElementById('main-stat-week-change');
     const weekLabelEl = document.getElementById('main-stat-week-label');
@@ -360,62 +404,39 @@ function renderMainTopStats(mainData, holdings, history) {
         const sign = cw.changeCAD >= 0 ? '+' : '';
         const color = cw.isUp ? '#16a34a' : '#dc2626';
         const icon = cw.isUp ? '🟢' : '🔴';
-        weekChangeEl.textContent = `${sign}${formatCurrency(cw.changeCAD, 'CAD')}`;
+        weekChangeEl.textContent = `${sign}${formatCurr(cw.changeCAD, 'CAD')}`;
         weekChangeEl.style.color = color;
         if (weekLabelEl) {
-            weekLabelEl.textContent = cw.weekNumber ? `This Week (${cw.weekNumber})` : 'Current Week';
+            weekLabelEl.textContent = cw.weekNumber ? `${cw.weekNumber} (CAD)` : 'Current Week (CAD)';
         }
         if (weekSubEl) {
             weekSubEl.innerHTML = `${sign}${cw.changePct.toFixed(2)}% &bull; <strong style="color: ${color};">${icon} ${cw.statusText}</strong>`;
         }
     }
 
-    const categories = mainData?.categories || [];
-    const catStocks = categories.find(c => c.name === 'Stocks') || { value: 0, percentage: '0%' };
-    const catFixed = categories.find(c => c.name === 'Fixed Income') || { value: 0, percentage: '0%' };
-    const catMetals = categories.find(c => c.name === 'Precious Metals') || { value: 0 };
-    const catCrypto = categories.find(c => c.name === 'Crypto') || { value: 0 };
-    const altsVal = catMetals.value + catCrypto.value;
-    const altsPct = totalCAD > 0 ? (altsVal / totalCAD * 100).toFixed(2) + '%' : '0.00%';
+    const weekChangeUsdEl = document.getElementById('main-stat-week-change-usd');
+    const weekLabelUsdEl = document.getElementById('main-stat-week-usd-label');
+    const weekSubUsdEl = document.getElementById('main-stat-week-usd-sub');
 
-    const stocksEl = document.getElementById('main-stat-stocks');
-    const stocksPctEl = document.getElementById('main-stat-stocks-pct');
-    if (stocksEl) stocksEl.textContent = formatCurrency(catStocks.value, 'CAD');
-    if (stocksPctEl) stocksPctEl.textContent = `${catStocks.percentage} of portfolio`;
-
-    const fixedEl = document.getElementById('main-stat-fixed');
-    const fixedPctEl = document.getElementById('main-stat-fixed-pct');
-    if (fixedEl) fixedEl.textContent = formatCurrency(catFixed.value, 'CAD');
-    if (fixedPctEl) fixedPctEl.textContent = `${catFixed.percentage} of portfolio`;
-
-    const altsEl = document.getElementById('main-stat-alts');
-    const altsPctEl = document.getElementById('main-stat-alts-pct');
-    if (altsEl) altsEl.textContent = formatCurrency(altsVal, 'CAD');
-    if (altsPctEl) altsPctEl.textContent = `${altsPct} of portfolio`;
-
-    const athValue = mainData.metrics?.athValue || 0;
-    const diffFromAth = totalCAD - athValue;
-    const isAth = diffFromAth >= -1.0;
-    const athEl = document.getElementById('main-stat-ath');
-    const athLabelEl = document.getElementById('main-stat-ath-label');
-    const athValEl = document.getElementById('main-stat-ath-val');
-
-    if (athEl) {
-        if (isAth) {
-            athEl.textContent = '🟢 ATH!';
-            athEl.style.color = '#16a34a';
-            if (athLabelEl) athLabelEl.textContent = 'All-Time High Status';
-            if (athValEl) athValEl.textContent = `At Peak: ${formatCurrency(athValue, 'CAD')}`;
-        } else {
-            const diffPct = athValue > 0 ? (diffFromAth / athValue) * 100 : 0;
-            athEl.textContent = formatCurrency(diffFromAth, 'CAD');
-            athEl.style.color = '#dc2626';
-            if (athLabelEl) athLabelEl.textContent = 'Off All-Time High';
-            if (athValEl) athValEl.textContent = `${diffPct.toFixed(2)}% \u2022 Peak: ${formatCurrency(athValue, 'CAD')}`;
+    if (weekChangeUsdEl && cw) {
+        const changeUSD = cw.changeUSD !== undefined ? cw.changeUSD : (cw.changeCAD * cadUsdRate);
+        const changeUSDPct = cw.changeUSDPct !== undefined ? cw.changeUSDPct : cw.changePct;
+        const isUpUSD = cw.isUpUSD !== undefined ? cw.isUpUSD : (changeUSD >= 0);
+        const statusTextUSD = cw.statusTextUSD || (isUpUSD ? 'Up this week' : 'Down this week');
+        const signUSD = changeUSD >= 0 ? '+' : '';
+        const colorUSD = isUpUSD ? '#16a34a' : '#dc2626';
+        const iconUSD = isUpUSD ? '🟢' : '🔴';
+        weekChangeUsdEl.textContent = `${signUSD}${formatCurr(changeUSD, 'USD')}`;
+        weekChangeUsdEl.style.color = colorUSD;
+        if (weekLabelUsdEl) {
+            weekLabelUsdEl.textContent = cw.weekNumber ? `${cw.weekNumber} (USD)` : 'Current Week (USD)';
+        }
+        if (weekSubUsdEl) {
+            weekSubUsdEl.innerHTML = `${signUSD}${changeUSDPct.toFixed(2)}% &bull; <strong style="color: ${colorUSD};">${iconUSD} ${statusTextUSD}</strong>`;
         }
     }
 
-    // Time Back in Terms of Money (CAD & USD)
+    // 3. Time Back in Terms of Money (CAD & USD)
     const timeBackCAD = calculateTimeBack(validHistory, totalCAD, 'totalCAD');
     const timeBackUSD = calculateTimeBack(validHistory, totalUSD, 'totalUSD');
 
@@ -434,6 +455,99 @@ function renderMainTopStats(mainData, holdings, history) {
         tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? '#cf222e' : '#d97706') : '#16a34a';
         if (tbUsdSubEl) tbUsdSubEl.textContent = timeBackUSD.sub;
     }
+
+    // 4. All-Time High Status (CAD & USD)
+    const athValue = mainData.metrics?.athValue || 0;
+    const diffFromAth = totalCAD - athValue;
+    const isAth = diffFromAth >= -1.0;
+    const athEl = document.getElementById('main-stat-ath');
+    const athLabelEl = document.getElementById('main-stat-ath-label');
+    const athValEl = document.getElementById('main-stat-ath-val');
+
+    if (athEl) {
+        if (isAth) {
+            athEl.textContent = '🟢 ATH!';
+            athEl.style.color = '#16a34a';
+            if (athLabelEl) athLabelEl.textContent = 'ATH Status (CAD)';
+            if (athValEl) athValEl.textContent = `At Peak: ${formatCurr(athValue, 'CAD')}`;
+        } else {
+            const diffPct = athValue > 0 ? (diffFromAth / athValue) * 100 : 0;
+            athEl.textContent = formatCurr(diffFromAth, 'CAD');
+            athEl.style.color = '#dc2626';
+            if (athLabelEl) athLabelEl.textContent = 'Off ATH (CAD)';
+            if (athValEl) athValEl.textContent = `${diffPct.toFixed(2)}% \u2022 Peak: ${formatCurr(athValue, 'CAD')}`;
+        }
+    }
+
+    let athValueUSD = mainData.metrics?.athValueUSD;
+    if (!athValueUSD) {
+        athValueUSD = totalUSD;
+        if (validHistory && validHistory.length > 0) {
+            validHistory.forEach(r => {
+                const rUsd = r.totalUSD || (r.totalCAD ? r.totalCAD * cadUsdRate : 0);
+                if (rUsd > athValueUSD) athValueUSD = rUsd;
+            });
+        }
+    }
+    const diffFromAthUSD = totalUSD - athValueUSD;
+    const isAthUSD = diffFromAthUSD >= -1.0;
+    const athUsdEl = document.getElementById('main-stat-ath-usd');
+    const athUsdLabelEl = document.getElementById('main-stat-ath-usd-label');
+    const athUsdValEl = document.getElementById('main-stat-ath-usd-val');
+
+    if (athUsdEl) {
+        if (isAthUSD) {
+            athUsdEl.textContent = '🟢 ATH!';
+            athUsdEl.style.color = '#16a34a';
+            if (athUsdLabelEl) athUsdLabelEl.textContent = 'ATH Status (USD)';
+            if (athUsdValEl) athUsdValEl.textContent = `At Peak: ${formatCurr(athValueUSD, 'USD')}`;
+        } else {
+            const diffPctUSD = athValueUSD > 0 ? (diffFromAthUSD / athValueUSD) * 100 : 0;
+            athUsdEl.textContent = formatCurr(diffFromAthUSD, 'USD');
+            athUsdEl.style.color = '#dc2626';
+            if (athUsdLabelEl) athUsdLabelEl.textContent = 'Off ATH (USD)';
+            if (athUsdValEl) athUsdValEl.textContent = `${diffPctUSD.toFixed(2)}% \u2022 Peak: ${formatCurr(athValueUSD, 'USD')}`;
+        }
+    }
+
+    // 5. Asset Allocation Categories (CAD & USD)
+    const categories = mainData?.categories || [];
+    const catStocks = categories.find(c => c.name === 'Stocks') || { value: 0, percentage: '0%' };
+    const catFixed = categories.find(c => c.name === 'Fixed Income') || { value: 0, percentage: '0%' };
+    const catMetals = categories.find(c => c.name === 'Precious Metals') || { value: 0 };
+    const catCrypto = categories.find(c => c.name === 'Crypto') || { value: 0 };
+    const altsVal = catMetals.value + catCrypto.value;
+    const altsPct = totalCAD > 0 ? (altsVal / totalCAD * 100).toFixed(2) + '%' : '0.00%';
+
+    const stocksEl = document.getElementById('main-stat-stocks');
+    const stocksPctEl = document.getElementById('main-stat-stocks-pct');
+    if (stocksEl) stocksEl.textContent = formatCurr(catStocks.value, 'CAD');
+    if (stocksPctEl) stocksPctEl.textContent = `${catStocks.percentage} of portfolio`;
+
+    const stocksUsdEl = document.getElementById('main-stat-stocks-usd');
+    const stocksUsdPctEl = document.getElementById('main-stat-stocks-usd-pct');
+    if (stocksUsdEl) stocksUsdEl.textContent = formatCurr(catStocks.value * cadUsdRate, 'USD');
+    if (stocksUsdPctEl) stocksUsdPctEl.textContent = `${catStocks.percentage} of portfolio`;
+
+    const fixedEl = document.getElementById('main-stat-fixed');
+    const fixedPctEl = document.getElementById('main-stat-fixed-pct');
+    if (fixedEl) fixedEl.textContent = formatCurr(catFixed.value, 'CAD');
+    if (fixedPctEl) fixedPctEl.textContent = `${catFixed.percentage} of portfolio`;
+
+    const fixedUsdEl = document.getElementById('main-stat-fixed-usd');
+    const fixedUsdPctEl = document.getElementById('main-stat-fixed-usd-pct');
+    if (fixedUsdEl) fixedUsdEl.textContent = formatCurr(catFixed.value * cadUsdRate, 'USD');
+    if (fixedUsdPctEl) fixedUsdPctEl.textContent = `${catFixed.percentage} of portfolio`;
+
+    const altsEl = document.getElementById('main-stat-alts');
+    const altsPctEl = document.getElementById('main-stat-alts-pct');
+    if (altsEl) altsEl.textContent = formatCurr(altsVal, 'CAD');
+    if (altsPctEl) altsPctEl.textContent = `${altsPct} of portfolio`;
+
+    const altsUsdEl = document.getElementById('main-stat-alts-usd');
+    const altsUsdPctEl = document.getElementById('main-stat-alts-usd-pct');
+    if (altsUsdEl) altsUsdEl.textContent = formatCurr(altsVal * cadUsdRate, 'USD');
+    if (altsUsdPctEl) altsUsdPctEl.textContent = `${altsPct} of portfolio`;
 }
 
 /**

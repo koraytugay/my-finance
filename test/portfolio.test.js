@@ -1480,7 +1480,135 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
 
       assert.equal(mockElements['main-stat-total-cad'].textContent, '$120,000.00');
       // Must equal 120,000 * 0.72 = $86,400.00 (US$86,400.00), NOT the stale 70,000!
-      assert.equal(mockElements['main-stat-total-usd'].textContent, '≈ US$86,400.00');
+      assert.equal(mockElements['main-stat-total-usd'].textContent, 'US$86,400.00');
+    } finally {
+      delete global.document;
+      delete global.window;
+      delete global.formatCurrency;
+    }
+  });
+
+  await t.test('renderMainTopStats renders all 7 CAD cards and 7 USD cards with accurate values and labels', () => {
+    const mockElements = {
+      'main-stat-total-cad': { textContent: '' },
+      'main-stat-total-cad-sub': { textContent: '' },
+      'main-stat-total-usd': { textContent: '' },
+      'main-stat-total-usd-sub': { textContent: '' },
+      'main-stat-week-change': { textContent: '', style: {} },
+      'main-stat-week-label': { textContent: '' },
+      'main-stat-week-sub': { innerHTML: '' },
+      'main-stat-week-change-usd': { textContent: '', style: {} },
+      'main-stat-week-usd-label': { textContent: '' },
+      'main-stat-week-usd-sub': { innerHTML: '' },
+      'main-stat-timeback-cad': { textContent: '', style: {} },
+      'main-stat-timeback-cad-sub': { textContent: '' },
+      'main-stat-timeback-usd': { textContent: '', style: {} },
+      'main-stat-timeback-usd-sub': { textContent: '' },
+      'main-stat-ath': { textContent: '', style: {} },
+      'main-stat-ath-label': { textContent: '' },
+      'main-stat-ath-val': { textContent: '' },
+      'main-stat-ath-usd': { textContent: '', style: {} },
+      'main-stat-ath-usd-label': { textContent: '' },
+      'main-stat-ath-usd-val': { textContent: '' },
+      'main-stat-stocks': { textContent: '' },
+      'main-stat-stocks-pct': { textContent: '' },
+      'main-stat-stocks-usd': { textContent: '' },
+      'main-stat-stocks-usd-pct': { textContent: '' },
+      'main-stat-fixed': { textContent: '' },
+      'main-stat-fixed-pct': { textContent: '' },
+      'main-stat-fixed-usd': { textContent: '' },
+      'main-stat-fixed-usd-pct': { textContent: '' },
+      'main-stat-alts': { textContent: '' },
+      'main-stat-alts-pct': { textContent: '' },
+      'main-stat-alts-usd': { textContent: '' },
+      'main-stat-alts-usd-pct': { textContent: '' }
+    };
+
+    global.document = {
+      getElementById: (id) => mockElements[id] || null
+    };
+
+    const history = [
+      { week: 1, date: '2026-09-18', totalCAD: 100000, totalUSD: 72000, weeklyChangeCAD: 2000, weeklyChangeUSD: 1440, weeklyChangePct: 2.0 },
+      { week: 2, date: '2026-09-25', totalCAD: 105000, totalUSD: 75600, weeklyChangeCAD: 5000, weeklyChangeUSD: 3600, weeklyChangePct: 5.0 }
+    ];
+    const holdings = [
+      { sum: 105000, registered: true, count: 1000, averageCost: 100 }
+    ];
+    const mainData = {
+      categories: [
+        { name: 'Stocks', value: 84000, percentage: '80.00%' },
+        { name: 'Fixed Income', value: 15750, percentage: '15.00%' },
+        { name: 'Precious Metals', value: 3150, percentage: '3.00%' },
+        { name: 'Crypto', value: 2100, percentage: '2.00%' }
+      ],
+      metrics: {
+        totalValue: 105000,
+        athValue: 105000,
+        athValueUSD: 75600,
+        currentWeek: {
+          weekNumber: 'Week 2',
+          date: '2026-09-25',
+          changeCAD: 5000,
+          changePct: 5.0,
+          isUp: true,
+          statusText: 'Up this week',
+          changeUSD: 3600,
+          changeUSDPct: 5.0,
+          isUpUSD: true,
+          statusTextUSD: 'Up this week'
+        }
+      }
+    };
+
+    try {
+      global.formatCurrency = formatCurrency;
+      global.window = {
+        cachedPrices: { cadUsdRate: 0.72 }
+      };
+
+      renderMainTopStats(mainData, holdings, history);
+
+      // 1. Total Portfolio CAD & USD
+      assert.equal(mockElements['main-stat-total-cad'].textContent, '$105,000.00');
+      assert.equal(mockElements['main-stat-total-cad-sub'].textContent, 'Net Worth (CAD)');
+      assert.equal(mockElements['main-stat-total-usd'].textContent, 'US$75,600.00');
+      assert.equal(mockElements['main-stat-total-usd-sub'].textContent, '≈ 1 CAD = 0.7200 USD');
+
+      // 2. Current Week CAD & USD
+      assert.equal(mockElements['main-stat-week-change'].textContent, '+$5,000.00');
+      assert.equal(mockElements['main-stat-week-label'].textContent, 'Week 2 (CAD)');
+      assert.equal(mockElements['main-stat-week-change-usd'].textContent, '+US$3,600.00');
+      assert.equal(mockElements['main-stat-week-usd-label'].textContent, 'Week 2 (USD)');
+
+      // 3. Time Back CAD & USD
+      assert.equal(mockElements['main-stat-timeback-cad'].textContent, '0 weeks');
+      assert.equal(mockElements['main-stat-timeback-usd'].textContent, '0 weeks');
+
+      // 4. ATH Status CAD & USD
+      assert.equal(mockElements['main-stat-ath'].textContent, '🟢 ATH!');
+      assert.equal(mockElements['main-stat-ath-label'].textContent, 'ATH Status (CAD)');
+      assert.equal(mockElements['main-stat-ath-usd'].textContent, '🟢 ATH!');
+      assert.equal(mockElements['main-stat-ath-usd-label'].textContent, 'ATH Status (USD)');
+
+      // 5. Equities (Stocks) CAD & USD
+      assert.equal(mockElements['main-stat-stocks'].textContent, '$84,000.00');
+      assert.equal(mockElements['main-stat-stocks-pct'].textContent, '80.00% of portfolio');
+      assert.equal(mockElements['main-stat-stocks-usd'].textContent, 'US$60,480.00');
+      assert.equal(mockElements['main-stat-stocks-usd-pct'].textContent, '80.00% of portfolio');
+
+      // 6. Fixed Income CAD & USD
+      assert.equal(mockElements['main-stat-fixed'].textContent, '$15,750.00');
+      assert.equal(mockElements['main-stat-fixed-pct'].textContent, '15.00% of portfolio');
+      assert.equal(mockElements['main-stat-fixed-usd'].textContent, 'US$11,340.00');
+      assert.equal(mockElements['main-stat-fixed-usd-pct'].textContent, '15.00% of portfolio');
+
+      // 7. Metals & Crypto CAD & USD
+      // 3150 + 2100 = 5250 CAD -> 5250 * 0.72 = 3780 USD (5.00%)
+      assert.equal(mockElements['main-stat-alts'].textContent, '$5,250.00');
+      assert.equal(mockElements['main-stat-alts-pct'].textContent, '5.00% of portfolio');
+      assert.equal(mockElements['main-stat-alts-usd'].textContent, 'US$3,780.00');
+      assert.equal(mockElements['main-stat-alts-usd-pct'].textContent, '5.00% of portfolio');
     } finally {
       delete global.document;
       delete global.window;

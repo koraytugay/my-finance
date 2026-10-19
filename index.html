@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Main Overview</title>
-    <link rel="stylesheet" href="styles.css?v=3.2">
+    <link rel="stylesheet" href="styles.css?v=3.4">
     <style>
         .main-grid {
             display: grid;
@@ -102,16 +102,16 @@
 
         <!-- Main Content -->
         <div id="main-content" style="display: none;">
-            <!-- Top Stat Cards (2 Rows of 4 Cards) -->
-            <div class="stats" style="margin-bottom: 12px;">
+            <!-- Top Stat Cards (2 Rows of 7 Cards: CAD Top Row, USD Bottom Row) -->
+            <div class="stats stats-grid-7 stats-cad-row" style="margin-bottom: 12px;">
                 <div class="stat-card">
                     <span class="stat-number" id="main-stat-total-cad">$0.00</span>
                     <span class="stat-label">Total Portfolio CAD</span>
-                    <span class="stat-sub" id="main-stat-total-usd">≈ $0.00 USD</span>
+                    <span class="stat-sub" id="main-stat-total-cad-sub">Net Worth (CAD)</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-number" id="main-stat-week-change" style="color: #16a34a;">+$0.00</span>
-                    <span class="stat-label" id="main-stat-week-label">Current Week</span>
+                    <span class="stat-label" id="main-stat-week-label">Current Week (CAD)</span>
                     <span class="stat-sub" id="main-stat-week-sub">+0.00% &bull; 🟢 Up this week</span>
                 </div>
                 <div class="stat-card">
@@ -120,31 +120,61 @@
                     <span class="stat-sub" id="main-stat-timeback-cad-sub">🟢 At All-Time High</span>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-number" id="main-stat-timeback-usd" style="color: #16a34a;">0 weeks</span>
-                    <span class="stat-label">Time Back (USD)</span>
-                    <span class="stat-sub" id="main-stat-timeback-usd-sub">🟢 At All-Time High</span>
-                </div>
-            </div>
-            <div class="stats" style="margin-bottom: 24px;">
-                <div class="stat-card">
                     <span class="stat-number" id="main-stat-ath" style="color: #16a34a;">🟢 ATH!</span>
-                    <span class="stat-label" id="main-stat-ath-label">All-Time High Status</span>
+                    <span class="stat-label" id="main-stat-ath-label">ATH Status (CAD)</span>
                     <span class="stat-sub" id="main-stat-ath-val">$0.00 ATH</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-number" id="main-stat-stocks">$0.00</span>
-                    <span class="stat-label">Equities (Stocks)</span>
+                    <span class="stat-label">Equities (CAD)</span>
                     <span class="stat-sub" id="main-stat-stocks-pct">0.0% of portfolio</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-number" id="main-stat-fixed">$0.00</span>
-                    <span class="stat-label">Fixed Income</span>
+                    <span class="stat-label">Fixed Income (CAD)</span>
                     <span class="stat-sub" id="main-stat-fixed-pct">0.0% of portfolio</span>
                 </div>
                 <div class="stat-card">
                     <span class="stat-number" id="main-stat-alts">$0.00</span>
-                    <span class="stat-label">Precious Metals &amp; Crypto</span>
+                    <span class="stat-label">Metals &amp; Crypto (CAD)</span>
                     <span class="stat-sub" id="main-stat-alts-pct">0.0% of portfolio</span>
+                </div>
+            </div>
+            <div class="stats stats-grid-7 stats-usd-row" style="margin-bottom: 24px;">
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-total-usd">US$0.00</span>
+                    <span class="stat-label">Total Portfolio USD</span>
+                    <span class="stat-sub" id="main-stat-total-usd-sub">Net Worth (USD)</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-week-change-usd" style="color: #16a34a;">+$0.00</span>
+                    <span class="stat-label" id="main-stat-week-usd-label">Current Week (USD)</span>
+                    <span class="stat-sub" id="main-stat-week-usd-sub">+0.00% &bull; 🟢 Up this week</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-timeback-usd" style="color: #16a34a;">0 weeks</span>
+                    <span class="stat-label">Time Back (USD)</span>
+                    <span class="stat-sub" id="main-stat-timeback-usd-sub">🟢 At All-Time High</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-ath-usd" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="stat-label" id="main-stat-ath-usd-label">ATH Status (USD)</span>
+                    <span class="stat-sub" id="main-stat-ath-usd-val">US$0.00 ATH</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-stocks-usd">US$0.00</span>
+                    <span class="stat-label">Equities (USD)</span>
+                    <span class="stat-sub" id="main-stat-stocks-usd-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-fixed-usd">US$0.00</span>
+                    <span class="stat-label">Fixed Income (USD)</span>
+                    <span class="stat-sub" id="main-stat-fixed-usd-pct">0.0% of portfolio</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="main-stat-alts-usd">US$0.00</span>
+                    <span class="stat-label">Metals &amp; Crypto (USD)</span>
+                    <span class="stat-sub" id="main-stat-alts-usd-pct">0.0% of portfolio</span>
                 </div>
             </div>
 
@@ -548,6 +578,6 @@
     </div>
 
     <script src="api.js?v=3.3"></script>
-    <script src="main.js?v=3.3"></script>
+    <script src="main.js?v=3.4"></script>
 </body>
 </html>
