@@ -146,14 +146,6 @@ header h1 {
     box-sizing: border-box;
 }
 
-.stats-cad-row .stat-card {
-    border-top: 3px solid #0969da;
-}
-
-.stats-usd-row .stat-card {
-    border-top: 3px solid #16a34a;
-}
-
 .stats-grid-7 .stat-number {
     font-size: 1.32rem;
     white-space: nowrap;
