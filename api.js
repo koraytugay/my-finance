@@ -760,6 +760,55 @@ function computeXeqtProgressionOverlay(records, fullHistory, xeqtWeeklyPrices, c
     });
 }
 
+/**
+ * Computes portfolio progression relative to XEQT benchmark.
+ * Tracks portfolio growth over time compared to XEQT progression
+ * (e.g., if XEQT is +20% and portfolio is +25%, spread is +5%).
+ *
+ * @param {Array} records Historical records in the selected window
+ * @param {Array} fullHistory Complete historical record timeline
+ * @param {Array|Object} xeqtWeeklyPrices Weekly closing prices or benchmark object for XEQT
+ * @param {string} currency 'CAD' or 'USD'
+ * @param {number|null} currentBenchmarkPrice Live/latest benchmark price
+ * @param {string} unit 'PCT' or 'VAL'
+ * @returns {Array} Array of relative progression data points
+ */
+function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrices, currency = 'CAD', currentBenchmarkPrice = null, unit = 'PCT') {
+    if (!records || records.length === 0 || !xeqtWeeklyPrices) {
+        return [];
+    }
+
+    const overlay = computeXeqtProgressionOverlay(records, fullHistory, xeqtWeeklyPrices, currency, currentBenchmarkPrice);
+    if (!overlay || overlay.length === 0) {
+        return [];
+    }
+
+    const isPct = unit === 'PCT';
+
+    return overlay.map((pt, idx) => {
+        const spreadPct = Number(pt.spreadPct) || 0;
+        const spreadVal = Number(pt.spreadVal) || 0;
+        const chartVal = isPct ? spreadPct : spreadVal;
+
+        return {
+            index: idx,
+            date: pt.date,
+            week: pt.week,
+            portfolioVal: pt.portfolioVal,
+            portfolioReturnPct: pt.portfolioReturnPct,
+            portfolioGain: pt.portfolioGain,
+            xeqtPrice: pt.price,
+            xeqtVal: pt.val,
+            xeqtReturnPct: pt.returnPct,
+            xeqtGain: pt.gain,
+            spreadPct: spreadPct,
+            spreadVal: spreadVal,
+            chartVal: chartVal,
+            isOutperforming: spreadPct >= 0
+        };
+    });
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         formatCurrency,
@@ -769,6 +818,7 @@ if (typeof module !== 'undefined' && module.exports) {
         escapeHtml,
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay,
+        computePortfolioVsXeqtProgression,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,

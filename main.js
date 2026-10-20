@@ -25,6 +25,11 @@ let selectedAthMilestoneIdx = null;
 let currentHeatmapCurrency = 'CAD';
 let currentHeatmapUnit = 'PCT'; // 'PCT' | 'VAL'
 
+// Portfolio vs XEQT Progression Graph State
+let currentXeqtRelTimeframe = 'last-52'; // 'last-52' | 'all' | '2024' | '2025' | '2026' ...
+let currentXeqtRelCurrency = 'CAD'; // 'CAD' | 'USD'
+let currentXeqtRelUnit = 'PCT'; // 'PCT' | 'VAL' (default '%' per user request)
+
 async function initMain() {
     const loadingEl = document.getElementById('loading');
     const contentEl = document.getElementById('main-content');
@@ -55,8 +60,10 @@ async function initMain() {
 
         renderMainTopStats(mainData, holdings, enrichedHistory);
         syncMainTimeframeButtons(rawHistory);
+        syncXeqtRelTimeframeButtons(rawHistory);
         syncWeeklyTimeframeButtons(rawHistory);
         renderMainProgressionChart();
+        renderPortfolioVsXeqtChart();
         renderAthBarChart();
         renderMonthlyHeatmap();
         renderWeeklyBarChart();
@@ -3014,6 +3021,539 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 }
 
+/* ================= Portfolio vs XEQT Progression Graph ================= */
+
+/**
+ * Pure calculation function: Computes portfolio progression relative to XEQT benchmark.
+ * Tracks portfolio growth over time compared to XEQT progression
+ * (e.g., if XEQT is +20% and portfolio is +25%, spread is +5%).
+ */
+function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrices, currency = 'CAD', currentBenchmarkPrice = null, unit = 'PCT') {
+    if (!records || records.length === 0 || !xeqtWeeklyPrices) {
+        return [];
+    }
+
+    const fn = (typeof computeXeqtProgressionOverlay === 'function')
+        ? computeXeqtProgressionOverlay
+        : (typeof window !== 'undefined' && window.computeXeqtProgressionOverlay)
+            ? window.computeXeqtProgressionOverlay
+            : null;
+
+    if (!fn) return [];
+
+    const overlay = fn(records, fullHistory, xeqtWeeklyPrices, currency, currentBenchmarkPrice);
+    if (!overlay || overlay.length === 0) {
+        return [];
+    }
+
+    const isPct = unit === 'PCT';
+
+    return overlay.map((pt, idx) => {
+        const spreadPct = Number(pt.spreadPct) || 0;
+        const spreadVal = Number(pt.spreadVal) || 0;
+        const chartVal = isPct ? spreadPct : spreadVal;
+
+        return {
+            index: idx,
+            date: pt.date,
+            week: pt.week,
+            portfolioVal: pt.portfolioVal,
+            portfolioReturnPct: pt.portfolioReturnPct,
+            portfolioGain: pt.portfolioGain,
+            xeqtPrice: pt.price,
+            xeqtVal: pt.val,
+            xeqtReturnPct: pt.returnPct,
+            xeqtGain: pt.gain,
+            spreadPct: spreadPct,
+            spreadVal: spreadVal,
+            chartVal: chartVal,
+            isOutperforming: spreadPct >= 0
+        };
+    });
+}
+
+function syncXeqtRelTimeframeButtons(history) {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('xeqt-rel-timeframe-toggle');
+    if (!container || !history || history.length === 0) return;
+
+    const availableYears = [...new Set(
+        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
+    )].sort();
+
+    if (availableYears.length === 0) return;
+
+    let html = '';
+    availableYears.forEach((year, idx) => {
+        const isActive = currentXeqtRelTimeframe === year;
+        const bg = isActive ? '#1f2328' : 'white';
+        const color = isActive ? 'white' : '#24292f';
+        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
+        html += `
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setXeqtRelTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} relative progression">${year}</button>
+        `;
+    });
+
+    const isLast52Active = currentXeqtRelTimeframe === 'last-52';
+    const isAllActive = currentXeqtRelTimeframe === 'all';
+
+    html += `
+        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setXeqtRelTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks relative progression">Last 52W</button>
+        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setXeqtRelTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time relative progression">All Time</button>
+    `;
+
+    container.innerHTML = html;
+}
+
+function updateXeqtRelControlsUI() {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('xeqt-rel-timeframe-toggle');
+    if (container) {
+        const buttons = container.querySelectorAll('.timeframe-pill');
+        buttons.forEach(btn => {
+            const tf = btn.getAttribute('data-timeframe');
+            const isActive = currentXeqtRelTimeframe === tf;
+            btn.classList.toggle('active', isActive);
+            btn.style.background = isActive ? '#1f2328' : 'white';
+            btn.style.color = isActive ? 'white' : '#24292f';
+        });
+    }
+
+    const btnCad = document.getElementById('btn-xeqt-rel-cur-cad');
+    const btnUsd = document.getElementById('btn-xeqt-rel-cur-usd');
+    if (btnCad) {
+        const isActive = currentXeqtRelCurrency === 'CAD';
+        btnCad.classList.toggle('active', isActive);
+        btnCad.style.background = isActive ? '#1f2328' : 'white';
+        btnCad.style.color = isActive ? 'white' : '#24292f';
+    }
+    if (btnUsd) {
+        const isActive = currentXeqtRelCurrency === 'USD';
+        btnUsd.classList.toggle('active', isActive);
+        btnUsd.style.background = isActive ? '#1f2328' : 'white';
+        btnUsd.style.color = isActive ? 'white' : '#24292f';
+    }
+
+    const btnPct = document.getElementById('btn-xeqt-rel-unit-pct');
+    const btnVal = document.getElementById('btn-xeqt-rel-unit-val');
+    const isPct = currentXeqtRelUnit === 'PCT';
+    if (btnPct) {
+        btnPct.classList.toggle('active', isPct);
+        btnPct.style.background = isPct ? '#1f2328' : 'white';
+        btnPct.style.color = isPct ? 'white' : '#24292f';
+    }
+    if (btnVal) {
+        btnVal.classList.toggle('active', !isPct);
+        btnVal.style.background = !isPct ? '#1f2328' : 'white';
+        btnVal.style.color = !isPct ? 'white' : '#24292f';
+    }
+}
+
+async function setXeqtRelTimeframe(tf) {
+    currentXeqtRelTimeframe = tf;
+    if ((!rawBenchmarks || !rawBenchmarks.benchmarks) && typeof getBenchmarks === 'function') {
+        try {
+            rawBenchmarks = await getBenchmarks();
+        } catch (e) {
+            console.warn('Could not load benchmarks:', e);
+        }
+    }
+    updateXeqtRelControlsUI();
+    renderPortfolioVsXeqtChart();
+}
+
+function setXeqtRelCurrency(curr) {
+    if (curr === 'CAD' || curr === 'USD') {
+        currentXeqtRelCurrency = curr;
+    }
+    updateXeqtRelControlsUI();
+    renderPortfolioVsXeqtChart();
+}
+
+function setXeqtRelUnit(unit) {
+    if (unit === 'PCT' || unit === '%') {
+        currentXeqtRelUnit = 'PCT';
+    } else if (unit === 'VAL' || unit === '$') {
+        currentXeqtRelUnit = 'VAL';
+    }
+    updateXeqtRelControlsUI();
+    renderPortfolioVsXeqtChart();
+}
+
+function renderXeqtRelInfoCard(html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById('xeqt-rel-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
+function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCapital = 0, startXeqtPrice = 0) {
+    if (!pt) {
+        return '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>';
+    }
+
+    const isPct = unit === 'PCT';
+    const isUp = pt.spreadPct >= 0;
+    const spreadSign = pt.spreadPct >= 0 ? '+' : '';
+    const valSign = pt.spreadVal >= 0 ? '+' : '';
+
+    const spreadColor = isUp ? '#16a34a' : '#dc2626';
+
+    const dateStr = typeof formatDate === 'function' ? formatDate(pt.date) : pt.date;
+    const badgeText = isInspecting ? 'INSPECTING' : 'LATEST';
+    const badgeBg = isInspecting ? '#e0f2fe' : '#f1f5f9';
+    const badgeColor = isInspecting ? '#0284c7' : '#475569';
+
+    const primaryValStr = isPct
+        ? `${spreadSign}${pt.spreadPct.toFixed(2)}% pts`
+        : `${valSign}${typeof formatCurrency === 'function' ? formatCurrency(pt.spreadVal, currency) : pt.spreadVal.toFixed(2)}`;
+
+    const portSign = pt.portfolioReturnPct >= 0 ? '+' : '';
+    const xeqtSign = pt.xeqtReturnPct >= 0 ? '+' : '';
+    const portColor = pt.portfolioReturnPct >= 0 ? '#16a34a' : '#dc2626';
+    const xeqtColor = pt.xeqtReturnPct >= 0 ? '#16a34a' : '#dc2626';
+
+    const statusBadge = Math.abs(pt.spreadPct) < 0.05
+        ? `<span style="font-size: 0.75rem; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 8px; border-radius: 4px;">Parity with XEQT</span>`
+        : isUp
+            ? `<span style="font-size: 0.75rem; font-weight: 700; color: #16a34a; background: rgba(22, 163, 74, 0.1); padding: 2px 8px; border-radius: 4px;">🚀 +${pt.spreadPct.toFixed(2)}% Ahead of XEQT</span>`
+            : `<span style="font-size: 0.75rem; font-weight: 700; color: #dc2626; background: rgba(220, 38, 38, 0.1); padding: 2px 8px; border-radius: 4px;">🔻 ${pt.spreadPct.toFixed(2)}% Behind XEQT</span>`;
+
+    const subValHtml = isPct
+        ? `Dollar Spread: <strong style="color: ${spreadColor};">${valSign}${typeof formatCurrency === 'function' ? formatCurrency(pt.spreadVal, currency) : pt.spreadVal.toFixed(2)}</strong>`
+        : `Return Spread: <strong style="color: ${spreadColor};">${spreadSign}${pt.spreadPct.toFixed(2)}% pts</strong>`;
+
+    return `
+        <div class="chart-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span class="chart-card-date" style="font-weight: 700; font-size: 0.85rem; color: #1e293b;">Week ${pt.week} &bull; ${dateStr}</span>
+            <span class="chart-card-badge" style="background: ${badgeBg}; color: ${badgeColor}; font-size: 0.7rem; font-weight: 800; padding: 2px 6px; border-radius: 4px;">${badgeText}</span>
+        </div>
+        <div class="chart-card-primary-val" style="font-size: 1.45rem; font-weight: 800; color: ${spreadColor}; line-height: 1.2;">
+            ${primaryValStr}
+        </div>
+        <div style="margin-top: 4px; margin-bottom: 10px;">
+            ${statusBadge}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b; font-size: 0.78rem; margin-bottom: 12px; line-height: 1.4;">
+            ${subValHtml}
+        </div>
+        <div class="chart-card-section-divider" style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Growth Comparison</div>
+            <div class="chart-card-row" style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                <span>Portfolio Growth:</span>
+                <strong style="color: ${portColor};">${portSign}${pt.portfolioReturnPct.toFixed(2)}% (${typeof formatCurrency === 'function' ? formatCurrency(pt.portfolioVal, currency) : pt.portfolioVal})</strong>
+            </div>
+            <div class="chart-card-row" style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">
+                <span>XEQT Benchmark:</span>
+                <strong style="color: ${xeqtColor};">${xeqtSign}${pt.xeqtReturnPct.toFixed(2)}% (${typeof formatCurrency === 'function' ? formatCurrency(pt.xeqtVal, currency) : pt.xeqtVal})</strong>
+            </div>
+            ${startCapital > 0 ? `
+            <div class="chart-card-row" style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #e2e8f0;">
+                <span>Starting Capital:</span>
+                <span>${typeof formatCurrency === 'function' ? formatCurrency(startCapital, currency) : startCapital}</span>
+            </div>
+            ` : ''}
+            ${pt.xeqtPrice > 0 ? `
+            <div class="chart-card-row" style="display: flex; justify-content: space-between; font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+                <span>XEQT Price (${currency}):</span>
+                <span>$${pt.xeqtPrice.toFixed(2)}</span>
+            </div>
+            ` : ''}
+        </div>
+        <div class="chart-card-footer" style="margin-top: auto; padding-top: 10px; font-size: 0.72rem; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+            💡 Hover over curve to inspect historical outperformance
+        </div>
+    `;
+}
+
+function renderPortfolioVsXeqtChart() {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('xeqt-rel-chart-container');
+    const box = document.getElementById('xeqt-rel-svg-box');
+    const titleEl = document.getElementById('xeqt-rel-chart-title');
+    const subtitleEl = document.getElementById('xeqt-rel-chart-subtitle');
+    const legendEl = document.getElementById('xeqt-rel-legend');
+    if (!box || !rawHistory || rawHistory.length === 0) return;
+
+    const currency = currentXeqtRelCurrency;
+    const unit = currentXeqtRelUnit;
+    const timeframe = currentXeqtRelTimeframe || 'last-52';
+    const isPct = unit === 'PCT';
+
+    const tfLabel = timeframe === 'all'
+        ? 'All Time'
+        : timeframe === 'last-52'
+            ? 'Last 52 Weeks'
+            : `Year ${timeframe}`;
+
+    if (titleEl) {
+        titleEl.textContent = `⚖️ Portfolio vs XEQT Progression (${isPct ? '% Spread' : `${currency} $ Spread`} - ${tfLabel})`;
+    }
+
+    let records = [...rawHistory];
+    if (timeframe === 'last-52') {
+        records = records.length > 52 ? records.slice(-53) : records;
+    } else if (/^\d{4}$/.test(timeframe)) {
+        records = records.filter(r => r.date && r.date.startsWith(timeframe));
+    }
+
+    if (records.length <= 1) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
+        renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
+        return;
+    }
+
+    const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
+    const currentXeqtPrice = xeqtBenchmark?.currentPrice;
+
+    if (!xeqtPrices || xeqtPrices.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
+        renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
+        return;
+    }
+
+    const calcFunc = (typeof computePortfolioVsXeqtProgression === 'function')
+        ? computePortfolioVsXeqtProgression
+        : (typeof window !== 'undefined' && window.computePortfolioVsXeqtProgression)
+            ? window.computePortfolioVsXeqtProgression
+            : null;
+
+    if (!calcFunc) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">Progression calculation function not found.</p>';
+        return;
+    }
+
+    const points = calcFunc(records, rawHistory, xeqtPrices, currency, currentXeqtPrice, unit);
+    if (points.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No progression points calculated for this timeframe.</p>';
+        return;
+    }
+
+    const width = 1000;
+    const height = 220;
+    const padding = { top: 20, right: 25, bottom: 32, left: 65 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+
+    const allVals = [0, ...points.map(p => p.chartVal)];
+    let minVal = Math.min(...allVals);
+    let maxVal = Math.max(...allVals);
+
+    let step;
+    if (isPct) {
+        const span = maxVal - minVal;
+        const pad = span > 0 ? Math.max(1, span * 0.12) : 3;
+        step = 5;
+        if (span + 2 * pad > 40) step = 10;
+        else if (span + 2 * pad <= 10) step = 2;
+        else if (span + 2 * pad <= 4) step = 1;
+
+        minVal = Math.floor((minVal - pad) / step) * step;
+        maxVal = Math.ceil((maxVal + pad) / step) * step;
+        if (minVal > 0) minVal = 0;
+        if (maxVal < 0) maxVal = 0;
+        if (minVal === maxVal) { minVal = -5; maxVal = 5; }
+    } else {
+        const range = maxVal - minVal || 5000;
+        const pad = range * 0.12;
+        step = range > 50000 ? 10000 : (range > 20000 ? 5000 : (range > 6000 ? 2000 : 1000));
+        minVal = Math.floor((minVal - pad) / step) * step;
+        maxVal = Math.ceil((maxVal + pad) / step) * step;
+        if (minVal > 0) minVal = 0;
+        if (maxVal < 0) maxVal = 0;
+        if (minVal === maxVal) { minVal = -1000; maxVal = 1000; }
+    }
+
+    const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal || 1)) * plotH;
+    const getX = (i) => padding.left + (i / (points.length - 1 || 1)) * plotW;
+    const zeroY = getY(0);
+
+    points.forEach((p, i) => {
+        p.x = getX(i);
+        p.y = getY(p.chartVal);
+    });
+
+    // Y Gridlines
+    let gridLinesHtml = '';
+    const tickCount = Math.round((maxVal - minVal) / step);
+    for (let i = 0; i <= tickCount; i++) {
+        const v = Math.round((minVal + i * step) * 10) / 10;
+        const y = getY(v);
+        const isZero = Math.abs(v) < 0.001;
+        const sign = v > 0 ? '+' : '';
+        const label = isPct
+            ? `${sign}${v}%`
+            : (isZero ? '$0' : (currency === 'USD' ? `US$${(v / 1000).toFixed(0)}k` : `$${(v / 1000).toFixed(0)}k`));
+
+        if (isZero) {
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#1e293b" font-weight="700" font-size="11" text-anchor="end">${label}</text>
+            `;
+        } else {
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
+    }
+
+    // X Date ticks
+    let xTicksHtml = '';
+    const numTicks = Math.min(points.length, 7);
+    for (let i = 0; i < numTicks; i++) {
+        const idx = Math.round((i / (numTicks - 1 || 1)) * (points.length - 1));
+        const pt = points[idx];
+        const x = getX(idx);
+        const label = typeof formatMonthShort === 'function' ? formatMonthShort(pt.date) : formatDate(pt.date);
+        xTicksHtml += `
+            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+        `;
+    }
+
+    // Area & Line paths
+    const pointsStr = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+    const linePathD = 'M ' + pointsStr.join(' L ');
+    const firstX = points[0].x;
+    const lastX = points[points.length - 1].x;
+    const areaPathD = `${linePathD} L ${lastX.toFixed(1)},${zeroY.toFixed(1)} L ${firstX.toFixed(1)},${zeroY.toFixed(1)} Z`;
+
+    const zeroFrac = Math.max(0, Math.min(1, (zeroY - padding.top) / plotH));
+    const zeroPct = (zeroFrac * 100).toFixed(1);
+
+    const lastPt = points[points.length - 1];
+    const isLatestOutperforming = lastPt.spreadPct >= 0;
+    const strokeColor = isLatestOutperforming ? '#16a34a' : '#dc2626';
+
+    const hoverPointsHtml = points.map((p, i) => {
+        const isUp = p.spreadPct >= 0;
+        const color = isUp ? '#16a34a' : '#dc2626';
+        return `
+            <circle class="xeqt-rel-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="${color}" stroke-width="1.8" style="cursor: pointer;" />
+        `;
+    }).join('');
+
+    const startCapital = records[0][currency === 'USD' ? 'totalUSD' : 'totalCAD'] || 0;
+    const startXeqtPrice = points[0].xeqtPrice || 0;
+
+    const svg = `
+        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="xeqt-rel-svg" style="width: 100%; max-height: 220px; display: block; overflow: visible;">
+            <defs>
+                <linearGradient id="xeqtRelAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#16a34a" stop-opacity="0.28" />
+                    <stop offset="${zeroPct}%" stop-color="#16a34a" stop-opacity="0.04" />
+                    <stop offset="${zeroPct}%" stop-color="#dc2626" stop-opacity="0.04" />
+                    <stop offset="100%" stop-color="#dc2626" stop-opacity="0.28" />
+                </linearGradient>
+            </defs>
+            ${gridLinesHtml}
+            ${xTicksHtml}
+            <path d="${areaPathD}" fill="url(#xeqtRelAreaGradient)" />
+            <path d="${linePathD}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            ${hoverPointsHtml}
+            <!-- Vertical Crosshair Line -->
+            <line id="xeqt-rel-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <!-- Active Hover Dot -->
+            <circle id="xeqt-rel-cursor-dot" r="6" fill="${strokeColor}" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <!-- Mouse capture overlay -->
+            <rect id="xeqt-rel-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
+        </svg>
+    `;
+
+    box.innerHTML = svg;
+
+    // Update legend
+    if (legendEl) {
+        const spreadSign = lastPt.spreadPct >= 0 ? '+' : '';
+        const spreadValSign = lastPt.spreadVal >= 0 ? '+' : '';
+        const spreadColor = lastPt.spreadPct >= 0 ? '#16a34a' : '#dc2626';
+        const portSign = lastPt.portfolioReturnPct >= 0 ? '+' : '';
+        const xeqtSign = lastPt.xeqtReturnPct >= 0 ? '+' : '';
+
+        legendEl.innerHTML = `
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 12px; height: 3px; background: ${strokeColor}; border-radius: 2px;"></span>
+                <strong style="color: #1f2328;">Spread vs XEQT</strong>: <span style="color: ${spreadColor}; font-weight: 700;">${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts (${spreadValSign}${formatCurrency(lastPt.spreadVal, currency)})</span>
+            </div>
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
+                <span style="color: #64748b; font-weight: 600;">0.0% Parity (XEQT Baseline)</span>
+            </div>
+            <div style="font-size: 0.75rem; color: #64748b;">
+                Portfolio: <strong>${portSign}${lastPt.portfolioReturnPct.toFixed(2)}%</strong> &bull; XEQT: <strong>${xeqtSign}${lastPt.xeqtReturnPct.toFixed(2)}%</strong>
+            </div>
+        `;
+    }
+
+    if (subtitleEl) {
+        const spreadSign = lastPt.spreadPct >= 0 ? '+' : '';
+        const statusText = lastPt.spreadPct >= 0
+            ? `Outperforming XEQT by ${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts`
+            : `Trailing XEQT by ${lastPt.spreadPct.toFixed(2)}% pts`;
+        subtitleEl.textContent = `Portfolio growth relative to XEQT benchmark (0% = parity) • Current: ${statusText}`;
+    }
+
+    // Interactive tracking
+    const svgEl = box.querySelector('#xeqt-rel-svg');
+    const overlay = box.querySelector('#xeqt-rel-overlay');
+    const cursorLine = box.querySelector('#xeqt-rel-cursor-line');
+    const cursorDot = box.querySelector('#xeqt-rel-cursor-dot');
+
+    function setActivePoint(idx, isHover = true) {
+        if (idx < 0 || idx >= points.length) return;
+        const pt = points[idx];
+        const ptColor = pt.spreadPct >= 0 ? '#16a34a' : '#dc2626';
+
+        if (cursorLine && cursorDot) {
+            cursorLine.setAttribute('x1', pt.x.toFixed(1));
+            cursorLine.setAttribute('x2', pt.x.toFixed(1));
+            cursorLine.style.display = isHover ? 'block' : 'none';
+
+            cursorDot.setAttribute('cx', pt.x.toFixed(1));
+            cursorDot.setAttribute('cy', pt.y.toFixed(1));
+            cursorDot.setAttribute('fill', ptColor);
+            cursorDot.style.display = isHover ? 'block' : 'none';
+        }
+
+        renderXeqtRelInfoCard(buildXeqtRelCardHtml(pt, currency, unit, isHover, startCapital, startXeqtPrice), isHover);
+    }
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const p = svgEl.createSVGPoint();
+                    p.x = e.clientX;
+                    p.y = e.clientY;
+                    const sp = p.matrixTransform(ctm.inverse());
+                    svgX = sp.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
+            }
+
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
+            const frac = (clampedX - padding.left) / (plotW || 1);
+            const idx = Math.max(0, Math.min(points.length - 1, Math.round(frac * (points.length - 1))));
+            setActivePoint(idx, true);
+        });
+
+        overlay.addEventListener('mouseleave', () => {
+            setActivePoint(points.length - 1, false);
+        });
+    }
+
+    // Set initial card state
+    setActivePoint(points.length - 1, false);
+}
+
 /* ================= All-Time High Increments Bar Chart ================= */
 
 /**
@@ -4231,6 +4771,7 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
     window.addEventListener('resize', () => {
         if (rawHistory && rawHistory.length > 0) {
             renderMainProgressionChart();
+            renderPortfolioVsXeqtChart();
             renderAthBarChart();
             renderMonthlyHeatmap();
             renderWeeklyBarChart();
@@ -4334,6 +4875,22 @@ if (typeof module !== 'undefined' && module.exports) {
             currentWeeklyBarCurrency = 'CAD';
             currentWeeklyBarUnit = 'VAL';
             currentWeeklyBarTimeframe = 'all';
+        },
+        computePortfolioVsXeqtProgression,
+        renderPortfolioVsXeqtChart,
+        setXeqtRelTimeframe,
+        setXeqtRelCurrency,
+        setXeqtRelUnit,
+        syncXeqtRelTimeframeButtons,
+        getXeqtRelChartState: () => ({
+            currentXeqtRelTimeframe,
+            currentXeqtRelCurrency,
+            currentXeqtRelUnit
+        }),
+        resetXeqtRelChartState: () => {
+            currentXeqtRelTimeframe = 'last-52';
+            currentXeqtRelCurrency = 'CAD';
+            currentXeqtRelUnit = 'PCT';
         }
     };
 }
