@@ -3264,6 +3264,7 @@ function renderPortfolioVsXeqtChart() {
     const container = document.getElementById('xeqt-rel-chart-container');
     const box = document.getElementById('xeqt-rel-svg-box');
     const titleEl = document.getElementById('xeqt-rel-chart-title');
+    const subtitleEl = document.getElementById('xeqt-rel-chart-subtitle');
     const legendEl = document.getElementById('xeqt-rel-legend');
     if (!box || !rawHistory || rawHistory.length === 0) return;
 
