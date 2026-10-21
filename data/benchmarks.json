@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-20T20:45:20.737Z",
+  "updatedAt": "2026-10-21T13:15:21.181Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-20",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4057,
-    "cadUsdRate": 0.7114,
-    "updatedAt": "2026-10-20T20:45:20.737Z"
+    "usdCadRate": 1.405,
+    "cadUsdRate": 0.7117,
+    "updatedAt": "2026-10-21T13:15:21.181Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -408,7 +408,7 @@
       "color": "#64748b",
       "startPrice": 20.03,
       "currentPrice": 19.66,
-      "returnPct": -1.87,
+      "returnPct": -1.85,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-20",
