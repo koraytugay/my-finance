@@ -1,16 +1,16 @@
 {
-  "updatedAt": "2026-10-21T13:15:21.181Z",
+  "updatedAt": "2026-10-21T13:39:06.854Z",
   "window": {
     "startDate": "2024-08-23",
-    "endDate": "2026-10-20",
+    "endDate": "2026-10-21",
     "weeks": 113,
     "label": "Aug 2024 – Oct 2026 (113-Week Window)"
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.405,
-    "cadUsdRate": 0.7117,
-    "updatedAt": "2026-10-21T13:15:21.181Z"
+    "usdCadRate": 1.4059,
+    "cadUsdRate": 0.7113,
+    "updatedAt": "2026-10-21T13:39:06.854Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -20,11 +20,11 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 45.44,
-      "returnPct": 42.7,
+      "currentPrice": 45.6,
+      "returnPct": 43.22,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
-      "endDate": "2026-10-20",
+      "endDate": "2026-10-21",
       "weeklyPrices": [
         31.84,
         31.83,
@@ -139,7 +139,7 @@
         45.95,
         46.16,
         45.46,
-        45.44
+        45.6
       ]
     },
     "VFV": {
@@ -149,11 +149,11 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 192.27,
-      "returnPct": 42.26,
+      "currentPrice": 192.7,
+      "returnPct": 42.58,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
-      "endDate": "2026-10-20",
+      "endDate": "2026-10-21",
       "weeklyPrices": [
         135.15,
         135.19,
@@ -268,7 +268,7 @@
         195.08,
         197.56,
         192.1,
-        192.27
+        192.7
       ]
     },
     "XBAL": {
@@ -407,11 +407,11 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.66,
-      "returnPct": -1.85,
+      "currentPrice": 19.69,
+      "returnPct": -1.7,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
-      "endDate": "2026-10-20",
+      "endDate": "2026-10-21",
       "weeklyPrices": [
         20.03,
         19.95,
@@ -526,7 +526,7 @@
         19.64,
         19.72,
         19.73,
-        19.66
+        19.69
       ]
     }
   }
