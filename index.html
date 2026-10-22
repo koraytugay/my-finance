@@ -270,6 +270,47 @@
                 </div>
             </div>
 
+            <!-- Weekly Portfolio vs XEQT (Beat / Lag) Bar Chart -->
+            <div class="chart-wrapper" id="xeqt-weekly-wrapper" style="margin-top: 24px;">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="xeqt-weekly-chart-title" style="margin: 0; font-size: 1.15rem;">📊 Weekly Performance vs XEQT</h2>
+                        <span id="xeqt-weekly-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Weekly percentage beat or lag against XEQT benchmark</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <div class="timeframe-toggle" id="xeqt-weekly-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2024" onclick="setXeqtWeeklyTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 weekly relative performance">2024</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2025" onclick="setXeqtWeeklyTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 weekly relative performance">2025</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2026" onclick="setXeqtWeeklyTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2026 weekly relative performance">2026</button>
+                            <button type="button" class="btn-secondary timeframe-pill active" data-timeframe="last-52" onclick="setXeqtWeeklyTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Show Last 52 Weeks weekly relative performance">Last 52W</button>
+                            <button type="button" class="btn-secondary timeframe-pill" data-timeframe="all" onclick="setXeqtWeeklyTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show All-Time weekly relative performance">All Time</button>
+                        </div>
+                        <div class="currency-toggle" id="xeqt-weekly-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-xeqt-weekly-cur-cad" class="btn-secondary active" onclick="setXeqtWeeklyCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-xeqt-weekly-cur-usd" class="btn-secondary" onclick="setXeqtWeeklyCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        </div>
+                        <div class="unit-toggle" id="xeqt-weekly-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-xeqt-weekly-unit-val" class="btn-secondary" onclick="setXeqtWeeklyUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display weekly difference in Currency ($)">$</button>
+                            <button type="button" id="btn-xeqt-weekly-unit-pct" class="btn-secondary active" onclick="setXeqtWeeklyUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display weekly difference in Percentage (%) return">%</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-layout-grid">
+                    <div class="chart-canvas-col">
+                        <div class="chart-container" id="xeqt-weekly-chart-container" style="margin: 0; position: relative;">
+                            <div id="xeqt-weekly-svg-box"></div>
+                            <div id="xeqt-weekly-tooltip" class="chart-tooltip" style="display: none;"></div>
+                        </div>
+                        <div class="chart-legend" id="xeqt-weekly-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                            <!-- Injected dynamically via main.js -->
+                        </div>
+                    </div>
+                    <div class="chart-info-card" id="xeqt-weekly-info-card">
+                        <!-- Populated dynamically via main.js -->
+                    </div>
+                </div>
+            </div>
+
             <!-- All-Time High Increments (ATH Diffs) Bar Chart -->
             <div class="chart-wrapper" id="ath-diffs-wrapper" style="margin-top: 24px;">
                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">

@@ -30,6 +30,11 @@ let currentXeqtRelTimeframe = 'last-52'; // 'last-52' | 'all' | '2024' | '2025' 
 let currentXeqtRelCurrency = 'CAD'; // 'CAD' | 'USD'
 let currentXeqtRelUnit = 'PCT'; // 'PCT' | 'VAL' (default '%' per user request)
 
+// Weekly Portfolio vs XEQT Bar Chart State
+let currentXeqtWeeklyTimeframe = 'last-52'; // 'last-52' | 'all' | '2024' | '2025' | '2026' ...
+let currentXeqtWeeklyCurrency = 'CAD'; // 'CAD' | 'USD'
+let currentXeqtWeeklyUnit = 'PCT'; // 'PCT' | 'VAL' (default '%' per user request)
+
 async function initMain() {
     const loadingEl = document.getElementById('loading');
     const contentEl = document.getElementById('main-content');
@@ -61,9 +66,11 @@ async function initMain() {
         renderMainTopStats(mainData, holdings, enrichedHistory);
         syncMainTimeframeButtons(rawHistory);
         syncXeqtRelTimeframeButtons(rawHistory);
+        syncXeqtWeeklyTimeframeButtons(rawHistory);
         syncWeeklyTimeframeButtons(rawHistory);
         renderMainProgressionChart();
         renderPortfolioVsXeqtChart();
+        renderWeeklyPortfolioVsXeqtChart();
         renderAthBarChart();
         renderMonthlyHeatmap();
         renderWeeklyBarChart();
@@ -3530,6 +3537,636 @@ function renderPortfolioVsXeqtChart() {
     setActivePoint(points.length - 1, false);
 }
 
+/* ================= Weekly Portfolio vs XEQT Bar Chart ================= */
+
+/**
+ * Pure calculation function: Computes weekly portfolio performance relative to XEQT benchmark.
+ * Tracks by how much percentage (or dollar value) the portfolio beat or lost against XEQT in each week.
+ */
+function computeWeeklyPortfolioVsXeqt(history, xeqtWeeklyPrices, currency = 'CAD', unit = 'PCT', timeframe = 'last-52', currentBenchmarkPrice = null) {
+    if (!history || history.length <= 1 || !xeqtWeeklyPrices) {
+        return [];
+    }
+
+    const prices = Array.isArray(xeqtWeeklyPrices) ? xeqtWeeklyPrices : (xeqtWeeklyPrices.weeklyPrices || []);
+    if (prices.length === 0) {
+        return [];
+    }
+
+    const livePrice = (currentBenchmarkPrice != null && Number.isFinite(Number(currentBenchmarkPrice)))
+        ? Number(currentBenchmarkPrice)
+        : (!Array.isArray(xeqtWeeklyPrices) && xeqtWeeklyPrices.currentPrice ? xeqtWeeklyPrices.currentPrice : null);
+
+    const latestHistoryRec = history[history.length - 1];
+
+    function getXeqtPrice(rec, idx) {
+        let pIdx = -1;
+        if (rec.week !== undefined && rec.week !== null && Number.isFinite(Number(rec.week))) {
+            pIdx = Number(rec.week) - 1;
+        } else if (Array.isArray(history)) {
+            pIdx = history.findIndex(h => h.date === rec.date);
+        }
+        if (pIdx < 0) pIdx = 0;
+
+        const isLatestRecord = (rec === latestHistoryRec) || (latestHistoryRec && rec.date === latestHistoryRec.date);
+        if (isLatestRecord && livePrice != null && livePrice > 0) {
+            if (pIdx >= prices.length - 1 || (history[history.length - 2] && history[history.length - 2].date !== rec.date)) {
+                return livePrice;
+            }
+        }
+
+        const clampedIdx = Math.min(Math.max(0, pIdx), prices.length - 1);
+        return prices[clampedIdx] || prices[prices.length - 1] || 0;
+    }
+
+    const isUsd = currency === 'USD';
+    const isPct = unit === 'PCT';
+
+    const allItems = [];
+    for (let i = 1; i < history.length; i++) {
+        const r = history[i];
+        const prev = history[i - 1];
+
+        // XEQT Price & Return
+        const prevPriceCAD = getXeqtPrice(prev, i - 1);
+        const curPriceCAD = getXeqtPrice(r, i);
+
+        const prevRate = (prev.totalCAD && prev.totalUSD) ? (prev.totalUSD / prev.totalCAD) : 1;
+        const curRate = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : 1;
+
+        const prevXeqtPrice = isUsd ? (prevPriceCAD * prevRate) : prevPriceCAD;
+        const curXeqtPrice = isUsd ? (curPriceCAD * curRate) : curPriceCAD;
+
+        const xeqtReturnPct = prevXeqtPrice > 0
+            ? (((curXeqtPrice - prevXeqtPrice) / prevXeqtPrice) * 100)
+            : 0;
+
+        // Portfolio Price & Return
+        const prevPortVal = isUsd ? Number(prev.totalUSD || 0) : Number(prev.totalCAD || 0);
+        const curPortVal = isUsd ? Number(r.totalUSD || 0) : Number(r.totalCAD || 0);
+
+        let portChangeVal;
+        if (isUsd) {
+            if (r.weeklyChangeUSD !== undefined && r.weeklyChangeUSD !== null) {
+                portChangeVal = Number(r.weeklyChangeUSD);
+            } else if (r.totalUSD !== undefined && prev.totalUSD !== undefined) {
+                portChangeVal = Number(r.totalUSD) - Number(prev.totalUSD);
+            } else {
+                const fx = (r.totalUSD && r.totalCAD) ? (r.totalUSD / r.totalCAD) : 0.74;
+                const changeCAD = (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null)
+                    ? Number(r.weeklyChangeCAD)
+                    : (Number(r.totalCAD || 0) - Number(prev.totalCAD || 0));
+                portChangeVal = changeCAD * fx;
+            }
+        } else {
+            if (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null) {
+                portChangeVal = Number(r.weeklyChangeCAD);
+            } else {
+                portChangeVal = curPortVal - prevPortVal;
+            }
+        }
+
+        let portReturnPct;
+        if (isUsd) {
+            if (r.weeklyChangeUSDPct !== undefined && r.weeklyChangeUSDPct !== null) {
+                portReturnPct = Number(r.weeklyChangeUSDPct);
+            } else if (prevPortVal > 0) {
+                portReturnPct = (portChangeVal / prevPortVal) * 100;
+            } else {
+                portReturnPct = 0;
+            }
+        } else {
+            if (r.weeklyChangePct !== undefined && r.weeklyChangePct !== null) {
+                portReturnPct = Number(r.weeklyChangePct);
+            } else if (prevPortVal > 0) {
+                portReturnPct = (portChangeVal / prevPortVal) * 100;
+            } else {
+                portReturnPct = 0;
+            }
+        }
+
+        const spreadPct = portReturnPct - xeqtReturnPct;
+        const xeqtGainOnPortVal = prevPortVal * (xeqtReturnPct / 100);
+        const spreadVal = portChangeVal - xeqtGainOnPortVal;
+        const chartVal = isPct ? spreadPct : spreadVal;
+
+        allItems.push({
+            index: i - 1,
+            week: r.week,
+            date: r.date,
+            prevDate: prev.date,
+            portfolioStartVal: prevPortVal,
+            portfolioEndVal: curPortVal,
+            portfolioChange: Number(portChangeVal.toFixed(2)),
+            portfolioReturnPct: Number(portReturnPct.toFixed(2)),
+            prevXeqtPrice: Number(prevXeqtPrice.toFixed(2)),
+            curXeqtPrice: Number(curXeqtPrice.toFixed(2)),
+            xeqtReturnPct: Number(xeqtReturnPct.toFixed(2)),
+            xeqtGainOnPortVal: Number(xeqtGainOnPortVal.toFixed(2)),
+            spreadPct: Number(spreadPct.toFixed(2)),
+            spreadVal: Number(spreadVal.toFixed(2)),
+            chartVal: Number(chartVal.toFixed(2)),
+            isBeat: spreadPct >= 0
+        });
+    }
+
+    if (!timeframe || timeframe === 'all') {
+        return allItems;
+    }
+    if (timeframe === 'last-52') {
+        return allItems.length > 52 ? allItems.slice(-52) : allItems;
+    }
+    if (/^\d{4}$/.test(timeframe)) {
+        return allItems.filter(it => it.date && it.date.startsWith(timeframe));
+    }
+
+    return allItems;
+}
+
+function syncXeqtWeeklyTimeframeButtons(history) {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('xeqt-weekly-timeframe-toggle');
+    if (!container || !history || history.length === 0) return;
+
+    const availableYears = [...new Set(
+        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
+    )].sort();
+
+    if (availableYears.length === 0) return;
+
+    let html = '';
+    availableYears.forEach((year, idx) => {
+        const isActive = currentXeqtWeeklyTimeframe === year;
+        const bg = isActive ? '#1f2328' : 'white';
+        const color = isActive ? 'white' : '#24292f';
+        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
+        html += `
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setXeqtWeeklyTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} weekly relative performance">${year}</button>
+        `;
+    });
+
+    const isLast52Active = currentXeqtWeeklyTimeframe === 'last-52';
+    const isAllActive = currentXeqtWeeklyTimeframe === 'all';
+
+    html += `
+        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setXeqtWeeklyTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks weekly relative performance">Last 52W</button>
+        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setXeqtWeeklyTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time weekly relative performance">All Time</button>
+    `;
+
+    container.innerHTML = html;
+}
+
+function updateXeqtWeeklyControlsUI() {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('xeqt-weekly-timeframe-toggle');
+    if (container) {
+        const buttons = container.querySelectorAll('.timeframe-pill');
+        buttons.forEach(btn => {
+            const tf = btn.getAttribute('data-timeframe');
+            const isActive = currentXeqtWeeklyTimeframe === tf;
+            btn.classList.toggle('active', isActive);
+            btn.style.background = isActive ? '#1f2328' : 'white';
+            btn.style.color = isActive ? 'white' : '#24292f';
+        });
+    }
+
+    const btnCad = document.getElementById('btn-xeqt-weekly-cur-cad');
+    const btnUsd = document.getElementById('btn-xeqt-weekly-cur-usd');
+    if (btnCad) {
+        const isActive = currentXeqtWeeklyCurrency === 'CAD';
+        btnCad.classList.toggle('active', isActive);
+        btnCad.style.background = isActive ? '#1f2328' : 'white';
+        btnCad.style.color = isActive ? 'white' : '#24292f';
+    }
+    if (btnUsd) {
+        const isActive = currentXeqtWeeklyCurrency === 'USD';
+        btnUsd.classList.toggle('active', isActive);
+        btnUsd.style.background = isActive ? '#1f2328' : 'white';
+        btnUsd.style.color = isActive ? 'white' : '#24292f';
+    }
+
+    const btnPct = document.getElementById('btn-xeqt-weekly-unit-pct');
+    const btnVal = document.getElementById('btn-xeqt-weekly-unit-val');
+    const isPct = currentXeqtWeeklyUnit === 'PCT';
+    if (btnPct) {
+        btnPct.classList.toggle('active', isPct);
+        btnPct.style.background = isPct ? '#1f2328' : 'white';
+        btnPct.style.color = isPct ? 'white' : '#24292f';
+    }
+    if (btnVal) {
+        btnVal.classList.toggle('active', !isPct);
+        btnVal.style.background = !isPct ? '#1f2328' : 'white';
+        btnVal.style.color = !isPct ? 'white' : '#24292f';
+    }
+}
+
+async function setXeqtWeeklyTimeframe(tf) {
+    currentXeqtWeeklyTimeframe = tf;
+    if ((!rawBenchmarks || !rawBenchmarks.benchmarks) && typeof getBenchmarks === 'function') {
+        try {
+            rawBenchmarks = await getBenchmarks();
+        } catch (e) {
+            console.warn('Could not load benchmarks:', e);
+        }
+    }
+    updateXeqtWeeklyControlsUI();
+    renderWeeklyPortfolioVsXeqtChart();
+}
+
+function setXeqtWeeklyCurrency(curr) {
+    if (curr === 'CAD' || curr === 'USD') {
+        currentXeqtWeeklyCurrency = curr;
+    }
+    updateXeqtWeeklyControlsUI();
+    renderWeeklyPortfolioVsXeqtChart();
+}
+
+function setXeqtWeeklyUnit(unit) {
+    if (unit === 'PCT' || unit === '%') {
+        currentXeqtWeeklyUnit = 'PCT';
+    } else if (unit === 'VAL' || unit === '$') {
+        currentXeqtWeeklyUnit = 'VAL';
+    }
+    updateXeqtWeeklyControlsUI();
+    renderWeeklyPortfolioVsXeqtChart();
+}
+
+function renderXeqtWeeklyInfoCard(html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById('xeqt-weekly-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
+function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '', beatCount = 0, totalWeeks = 0, beatPct = 0) {
+    if (!it) {
+        return '<p class="empty-state" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative weekly data available.</p>';
+    }
+
+    const isPct = unit === 'PCT';
+    const isBeat = it.spreadPct >= 0;
+    const sign = it.spreadPct >= 0 ? '+' : '';
+    const valSign = it.spreadVal >= 0 ? '+' : '';
+    const color = isBeat ? '#16a34a' : '#dc2626';
+
+    const dateStr = typeof formatDate === 'function' ? formatDate(it.date) : it.date;
+    const badgeHtml = isHover
+        ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+        : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+    const primaryValStr = isPct
+        ? `${sign}${it.spreadPct.toFixed(2)}%`
+        : `${valSign}${typeof formatCurrency === 'function' ? formatCurrency(it.spreadVal, currency) : (valSign + it.spreadVal.toFixed(2))}`;
+
+    const subValHtml = isPct
+        ? `Spread: <strong style="color: ${color}">${sign}${it.spreadPct.toFixed(2)}% pts (${valSign}${typeof formatCurrency === 'function' ? formatCurrency(it.spreadVal, currency) : it.spreadVal.toFixed(2)})</strong>`
+        : `Dollar Spread: <strong style="color: ${color}">${valSign}${typeof formatCurrency === 'function' ? formatCurrency(it.spreadVal, currency) : it.spreadVal.toFixed(2)} (${sign}${it.spreadPct.toFixed(2)}% pts)</strong>`;
+
+    const portSign = it.portfolioReturnPct >= 0 ? '+' : '';
+    const xeqtSign = it.xeqtReturnPct >= 0 ? '+' : '';
+    const portValSign = it.portfolioChange >= 0 ? '+' : '';
+
+    const outcomeText = isBeat
+        ? `🏆 Beat XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`
+        : `📉 Lagged XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`;
+
+    return `
+        <div class="chart-card-header">
+            <span class="chart-card-date">Week ${it.week} &bull; ${dateStr}</span>
+            ${badgeHtml}
+        </div>
+        <div class="chart-card-primary-val" style="color: ${color};">
+            ${primaryValStr}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b;">
+            ${subValHtml}
+        </div>
+        <div class="chart-card-section-divider">
+            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Weekly Breakdown</div>
+            <div class="chart-card-row">
+                <span>Portfolio Weekly Return:</span>
+                <strong>${portSign}${it.portfolioReturnPct.toFixed(2)}% (${portValSign}${typeof formatCurrency === 'function' ? formatCurrency(it.portfolioChange, currency) : it.portfolioChange})</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>XEQT Benchmark Return:</span>
+                <strong>${xeqtSign}${it.xeqtReturnPct.toFixed(2)}% ($${it.prevXeqtPrice.toFixed(2)} &rarr; $${it.curXeqtPrice.toFixed(2)})</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Weekly Alpha Outcome:</span>
+                <strong style="color: ${color}">${outcomeText}</strong>
+            </div>
+            ${totalWeeks > 0 ? `
+            <div class="chart-card-row">
+                <span>Timeline Win Rate:</span>
+                <span style="font-weight: 700;">${beatCount}/${totalWeeks} weeks (${beatPct}%)</span>
+            </div>
+            ` : ''}
+            ${avgStr ? `
+            <div class="chart-card-row">
+                <span>Timeline Average Spread:</span>
+                <strong style="color: #b45309;">${avgStr}</strong>
+            </div>
+            ` : ''}
+        </div>
+        <div class="chart-card-footer">
+            💡 Hover any bar to inspect weekly performance
+        </div>
+    `;
+}
+
+function renderWeeklyPortfolioVsXeqtChart() {
+    if (typeof document === 'undefined') return;
+    const box = document.getElementById('xeqt-weekly-svg-box');
+    const titleEl = document.getElementById('xeqt-weekly-chart-title');
+    const subtitleEl = document.getElementById('xeqt-weekly-chart-subtitle');
+    const legendEl = document.getElementById('xeqt-weekly-legend');
+    if (!box || !rawHistory || rawHistory.length <= 1) {
+        if (box) {
+            box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
+        }
+        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
+        return;
+    }
+
+    const currency = currentXeqtWeeklyCurrency;
+    const unit = currentXeqtWeeklyUnit;
+    const timeframe = currentXeqtWeeklyTimeframe || 'last-52';
+    const isPct = unit === 'PCT';
+
+    const tfLabel = timeframe === 'all'
+        ? 'All Time'
+        : timeframe === 'last-52'
+            ? 'Last 52 Weeks'
+            : `Year ${timeframe}`;
+    const curLabel = currency === 'USD' ? 'USD' : 'CAD';
+
+    const xeqtBenchmark = rawBenchmarks?.benchmarks?.XEQT;
+    const xeqtPrices = xeqtBenchmark?.weeklyPrices || [];
+    const currentXeqtPrice = xeqtBenchmark?.currentPrice;
+
+    if (!xeqtPrices || xeqtPrices.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
+        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
+        return;
+    }
+
+    const calcFunc = (typeof computeWeeklyPortfolioVsXeqt === 'function')
+        ? computeWeeklyPortfolioVsXeqt
+        : (typeof window !== 'undefined' && window.computeWeeklyPortfolioVsXeqt)
+            ? window.computeWeeklyPortfolioVsXeqt
+            : null;
+
+    if (!calcFunc) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">Weekly comparison calculation function not found.</p>';
+        return;
+    }
+
+    const items = calcFunc(rawHistory, xeqtPrices, currency, unit, timeframe, currentXeqtPrice);
+    if (!items || items.length === 0) {
+        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly comparison data available for this timeframe.</p>';
+        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>', false);
+        return;
+    }
+
+    const beatCount = items.filter(it => it.isBeat).length;
+    const lagCount = items.length - beatCount;
+    const beatPct = ((beatCount / items.length) * 100).toFixed(1);
+    const avgSpread = items.reduce((sum, it) => sum + it.chartVal, 0) / items.length;
+    const avgSign = avgSpread >= 0 ? '+' : '';
+    const avgStr = isPct
+        ? `${avgSign}${avgSpread.toFixed(2)}%`
+        : `${avgSign}${typeof formatCurrency === 'function' ? formatCurrency(avgSpread, currency) : (avgSign + avgSpread.toFixed(2))}`;
+
+    if (titleEl) {
+        titleEl.textContent = isPct
+            ? `📊 Weekly Performance vs XEQT (% Spread - ${tfLabel} - ${curLabel})`
+            : `📊 Weekly Performance vs XEQT ($ Spread - ${tfLabel} - ${curLabel})`;
+    }
+
+    if (subtitleEl) {
+        subtitleEl.textContent = `Weekly beat or lag against XEQT benchmark • Beat in ${beatCount} of ${items.length} weeks (${beatPct}%) • Average: ${avgStr}`;
+    }
+
+    const width = 1000;
+    const height = 220;
+    const padding = { top: 18, right: 25, bottom: 32, left: 65 };
+    const plotW = width - padding.left - padding.right;
+    const plotH = height - padding.top - padding.bottom;
+
+    const allVals = [0, ...items.map(it => it.chartVal)];
+    let minVal = Math.min(...allVals);
+    let maxVal = Math.max(...allVals);
+
+    let step;
+    if (isPct) {
+        const span = maxVal - minVal;
+        const pad = span > 0 ? Math.max(0.5, span * 0.08) : 2;
+        step = 2;
+        if (span + 2 * pad > 30) step = 5;
+        else if (span + 2 * pad <= 6) step = 1;
+
+        minVal = Math.floor((minVal - pad) / step) * step;
+        maxVal = Math.ceil((maxVal + pad) / step) * step;
+        if (minVal > 0) minVal = 0;
+        if (maxVal < 0) maxVal = 0;
+        if (minVal === maxVal) { minVal = -3; maxVal = 3; }
+    } else {
+        const range = maxVal - minVal || 1000;
+        step = 500;
+        if (range > 10000) step = 2500;
+        else if (range > 4000) step = 1000;
+        else if (range > 2000) step = 500;
+        else step = 250;
+
+        minVal = Math.floor((minVal - step * 0.5) / step) * step;
+        maxVal = Math.ceil((maxVal + step * 0.5) / step) * step;
+        if (minVal > 0) minVal = 0;
+        if (maxVal < 0) maxVal = 0;
+        if (minVal === maxVal) { minVal = -500; maxVal = 500; }
+    }
+
+    const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal || 1)) * plotH;
+    const zeroY = getY(0);
+
+    // Y Gridlines
+    let gridLinesHtml = '';
+    const tickCount = Math.round((maxVal - minVal) / step);
+    for (let i = 0; i <= tickCount; i++) {
+        const v = Math.round((minVal + i * step) * 10) / 10;
+        const y = getY(v);
+        const isZero = Math.abs(v) < 0.001;
+        const sign = v > 0 ? '+' : '';
+        const label = isPct
+            ? `${sign}${v}%`
+            : (isZero ? '$0' : (currency === 'USD' ? `US$${(v / 1000).toFixed(0)}k` : `$${(v / 1000).toFixed(0)}k`));
+
+        if (isZero) {
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#1e293b" font-weight="700" font-size="11" text-anchor="end">${label}</text>
+            `;
+        } else {
+            gridLinesHtml += `
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            `;
+        }
+    }
+
+    // Average Line (dashed)
+    let avgLineHtml = '';
+    if (Math.abs(avgSpread) > 0.01) {
+        const avgY = getY(avgSpread);
+        avgLineHtml = `
+            <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#d97706" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.85" />
+        `;
+    }
+
+    // X Date ticks
+    let xTicksHtml = '';
+    const numTicks = Math.min(items.length, 7);
+    for (let i = 0; i < numTicks; i++) {
+        const idx = Math.round((i / (numTicks - 1 || 1)) * (items.length - 1));
+        const it = items[idx];
+        const stepW = plotW / items.length;
+        const x = padding.left + (idx + 0.5) * stepW;
+        const label = typeof formatMonthShort === 'function' ? formatMonthShort(it.date) : (typeof formatDate === 'function' ? formatDate(it.date) : it.date);
+        xTicksHtml += `
+            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+        `;
+    }
+
+    // Bars
+    const stepW = plotW / items.length;
+    const barWidth = Math.max(3, Math.min(22, stepW - 2));
+
+    const barsHtml = items.map((it, idx) => {
+        const barCenterX = padding.left + (idx + 0.5) * stepW;
+        const barX = barCenterX - (barWidth / 2);
+        const valY = getY(it.chartVal);
+        let barY, barH, color;
+
+        if (it.chartVal >= 0) {
+            barY = valY;
+            barH = Math.max(2, zeroY - valY);
+            color = '#16a34a';
+        } else {
+            barY = zeroY;
+            barH = Math.max(2, valY - zeroY);
+            color = '#dc2626';
+        }
+
+        return `
+            <rect id="xeqt-weekly-bar-${idx}" class="xeqt-weekly-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="1.5" fill="${color}" opacity="0.88" style="transition: opacity 0.1s ease;" />
+        `;
+    }).join('');
+
+    const svg = `
+        <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="xeqt-weekly-svg" style="width: 100%; max-height: 220px; display: block; overflow: visible;">
+            ${gridLinesHtml}
+            ${avgLineHtml}
+            ${xTicksHtml}
+            ${barsHtml}
+            <!-- Vertical Crosshair Line -->
+            <line id="xeqt-weekly-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <!-- Mouse capture overlay -->
+            <rect id="xeqt-weekly-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
+        </svg>
+    `;
+
+    box.innerHTML = svg;
+
+    // Update legend
+    if (legendEl) {
+        legendEl.innerHTML = `
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span>
+                <strong style="color: #1f2328;">Beat XEQT</strong>: <span style="font-weight: 700; color: #16a34a;">${beatCount} weeks (${beatPct}%)</span>
+            </div>
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span class="legend-dot" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span>
+                <strong style="color: #1f2328;">Lagged XEQT</strong>: <span style="font-weight: 700; color: #dc2626;">${lagCount} weeks</span>
+            </div>
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
+                <span style="color: #64748b; font-weight: 600;">0.0% Parity</span>
+            </div>
+            <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #d97706;"></span>
+                <span style="color: #64748b;">Average: <strong style="color: #b45309;">${avgStr}</strong></span>
+            </div>
+        `;
+    }
+
+    // Interactive mouse tracking
+    const svgEl = box.querySelector('#xeqt-weekly-svg');
+    const overlay = box.querySelector('#xeqt-weekly-overlay');
+    const cursorLine = box.querySelector('#xeqt-weekly-cursor-line');
+
+    function setActiveBar(idx, isHover = true) {
+        if (idx < 0 || idx >= items.length) return;
+        const it = items[idx];
+        const barCenterX = padding.left + (idx + 0.5) * stepW;
+
+        if (cursorLine) {
+            cursorLine.setAttribute('x1', barCenterX.toFixed(1));
+            cursorLine.setAttribute('x2', barCenterX.toFixed(1));
+            cursorLine.style.display = isHover ? 'block' : 'none';
+        }
+
+        const allBars = box.querySelectorAll('.xeqt-weekly-bar');
+        allBars.forEach((bar, bIdx) => {
+            if (isHover) {
+                bar.style.opacity = (bIdx === idx) ? '1' : '0.4';
+            } else {
+                bar.style.opacity = '0.88';
+            }
+        });
+
+        renderXeqtWeeklyInfoCard(buildXeqtWeeklyCardHtml(it, currency, unit, isHover, avgStr, beatCount, items.length, beatPct), isHover);
+    }
+
+    if (overlay && svgEl) {
+        overlay.addEventListener('mousemove', (e) => {
+            let svgX = padding.left;
+            if (typeof svgEl.getScreenCTM === 'function') {
+                const ctm = svgEl.getScreenCTM();
+                if (ctm) {
+                    const pt = svgEl.createSVGPoint();
+                    pt.x = e.clientX;
+                    pt.y = e.clientY;
+                    const sp = pt.matrixTransform(ctm.inverse());
+                    svgX = sp.x;
+                }
+            } else {
+                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
+                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
+            }
+
+            const clampedX = Math.max(padding.left, Math.min(padding.left + plotW - 1, svgX));
+            const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
+            setActiveBar(idx, true);
+        });
+
+        overlay.addEventListener('mouseleave', () => {
+            if (cursorLine) cursorLine.style.display = 'none';
+            const allBars = box.querySelectorAll('.xeqt-weekly-bar');
+            allBars.forEach(bar => { bar.style.opacity = '0.88'; });
+            if (items.length > 0) {
+                renderXeqtWeeklyInfoCard(buildXeqtWeeklyCardHtml(items[items.length - 1], currency, unit, false, avgStr, beatCount, items.length, beatPct), false);
+            }
+        });
+    }
+
+    // Set initial card state with latest week
+    if (items.length > 0) {
+        renderXeqtWeeklyInfoCard(buildXeqtWeeklyCardHtml(items[items.length - 1], currency, unit, false, avgStr, beatCount, items.length, beatPct), false);
+    }
+}
+
 /* ================= All-Time High Increments Bar Chart ================= */
 
 /**
@@ -4748,6 +5385,7 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
         if (rawHistory && rawHistory.length > 0) {
             renderMainProgressionChart();
             renderPortfolioVsXeqtChart();
+            renderWeeklyPortfolioVsXeqtChart();
             renderAthBarChart();
             renderMonthlyHeatmap();
             renderWeeklyBarChart();
@@ -4867,6 +5505,22 @@ if (typeof module !== 'undefined' && module.exports) {
             currentXeqtRelTimeframe = 'last-52';
             currentXeqtRelCurrency = 'CAD';
             currentXeqtRelUnit = 'PCT';
+        },
+        computeWeeklyPortfolioVsXeqt,
+        renderWeeklyPortfolioVsXeqtChart,
+        setXeqtWeeklyTimeframe,
+        setXeqtWeeklyCurrency,
+        setXeqtWeeklyUnit,
+        syncXeqtWeeklyTimeframeButtons,
+        getXeqtWeeklyChartState: () => ({
+            currentXeqtWeeklyTimeframe,
+            currentXeqtWeeklyCurrency,
+            currentXeqtWeeklyUnit
+        }),
+        resetXeqtWeeklyChartState: () => {
+            currentXeqtWeeklyTimeframe = 'last-52';
+            currentXeqtWeeklyCurrency = 'CAD';
+            currentXeqtWeeklyUnit = 'PCT';
         }
     };
 }

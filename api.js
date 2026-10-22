@@ -809,6 +809,158 @@ function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrice
     });
 }
 
+/**
+ * Pure calculation function: Computes weekly portfolio performance relative to XEQT benchmark.
+ * Tracks by how much percentage (or dollar value) the portfolio beat or lost against XEQT in each week.
+ *
+ * @param {Array} history Complete historical records
+ * @param {Array|Object} xeqtWeeklyPrices Weekly closing prices or benchmark object for XEQT
+ * @param {string} currency 'CAD' or 'USD'
+ * @param {string} unit 'PCT' or 'VAL'
+ * @param {string} timeframe 'last-52', 'all', or a year string ('2024', '2025', etc.)
+ * @param {number|null} currentBenchmarkPrice Live/latest benchmark price
+ * @returns {Array} Array of weekly performance comparison objects
+ */
+function computeWeeklyPortfolioVsXeqt(history, xeqtWeeklyPrices, currency = 'CAD', unit = 'PCT', timeframe = 'last-52', currentBenchmarkPrice = null) {
+    if (!history || history.length <= 1 || !xeqtWeeklyPrices) {
+        return [];
+    }
+
+    const prices = Array.isArray(xeqtWeeklyPrices) ? xeqtWeeklyPrices : (xeqtWeeklyPrices.weeklyPrices || []);
+    if (prices.length === 0) {
+        return [];
+    }
+
+    const livePrice = (currentBenchmarkPrice != null && Number.isFinite(Number(currentBenchmarkPrice)))
+        ? Number(currentBenchmarkPrice)
+        : (!Array.isArray(xeqtWeeklyPrices) && xeqtWeeklyPrices.currentPrice ? xeqtWeeklyPrices.currentPrice : null);
+
+    const latestHistoryRec = history[history.length - 1];
+
+    function getXeqtPrice(rec, idx) {
+        let pIdx = -1;
+        if (rec.week !== undefined && rec.week !== null && Number.isFinite(Number(rec.week))) {
+            pIdx = Number(rec.week) - 1;
+        } else if (Array.isArray(history)) {
+            pIdx = history.findIndex(h => h.date === rec.date);
+        }
+        if (pIdx < 0) pIdx = 0;
+
+        const isLatestRecord = (rec === latestHistoryRec) || (latestHistoryRec && rec.date === latestHistoryRec.date);
+        if (isLatestRecord && livePrice != null && livePrice > 0) {
+            if (pIdx >= prices.length - 1 || (history[history.length - 2] && history[history.length - 2].date !== rec.date)) {
+                return livePrice;
+            }
+        }
+
+        const clampedIdx = Math.min(Math.max(0, pIdx), prices.length - 1);
+        return prices[clampedIdx] || prices[prices.length - 1] || 0;
+    }
+
+    const isUsd = currency === 'USD';
+    const isPct = unit === 'PCT';
+
+    const allItems = [];
+    for (let i = 1; i < history.length; i++) {
+        const r = history[i];
+        const prev = history[i - 1];
+
+        // XEQT Price & Return
+        const prevPriceCAD = getXeqtPrice(prev, i - 1);
+        const curPriceCAD = getXeqtPrice(r, i);
+
+        const prevRate = (prev.totalCAD && prev.totalUSD) ? (prev.totalUSD / prev.totalCAD) : 1;
+        const curRate = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : 1;
+
+        const prevXeqtPrice = isUsd ? (prevPriceCAD * prevRate) : prevPriceCAD;
+        const curXeqtPrice = isUsd ? (curPriceCAD * curRate) : curPriceCAD;
+
+        const xeqtReturnPct = prevXeqtPrice > 0
+            ? (((curXeqtPrice - prevXeqtPrice) / prevXeqtPrice) * 100)
+            : 0;
+
+        // Portfolio Price & Return
+        const prevPortVal = isUsd ? Number(prev.totalUSD || 0) : Number(prev.totalCAD || 0);
+        const curPortVal = isUsd ? Number(r.totalUSD || 0) : Number(r.totalCAD || 0);
+
+        let portChangeVal;
+        if (isUsd) {
+            if (r.weeklyChangeUSD !== undefined && r.weeklyChangeUSD !== null) {
+                portChangeVal = Number(r.weeklyChangeUSD);
+            } else if (r.totalUSD !== undefined && prev.totalUSD !== undefined) {
+                portChangeVal = Number(r.totalUSD) - Number(prev.totalUSD);
+            } else {
+                const fx = (r.totalUSD && r.totalCAD) ? (r.totalUSD / r.totalCAD) : 0.74;
+                const changeCAD = (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null)
+                    ? Number(r.weeklyChangeCAD)
+                    : (Number(r.totalCAD || 0) - Number(prev.totalCAD || 0));
+                portChangeVal = changeCAD * fx;
+            }
+        } else {
+            if (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null) {
+                portChangeVal = Number(r.weeklyChangeCAD);
+            } else {
+                portChangeVal = curPortVal - prevPortVal;
+            }
+        }
+
+        let portReturnPct;
+        if (isUsd) {
+            if (r.weeklyChangeUSDPct !== undefined && r.weeklyChangeUSDPct !== null) {
+                portReturnPct = Number(r.weeklyChangeUSDPct);
+            } else if (prevPortVal > 0) {
+                portReturnPct = (portChangeVal / prevPortVal) * 100;
+            } else {
+                portReturnPct = 0;
+            }
+        } else {
+            if (r.weeklyChangePct !== undefined && r.weeklyChangePct !== null) {
+                portReturnPct = Number(r.weeklyChangePct);
+            } else if (prevPortVal > 0) {
+                portReturnPct = (portChangeVal / prevPortVal) * 100;
+            } else {
+                portReturnPct = 0;
+            }
+        }
+
+        const spreadPct = portReturnPct - xeqtReturnPct;
+        const xeqtGainOnPortVal = prevPortVal * (xeqtReturnPct / 100);
+        const spreadVal = portChangeVal - xeqtGainOnPortVal;
+        const chartVal = isPct ? spreadPct : spreadVal;
+
+        allItems.push({
+            index: i - 1,
+            week: r.week,
+            date: r.date,
+            prevDate: prev.date,
+            portfolioStartVal: prevPortVal,
+            portfolioEndVal: curPortVal,
+            portfolioChange: Number(portChangeVal.toFixed(2)),
+            portfolioReturnPct: Number(portReturnPct.toFixed(2)),
+            prevXeqtPrice: Number(prevXeqtPrice.toFixed(2)),
+            curXeqtPrice: Number(curXeqtPrice.toFixed(2)),
+            xeqtReturnPct: Number(xeqtReturnPct.toFixed(2)),
+            xeqtGainOnPortVal: Number(xeqtGainOnPortVal.toFixed(2)),
+            spreadPct: Number(spreadPct.toFixed(2)),
+            spreadVal: Number(spreadVal.toFixed(2)),
+            chartVal: Number(chartVal.toFixed(2)),
+            isBeat: spreadPct >= 0
+        });
+    }
+
+    if (!timeframe || timeframe === 'all') {
+        return allItems;
+    }
+    if (timeframe === 'last-52') {
+        return allItems.length > 52 ? allItems.slice(-52) : allItems;
+    }
+    if (/^\d{4}$/.test(timeframe)) {
+        return allItems.filter(it => it.date && it.date.startsWith(timeframe));
+    }
+
+    return allItems;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         formatCurrency,
@@ -819,6 +971,7 @@ if (typeof module !== 'undefined' && module.exports) {
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay,
         computePortfolioVsXeqtProgression,
+        computeWeeklyPortfolioVsXeqt,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,

@@ -12,7 +12,7 @@ const {
   buildRolling52OverlaySeries,
   calculateDrawdownMetrics
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
+const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, computeWeeklyPortfolioVsXeqt, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -61,7 +61,12 @@ const {
   setXeqtRelUnit,
   setXeqtRelTimeframe,
   getXeqtRelChartState,
-  resetXeqtRelChartState
+  resetXeqtRelChartState,
+  setXeqtWeeklyCurrency,
+  setXeqtWeeklyUnit,
+  setXeqtWeeklyTimeframe,
+  getXeqtWeeklyChartState,
+  resetXeqtWeeklyChartState
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -2612,6 +2617,146 @@ test('Portfolio vs XEQT Progression Suite', async (t) => {
     assert.equal(state.currentXeqtRelCurrency, 'CAD');
     assert.equal(state.currentXeqtRelUnit, 'PCT');
     assert.equal(state.currentXeqtRelTimeframe, 'last-52');
+  });
+});
+
+test('Weekly Portfolio vs XEQT Performance Suite', async (t) => {
+  const fullHistory = MOCK_HISTORY;
+  const benchPath = path.join(__dirname, '..', 'data', 'benchmarks.json');
+  const benchData = JSON.parse(fs.readFileSync(benchPath, 'utf8'));
+  const xeqtPrices = benchData.benchmarks.XEQT.weeklyPrices;
+
+  await t.test('computeWeeklyPortfolioVsXeqt returns empty array on empty inputs or single-record history', () => {
+    assert.deepEqual(computeWeeklyPortfolioVsXeqt([], xeqtPrices), []);
+    assert.deepEqual(computeWeeklyPortfolioVsXeqt(null, xeqtPrices), []);
+    assert.deepEqual(computeWeeklyPortfolioVsXeqt([fullHistory[0]], xeqtPrices), []);
+    assert.deepEqual(computeWeeklyPortfolioVsXeqt(fullHistory, []), []);
+    assert.deepEqual(computeWeeklyPortfolioVsXeqt(fullHistory, null), []);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt verifies outperformance: portfolio beat XEQT by +1.50%', () => {
+    // Week 1: Port $100k, XEQT $50
+    // Week 2: Port $102.5k (+2.5%), XEQT $50.50 (+1.0%)
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 75000 },
+      { week: 2, date: '2025-01-08', totalCAD: 102500, totalUSD: 76875 }
+    ];
+    const mockPrices = [50, 50.50];
+
+    const result = computeWeeklyPortfolioVsXeqt(mockRecords, mockPrices, 'CAD', 'PCT', 'all');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].week, 2);
+    assert.equal(result[0].portfolioReturnPct, 2.5);
+    assert.equal(result[0].xeqtReturnPct, 1.0);
+    assert.equal(result[0].spreadPct, 1.5);
+    assert.equal(result[0].chartVal, 1.5);
+    assert.equal(result[0].isBeat, true);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt verifies underperformance: portfolio lost against XEQT by -1.50%', () => {
+    // Week 1: Port $100k, XEQT $50
+    // Week 2: Port $99k (-1.0%), XEQT $50.25 (+0.5%)
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 75000 },
+      { week: 2, date: '2025-01-08', totalCAD: 99000, totalUSD: 74250 }
+    ];
+    const mockPrices = [50, 50.25];
+
+    const result = computeWeeklyPortfolioVsXeqt(mockRecords, mockPrices, 'CAD', 'PCT', 'all');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].week, 2);
+    assert.equal(result[0].portfolioReturnPct, -1.0);
+    assert.equal(result[0].xeqtReturnPct, 0.5);
+    assert.equal(result[0].spreadPct, -1.5);
+    assert.equal(result[0].chartVal, -1.5);
+    assert.equal(result[0].isBeat, false);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt detects beat in down market when portfolio drops less than XEQT', () => {
+    // Week 1: Port $100k, XEQT $50
+    // Week 2: Port $98k (-2.0%), XEQT $47.75 (-4.5%)
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 75000 },
+      { week: 2, date: '2025-01-08', totalCAD: 98000, totalUSD: 73500 }
+    ];
+    const mockPrices = [50, 47.75];
+
+    const result = computeWeeklyPortfolioVsXeqt(mockRecords, mockPrices, 'CAD', 'PCT', 'all');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].portfolioReturnPct, -2.0);
+    assert.equal(result[0].xeqtReturnPct, -4.5);
+    assert.equal(result[0].spreadPct, 2.5);
+    assert.equal(result[0].isBeat, true);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt calculates dollar excess spread when unit is VAL', () => {
+    // Week 1: Port $100k, XEQT $50
+    // Week 2: Port $102.5k (+$2,500 / +2.5%), XEQT $50.50 (+1.0%)
+    // If $100k was in XEQT, gain would be $1,000. Excess = $2,500 - $1,000 = $1,500.
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 75000 },
+      { week: 2, date: '2025-01-08', totalCAD: 102500, totalUSD: 76875 }
+    ];
+    const mockPrices = [50, 50.50];
+
+    const result = computeWeeklyPortfolioVsXeqt(mockRecords, mockPrices, 'CAD', 'VAL', 'all');
+    assert.equal(result.length, 1);
+    assert.equal(result[0].spreadVal, 1500);
+    assert.equal(result[0].chartVal, 1500);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt supports USD currency', () => {
+    const mockRecords = [
+      { week: 1, date: '2025-01-01', totalCAD: 100000, totalUSD: 75000 },
+      { week: 2, date: '2025-01-08', totalCAD: 102000, totalUSD: 77250 }
+    ];
+    const mockPrices = [50, 50]; // In CAD, XEQT flat. In USD, FX changed.
+
+    const resultUSD = computeWeeklyPortfolioVsXeqt(mockRecords, mockPrices, 'USD', 'PCT', 'all');
+    assert.equal(resultUSD.length, 1);
+    assert.equal(resultUSD[0].portfolioStartVal, 75000);
+    assert.equal(resultUSD[0].portfolioEndVal, 77250);
+    assert.equal(resultUSD[0].portfolioReturnPct, 3.0);
+  });
+
+  await t.test('computeWeeklyPortfolioVsXeqt operates smoothly across real historical data and timeframes', () => {
+    const timeframes = ['all', 'last-52', '2025'];
+    for (const tf of timeframes) {
+      const result = computeWeeklyPortfolioVsXeqt(fullHistory, xeqtPrices, 'CAD', 'PCT', tf);
+      assert.ok(result.length > 0, `Returns results for timeframe ${tf}`);
+      if (tf === 'last-52' && fullHistory.length > 53) {
+        assert.equal(result.length, 52);
+      }
+      for (const item of result) {
+        assert.ok(Number.isFinite(item.chartVal), 'chartVal is finite');
+        assert.ok(Number.isFinite(item.spreadPct), 'spreadPct is finite');
+        assert.ok(Number.isFinite(item.xeqtReturnPct), 'xeqtReturnPct is finite');
+        assert.ok(typeof item.isBeat === 'boolean', 'isBeat is boolean');
+      }
+    }
+  });
+
+  await t.test('setXeqtWeeklyCurrency, setXeqtWeeklyUnit, setXeqtWeeklyTimeframe manage state transitions', () => {
+    resetXeqtWeeklyChartState();
+    let state = getXeqtWeeklyChartState();
+    assert.equal(state.currentXeqtWeeklyCurrency, 'CAD');
+    assert.equal(state.currentXeqtWeeklyUnit, 'PCT');
+    assert.equal(state.currentXeqtWeeklyTimeframe, 'last-52');
+
+    setXeqtWeeklyCurrency('USD');
+    assert.equal(getXeqtWeeklyChartState().currentXeqtWeeklyCurrency, 'USD');
+
+    setXeqtWeeklyUnit('VAL');
+    assert.equal(getXeqtWeeklyChartState().currentXeqtWeeklyUnit, 'VAL');
+
+    setXeqtWeeklyTimeframe('2025');
+    assert.equal(getXeqtWeeklyChartState().currentXeqtWeeklyTimeframe, '2025');
+
+    resetXeqtWeeklyChartState();
+    state = getXeqtWeeklyChartState();
+    assert.equal(state.currentXeqtWeeklyCurrency, 'CAD');
+    assert.equal(state.currentXeqtWeeklyUnit, 'PCT');
+    assert.equal(state.currentXeqtWeeklyTimeframe, 'last-52');
   });
 });
 
