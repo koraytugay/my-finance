@@ -3880,7 +3880,6 @@ function renderWeeklyPortfolioVsXeqtChart() {
     if (typeof document === 'undefined') return;
     const box = document.getElementById('xeqt-weekly-svg-box');
     const titleEl = document.getElementById('xeqt-weekly-chart-title');
-    const subtitleEl = document.getElementById('xeqt-weekly-chart-subtitle');
     const legendEl = document.getElementById('xeqt-weekly-legend');
     if (!box || !rawHistory || rawHistory.length <= 1) {
         if (box) {
@@ -3943,10 +3942,6 @@ function renderWeeklyPortfolioVsXeqtChart() {
         titleEl.textContent = isPct
             ? `📊 Weekly Performance vs XEQT (% Spread - ${tfLabel} - ${curLabel})`
             : `📊 Weekly Performance vs XEQT ($ Spread - ${tfLabel} - ${curLabel})`;
-    }
-
-    if (subtitleEl) {
-        subtitleEl.textContent = `Weekly beat or lag against XEQT benchmark • Beat in ${beatCount} of ${items.length} weeks (${beatPct}%) • Average: ${avgStr}`;
     }
 
     const width = 1000;

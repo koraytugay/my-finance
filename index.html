@@ -192,7 +192,7 @@
                             Overlay XEQT
                         </label>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                         <div class="timeframe-toggle" id="main-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2024" onclick="setMainTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Toggle Year 2024 overlay">2024</button>
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2025" onclick="setMainTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Toggle Year 2025 overlay">2025</button>
@@ -234,7 +234,7 @@
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <h2 class="section-title" id="xeqt-rel-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Portfolio vs XEQT Progression</h2>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                         <div class="timeframe-toggle" id="xeqt-rel-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2024" onclick="setXeqtRelTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 relative progression">2024</button>
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2025" onclick="setXeqtRelTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 relative progression">2025</button>
@@ -275,9 +275,8 @@
                 <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                         <h2 class="section-title" id="xeqt-weekly-chart-title" style="margin: 0; font-size: 1.15rem;">📊 Weekly Performance vs XEQT</h2>
-                        <span id="xeqt-weekly-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Weekly percentage beat or lag against XEQT benchmark</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                         <div class="timeframe-toggle" id="xeqt-weekly-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2024" onclick="setXeqtWeeklyTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 weekly relative performance">2024</button>
                             <button type="button" class="btn-secondary timeframe-pill" data-timeframe="2025" onclick="setXeqtWeeklyTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 weekly relative performance">2025</button>
@@ -318,7 +317,7 @@
                         <h2 class="section-title" id="ath-bar-chart-title" style="margin: 0; font-size: 1.15rem;">🏆 All-Time High Increments</h2>
                         <span id="ath-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Growth jump per All-Time High milestone</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                         <div class="currency-toggle" id="ath-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
                             <button type="button" id="btn-ath-cur-cad" class="btn-secondary active" onclick="setAthBarCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display increments in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-ath-cur-usd" class="btn-secondary" onclick="setAthBarCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display increments in US Dollars (USD $)">USD ($)</button>
@@ -358,7 +357,7 @@
                         <h2 class="section-title" id="heatmap-title" style="margin: 0; font-size: 1.15rem;">🗓️ Monthly Returns Heatmap</h2>
                         <span id="heatmap-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
                         <div class="currency-toggle" id="heatmap-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
                             <button type="button" id="btn-heatmap-cur-cad" class="btn-secondary active" onclick="setHeatmapCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-heatmap-cur-usd" class="btn-secondary" onclick="setHeatmapCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>
