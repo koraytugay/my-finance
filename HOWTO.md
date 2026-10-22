@@ -82,14 +82,14 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 | Page | File | Purpose & Key Features |
 | :--- | :--- | :--- |
-| **Main** | `index.html` | High-level executive dashboard, total net worth, net worth progression, ATH increments, monthly returns heatmap, weekly net worth change, 52-week & YTD stats. |
+| **Main** | `index.html` | High-level executive dashboard, total net worth, net worth progression, ATH increments, monthly returns heatmap, weekly net worth change, drawdown underwater chart, 52-week & YTD stats. |
 | **Holdings** | `holdings.html` | Searchable, sortable holdings table and card view with asset class breakdown. |
 | **Net Worth History** | `history.html` | Comprehensive weekly history log, interactive SVG timeline chart, and milestone markers. |
 | **Asset Allocation** | `allocation.html` | Geographic diversification (US, Canada, Developed, Emerging) and factor tilt analysis. |
 | **Accounts & Brokerages** | `accounts.html` | Grouping by institution with clean sub-grouping by Account (TFSA, RRSP, Non-Reg, Cash). |
 | **Dividends & Cashflow** | `dividends.html` | Annual, monthly & daily passive income projections, tax-sheltered cashflow, 12-month schedule & 2% fixed income rule. |
 | **Financial Stats** | `stats.html` | Asset concentration, diversification scores, and portfolio records. |
-| **Performance** | `performance.html` | Drawdown underwater chart, annualized volatility (σ), Sharpe/Sortino ratios & historical crisis stress testing. |
+| **Performance** | `performance.html` | Annualized volatility (σ), Sharpe/Sortino ratios, rolling 52-week returns & historical crisis stress testing. |
 | **Projections** | `projections.html` | Interactive 30-year FIRE & wealth compounding simulator, milestone countdowns, and Safe Withdrawal Rate (SWR) planner. |
 | **Tax Location** | `tax.html` | Tax-efficiency matrix: asset placement across Tax-Free, Tax-Deferred, and Taxable wrappers. |
 

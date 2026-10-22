@@ -66,7 +66,12 @@ const {
   setXeqtWeeklyUnit,
   setXeqtWeeklyTimeframe,
   getXeqtWeeklyChartState,
-  resetXeqtWeeklyChartState
+  resetXeqtWeeklyChartState,
+  setDrawdownCurrency,
+  setDrawdownUnit,
+  setDrawdownMode,
+  getDrawdownChartState,
+  resetDrawdownChartState
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -2759,6 +2764,62 @@ test('Weekly Portfolio vs XEQT Performance Suite', async (t) => {
     assert.equal(state.currentXeqtWeeklyTimeframe, 'last-52');
   });
 });
+
+test('Portfolio Drawdown Underwater Chart Suite (Main Page)', async (t) => {
+  await t.test('setDrawdownCurrency and setDrawdownUnit manage state transitions correctly', () => {
+    resetDrawdownChartState();
+    let state = getDrawdownChartState();
+    assert.equal(state.currentDrawdownCurrency, 'CAD');
+    assert.equal(state.currentDrawdownUnit, 'PCT');
+
+    setDrawdownCurrency('USD');
+    assert.equal(getDrawdownChartState().currentDrawdownCurrency, 'USD');
+
+    setDrawdownUnit('VAL');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
+
+    // Invalid values should be ignored
+    setDrawdownCurrency('EUR');
+    assert.equal(getDrawdownChartState().currentDrawdownCurrency, 'USD');
+
+    setDrawdownUnit('INVALID');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
+
+    // setDrawdownMode backward compatibility
+    setDrawdownMode('pct');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'PCT');
+
+    setDrawdownMode('cad');
+    assert.equal(getDrawdownChartState().currentDrawdownCurrency, 'CAD');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
+
+    resetDrawdownChartState();
+    state = getDrawdownChartState();
+    assert.equal(state.currentDrawdownCurrency, 'CAD');
+    assert.equal(state.currentDrawdownUnit, 'PCT');
+  });
+
+  await t.test('calculateDrawdownMetrics supports multi-currency CAD and USD calculations', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000, totalUSD: 70000 },
+      { week: 2, date: '2025-01-10', totalCAD: 120000, totalUSD: 85000 }, // ATH CAD 120k, ATH USD 85k
+      { week: 3, date: '2025-01-17', totalCAD: 105000, totalUSD: 76500 }  // CAD: -15k (-12.5%), USD: -8.5k (-10.0%)
+    ];
+
+    const metricsCAD = calculateDrawdownMetrics(history, null, 'CAD');
+    assert.equal(metricsCAD.overallPeakCAD, 120000);
+    assert.equal(metricsCAD.currentDDCAD, -15000);
+    assert.equal(metricsCAD.maxDDCAD, -15000);
+    assert.equal(Number(metricsCAD.currentDDPct.toFixed(2)), -12.5);
+
+    const metricsUSD = calculateDrawdownMetrics(history, null, 'USD');
+    assert.equal(metricsUSD.overallPeakVal, 85000);
+    assert.equal(metricsUSD.currentDDVal, -8500);
+    assert.equal(metricsUSD.maxDDVal, -8500);
+    assert.equal(Number(metricsUSD.currentDDPct.toFixed(2)), -10.0);
+  });
+});
+
 
 
 

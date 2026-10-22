@@ -574,59 +574,6 @@
                 </div>
             </div>
 
-            <!-- Max Drawdown Underwater Graph -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
-                            📉 Portfolio Drawdown from Peak (Underwater Chart)
-                        </h3>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
-                            Visualizes market corrections and recovery time. The 0 line represents previous all-time highs; dips illustrate pullbacks.
-                        </p>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">View:</span>
-                        <div class="currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-dd-pct" class="btn-secondary active" onclick="setDrawdownMode('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">Percentage (%)</button>
-                            <button type="button" id="btn-dd-cad" class="btn-secondary" onclick="setDrawdownMode('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">Dollars ($ CAD)</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Drawdown Stat Cards -->
-                <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
-                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #991b1b; text-transform: uppercase;">Max Drawdown (All-Time)</div>
-                        <div id="dd-stat-max" style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">-$0.00 (-0.0%)</div>
-                        <div id="dd-stat-max-date" style="font-size: 0.75rem; color: #b91c1c;">Week - (-)</div>
-                    </div>
-                    <div id="dd-stat-current-card" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div id="dd-stat-current-title" style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase;">Current Drawdown</div>
-                        <div id="dd-stat-current" style="font-size: 1.25rem; font-weight: 800; color: #16a34a;">$0.00 (0.0%)</div>
-                        <div id="dd-stat-current-status" style="font-size: 0.75rem; color: #15803d;">At All-Time High</div>
-                    </div>
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Longest Recovery Period</div>
-                        <div id="dd-stat-longest-duration" style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">- weeks</div>
-                        <div id="dd-stat-longest-dates" style="font-size: 0.75rem; color: #64748b;">Peak to new high</div>
-                    </div>
-                </div>
-
-                <!-- SVG Area Container -->
-                <div class="chart-layout-grid">
-                    <div class="chart-canvas-col">
-                        <div id="drawdown-chart-container" style="width: 100%; height: 230px; position: relative;">
-                            <div id="drawdown-svg-wrap" style="width: 100%; height: 100%;"></div>
-                            <div id="drawdown-tooltip" class="chart-tooltip" style="display: none;"></div>
-                        </div>
-                    </div>
-                    <div class="chart-info-card" id="drawdown-info-card">
-                        <!-- Populated dynamically via performance.js -->
-                    </div>
-                </div>
-            </div>
-
             <!-- Annual Performance Summary Table -->
             <div class="controls" style="padding: 20px; margin-bottom: 30px;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">

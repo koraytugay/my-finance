@@ -35,6 +35,10 @@ let currentXeqtWeeklyTimeframe = 'last-52'; // 'last-52' | 'all' | '2024' | '202
 let currentXeqtWeeklyCurrency = 'CAD'; // 'CAD' | 'USD'
 let currentXeqtWeeklyUnit = 'PCT'; // 'PCT' | 'VAL' (default '%' per user request)
 
+// Drawdown Underwater Chart State
+let currentDrawdownCurrency = 'CAD'; // 'CAD' | 'USD'
+let currentDrawdownUnit = 'PCT'; // 'PCT' | 'VAL'
+
 async function initMain() {
     const loadingEl = document.getElementById('loading');
     const contentEl = document.getElementById('main-content');
@@ -74,6 +78,7 @@ async function initMain() {
         renderAthBarChart();
         renderMonthlyHeatmap();
         renderWeeklyBarChart();
+        renderDrawdownChart();
         renderAssetClassTable(mainData, holdings);
         renderAccountTypeTable(mainData, holdings, enrichedHistory);
         renderCategoryTable(mainData, holdings);
@@ -5357,6 +5362,489 @@ function renderWeeklyBarChart() {
     }
 }
 
+// ==========================================
+// Max Drawdown Underwater Graph Controller
+// ==========================================
+
+function updateDrawdownControlsUI() {
+    if (typeof document === 'undefined') return;
+    const btnCad = document.getElementById('btn-dd-cur-cad');
+    const btnUsd = document.getElementById('btn-dd-cur-usd');
+    const btnVal = document.getElementById('btn-dd-unit-val');
+    const btnPct = document.getElementById('btn-dd-unit-pct');
+
+    if (btnCad && btnUsd) {
+        if (currentDrawdownCurrency === 'CAD') {
+            btnCad.classList.add('active');
+            btnCad.style.background = '#1f2328';
+            btnCad.style.color = '#fff';
+            btnUsd.classList.remove('active');
+            btnUsd.style.background = '#fff';
+            btnUsd.style.color = '#24292f';
+        } else {
+            btnUsd.classList.add('active');
+            btnUsd.style.background = '#1f2328';
+            btnUsd.style.color = '#fff';
+            btnCad.classList.remove('active');
+            btnCad.style.background = '#fff';
+            btnCad.style.color = '#24292f';
+        }
+    }
+
+    if (btnVal && btnPct) {
+        if (currentDrawdownUnit === 'VAL') {
+            btnVal.classList.add('active');
+            btnVal.style.background = '#1f2328';
+            btnVal.style.color = '#fff';
+            btnPct.classList.remove('active');
+            btnPct.style.background = '#fff';
+            btnPct.style.color = '#24292f';
+        } else {
+            btnPct.classList.add('active');
+            btnPct.style.background = '#1f2328';
+            btnPct.style.color = '#fff';
+            btnVal.classList.remove('active');
+            btnVal.style.background = '#fff';
+            btnVal.style.color = '#24292f';
+        }
+    }
+}
+
+function setDrawdownCurrency(currency) {
+    if (currency !== 'CAD' && currency !== 'USD') return;
+    currentDrawdownCurrency = currency;
+    updateDrawdownControlsUI();
+    renderDrawdownChart();
+}
+
+function setDrawdownUnit(unit) {
+    if (unit !== 'VAL' && unit !== 'PCT') return;
+    currentDrawdownUnit = unit;
+    updateDrawdownControlsUI();
+    renderDrawdownChart();
+}
+
+function setDrawdownMode(mode) {
+    if (mode === 'pct') {
+        currentDrawdownUnit = 'PCT';
+    } else if (mode === 'cad') {
+        currentDrawdownCurrency = 'CAD';
+        currentDrawdownUnit = 'VAL';
+    }
+    updateDrawdownControlsUI();
+    renderDrawdownChart();
+}
+
+function renderDrawdownInfoCard(html, isActive = false) {
+    if (typeof document === 'undefined') return;
+    const card = document.getElementById('drawdown-info-card');
+    if (!card) return;
+    card.innerHTML = html;
+    if (isActive) card.classList.add('active');
+    else card.classList.remove('active');
+}
+
+function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit = 'PCT') {
+    if (!nearest || !nearest.r) return '';
+    const isPeak = Math.abs(nearest.ddVal) < 1;
+    const ddColor = isPeak ? '#16a34a' : '#cf222e';
+    const dateStr = typeof formatDate === 'function' ? formatDate(nearest.r.date) : nearest.r.date;
+    const isUsd = currency === 'USD';
+    const netVal = isUsd && nearest.r.totalUSD !== undefined ? nearest.r.totalUSD : (nearest.val || nearest.r.totalCAD);
+    const totalNet = typeof formatCurrency === 'function' ? formatCurrency(netVal, currency) : `$${netVal.toFixed(2)}`;
+    const peakVal = typeof formatCurrency === 'function' ? formatCurrency(nearest.peak, currency) : `$${nearest.peak.toFixed(2)}`;
+    const formattedDdVal = typeof formatCurrency === 'function' ? formatCurrency(nearest.ddVal, currency) : `$${nearest.ddVal.toFixed(2)}`;
+
+    const badgeHtml = isHover
+        ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+        : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+
+    const primaryVal = unit === 'VAL'
+        ? (isPeak ? '$0.00' : formattedDdVal)
+        : (isPeak ? '0.00%' : `${nearest.ddPct.toFixed(2)}%`);
+
+    const subLabel = unit === 'VAL' ? 'Drawdown (%)' : 'Drawdown Amount';
+    const subVal = unit === 'VAL'
+        ? (isPeak ? '0.00% (At Peak)' : `${nearest.ddPct.toFixed(2)}%`)
+        : (isPeak ? '$0.00 (At Peak)' : formattedDdVal);
+
+    return `
+        <div class="chart-card-header">
+            <span class="chart-card-date">Week ${nearest.r.week} &bull; ${dateStr}</span>
+            ${badgeHtml}
+        </div>
+        <div class="chart-card-primary-val" style="color: ${ddColor};">
+            ${primaryVal}
+        </div>
+        <div class="chart-card-sub-val" style="color: #64748b;">
+            ${subLabel}: <strong style="color: ${ddColor};">${subVal}</strong>
+        </div>
+        <div class="chart-card-section-divider">
+            <div class="chart-card-row">
+                <span>Portfolio Net Worth:</span>
+                <strong>${totalNet}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Previous Peak (ATH):</span>
+                <strong>${peakVal}</strong>
+            </div>
+            <div class="chart-card-row">
+                <span>Correction Status:</span>
+                <span style="font-weight: 700; color: ${ddColor};">
+                    ${isPeak ? '🟢 Peak Reached' : '🔴 Underwater Pullback'}
+                </span>
+            </div>
+        </div>
+        <div class="chart-card-footer">
+            💡 Move cursor across underwater curve to inspect historical drawdowns
+        </div>
+    `;
+}
+
+function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') {
+    if (!history || history.length === 0) {
+        return {
+            maxDDCAD: 0,
+            maxDDVal: 0,
+            maxDDPct: 0,
+            maxDDRecord: null,
+            currentDDCAD: 0,
+            currentDDVal: 0,
+            currentDDPct: 0,
+            currentPeakCAD: 0,
+            overallPeakCAD: 0,
+            overallPeakVal: 0,
+            longestRecoveryWeeks: 0,
+            longestStart: '',
+            longestEnd: '',
+            points: []
+        };
+    }
+
+    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    let runningPeak = 0;
+    let maxDDRecord = history[0];
+    let maxDDVal = 0;
+    let maxDDPct = 0;
+
+    let longestRecoveryWeeks = 0;
+    let longestStart = '';
+    let longestEnd = '';
+    let currentStreak = 0;
+    let currentStreakStart = '';
+
+    const points = history.map((r, idx) => {
+        let val = Number(r[valKey]);
+        if (isNaN(val) || val <= 0) {
+            val = Number(r.totalCAD) || 0;
+        }
+        if (val > runningPeak) {
+            runningPeak = val;
+        }
+        const peak = runningPeak;
+        const ddVal = val - peak;
+        const ddPct = peak > 0 ? (ddVal / peak) * 100 : 0;
+
+        if (ddVal < maxDDVal) {
+            maxDDVal = ddVal;
+            maxDDPct = ddPct;
+            maxDDRecord = r;
+        }
+
+        // Recovery streak tracking (weeks spent under water below preceding peak)
+        if (ddVal < 0) {
+            if (currentStreak === 0) {
+                const prevRec = history[Math.max(0, idx - 1)];
+                currentStreakStart = prevRec ? prevRec.date : r.date;
+            }
+            currentStreak++;
+            if (currentStreak > longestRecoveryWeeks) {
+                longestRecoveryWeeks = currentStreak;
+                longestStart = currentStreakStart;
+                longestEnd = r.date;
+            }
+        } else {
+            currentStreak = 0;
+        }
+
+        return {
+            r,
+            val,
+            totalCAD: Number(r.totalCAD) || 0,
+            peak,
+            ddVal,
+            ddCAD: ddVal,
+            ddPct
+        };
+    });
+
+    const latest = history[history.length - 1];
+    let latestVal = Number(latest ? latest[valKey] : 0);
+    if (isNaN(latestVal) || latestVal <= 0) {
+        latestVal = latest ? Number(latest.totalCAD) || 0 : 0;
+    }
+    const liveVal = (currentVal !== null && currentVal !== undefined && Number(currentVal) > 0)
+        ? Number(currentVal)
+        : latestVal;
+
+    const overallPeak = Math.max(runningPeak, liveVal);
+    const currentDDVal = liveVal - overallPeak;
+    const currentDDPct = overallPeak > 0 ? (currentDDVal / overallPeak) * 100 : 0;
+
+    return {
+        maxDDCAD: maxDDVal,
+        maxDDVal,
+        maxDDPct,
+        maxDDRecord,
+        currentDDCAD: currentDDVal,
+        currentDDVal,
+        currentDDPct,
+        currentPeakCAD: runningPeak,
+        overallPeakCAD: overallPeak,
+        overallPeakVal: overallPeak,
+        longestRecoveryWeeks,
+        longestStart,
+        longestEnd,
+        points
+    };
+}
+
+function renderDrawdownChart() {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById('drawdown-chart-container');
+    const svgWrap = document.getElementById('drawdown-svg-wrap') || container;
+    const tooltip = document.getElementById('drawdown-tooltip');
+    if (!container || !svgWrap || !rawHistory || rawHistory.length === 0) return;
+    svgWrap.innerHTML = '';
+
+    const currency = currentDrawdownCurrency;
+    const unit = currentDrawdownUnit;
+    const isPct = unit === 'PCT';
+
+    updateDrawdownControlsUI();
+
+    // 1. Calculate Drawdown Metrics & Stats dynamically
+    const latest = rawHistory[rawHistory.length - 1];
+    const liveVal = currency === 'USD' ? (Number(latest.totalUSD) || 0) : (Number(latest.totalCAD) || 0);
+
+    const metrics = calculateDrawdownMetrics(rawHistory, liveVal, currency);
+    const { maxDDVal, maxDDPct, maxDDRecord, currentDDVal, currentDDPct, overallPeakVal, longestRecoveryWeeks, longestStart, longestEnd } = metrics;
+
+    // Update Sub-cards
+    const maxDateStr = maxDDRecord ? (typeof formatDate === 'function' ? formatDate(maxDDRecord.date) : maxDDRecord.date) : '-';
+    const maxWeekStr = maxDDRecord ? `Week ${maxDDRecord.week} (${maxDateStr})` : 'Week - (-)';
+    const maxStatEl = document.getElementById('dd-stat-max');
+    const maxDateEl = document.getElementById('dd-stat-max-date');
+    if (maxStatEl) maxStatEl.textContent = `${formatCurrency(maxDDVal, currency)} (${maxDDPct.toFixed(2)}%)`;
+    if (maxDateEl) maxDateEl.textContent = maxWeekStr;
+
+    const curStatEl = document.getElementById('dd-stat-current');
+    const curStatusEl = document.getElementById('dd-stat-current-status');
+    const curCardEl = document.getElementById('dd-stat-current-card') || (curStatEl ? curStatEl.parentElement : null);
+    const curTitleEl = document.getElementById('dd-stat-current-title') || (curCardEl ? curCardEl.firstElementChild : null);
+
+    if (curStatEl && curStatusEl) {
+        if (currentDDVal >= -1) {
+            curStatEl.textContent = '$0.00 (0.0%)';
+            curStatEl.style.color = '#16a34a';
+            curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
+            curStatusEl.style.color = '#15803d';
+            if (curCardEl) {
+                curCardEl.style.background = '#f0fdf4';
+                curCardEl.style.borderColor = '#bbf7d0';
+            }
+            if (curTitleEl) curTitleEl.style.color = '#166534';
+        } else {
+            curStatEl.textContent = `${formatCurrency(currentDDVal, currency)} (${currentDDPct.toFixed(2)}%)`;
+            curStatEl.style.color = '#dc2626';
+            curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} from ATH (${formatCurrency(overallPeakVal, currency)})`;
+            curStatusEl.style.color = '#b91c1c';
+            if (curCardEl) {
+                curCardEl.style.background = '#fef2f2';
+                curCardEl.style.borderColor = '#fecaca';
+            }
+            if (curTitleEl) curTitleEl.style.color = '#991b1b';
+        }
+    }
+
+    const durationEl = document.getElementById('dd-stat-longest-duration');
+    const datesEl = document.getElementById('dd-stat-longest-dates');
+    if (durationEl) durationEl.textContent = `${longestRecoveryWeeks} weeks`;
+    const formattedLongestStart = longestStart ? (typeof formatDate === 'function' ? formatDate(longestStart) : longestStart) : '';
+    const formattedLongestEnd = longestEnd ? (typeof formatDate === 'function' ? formatDate(longestEnd) : longestEnd) : '';
+    if (datesEl) datesEl.textContent = longestStart ? `${formattedLongestStart} to ${formattedLongestEnd}` : 'Fast recoveries';
+
+    // 2. SVG Geometry
+    const width = container.clientWidth || 900;
+    const height = 230;
+    const padding = { top: 25, bottom: 35, left: 65, right: 20 };
+    const chartWidth = Math.max(10, width - padding.left - padding.right);
+    const chartHeight = height - padding.top - padding.bottom;
+
+    const minVal = isPct ? Math.min(maxDDPct * 1.15, -1) : Math.min(maxDDVal * 1.15, -1000);
+
+    function getY(val) {
+        const fraction = minVal !== 0 ? (val / minVal) : 0; // 0 to 1
+        return padding.top + (fraction * chartHeight);
+    }
+
+    function getX(idx) {
+        return padding.left + (idx * (chartWidth / Math.max(1, rawHistory.length - 1)));
+    }
+
+    let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible; font-family: inherit;">`;
+
+    // Linear gradient definition
+    svg += `
+        <defs>
+            <linearGradient id="underwaterGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="#b91c1c" stop-opacity="0.55"/>
+            </linearGradient>
+        </defs>
+    `;
+
+    // Horizontal grid lines
+    const gridTicks = 4;
+    for (let i = 0; i <= gridTicks; i++) {
+        const tickVal = (minVal / gridTicks) * i;
+        const tickY = getY(tickVal);
+        const label = isPct ? `${tickVal.toFixed(1)}%` : formatCurrency(tickVal, currency);
+        svg += `
+            <line x1="${padding.left}" y1="${tickY}" x2="${width - padding.right}" y2="${tickY}" stroke="#e2e8f0" stroke-width="${i === 0 ? '1.5' : '1'}" stroke-dasharray="${i === 0 ? '' : '3,3'}"/>
+            <text x="${padding.left - 8}" y="${tickY + 4}" font-size="11" font-weight="${i === 0 ? '700' : '500'}" fill="${i === 0 ? '#1f2328' : '#64748b'}" text-anchor="end">${label}</text>
+        `;
+    }
+
+    // Build Path Coordinates
+    const points = metrics.points.map((pt, idx) => {
+        const val = isPct ? pt.ddPct : pt.ddVal;
+        return {
+            x: getX(idx),
+            y: getY(val),
+            r: pt.r,
+            val,
+            ddVal: pt.ddVal,
+            ddCAD: pt.ddCAD,
+            ddPct: pt.ddPct,
+            peak: pt.peak
+        };
+    });
+
+    if (points.length > 0) {
+        let pathD = `M ${points[0].x},${points[0].y}`;
+        for (let i = 1; i < points.length; i++) {
+            pathD += ` L ${points[i].x},${points[i].y}`;
+        }
+
+        const areaD = `${pathD} L ${points[points.length - 1].x},${padding.top} L ${points[0].x},${padding.top} Z`;
+
+        // Render Area & Stroke
+        svg += `<path d="${areaD}" fill="url(#underwaterGrad)"/>`;
+        svg += `<path d="${pathD}" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>`;
+
+        // Top zero baseline
+        svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${width - padding.right}" y2="${padding.top}" stroke="#475569" stroke-width="1.5"/>`;
+
+        // Max Drawdown Point Marker
+        const maxPt = points.reduce((min, p) => p.val < min.val ? p : min, points[0]);
+        if (maxPt && maxPt.val < 0) {
+            svg += `
+                <circle cx="${maxPt.x}" cy="${maxPt.y}" r="5" fill="#b91c1c" stroke="#ffffff" stroke-width="2"/>
+                <text x="${maxPt.x}" y="${Math.min(height - 10, maxPt.y + 16)}" font-size="10.5" font-weight="800" fill="#b91c1c" text-anchor="middle">
+                    ${isPct ? maxPt.ddPct.toFixed(1) + '%' : formatCurrency(maxPt.ddVal, currency)}
+                </text>
+            `;
+        }
+
+        // X-Axis Date Labels (sample 6 evenly spaced dates)
+        const fmt = typeof formatMonthShort === 'function' ? formatMonthShort : (typeof formatDate === 'function' ? formatDate : (d => d));
+        const step = Math.max(1, Math.floor(rawHistory.length / 5));
+        for (let i = 0; i < rawHistory.length; i += step) {
+            const pt = points[i];
+            if (pt) {
+                svg += `<text x="${pt.x}" y="${height - 8}" font-size="10.5" fill="#64748b" text-anchor="middle">${fmt(pt.r.date)}</text>`;
+            }
+        }
+    }
+
+    // Vertical Cursor line (hidden initially)
+    svg += `<line id="dd-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;"/>`;
+
+    // Intersection hover dot on the curve
+    svg += `<circle id="dd-hover-dot" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;"/>`;
+
+    // Transparent overlay rect for mouse tracking across the entire chart area
+    svg += `<rect id="dd-overlay" x="0" y="0" width="${width}" height="${height}" fill="transparent" style="cursor: crosshair;"/>`;
+
+    svg += `</svg>`;
+    svgWrap.innerHTML = svg;
+
+    // Interactive Hover Tracking
+    const svgEl = svgWrap.querySelector('svg');
+    const overlay = svgWrap.querySelector('#dd-overlay');
+    const cursor = svgWrap.querySelector('#dd-cursor-line');
+    const hoverDot = svgWrap.querySelector('#dd-hover-dot');
+
+    if (!svgEl || !overlay || points.length === 0) return;
+
+    overlay.addEventListener('mousemove', (e) => {
+        const ctm = svgEl.getScreenCTM();
+        if (!ctm) return;
+
+        // Convert mouse event client coordinates to SVG coordinate system
+        const pt = svgEl.createSVGPoint();
+        pt.x = e.clientX;
+        pt.y = e.clientY;
+        const svgP = pt.matrixTransform(ctm.inverse());
+        const svgX = svgP.x;
+
+        const boundedX = Math.max(padding.left, Math.min(width - padding.right, svgX));
+
+        let nearest = points[0];
+        let minDist = Infinity;
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            const dist = Math.abs(p.x - boundedX);
+            if (dist < minDist) {
+                minDist = dist;
+                nearest = p;
+            }
+        }
+
+        // Align dashed line and dot to the nearest data point
+        if (cursor) {
+            cursor.setAttribute('x1', nearest.x);
+            cursor.setAttribute('x2', nearest.x);
+            cursor.style.display = 'block';
+        }
+
+        if (hoverDot) {
+            hoverDot.setAttribute('cx', nearest.x);
+            hoverDot.setAttribute('cy', nearest.y);
+            hoverDot.style.display = 'block';
+        }
+
+        if (tooltip) {
+            tooltip.style.display = 'none';
+        }
+
+        renderDrawdownInfoCard(buildDrawdownCardHtml(nearest, true, currency, unit), true);
+    });
+
+    overlay.addEventListener('mouseleave', () => {
+        if (cursor) cursor.style.display = 'none';
+        if (hoverDot) hoverDot.style.display = 'none';
+        if (tooltip) tooltip.style.display = 'none';
+        renderDrawdownInfoCard(buildDrawdownCardHtml(points[points.length - 1], false, currency, unit), false);
+    });
+
+    // Set initial card state
+    if (points.length > 0) {
+        renderDrawdownInfoCard(buildDrawdownCardHtml(points[points.length - 1], false, currency, unit), false);
+    }
+}
+
 function renderMainLastSynced(syncStatus, benchmarks) {
     if (typeof document === 'undefined') return;
     const wrapper = document.getElementById('main-last-synced-wrapper');
@@ -5384,6 +5872,7 @@ if (typeof window !== 'undefined' && typeof window.addEventListener === 'functio
             renderAthBarChart();
             renderMonthlyHeatmap();
             renderWeeklyBarChart();
+            renderDrawdownChart();
         }
     });
 }
@@ -5516,6 +6005,19 @@ if (typeof module !== 'undefined' && module.exports) {
             currentXeqtWeeklyTimeframe = 'last-52';
             currentXeqtWeeklyCurrency = 'CAD';
             currentXeqtWeeklyUnit = 'PCT';
+        },
+        calculateDrawdownMetrics,
+        renderDrawdownChart,
+        setDrawdownCurrency,
+        setDrawdownUnit,
+        setDrawdownMode,
+        getDrawdownChartState: () => ({
+            currentDrawdownCurrency,
+            currentDrawdownUnit
+        }),
+        resetDrawdownChartState: () => {
+            currentDrawdownCurrency = 'CAD';
+            currentDrawdownUnit = 'PCT';
         }
     };
 }

@@ -444,6 +444,57 @@
                 </div>
             </div>
 
+            <!-- Max Drawdown Underwater Graph -->
+            <div class="chart-wrapper" id="drawdown-wrapper" style="margin-top: 24px;">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                        <h2 class="section-title" id="drawdown-chart-title" style="margin: 0; font-size: 1.15rem;">📉 Portfolio Drawdown from Peak (Underwater Chart)</h2>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                        <div class="currency-toggle" id="drawdown-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-dd-cur-cad" class="btn-secondary active" onclick="setDrawdownCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-dd-cur-usd" class="btn-secondary" onclick="setDrawdownCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        </div>
+                        <div class="unit-toggle" id="drawdown-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
+                            <button type="button" id="btn-dd-unit-val" class="btn-secondary" onclick="setDrawdownUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display drawdown in Currency ($)">$</button>
+                            <button type="button" id="btn-dd-unit-pct" class="btn-secondary active" onclick="setDrawdownUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display drawdown in Percentage (%)">%</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Drawdown Stat Cards -->
+                <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
+                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #991b1b; text-transform: uppercase;">Max Drawdown (All-Time)</div>
+                        <div id="dd-stat-max" style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">-$0.00 (-0.0%)</div>
+                        <div id="dd-stat-max-date" style="font-size: 0.75rem; color: #b91c1c;">Week - (-)</div>
+                    </div>
+                    <div id="dd-stat-current-card" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
+                        <div id="dd-stat-current-title" style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase;">Current Drawdown</div>
+                        <div id="dd-stat-current" style="font-size: 1.25rem; font-weight: 800; color: #16a34a;">$0.00 (0.0%)</div>
+                        <div id="dd-stat-current-status" style="font-size: 0.75rem; color: #15803d;">At All-Time High</div>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Longest Recovery Period</div>
+                        <div id="dd-stat-longest-duration" style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">- weeks</div>
+                        <div id="dd-stat-longest-dates" style="font-size: 0.75rem; color: #64748b;">Peak to new high</div>
+                    </div>
+                </div>
+
+                <!-- SVG Area Container -->
+                <div class="chart-layout-grid">
+                    <div class="chart-canvas-col">
+                        <div id="drawdown-chart-container" style="width: 100%; height: 230px; position: relative;">
+                            <div id="drawdown-svg-wrap" style="width: 100%; height: 100%;"></div>
+                            <div id="drawdown-tooltip" class="chart-tooltip" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="chart-info-card" id="drawdown-info-card">
+                        <!-- Populated dynamically via main.js -->
+                    </div>
+                </div>
+            </div>
+
             <!-- Google Sheets Main Tab 3-Column Tables Layout -->
             <div class="main-grid">
                 <!-- 1. Asset Class Table -->
