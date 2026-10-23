@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-23T14:15:22.717Z",
+  "updatedAt": "2026-10-23T14:30:28.223Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-23",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.3979,
-    "cadUsdRate": 0.7154,
-    "updatedAt": "2026-10-23T14:15:22.717Z"
+    "usdCadRate": 1.3988,
+    "cadUsdRate": 0.7149,
+    "updatedAt": "2026-10-23T14:30:28.223Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -20,8 +20,8 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 44.64,
-      "returnPct": 40.2,
+      "currentPrice": 44.62,
+      "returnPct": 40.14,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-10-23",
@@ -139,7 +139,7 @@
         45.95,
         46.16,
         45.46,
-        44.64
+        44.62
       ]
     },
     "VFV": {
@@ -149,8 +149,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 189.13,
-      "returnPct": 39.94,
+      "currentPrice": 188.96,
+      "returnPct": 39.82,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-23",
@@ -268,7 +268,7 @@
         195.08,
         197.56,
         192.1,
-        189.13
+        188.96
       ]
     },
     "XBAL": {
@@ -278,8 +278,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.4,
-      "returnPct": 20.9,
+      "currentPrice": 35.38,
+      "returnPct": 20.83,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-10-23",
@@ -397,7 +397,7 @@
         35.89,
         36.06,
         35.77,
-        35.4
+        35.38
       ]
     },
     "XCB": {
@@ -407,8 +407,8 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.71,
-      "returnPct": -1.6,
+      "currentPrice": 19.72,
+      "returnPct": -1.55,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-23",
@@ -526,7 +526,7 @@
         19.64,
         19.72,
         19.73,
-        19.71
+        19.72
       ]
     }
   }
