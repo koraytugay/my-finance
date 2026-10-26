@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-26T17:15:25.149Z",
+  "updatedAt": "2026-10-26T17:30:26.240Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-26",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4012,
-    "cadUsdRate": 0.7137,
-    "updatedAt": "2026-10-26T17:15:25.149Z"
+    "usdCadRate": 1.4008,
+    "cadUsdRate": 0.7139,
+    "updatedAt": "2026-10-26T17:30:26.240Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -21,7 +21,7 @@
       "color": "#16a34a",
       "startPrice": 31.84,
       "currentPrice": 45.15,
-      "returnPct": 41.8,
+      "returnPct": 41.79,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -150,8 +150,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 191.07,
-      "returnPct": 41.38,
+      "currentPrice": 190.91,
+      "returnPct": 41.26,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -270,7 +270,7 @@
         197.56,
         192.1,
         189.37,
-        191.07
+        190.91
       ]
     },
     "XBAL": {
@@ -280,8 +280,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.66,
-      "returnPct": 21.79,
+      "currentPrice": 35.65,
+      "returnPct": 21.76,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -400,7 +400,7 @@
         36.06,
         35.77,
         35.48,
-        35.66
+        35.65
       ]
     },
     "XCB": {
@@ -410,8 +410,8 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.71,
-      "returnPct": -1.6,
+      "currentPrice": 19.7,
+      "returnPct": -1.65,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -530,7 +530,7 @@
         19.72,
         19.73,
         19.71,
-        19.71
+        19.7
       ]
     }
   }
