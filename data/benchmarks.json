@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-26T15:30:32.301Z",
+  "updatedAt": "2026-10-26T15:45:26.641Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-26",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4036,
+    "usdCadRate": 1.4035,
     "cadUsdRate": 0.7125,
-    "updatedAt": "2026-10-26T15:30:32.301Z"
+    "updatedAt": "2026-10-26T15:45:26.641Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -150,8 +150,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 191.53,
-      "returnPct": 41.72,
+      "currentPrice": 191.5,
+      "returnPct": 41.69,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -270,7 +270,7 @@
         197.56,
         192.1,
         189.37,
-        191.53
+        191.5
       ]
     },
     "XBAL": {
@@ -410,8 +410,8 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.72,
-      "returnPct": -1.55,
+      "currentPrice": 19.73,
+      "returnPct": -1.5,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-10-26",
@@ -530,7 +530,7 @@
         19.72,
         19.73,
         19.71,
-        19.72
+        19.73
       ]
     }
   }
