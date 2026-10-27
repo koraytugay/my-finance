@@ -1708,10 +1708,19 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
                 &bull; <span style="color: #dc2626; font-weight: 700;">Drawdown: -${downValStr} (-${downPctStr}% from peak)</span>
             `;
-        } else {
+        } else if (isHover) {
             subValHtml = `
                 ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
-                &bull; <span style="color: ${changeColor}; font-weight: 600;">${weeklyChangeStr}</span>
+                &bull; <span style="color: ${changeColor}; font-weight: 600;">Weekly: ${weeklyChangeStr}</span>
+            `;
+        } else {
+            const gainVal = (r[valKey] || 0) - baseVal;
+            const gainSign = gainVal >= 0 ? '+' : '';
+            const gainColor = gainVal >= 0 ? '#16a34a' : '#cf222e';
+            const gainValStr = `${gainSign}${formatCurrency(gainVal, currency)}`;
+            subValHtml = `
+                ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
+                &bull; <span style="color: ${gainColor}; font-weight: 600;">${gainValStr}</span>
             `;
         }
 
@@ -2564,14 +2573,10 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 ? (r.totalUSD / r.totalCAD)
                 : ((typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || (typeof rawBenchmarks !== 'undefined' && rawBenchmarks?.fx?.cadUsdRate) || 0.7073);
 
-            const weeklyChgVal = isUSD
-                ? (last.weeklyChangeUSD !== undefined ? last.weeklyChangeUSD : (r?.weeklyChangeUSD || 0))
-                : (last.weeklyChangeCAD !== undefined ? last.weeklyChangeCAD : (r?.weeklyChangeCAD || 0));
-            const weeklySign = weeklyChgVal >= 0 ? '+' : '';
-            const weeklyColor = weeklyChgVal >= 0 ? '#16a34a' : '#cf222e';
-            const weeklyPctVal = (last.weeklyChangePct !== undefined ? last.weeklyChangePct : (r?.weeklyChangePct || 0));
-            const weeklyPctSign = weeklyPctVal >= 0 ? '+' : '';
-            const weeklyChangeStr = `${weeklySign}${formatCurrency(weeklyChgVal, currency)} (${weeklyPctSign}${weeklyPctVal.toFixed(2)}%)`;
+            const yearlyGainVal = last.val - s.baseVal;
+            const yearlyGainSign = yearlyGainVal >= 0 ? '+' : '';
+            const yearlyGainColor = yearlyGainVal >= 0 ? '#16a34a' : '#cf222e';
+            const yearlyGainStr = `${yearlyGainSign}${formatCurrency(yearlyGainVal, currency)}`;
             const weekPrefix = r?.week ? `Week ${r.week} &bull; ` : '';
 
             let assetBreakdownHtml = '';
@@ -2614,7 +2619,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 </div>
                 <div class="chart-card-sub-val" style="color: #64748b;">
                     ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${last.pct.toFixed(2)}%</strong>`}
-                    ${(weeklyChgVal !== 0 || weeklyPctVal !== 0) ? ` &bull; <span style="color: ${weeklyColor}; font-weight: 600;">${weeklyChangeStr}</span>` : ''}
+                    &bull; <span style="color: ${yearlyGainColor}; font-weight: 600;">${yearlyGainStr}</span>
                 </div>
                 ${xeqtSection}
                 ${assetBreakdownHtml}

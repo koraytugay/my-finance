@@ -1334,6 +1334,8 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       assert.ok(mockCard.innerHTML.includes('XEQT Benchmark:'), 'Right panel info card must include XEQT Benchmark section');
       assert.ok(mockCard.innerHTML.includes('Spread:'), 'Right panel info card must include Spread');
       assert.ok(mockCard.innerHTML.includes('Return:'), 'Right panel info card must include Return comparison');
+      assert.ok(mockCard.innerHTML.includes('+$6,000.00'), 'Right panel info card must display yearly gain (+$6,000.00)');
+      assert.ok(!mockCard.innerHTML.includes('+$3,000.00'), 'Right panel info card must NOT display weekly gain (+$3,000.00) when idle');
 
       // Toggle off XEQT overlay and verify info card updates to remove XEQT
       await toggleMainXeqtOverlay(false);
