@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-29T19:00:31.837Z",
+  "updatedAt": "2026-10-29T19:15:24.737Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-10-29",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.3985,
-    "cadUsdRate": 0.7151,
-    "updatedAt": "2026-10-29T19:00:31.837Z"
+    "usdCadRate": 1.3986,
+    "cadUsdRate": 0.715,
+    "updatedAt": "2026-10-29T19:15:24.737Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -150,8 +150,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 191,
-      "returnPct": 41.32,
+      "currentPrice": 191.04,
+      "returnPct": 41.35,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-10-29",
@@ -270,7 +270,7 @@
         197.56,
         192.1,
         189.37,
-        191
+        191.04
       ]
     },
     "XBAL": {
