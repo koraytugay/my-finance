@@ -47,7 +47,7 @@ jobs:
           git add data/sync.json 2>/dev/null || true
           
           if ! git diff --quiet --staged; then
-            git commit -m "chore: automated sync ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git commit -m "chore: automated sync ($(date -u +'%Y-%m-%d %H:%M UTC')) [skip ci]"
             git pull --rebase origin ${{ github.ref_name }}
             git push
             echo "✓ Changes committed and pushed successfully."
