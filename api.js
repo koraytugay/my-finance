@@ -436,43 +436,18 @@ async function getMainData(forceRefresh = false) {
 
 // Data files are fetched straight from raw.githubusercontent.com when hosted on
 // GitHub Pages, so fresh data is visible without waiting for a Pages deployment.
-// raw.githubusercontent.com caches per branch URL for ~5 minutes and ignores query
-// strings, so we resolve the latest commit SHA first and fetch files pinned to it
-// (a SHA-pinned URL is unique per commit and therefore never stale).
-const RAW_REPO = 'koraytugay/my-finance';
-const RAW_BRANCH = 'main';
+const RAW_DATA_BASE = 'https://raw.githubusercontent.com/koraytugay/my-finance/main/';
 
 function isGitHubPages() {
     return typeof location !== 'undefined' && /\.github\.io$/.test(location.hostname);
 }
 
-let latestShaPromise = null;
-
-function getLatestCommitSha() {
-    if (!latestShaPromise) {
-        latestShaPromise = (async () => {
-            try {
-                const res = await fetch(`https://api.github.com/repos/${RAW_REPO}/commits/${RAW_BRANCH}`, {
-                    headers: { Accept: 'application/vnd.github.sha' },
-                    cache: 'no-store'
-                });
-                if (res.ok) {
-                    const sha = (await res.text()).trim();
-                    if (/^[0-9a-f]{40}$/.test(sha)) return sha;
-                }
-            } catch (_) {}
-            return RAW_BRANCH; // rate-limited/offline: fall back to the branch URL
-        })();
-    }
-    return latestShaPromise;
-}
-
 async function fetchData(path, options = {}) {
-    const bust = `${path.includes('?') ? '&' : '?'}_=${Date.now()}`;
+    const sep = path.includes('?') ? '&' : '?';
+    const bust = `${sep}_=${Date.now()}`;
     if (isGitHubPages()) {
         try {
-            const ref = await getLatestCommitSha();
-            const res = await fetch(`https://raw.githubusercontent.com/${RAW_REPO}/${ref}/${path}`, options);
+            const res = await fetch(RAW_DATA_BASE + path + bust, options);
             if (res.ok) return res;
         } catch (_) {}
     }
