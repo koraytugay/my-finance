@@ -609,6 +609,12 @@ function calculateTimeBack(history, currentVal, currencyKey) {
         targetIdx = 0;
     }
 
+    // list[targetIdx] is the last record BELOW currentVal; the next record is the first
+    // one at/above it, i.e. when wealth first reached today's level (never show a lower value).
+    if ((Number(list[targetIdx][currencyKey]) || 0) < currentVal && targetIdx < peakIdx) {
+        targetIdx++;
+    }
+
     const targetRecord = list[targetIdx];
     const latestRecord = list[list.length - 1];
 
@@ -635,7 +641,7 @@ function calculateTimeBack(history, currentVal, currencyKey) {
         record: targetRecord,
         isAth: false,
         label: weeksStr,
-        sub: `Back to ${dateStr} (${formattedVal})`
+        sub: `First reached ${dateStr} (${formattedVal})`
     };
 }
 
