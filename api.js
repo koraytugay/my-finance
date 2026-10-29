@@ -344,8 +344,8 @@ async function unlockWithPassword(password, forceRefresh = false) {
     activeUnlockPromise = (async () => {
         const t = Date.now();
         const [holdingsRes, historyRes] = await Promise.all([
-            fetchData('encrypted/holdings.enc', { cache: 'no-cache' }),
-            fetchData('encrypted/history.enc', { cache: 'no-cache' })
+            fetch(`encrypted/holdings.enc?_=${t}`, { cache: 'no-cache' }),
+            fetch(`encrypted/history.enc?_=${t}`, { cache: 'no-cache' })
         ]);
 
         if (!holdingsRes.ok) {
@@ -434,32 +434,12 @@ async function getMainData(forceRefresh = false) {
     return { holdings, history };
 }
 
-// Data files are fetched straight from raw.githubusercontent.com when hosted on
-// GitHub Pages, so fresh data is visible without waiting for a Pages deployment.
-const RAW_DATA_BASE = 'https://raw.githubusercontent.com/koraytugay/my-finance/main/';
-
-function isGitHubPages() {
-    return typeof location !== 'undefined' && /\.github\.io$/.test(location.hostname);
-}
-
-async function fetchData(path, options = {}) {
-    const sep = path.includes('?') ? '&' : '?';
-    const bust = `${sep}_=${Date.now()}`;
-    if (isGitHubPages()) {
-        try {
-            const res = await fetch(RAW_DATA_BASE + path + bust, options);
-            if (res.ok) return res;
-        } catch (_) {}
-    }
-    return fetch(path + bust, options);
-}
-
 let cachedBenchmarks = null;
 
 async function getBenchmarks(forceRefresh = false) {
     if (cachedBenchmarks && !forceRefresh) return cachedBenchmarks;
     try {
-        const res = await fetchData('data/benchmarks.json');
+        const res = await fetch(`data/benchmarks.json?t=${Date.now()}`);
         if (res.ok) {
             cachedBenchmarks = await res.json();
             if (cachedBenchmarks.fx?.cadUsdRate) {
@@ -485,7 +465,7 @@ let cachedSyncStatus = null;
 async function getSyncStatus(forceRefresh = false) {
     if (cachedSyncStatus && !forceRefresh) return cachedSyncStatus;
     try {
-        const res = await fetchData('data/sync.json');
+        const res = await fetch(`data/sync.json?t=${Date.now()}`);
         if (res.ok) {
             cachedSyncStatus = await res.json();
             return cachedSyncStatus;
