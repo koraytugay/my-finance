@@ -2114,16 +2114,82 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
  * @param {number|null} currentCAD Current portfolio valuation (live or latest)
  * @returns {Object} Drawdown analytics object
  */
+function calculateTimeBack(history, currentVal, currencyKey) {
+    const list = (typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : history) || [];
+    if (!list || list.length <= 1 || !currentVal || currentVal <= 0) {
+        return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+    }
+
+    let maxVal = -Infinity;
+    let peakIdx = -1;
+    list.forEach((r, idx) => {
+        const val = Number(r[currencyKey]) || 0;
+        if (val >= maxVal) {
+            maxVal = val;
+            peakIdx = idx;
+        }
+    });
+
+    if (currentVal >= maxVal - 1.0) {
+        return { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+    }
+
+    let targetIdx = peakIdx - 1;
+    while (targetIdx >= 0 && (Number(list[targetIdx][currencyKey]) || 0) >= currentVal) {
+        targetIdx--;
+    }
+
+    if (targetIdx < 0) {
+        targetIdx = 0;
+    }
+
+    if ((Number(list[targetIdx][currencyKey]) || 0) < currentVal && targetIdx < peakIdx) {
+        targetIdx++;
+    }
+
+    const targetRecord = list[targetIdx];
+    const latestRecord = list[list.length - 1];
+
+    let weeksDiff = (latestRecord.week && targetRecord.week && latestRecord.week >= targetRecord.week)
+        ? (latestRecord.week - targetRecord.week)
+        : (list.length - 1 - targetIdx);
+
+    if (weeksDiff === 0 && (Number(targetRecord[currencyKey]) || 0) > currentVal) {
+        weeksDiff = 1;
+    }
+
+    const weeksStr = weeksDiff === 1 ? '1 week' : `${weeksDiff} weeks`;
+    const targetVal = Number(targetRecord[currencyKey]) || 0;
+    const currency = currencyKey === 'totalUSD' ? 'USD' : 'CAD';
+    const prefix = currency === 'USD' ? 'US$' : '$';
+    const formattedVal = `${prefix}${(targetVal / 1000).toFixed(0)}k`;
+    const dateFn = typeof formatDate === 'function'
+        ? formatDate
+        : (typeof require !== 'undefined' ? require('./api.js').formatDate : (d => d));
+    const dateStr = dateFn ? dateFn(targetRecord.date) : targetRecord.date;
+
+    return {
+        weeks: weeksDiff,
+        record: targetRecord,
+        isAth: false,
+        label: weeksStr,
+        sub: `First reached ${dateStr} (${formattedVal})`
+    };
+}
+
 function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') {
     if (!history || history.length === 0) {
         return {
             maxDDCAD: 0,
             maxDDVal: 0,
             maxDDPct: 0,
+            maxWeeksBack: 0,
+            maxWeeksRecord: null,
             maxDDRecord: null,
             currentDDCAD: 0,
             currentDDVal: 0,
             currentDDPct: 0,
+            currentWeeksBack: 0,
             currentPeakCAD: 0,
             overallPeakCAD: 0,
             overallPeakVal: 0,
@@ -2139,6 +2205,8 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
     let maxDDRecord = history[0];
     let maxDDVal = 0;
     let maxDDPct = 0;
+    let maxWeeksBack = 0;
+    let maxWeeksRecord = history[0];
 
     let longestRecoveryWeeks = 0;
     let longestStart = '';
@@ -2180,6 +2248,16 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
             currentStreak = 0;
         }
 
+        const slice = history.slice(0, idx + 1);
+        const tb = typeof calculateTimeBack === 'function'
+            ? calculateTimeBack(slice, val, valKey)
+            : { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+        const weeksBack = (tb && typeof tb.weeks === 'number') ? tb.weeks : 0;
+        if (weeksBack > maxWeeksBack) {
+            maxWeeksBack = weeksBack;
+            maxWeeksRecord = r;
+        }
+
         return {
             r,
             val,
@@ -2187,7 +2265,11 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
             peak,
             ddVal,
             ddCAD: ddVal,
-            ddPct
+            ddPct,
+            weeksBack,
+            timeBackRecord: tb?.record || null,
+            timeBackSub: tb?.sub || '',
+            timeBackLabel: tb?.label || `${weeksBack} weeks`
         };
     });
 
@@ -2204,14 +2286,39 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
     const currentDDVal = liveVal - overallPeak;
     const currentDDPct = overallPeak > 0 ? (currentDDVal / overallPeak) * 100 : 0;
 
+    const latestTb = typeof calculateTimeBack === 'function'
+        ? calculateTimeBack(history, liveVal, valKey)
+        : { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+    const currentWeeksBack = (latestTb && typeof latestTb.weeks === 'number') ? latestTb.weeks : 0;
+
+    if (points.length > 0) {
+        const lastPt = points[points.length - 1];
+        lastPt.val = liveVal;
+        lastPt.peak = overallPeak;
+        lastPt.ddVal = currentDDVal;
+        lastPt.ddCAD = currentDDVal;
+        lastPt.ddPct = currentDDPct;
+        lastPt.weeksBack = currentWeeksBack;
+        lastPt.timeBackRecord = latestTb?.record || null;
+        lastPt.timeBackSub = latestTb?.sub || '';
+        lastPt.timeBackLabel = latestTb?.label || `${currentWeeksBack} weeks`;
+        if (currentWeeksBack > maxWeeksBack) {
+            maxWeeksBack = currentWeeksBack;
+            maxWeeksRecord = lastPt.r;
+        }
+    }
+
     return {
         maxDDCAD: maxDDVal,
         maxDDVal,
         maxDDPct,
+        maxWeeksBack,
+        maxWeeksRecord,
         maxDDRecord,
         currentDDCAD: currentDDVal,
         currentDDVal,
         currentDDPct,
+        currentWeeksBack,
         currentPeakCAD: runningPeak,
         overallPeakCAD: overallPeak,
         overallPeakVal: overallPeak,
@@ -2462,7 +2569,8 @@ if (typeof module !== 'undefined' && module.exports) {
         computeRolling52Windows,
         calculatePurchasingPower,
         buildRolling52OverlaySeries,
-        calculateDrawdownMetrics
+        calculateDrawdownMetrics,
+        calculateTimeBack
     };
 }
 

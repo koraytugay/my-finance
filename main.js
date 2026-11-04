@@ -37,7 +37,7 @@ let currentXeqtWeeklyUnit = 'PCT'; // 'PCT' | 'VAL' (default '%' per user reques
 
 // Drawdown Underwater Chart State
 let currentDrawdownCurrency = 'CAD'; // 'CAD' | 'USD'
-let currentDrawdownUnit = 'PCT'; // 'PCT' | 'VAL'
+let currentDrawdownUnit = 'PCT'; // 'PCT' | 'VAL' | 'WEEKS'
 
 async function initMain() {
     const loadingEl = document.getElementById('loading');
@@ -5383,6 +5383,7 @@ function updateDrawdownControlsUI() {
     const btnUsd = document.getElementById('btn-dd-cur-usd');
     const btnVal = document.getElementById('btn-dd-unit-val');
     const btnPct = document.getElementById('btn-dd-unit-pct');
+    const btnWeeks = document.getElementById('btn-dd-unit-weeks');
 
     if (btnCad && btnUsd) {
         if (currentDrawdownCurrency === 'CAD') {
@@ -5402,23 +5403,24 @@ function updateDrawdownControlsUI() {
         }
     }
 
-    if (btnVal && btnPct) {
-        if (currentDrawdownUnit === 'VAL') {
-            btnVal.classList.add('active');
-            btnVal.style.background = '#1f2328';
-            btnVal.style.color = '#fff';
-            btnPct.classList.remove('active');
-            btnPct.style.background = '#fff';
-            btnPct.style.color = '#24292f';
+    const unitButtons = [
+        { btn: btnVal, unit: 'VAL' },
+        { btn: btnPct, unit: 'PCT' },
+        { btn: btnWeeks, unit: 'WEEKS' }
+    ];
+
+    unitButtons.forEach(({ btn, unit }) => {
+        if (!btn) return;
+        if (currentDrawdownUnit === unit) {
+            btn.classList.add('active');
+            btn.style.background = '#1f2328';
+            btn.style.color = '#fff';
         } else {
-            btnPct.classList.add('active');
-            btnPct.style.background = '#1f2328';
-            btnPct.style.color = '#fff';
-            btnVal.classList.remove('active');
-            btnVal.style.background = '#fff';
-            btnVal.style.color = '#24292f';
+            btn.classList.remove('active');
+            btn.style.background = '#fff';
+            btn.style.color = '#24292f';
         }
-    }
+    });
 }
 
 function setDrawdownCurrency(currency) {
@@ -5429,7 +5431,7 @@ function setDrawdownCurrency(currency) {
 }
 
 function setDrawdownUnit(unit) {
-    if (unit !== 'VAL' && unit !== 'PCT') return;
+    if (unit !== 'VAL' && unit !== 'PCT' && unit !== 'WEEKS') return;
     currentDrawdownUnit = unit;
     updateDrawdownControlsUI();
     renderDrawdownChart();
@@ -5441,6 +5443,8 @@ function setDrawdownMode(mode) {
     } else if (mode === 'cad') {
         currentDrawdownCurrency = 'CAD';
         currentDrawdownUnit = 'VAL';
+    } else if (mode === 'weeks') {
+        currentDrawdownUnit = 'WEEKS';
     }
     updateDrawdownControlsUI();
     renderDrawdownChart();
@@ -5457,7 +5461,8 @@ function renderDrawdownInfoCard(html, isActive = false) {
 
 function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit = 'PCT') {
     if (!nearest || !nearest.r) return '';
-    const isPeak = Math.abs(nearest.ddVal) < 1;
+    const isWeeks = unit === 'WEEKS';
+    const isPeak = isWeeks ? (nearest.weeksBack === 0) : (Math.abs(nearest.ddVal) < 1);
     const ddColor = isPeak ? '#16a34a' : '#cf222e';
     const dateStr = typeof formatDate === 'function' ? formatDate(nearest.r.date) : nearest.r.date;
     const isUsd = currency === 'USD';
@@ -5470,14 +5475,41 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
         ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
         : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
 
-    const primaryVal = unit === 'VAL'
-        ? (isPeak ? '$0.00' : formattedDdVal)
-        : (isPeak ? '0.00%' : `${nearest.ddPct.toFixed(2)}%`);
+    let primaryVal = '';
+    let subLabel = '';
+    let subVal = '';
 
-    const subLabel = unit === 'VAL' ? 'Drawdown (%)' : 'Drawdown Amount';
-    const subVal = unit === 'VAL'
-        ? (isPeak ? '0.00% (At Peak)' : `${nearest.ddPct.toFixed(2)}%`)
-        : (isPeak ? '$0.00 (At Peak)' : formattedDdVal);
+    if (isWeeks) {
+        primaryVal = isPeak ? '0 weeks' : `${nearest.weeksBack} ${nearest.weeksBack === 1 ? 'week' : 'weeks'} back`;
+        subLabel = 'Drawdown';
+        subVal = isPeak ? '0.00% (At Peak)' : `${formattedDdVal} (${nearest.ddPct.toFixed(2)}%)`;
+    } else if (unit === 'VAL') {
+        primaryVal = isPeak ? '$0.00' : formattedDdVal;
+        subLabel = 'Drawdown (%)';
+        subVal = isPeak ? '0.00% (At Peak)' : `${nearest.ddPct.toFixed(2)}%`;
+    } else {
+        primaryVal = isPeak ? '0.00%' : `${nearest.ddPct.toFixed(2)}%`;
+        subLabel = 'Drawdown Amount';
+        subVal = isPeak ? '$0.00 (At Peak)' : formattedDdVal;
+    }
+
+    const timeBackBaselineRow = (nearest.weeksBack > 0 && nearest.timeBackSub)
+        ? `
+            <div class="chart-card-row">
+                <span>Time Back Baseline:</span>
+                <strong>${nearest.timeBackSub.replace('First reached ', '')}</strong>
+            </div>
+        `
+        : '';
+
+    const timeBackStatRow = !isWeeks
+        ? `
+            <div class="chart-card-row">
+                <span>Time Back:</span>
+                <strong style="color: ${ddColor};">${nearest.weeksBack > 0 ? (nearest.weeksBack + (nearest.weeksBack === 1 ? ' week' : ' weeks')) : 'At Peak'}</strong>
+            </div>
+        `
+        : '';
 
     return `
         <div class="chart-card-header">
@@ -5499,10 +5531,12 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
                 <span>Previous Peak (ATH):</span>
                 <strong>${peakVal}</strong>
             </div>
+            ${timeBackStatRow}
+            ${timeBackBaselineRow}
             <div class="chart-card-row">
                 <span>Correction Status:</span>
                 <span style="font-weight: 700; color: ${ddColor};">
-                    ${isPeak ? '🟢 Peak Reached' : '🔴 Underwater Pullback'}
+                    ${isPeak ? '🟢 Peak Reached' : (isWeeks ? `🔴 Underwater Setback (${nearest.weeksBack} wks)` : '🔴 Underwater Pullback')}
                 </span>
             </div>
         </div>
@@ -5518,10 +5552,13 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
             maxDDCAD: 0,
             maxDDVal: 0,
             maxDDPct: 0,
+            maxWeeksBack: 0,
+            maxWeeksRecord: null,
             maxDDRecord: null,
             currentDDCAD: 0,
             currentDDVal: 0,
             currentDDPct: 0,
+            currentWeeksBack: 0,
             currentPeakCAD: 0,
             overallPeakCAD: 0,
             overallPeakVal: 0,
@@ -5537,6 +5574,8 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
     let maxDDRecord = history[0];
     let maxDDVal = 0;
     let maxDDPct = 0;
+    let maxWeeksBack = 0;
+    let maxWeeksRecord = history[0];
 
     let longestRecoveryWeeks = 0;
     let longestStart = '';
@@ -5578,6 +5617,17 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
             currentStreak = 0;
         }
 
+        // Calculate time back (weeks back) at this point in history
+        const slice = history.slice(0, idx + 1);
+        const tb = typeof calculateTimeBack === 'function'
+            ? calculateTimeBack(slice, val, valKey)
+            : { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+        const weeksBack = (tb && typeof tb.weeks === 'number') ? tb.weeks : 0;
+        if (weeksBack > maxWeeksBack) {
+            maxWeeksBack = weeksBack;
+            maxWeeksRecord = r;
+        }
+
         return {
             r,
             val,
@@ -5585,7 +5635,11 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
             peak,
             ddVal,
             ddCAD: ddVal,
-            ddPct
+            ddPct,
+            weeksBack,
+            timeBackRecord: tb?.record || null,
+            timeBackSub: tb?.sub || '',
+            timeBackLabel: tb?.label || `${weeksBack} weeks`
         };
     });
 
@@ -5602,14 +5656,39 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
     const currentDDVal = liveVal - overallPeak;
     const currentDDPct = overallPeak > 0 ? (currentDDVal / overallPeak) * 100 : 0;
 
+    const latestTb = typeof calculateTimeBack === 'function'
+        ? calculateTimeBack(history, liveVal, valKey)
+        : { weeks: 0, record: null, isAth: true, label: '0 weeks', sub: '🟢 At All-Time High' };
+    const currentWeeksBack = (latestTb && typeof latestTb.weeks === 'number') ? latestTb.weeks : 0;
+
+    if (points.length > 0) {
+        const lastPt = points[points.length - 1];
+        lastPt.val = liveVal;
+        lastPt.peak = overallPeak;
+        lastPt.ddVal = currentDDVal;
+        lastPt.ddCAD = currentDDVal;
+        lastPt.ddPct = currentDDPct;
+        lastPt.weeksBack = currentWeeksBack;
+        lastPt.timeBackRecord = latestTb?.record || null;
+        lastPt.timeBackSub = latestTb?.sub || '';
+        lastPt.timeBackLabel = latestTb?.label || `${currentWeeksBack} weeks`;
+        if (currentWeeksBack > maxWeeksBack) {
+            maxWeeksBack = currentWeeksBack;
+            maxWeeksRecord = lastPt.r;
+        }
+    }
+
     return {
         maxDDCAD: maxDDVal,
         maxDDVal,
         maxDDPct,
+        maxWeeksBack,
+        maxWeeksRecord,
         maxDDRecord,
         currentDDCAD: currentDDVal,
         currentDDVal,
         currentDDPct,
+        currentWeeksBack,
         currentPeakCAD: runningPeak,
         overallPeakCAD: overallPeak,
         overallPeakVal: overallPeak,
@@ -5618,6 +5697,67 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
         longestEnd,
         points
     };
+}
+
+/**
+ * Finds up to maxCount (default 3) lowest drawdown points in the points series.
+ * Identifies distinct local troughs / minima (avoiding slope clustering) and returns
+ * the deepest troughs sorted chronologically.
+ */
+function findLowestDrawdownPoints(points, maxCount = 3, minDistancePx = 30) {
+    if (!Array.isArray(points) || points.length === 0) return [];
+
+    // Helper: is a point at index i a local trough within window w?
+    function isTrough(pts, i, w = 1) {
+        const target = pts[i];
+        if (!target || typeof target.val !== 'number' || target.val >= 0) return false;
+        const start = Math.max(0, i - w);
+        const end = Math.min(pts.length - 1, i + w);
+        for (let k = start; k <= end; k++) {
+            if (k === i) continue;
+            const other = pts[k];
+            if (!other || typeof other.val !== 'number') continue;
+            if (other.val < target.val) return false;
+            if (other.val === target.val && k < i) return false;
+        }
+        return true;
+    }
+
+    // Identify all local troughs (w=1 captures discrete drawdown bottoms)
+    const candidates = [];
+    for (let i = 0; i < points.length; i++) {
+        if (isTrough(points, i, 1)) {
+            candidates.push(points[i]);
+        }
+    }
+
+    // Sort troughs by value ascending (deepest drawdown first)
+    candidates.sort((a, b) => a.val - b.val);
+
+    const selected = [];
+    for (const cand of candidates) {
+        if (selected.length >= maxCount) break;
+        const tooClose = selected.some(s => {
+            const hasCoords = typeof cand.x === 'number' && typeof s.x === 'number';
+            const hasIdx = typeof cand.idx === 'number' && typeof s.idx === 'number';
+            if (hasCoords) {
+                const dx = Math.abs(cand.x - s.x);
+                const dy = Math.abs((cand.y ?? 0) - (s.y ?? 0));
+                if (dx < 20 || (dx < minDistancePx && dy < 20)) return true;
+            }
+            if (hasIdx) {
+                const dIdx = Math.abs(cand.idx - s.idx);
+                if (dIdx < 2) return true;
+            }
+            return false;
+        });
+
+        if (!tooClose) {
+            selected.push(cand);
+        }
+    }
+
+    return selected.sort((a, b) => (a.idx ?? a.x ?? 0) - (b.idx ?? b.x ?? 0));
 }
 
 function renderDrawdownChart() {
@@ -5630,6 +5770,7 @@ function renderDrawdownChart() {
 
     const currency = currentDrawdownCurrency;
     const unit = currentDrawdownUnit;
+    const isWeeks = unit === 'WEEKS';
     const isPct = unit === 'PCT';
 
     updateDrawdownControlsUI();
@@ -5639,42 +5780,83 @@ function renderDrawdownChart() {
     const liveVal = currency === 'USD' ? (Number(latest.totalUSD) || 0) : (Number(latest.totalCAD) || 0);
 
     const metrics = calculateDrawdownMetrics(rawHistory, liveVal, currency);
-    const { maxDDVal, maxDDPct, maxDDRecord, currentDDVal, currentDDPct, overallPeakVal, longestRecoveryWeeks, longestStart, longestEnd } = metrics;
+    const { maxDDVal, maxDDPct, maxDDRecord, maxWeeksBack, maxWeeksRecord, currentDDVal, currentDDPct, currentWeeksBack, overallPeakVal, longestRecoveryWeeks, longestStart, longestEnd } = metrics;
 
     // Update Sub-cards
-    const maxDateStr = maxDDRecord ? (typeof formatDate === 'function' ? formatDate(maxDDRecord.date) : maxDDRecord.date) : '-';
-    const maxWeekStr = maxDDRecord ? `Week ${maxDDRecord.week} (${maxDateStr})` : 'Week - (-)';
+    const maxTitleEl = document.getElementById('dd-stat-max-title');
+    if (maxTitleEl) {
+        maxTitleEl.textContent = isWeeks ? 'Max Time Back (All-Time)' : 'Max Drawdown (All-Time)';
+    }
+
     const maxStatEl = document.getElementById('dd-stat-max');
     const maxDateEl = document.getElementById('dd-stat-max-date');
-    if (maxStatEl) maxStatEl.textContent = `${formatCurrency(maxDDVal, currency)} (${maxDDPct.toFixed(2)}%)`;
-    if (maxDateEl) maxDateEl.textContent = maxWeekStr;
+
+    if (isWeeks) {
+        const maxWeeksDateStr = maxWeeksRecord ? (typeof formatDate === 'function' ? formatDate(maxWeeksRecord.date) : maxWeeksRecord.date) : '-';
+        const maxWeeksWeekStr = maxWeeksRecord ? `Week ${maxWeeksRecord.week} (${maxWeeksDateStr})` : 'Week - (-)';
+        if (maxStatEl) maxStatEl.textContent = `${maxWeeksBack} ${maxWeeksBack === 1 ? 'week' : 'weeks'}`;
+        if (maxDateEl) maxDateEl.textContent = maxWeeksWeekStr;
+    } else {
+        const maxDateStr = maxDDRecord ? (typeof formatDate === 'function' ? formatDate(maxDDRecord.date) : maxDDRecord.date) : '-';
+        const maxWeekStr = maxDDRecord ? `Week ${maxDDRecord.week} (${maxDateStr})` : 'Week - (-)';
+        if (maxStatEl) maxStatEl.textContent = `${formatCurrency(maxDDVal, currency)} (${maxDDPct.toFixed(2)}%)`;
+        if (maxDateEl) maxDateEl.textContent = maxWeekStr;
+    }
 
     const curStatEl = document.getElementById('dd-stat-current');
     const curStatusEl = document.getElementById('dd-stat-current-status');
     const curCardEl = document.getElementById('dd-stat-current-card') || (curStatEl ? curStatEl.parentElement : null);
     const curTitleEl = document.getElementById('dd-stat-current-title') || (curCardEl ? curCardEl.firstElementChild : null);
 
+    if (curTitleEl) {
+        curTitleEl.textContent = isWeeks ? 'Current Time Back' : 'Current Drawdown';
+    }
+
     if (curStatEl && curStatusEl) {
-        if (currentDDVal >= -1) {
-            curStatEl.textContent = '$0.00 (0.0%)';
-            curStatEl.style.color = '#16a34a';
-            curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
-            curStatusEl.style.color = '#15803d';
-            if (curCardEl) {
-                curCardEl.style.background = '#f0fdf4';
-                curCardEl.style.borderColor = '#bbf7d0';
+        if (isWeeks) {
+            if (currentWeeksBack === 0) {
+                curStatEl.textContent = '0 weeks';
+                curStatEl.style.color = '#16a34a';
+                curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
+                curStatusEl.style.color = '#15803d';
+                if (curCardEl) {
+                    curCardEl.style.background = '#f0fdf4';
+                    curCardEl.style.borderColor = '#bbf7d0';
+                }
+                if (curTitleEl) curTitleEl.style.color = '#166534';
+            } else {
+                curStatEl.textContent = `${currentWeeksBack} ${currentWeeksBack === 1 ? 'week' : 'weeks'}`;
+                curStatEl.style.color = currentWeeksBack >= 4 ? '#dc2626' : '#d97706';
+                curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} (${currentDDPct.toFixed(2)}%) from ATH`;
+                curStatusEl.style.color = '#b91c1c';
+                if (curCardEl) {
+                    curCardEl.style.background = '#fef2f2';
+                    curCardEl.style.borderColor = '#fecaca';
+                }
+                if (curTitleEl) curTitleEl.style.color = '#991b1b';
             }
-            if (curTitleEl) curTitleEl.style.color = '#166534';
         } else {
-            curStatEl.textContent = `${formatCurrency(currentDDVal, currency)} (${currentDDPct.toFixed(2)}%)`;
-            curStatEl.style.color = '#dc2626';
-            curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} from ATH (${formatCurrency(overallPeakVal, currency)})`;
-            curStatusEl.style.color = '#b91c1c';
-            if (curCardEl) {
-                curCardEl.style.background = '#fef2f2';
-                curCardEl.style.borderColor = '#fecaca';
+            if (currentDDVal >= -1) {
+                curStatEl.textContent = '$0.00 (0.0%)';
+                curStatEl.style.color = '#16a34a';
+                curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
+                curStatusEl.style.color = '#15803d';
+                if (curCardEl) {
+                    curCardEl.style.background = '#f0fdf4';
+                    curCardEl.style.borderColor = '#bbf7d0';
+                }
+                if (curTitleEl) curTitleEl.style.color = '#166534';
+            } else {
+                curStatEl.textContent = `${formatCurrency(currentDDVal, currency)} (${currentDDPct.toFixed(2)}%)`;
+                curStatEl.style.color = '#dc2626';
+                curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} from ATH (${formatCurrency(overallPeakVal, currency)})`;
+                curStatusEl.style.color = '#b91c1c';
+                if (curCardEl) {
+                    curCardEl.style.background = '#fef2f2';
+                    curCardEl.style.borderColor = '#fecaca';
+                }
+                if (curTitleEl) curTitleEl.style.color = '#991b1b';
             }
-            if (curTitleEl) curTitleEl.style.color = '#991b1b';
         }
     }
 
@@ -5692,7 +5874,9 @@ function renderDrawdownChart() {
     const chartWidth = Math.max(10, width - padding.left - padding.right);
     const chartHeight = height - padding.top - padding.bottom;
 
-    const minVal = isPct ? Math.min(maxDDPct * 1.15, -1) : Math.min(maxDDVal * 1.15, -1000);
+    const minVal = isWeeks
+        ? -Math.max(4, Math.ceil((maxWeeksBack * 1.15) / 4) * 4)
+        : (isPct ? Math.min(maxDDPct * 1.15, -1) : Math.min(maxDDVal * 1.15, -1000));
 
     function getY(val) {
         const fraction = minVal !== 0 ? (val / minVal) : 0; // 0 to 1
@@ -5720,7 +5904,15 @@ function renderDrawdownChart() {
     for (let i = 0; i <= gridTicks; i++) {
         const tickVal = (minVal / gridTicks) * i;
         const tickY = getY(tickVal);
-        const label = isPct ? `${tickVal.toFixed(1)}%` : formatCurrency(tickVal, currency);
+        let label = '';
+        if (isWeeks) {
+            const w = Math.round(Math.abs(tickVal));
+            label = i === 0 ? '0 wks' : `-${w} wks`;
+        } else if (isPct) {
+            label = `${tickVal.toFixed(1)}%`;
+        } else {
+            label = formatCurrency(tickVal, currency);
+        }
         svg += `
             <line x1="${padding.left}" y1="${tickY}" x2="${width - padding.right}" y2="${tickY}" stroke="#e2e8f0" stroke-width="${i === 0 ? '1.5' : '1'}" stroke-dasharray="${i === 0 ? '' : '3,3'}"/>
             <text x="${padding.left - 8}" y="${tickY + 4}" font-size="11" font-weight="${i === 0 ? '700' : '500'}" fill="${i === 0 ? '#1f2328' : '#64748b'}" text-anchor="end">${label}</text>
@@ -5729,8 +5921,9 @@ function renderDrawdownChart() {
 
     // Build Path Coordinates
     const points = metrics.points.map((pt, idx) => {
-        const val = isPct ? pt.ddPct : pt.ddVal;
+        const val = isWeeks ? -pt.weeksBack : (isPct ? pt.ddPct : pt.ddVal);
         return {
+            idx,
             x: getX(idx),
             y: getY(val),
             r: pt.r,
@@ -5738,6 +5931,9 @@ function renderDrawdownChart() {
             ddVal: pt.ddVal,
             ddCAD: pt.ddCAD,
             ddPct: pt.ddPct,
+            weeksBack: pt.weeksBack,
+            timeBackSub: pt.timeBackSub,
+            timeBackLabel: pt.timeBackLabel,
             peak: pt.peak
         };
     });
@@ -5757,16 +5953,19 @@ function renderDrawdownChart() {
         // Top zero baseline
         svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${width - padding.right}" y2="${padding.top}" stroke="#475569" stroke-width="1.5"/>`;
 
-        // Max Drawdown Point Marker
-        const maxPt = points.reduce((min, p) => p.val < min.val ? p : min, points[0]);
-        if (maxPt && maxPt.val < 0) {
+        // Lowest Drawdown / Time Back Point Markers (up to 3 lowest points labeled)
+        const lowestPoints = findLowestDrawdownPoints(points, 3);
+        lowestPoints.forEach(pt => {
+            const markerLabel = isWeeks
+                ? `-${pt.weeksBack} wks`
+                : (isPct ? pt.ddPct.toFixed(1) + '%' : formatCurrency(pt.ddVal, currency));
             svg += `
-                <circle cx="${maxPt.x}" cy="${maxPt.y}" r="5" fill="#b91c1c" stroke="#ffffff" stroke-width="2"/>
-                <text x="${maxPt.x}" y="${Math.min(height - 10, maxPt.y + 16)}" font-size="10.5" font-weight="800" fill="#b91c1c" text-anchor="middle">
-                    ${isPct ? maxPt.ddPct.toFixed(1) + '%' : formatCurrency(maxPt.ddVal, currency)}
+                <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#b91c1c" stroke="#ffffff" stroke-width="2" style="pointer-events: none;"/>
+                <text x="${pt.x}" y="${Math.min(height - 10, pt.y + 16)}" font-size="10.5" font-weight="800" fill="#b91c1c" text-anchor="middle" style="pointer-events: none;">
+                    ${markerLabel}
                 </text>
             `;
-        }
+        });
 
         // X-Axis Date Labels (sample 6 evenly spaced dates)
         const fmt = typeof formatMonthShort === 'function' ? formatMonthShort : (typeof formatDate === 'function' ? formatDate : (d => d));
@@ -6019,6 +6218,7 @@ if (typeof module !== 'undefined' && module.exports) {
         },
         calculateDrawdownMetrics,
         renderDrawdownChart,
+        findLowestDrawdownPoints,
         setDrawdownCurrency,
         setDrawdownUnit,
         setDrawdownMode,

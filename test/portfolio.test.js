@@ -70,6 +70,7 @@ const {
   setDrawdownCurrency,
   setDrawdownUnit,
   setDrawdownMode,
+  findLowestDrawdownPoints,
   getDrawdownChartState,
   resetDrawdownChartState
 } = require('../main.js');
@@ -2778,12 +2779,16 @@ test('Portfolio Drawdown Underwater Chart Suite (Main Page)', async (t) => {
     setDrawdownUnit('VAL');
     assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
 
+    // Calendar / weeks back toggle
+    setDrawdownUnit('WEEKS');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'WEEKS');
+
     // Invalid values should be ignored
     setDrawdownCurrency('EUR');
     assert.equal(getDrawdownChartState().currentDrawdownCurrency, 'USD');
 
     setDrawdownUnit('INVALID');
-    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'WEEKS');
 
     // setDrawdownMode backward compatibility
     setDrawdownMode('pct');
@@ -2792,6 +2797,9 @@ test('Portfolio Drawdown Underwater Chart Suite (Main Page)', async (t) => {
     setDrawdownMode('cad');
     assert.equal(getDrawdownChartState().currentDrawdownCurrency, 'CAD');
     assert.equal(getDrawdownChartState().currentDrawdownUnit, 'VAL');
+
+    setDrawdownMode('weeks');
+    assert.equal(getDrawdownChartState().currentDrawdownUnit, 'WEEKS');
 
     resetDrawdownChartState();
     state = getDrawdownChartState();
@@ -2817,6 +2825,100 @@ test('Portfolio Drawdown Underwater Chart Suite (Main Page)', async (t) => {
     assert.equal(metricsUSD.currentDDVal, -8500);
     assert.equal(metricsUSD.maxDDVal, -8500);
     assert.equal(Number(metricsUSD.currentDDPct.toFixed(2)), -10.0);
+  });
+
+  await t.test('calculateDrawdownMetrics accurately computes weeks back (Time Back) across timeline', () => {
+    const history = [
+      { week: 1, date: '2025-01-03', totalCAD: 100000 },
+      { week: 2, date: '2025-01-10', totalCAD: 110000 },
+      { week: 3, date: '2025-01-17', totalCAD: 120000 }, // ATH 120k
+      { week: 4, date: '2025-01-24', totalCAD: 112000 }, // Drawdown below 120k; first reached 112k at week 3 -> 1 week back
+      { week: 5, date: '2025-01-31', totalCAD: 108000 }, // Drawdown below 120k; first reached 108k at week 2 (110k) -> 3 weeks back
+      { week: 6, date: '2025-02-07', totalCAD: 125000 }  // New ATH 125k -> 0 weeks back
+    ];
+
+    const metrics = calculateDrawdownMetrics(history, null, 'CAD');
+    assert.equal(metrics.points[0].weeksBack, 0); // week 1 ATH
+    assert.equal(metrics.points[1].weeksBack, 0); // week 2 ATH
+    assert.equal(metrics.points[2].weeksBack, 0); // week 3 ATH
+    assert.equal(metrics.points[3].weeksBack, 1); // week 4 (1 week setback)
+    assert.equal(metrics.points[4].weeksBack, 3); // week 5 (3 weeks setback)
+    assert.equal(metrics.points[5].weeksBack, 0); // week 6 new ATH
+    assert.equal(metrics.maxWeeksBack, 3);
+    assert.equal(metrics.maxWeeksRecord.week, 5);
+    assert.equal(metrics.currentWeeksBack, 0);
+  });
+
+  await t.test('findLowestDrawdownPoints returns empty array on empty inputs or when always at ATH', () => {
+    assert.deepEqual(findLowestDrawdownPoints([]), []);
+    assert.deepEqual(findLowestDrawdownPoints(null), []);
+    assert.deepEqual(findLowestDrawdownPoints([{ idx: 0, val: 0 }, { idx: 1, val: 0 }]), []);
+  });
+
+  await t.test('findLowestDrawdownPoints accurately identifies and labels the lowest 3 values across distinct troughs', () => {
+    const points = [
+      { idx: 0, x: 0, y: 20, val: 0, ddPct: 0 },
+      { idx: 1, x: 50, y: 50, val: -5, ddPct: -5 },
+      { idx: 2, x: 100, y: 150, val: -15, ddPct: -15 }, // Trough 1
+      { idx: 3, x: 150, y: 60, val: -6, ddPct: -6 },
+      { idx: 4, x: 200, y: 20, val: 0, ddPct: 0 },
+      { idx: 5, x: 250, y: 80, val: -8, ddPct: -8 },
+      { idx: 6, x: 300, y: 200, val: -22, ddPct: -22 }, // Trough 2 (Lowest)
+      { idx: 7, x: 350, y: 120, val: -12, ddPct: -12 },
+      { idx: 8, x: 400, y: 20, val: 0, ddPct: 0 },
+      { idx: 9, x: 450, y: 70, val: -7, ddPct: -7 },
+      { idx: 10, x: 500, y: 180, val: -18, ddPct: -18 }, // Trough 3
+      { idx: 11, x: 550, y: 40, val: -4, ddPct: -4 },
+      { idx: 12, x: 600, y: 20, val: 0, ddPct: 0 },
+      { idx: 13, x: 650, y: 60, val: -6, ddPct: -6 },
+      { idx: 14, x: 700, y: 90, val: -9, ddPct: -9 }, // Trough 4 (shallower than top 3)
+      { idx: 15, x: 750, y: 20, val: 0, ddPct: 0 }
+    ];
+
+    const lowest = findLowestDrawdownPoints(points, 3);
+    assert.equal(lowest.length, 3);
+
+    // Selected values should be the 3 deepest troughs: -22%, -18%, -15%
+    const values = lowest.map(p => p.val).sort((a, b) => a - b);
+    assert.deepEqual(values, [-22, -18, -15]);
+
+    // Ordered chronologically in the output
+    assert.equal(lowest[0].idx, 2);  // -15%
+    assert.equal(lowest[1].idx, 6);  // -22%
+    assert.equal(lowest[2].idx, 10); // -18%
+  });
+
+  await t.test('findLowestDrawdownPoints avoids clustering on adjacent slope points of the same dip', () => {
+    // Single dip lasting several weeks with consecutive negative slope values
+    const singleDip = [
+      { idx: 0, x: 50, y: 20, val: 0, ddPct: 0 },
+      { idx: 1, x: 100, y: 60, val: -5, ddPct: -5 },
+      { idx: 2, x: 150, y: 140, val: -19.5, ddPct: -19.5 },
+      { idx: 3, x: 160, y: 150, val: -20.0, ddPct: -20.0 }, // Bottom of dip
+      { idx: 4, x: 170, y: 142, val: -19.7, ddPct: -19.7 },
+      { idx: 5, x: 220, y: 20, val: 0, ddPct: 0 }
+    ];
+
+    const result = findLowestDrawdownPoints(singleDip, 3);
+    // Should select the bottom of the dip (-20.0%) and not stack adjacent points (-19.7%, -19.5%)
+    assert.equal(result.length, 1);
+    assert.equal(result[0].idx, 3);
+    assert.equal(result[0].val, -20.0);
+  });
+
+  await t.test('findLowestDrawdownPoints handles history with fewer than 3 dips gracefully', () => {
+    const twoDips = [
+      { idx: 0, x: 50, y: 20, val: 0 },
+      { idx: 1, x: 100, y: 120, val: -14 }, // Dip 1
+      { idx: 2, x: 150, y: 20, val: 0 },
+      { idx: 3, x: 200, y: 160, val: -21 }, // Dip 2
+      { idx: 4, x: 250, y: 20, val: 0 }
+    ];
+
+    const result = findLowestDrawdownPoints(twoDips, 3);
+    assert.equal(result.length, 2);
+    assert.equal(result[0].val, -14);
+    assert.equal(result[1].val, -21);
   });
 });
 
