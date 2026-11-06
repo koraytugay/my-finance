@@ -24,6 +24,7 @@ let selectedAthMilestoneIdx = null;
 // Monthly Returns Heatmap State
 let currentHeatmapCurrency = 'CAD';
 let currentHeatmapUnit = 'PCT'; // 'PCT' | 'VAL'
+let currentHeatmapVsXeqt = false;
 
 // Portfolio vs XEQT Progression Graph State
 let currentXeqtRelTimeframe = 'last-52'; // 'last-52' | 'all' | '2024' | '2025' | '2026' ...
@@ -4710,10 +4711,30 @@ function renderAthBarChart() {
  * @param {string} currency 'CAD' or 'USD'
  * @returns {Array} Array of year objects sorted descending by year
  */
-function computeMonthlyHeatmap(history, currency = 'CAD') {
+function computeMonthlyHeatmap(history, currency = 'CAD', xeqtWeeklyPrices = null, currentBenchmarkPrice = null) {
     if (!history || history.length === 0) return [];
 
     const isUSD = currency === 'USD';
+    const xeqtPrices = Array.isArray(xeqtWeeklyPrices) ? xeqtWeeklyPrices : [];
+    const hasXeqt = xeqtPrices.length > 0;
+    const livePrice = (currentBenchmarkPrice != null && Number(currentBenchmarkPrice) > 0)
+        ? Number(currentBenchmarkPrice) : null;
+    const fxOf = rec => (isUSD && Number(rec.totalCAD) > 0 && Number(rec.totalUSD) > 0)
+        ? Number(rec.totalUSD) / Number(rec.totalCAD) : 1;
+    // XEQT price (in selected currency) at a given record's week; null if unknown
+    const xeqtPriceAt = (rec, sortedIdx, isLatest) => {
+        if (!hasXeqt) return null;
+        let p;
+        if (isLatest && livePrice) {
+            p = livePrice;
+        } else {
+            const wk = Number(rec.week);
+            const idx = Number.isFinite(wk) && rec.week !== null && rec.week !== undefined ? wk - 1 : sortedIdx;
+            if (idx < 0) return null;
+            p = xeqtPrices[Math.min(idx, xeqtPrices.length - 1)];
+        }
+        return p > 0 ? p * fxOf(rec) : null;
+    };
     const valKey = isUSD ? 'totalUSD' : 'totalCAD';
     const yearsMap = {};
 
@@ -4740,6 +4761,9 @@ function computeMonthlyHeatmap(history, currency = 'CAD') {
     return years.map(year => {
         let yearStartVal = null;
         let yearEndVal = null;
+        let yearStartPx = null;
+        let yearCmpStartVal = null;
+        let yearEndPx = null;
 
         const months = [];
         for (let m = 0; m < 12; m++) {
@@ -4779,8 +4803,31 @@ function computeMonthlyHeatmap(history, currency = 'CAD') {
             const diffVal = monthEnd - monthStart;
             const diffPct = monthStart > 0 ? (diffVal / monthStart) * 100 : 0;
 
-            if (yearStartVal === null) yearStartVal = monthStart;
+            // XEQT baseline for the same window (previous record's price -> last record's price)
+            const firstIdx = sorted.indexOf(firstRec);
+            const lastIdx = sorted.indexOf(lastRec);
+            let startPx = firstIdx > 0
+                ? xeqtPriceAt(sorted[firstIdx - 1], firstIdx - 1, false)
+                : xeqtPriceAt({ ...firstRec, week: Number(firstRec.week) - 1 }, firstIdx - 1, false);
+            const endPx = xeqtPriceAt(lastRec, lastIdx, lastIdx === sorted.length - 1);
+
+            // Very first record has no prior XEQT price: baseline from that record itself
+            // (portfolio and XEQT both measured from the first recorded week onward).
+            let cmpStartVal = monthStart;
+            if (startPx == null && firstIdx === 0 && lastIdx > firstIdx) {
+                startPx = xeqtPriceAt(firstRec, firstIdx, false);
+                cmpStartVal = Number(firstRec[valKey]) || 0;
+            }
+            const hasXeqtData = startPx != null && endPx != null && cmpStartVal > 0;
+            const cmpDiffVal = monthEnd - cmpStartVal;
+            const cmpDiffPct = cmpStartVal > 0 ? (cmpDiffVal / cmpStartVal) * 100 : 0;
+            const xeqtPct = hasXeqtData ? ((endPx - startPx) / startPx) * 100 : null;
+            const spreadPct = hasXeqtData ? cmpDiffPct - xeqtPct : null;
+            const spreadVal = hasXeqtData ? cmpDiffVal - cmpStartVal * (xeqtPct / 100) : null;
+
+            if (yearStartVal === null) { yearStartVal = monthStart; yearCmpStartVal = cmpStartVal; yearStartPx = startPx; }
             yearEndVal = monthEnd;
+            yearEndPx = endPx;
 
             months.push({
                 month: m,
@@ -4788,7 +4835,12 @@ function computeMonthlyHeatmap(history, currency = 'CAD') {
                 startVal: monthStart,
                 endVal: monthEnd,
                 diffVal,
-                diffPct
+                diffPct,
+                hasXeqtData,
+                portPctCmp: cmpDiffPct,
+                xeqtPct,
+                spreadPct,
+                spreadVal
             });
         }
 
@@ -4801,13 +4853,27 @@ function computeMonthlyHeatmap(history, currency = 'CAD') {
             }
         }
 
+        let fullYearXeqtPct = null;
+        let fullYearSpreadPct = null;
+        let fullYearSpreadVal = null;
+        if (yearStartPx != null && yearEndPx != null) {
+            const cmpYearDiff = yearEndVal - (yearCmpStartVal || 0);
+            const cmpYearPct = yearCmpStartVal > 0 ? (cmpYearDiff / yearCmpStartVal) * 100 : 0;
+            fullYearXeqtPct = ((yearEndPx - yearStartPx) / yearStartPx) * 100;
+            fullYearSpreadPct = cmpYearPct - fullYearXeqtPct;
+            fullYearSpreadVal = cmpYearDiff - (yearCmpStartVal || 0) * (fullYearXeqtPct / 100);
+        }
+
         return {
             year,
             months,
             yearStartVal,
             yearEndVal,
             fullYearDiff,
-            fullYearPct
+            fullYearPct,
+            fullYearXeqtPct,
+            fullYearSpreadPct,
+            fullYearSpreadVal
         };
     });
 }
@@ -4850,6 +4916,17 @@ function setHeatmapUnit(unit) {
     renderMonthlyHeatmap();
 }
 
+function setHeatmapVsXeqt(enabled) {
+    enabled = !!enabled;
+    if (currentHeatmapVsXeqt === enabled) return;
+    currentHeatmapVsXeqt = enabled;
+    if (typeof document !== 'undefined') {
+        const cb = document.getElementById('heatmap-vs-xeqt');
+        if (cb) cb.checked = enabled;
+    }
+    renderMonthlyHeatmap();
+}
+
 function renderMonthlyHeatmap() {
     if (typeof document === 'undefined') return;
     const tbody = document.getElementById('heatmap-body');
@@ -4859,17 +4936,22 @@ function renderMonthlyHeatmap() {
     const subTitleEl = document.getElementById('heatmap-subtitle');
     const currency = currentHeatmapCurrency;
     const isPct = currentHeatmapUnit === 'PCT';
+    const vsXeqt = currentHeatmapVsXeqt;
 
     if (titleEl) {
-        titleEl.textContent = isPct
+        titleEl.textContent = (isPct
             ? `🗓️ Monthly Returns Heatmap (% Return - ${currency})`
-            : `🗓️ Monthly Returns Heatmap (${currency} $)`;
+            : `🗓️ Monthly Returns Heatmap (${currency} $)`) + (vsXeqt ? ' vs XEQT' : '');
     }
 
     if (subTitleEl) {
-        subTitleEl.textContent = isPct
-            ? `Percentage net worth growth by calendar month derived from your history log (${currency})`
-            : `Net worth dollar change by calendar month derived from your history log (${currency} $)`;
+        subTitleEl.textContent = vsXeqt
+            ? (isPct
+                ? `Portfolio monthly return minus XEQT monthly return, in % points (${currency}) • 0 = parity with XEQT`
+                : `Portfolio monthly gain minus what the same starting balance would have gained in XEQT (${currency} $)`)
+            : (isPct
+                ? `Percentage net worth growth by calendar month derived from your history log (${currency})`
+                : `Net worth dollar change by calendar month derived from your history log (${currency} $)`);
     }
 
     if (!rawHistory || rawHistory.length === 0) {
@@ -4877,7 +4959,10 @@ function renderMonthlyHeatmap() {
         return;
     }
 
-    const yearsData = computeMonthlyHeatmap(rawHistory, currency);
+    const xeqtBench = rawBenchmarks?.benchmarks?.XEQT;
+    const yearsData = vsXeqt
+        ? computeMonthlyHeatmap(rawHistory, currency, xeqtBench?.weeklyPrices || [], xeqtBench?.currentPrice)
+        : computeMonthlyHeatmap(rawHistory, currency);
     tbody.innerHTML = '';
 
     if (yearsData.length === 0) {
@@ -4919,8 +5004,13 @@ function renderMonthlyHeatmap() {
                 continue;
             }
 
-            const mGainPct = mInfo.diffPct;
-            const diffVal = mInfo.diffVal;
+            if (vsXeqt && !mInfo.hasXeqtData) {
+                rowHtml += `<td class="heatmap-cell heat-neutral" title="XEQT price data unavailable for this month">-</td>`;
+                continue;
+            }
+
+            const mGainPct = vsXeqt ? mInfo.spreadPct : mInfo.diffPct;
+            const diffVal = vsXeqt ? mInfo.spreadVal : mInfo.diffVal;
 
             let heatClass = 'heat-neutral';
             if (mGainPct >= 4.0) heatClass = 'heat-green-deep';
@@ -4938,9 +5028,10 @@ function renderMonthlyHeatmap() {
             const valPrecise = `${vSign}${formatVal(diffVal, currency)}`;
 
             const cellText = isPct ? pctFormatted : valCompact;
-            const cellTitle = isPct
+            const cellTitle = (isPct
                 ? `${pctPrecise} (${valPrecise})`
-                : `${valPrecise} (${pctPrecise})`;
+                : `${valPrecise} (${pctPrecise})`)
+                + (vsXeqt ? ` vs XEQT • Portfolio ${mInfo.portPctCmp.toFixed(2)}% | XEQT ${mInfo.xeqtPct.toFixed(2)}%` : '');
 
             rowHtml += `<td class="heatmap-cell ${heatClass}" title="${cellTitle}">
                 ${cellText}
@@ -4948,8 +5039,15 @@ function renderMonthlyHeatmap() {
         }
 
         // Full Year Total
-        const fullYearPct = yData.fullYearPct;
-        const fullYearDiff = yData.fullYearDiff;
+        const fullYearHasXeqt = yData.fullYearSpreadPct != null;
+        const fullYearPct = vsXeqt ? (yData.fullYearSpreadPct || 0) : yData.fullYearPct;
+        const fullYearDiff = vsXeqt ? (yData.fullYearSpreadVal || 0) : yData.fullYearDiff;
+        if (vsXeqt && !fullYearHasXeqt) {
+            rowHtml += `<td style="text-align: center; font-weight: 700; color: #64748b; padding: 7px 4px;" title="XEQT price data unavailable">-</td>`;
+            tr.innerHTML = rowHtml;
+            tbody.appendChild(tr);
+            return;
+        }
         const ySign = fullYearPct > 0 ? '+' : '';
         const yVSign = fullYearDiff > 0 ? '+' : '';
         const yBg = fullYearPct >= 0 ? '#166534' : '#991b1b';
@@ -6159,13 +6257,16 @@ if (typeof module !== 'undefined' && module.exports) {
         renderMonthlyHeatmap,
         setHeatmapCurrency,
         setHeatmapUnit,
+        setHeatmapVsXeqt,
         getHeatmapState: () => ({
             currentHeatmapCurrency,
-            currentHeatmapUnit
+            currentHeatmapUnit,
+            currentHeatmapVsXeqt
         }),
         resetHeatmapState: () => {
             currentHeatmapCurrency = 'CAD';
             currentHeatmapUnit = 'PCT';
+            currentHeatmapVsXeqt = false;
         },
         computeWeeklyBarData,
         computeWeeklyAverage,

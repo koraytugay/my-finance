@@ -358,6 +358,10 @@
                         <span id="heatmap-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
+                            <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                            vs XEQT
+                        </label>
                         <div class="currency-toggle" id="heatmap-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
                             <button type="button" id="btn-heatmap-cur-cad" class="btn-secondary active" onclick="setHeatmapCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-heatmap-cur-usd" class="btn-secondary" onclick="setHeatmapCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>

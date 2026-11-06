@@ -468,6 +468,28 @@ header h1 {
     cursor: default;
 }
 
+/* Fixed-size cells so the grid never shifts with cell contents */
+#heatmap-table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 860px;
+}
+
+#heatmap-table th:first-child,
+#heatmap-table td:first-child {
+    width: 56px;
+}
+
+#heatmap-table th:last-child,
+#heatmap-table td:last-child {
+    width: 84px;
+}
+
+#heatmap-table td {
+    overflow: hidden;
+    text-overflow: clip;
+}
+
 #heatmap-table th {
     transition: none;
     font-size: 0.74rem;
