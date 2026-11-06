@@ -4787,7 +4787,11 @@ function computeMonthlyHeatmap(history, currency = 'CAD', xeqtWeeklyPrices = nul
             let monthEnd = Number(lastRec[valKey]) || 0;
 
             if (isUSD) {
-                if (firstRec.weeklyChangeUSD !== undefined && firstRec.weeklyChangeUSD !== null) {
+                const prevRec = sorted[sorted.indexOf(firstRec) - 1];
+                if (prevRec && Number(prevRec.totalUSD) > 0) {
+                    // Actual USD balance at the end of the previous record (includes FX moves)
+                    monthStart = Number(prevRec.totalUSD);
+                } else if (firstRec.weeklyChangeUSD !== undefined && firstRec.weeklyChangeUSD !== null) {
                     monthStart = (Number(firstRec.totalUSD) || 0) - Number(firstRec.weeklyChangeUSD);
                 } else {
                     const fx = (Number(firstRec.totalCAD) > 0 && Number(firstRec.totalUSD) > 0)
