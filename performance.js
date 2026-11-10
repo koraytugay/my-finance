@@ -2330,62 +2330,29 @@ function calculateDrawdownMetrics(history, currentVal = null, currency = 'CAD') 
 }
 
 function renderAnnualSummary() {
-    const yearsMap = {};
-
-    allHistory.forEach(r => {
-        if (!r.date) return;
-        const year = r.date.split('-')[0];
-        if (!yearsMap[year]) {
-            yearsMap[year] = { records: [], peak: 0, min: Infinity };
-        }
-        yearsMap[year].records.push(r);
-        if (r.totalCAD > yearsMap[year].peak) yearsMap[year].peak = r.totalCAD;
-        if (r.totalCAD < yearsMap[year].min) yearsMap[year].min = r.totalCAD;
-    });
-
     const tbody = document.getElementById('annual-table-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
-    const years = Object.keys(yearsMap).sort((a, b) => b.localeCompare(a));
+    const summaries = (typeof computeAnnualSummaries === 'function'
+        ? computeAnnualSummaries(allHistory, 'CAD')
+        : []).slice().reverse();
 
-    years.forEach(year => {
-        const group = yearsMap[year];
-        const recs = group.records;
-        const startVal = recs[0].totalCAD - (recs[0].weeklyChangeCAD || 0);
-        const endVal = recs[recs.length - 1].totalCAD;
-        const changeCAD = endVal - startVal;
-        const changePct = startVal > 0 ? (changeCAD / startVal) * 100 : 0;
-
-        let maxDrawdownCAD = 0;
-        let maxDrawdownPct = 0;
-
-        recs.forEach(r => {
-            const ddCAD = r.drawdownCAD !== undefined && r.drawdownCAD !== null ? r.drawdownCAD : (r.totalCAD - (r.runningPeakCAD || r.totalCAD));
-            const peak = r.runningPeakCAD || (r.totalCAD - ddCAD);
-            const ddPct = peak > 0 ? (ddCAD / peak) * 100 : 0;
-
-            if (ddCAD < maxDrawdownCAD) {
-                maxDrawdownCAD = ddCAD;
-            }
-            if (ddPct < maxDrawdownPct) {
-                maxDrawdownPct = ddPct;
-            }
-        });
-
-        const sign = changeCAD >= 0 ? '+' : '';
-        const color = changeCAD >= 0 ? '#1a7f37' : '#cf222e';
-        const ddColor = maxDrawdownCAD < 0 ? '#cf222e' : '#1a7f37';
+    summaries.forEach(s => {
+        const sign = s.netChange >= 0 ? '+' : '';
+        const color = s.netChange >= 0 ? '#1a7f37' : '#cf222e';
+        const ddColor = s.maxDrawdownVal < 0 ? '#cf222e' : '#1a7f37';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${year}</strong> (${recs.length} weeks)</td>
-            <td style="text-align: right;">${formatCurrency(startVal, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700;">${formatCurrency(endVal, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${formatCurrency(changeCAD, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${changePct.toFixed(2)}%</td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(group.peak, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 600; color: ${ddColor};">${formatCurrency(maxDrawdownCAD, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${ddColor};">${maxDrawdownPct.toFixed(2)}%</td>
+            <td><strong>${s.year}</strong> (${s.weeks} weeks)</td>
+            <td style="text-align: right;">${formatCurrency(s.startVal, 'CAD')}</td>
+            <td style="text-align: right; font-weight: 700;">${formatCurrency(s.endVal, 'CAD')}</td>
+            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${formatCurrency(s.netChange, 'CAD')}</td>
+            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${s.returnPct.toFixed(2)}%</td>
+            <td style="text-align: right; font-weight: 600;">${formatCurrency(s.peak, 'CAD')}</td>
+            <td style="text-align: right; font-weight: 600; color: ${ddColor};">${formatCurrency(s.maxDrawdownVal, 'CAD')}</td>
+            <td style="text-align: right; font-weight: 700; color: ${ddColor};">${s.maxDrawdownPct.toFixed(2)}%</td>
         `;
         tbody.appendChild(tr);
     });

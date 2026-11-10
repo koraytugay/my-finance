@@ -978,17 +978,113 @@ function computeWeeklyPortfolioVsXeqt(history, xeqtWeeklyPrices, currency = 'CAD
     return allItems;
 }
 
+/**
+ * Pure calculation function: Computes standardized annual performance summaries across all years in history.
+ * Reconciles start-of-year baseline using the prior year's final closing balance (with fallback to first record minus weekly change),
+ * ensuring identical annual returns, net changes, peaks, drawdowns, and velocity across Main, History, Stats, and Performance.
+ *
+ * @param {Array} history Historical records
+ * @param {string} currency 'CAD' or 'USD'
+ * @param {number|null} currentOverrideVal Optional live valuation override for the current year's ending value
+ * @returns {Array} Chronologically sorted array of annual summary objects
+ */
+function computeAnnualSummaries(history, currency = 'CAD', currentOverrideVal = null) {
+    if (!Array.isArray(history) || history.length === 0) return [];
+
+    const valKey = currency === 'USD' ? 'totalUSD' : 'totalCAD';
+    const chgKey = currency === 'USD' ? 'weeklyChangeUSD' : 'weeklyChangeCAD';
+
+    const sortedHistory = [...history].filter(r => r && r.date).sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (sortedHistory.length === 0) return [];
+
+    const years = [...new Set(sortedHistory.map(r => r.date.split('-')[0]).filter(Boolean))].sort();
+    const currentYear = sortedHistory[sortedHistory.length - 1].date.split('-')[0];
+
+    return years.map(year => {
+        const recs = sortedHistory.filter(r => r.date.startsWith(year));
+        if (recs.length === 0) return null;
+
+        const priorRecs = sortedHistory.filter(r => r.date < `${year}-01-01`);
+        let startVal = 0;
+        if (priorRecs.length > 0) {
+            startVal = Number(priorRecs[priorRecs.length - 1][valKey]) || 0;
+        }
+        if (startVal <= 0) {
+            const firstRec = recs[0];
+            const chg = typeof firstRec[chgKey] === 'number' ? firstRec[chgKey] : 0;
+            startVal = (Number(firstRec[valKey]) || 0) - chg;
+        }
+        if (startVal <= 0) {
+            startVal = Number(recs[0][valKey]) || 0;
+        }
+
+        const isCurrentYr = year === currentYear;
+        const endVal = (isCurrentYr && currentOverrideVal != null && Number(currentOverrideVal) > 0)
+            ? Number(currentOverrideVal)
+            : (Number(recs[recs.length - 1][valKey]) || 0);
+
+        const netChange = endVal - startVal;
+        const returnPct = startVal > 0 ? (netChange / startVal) * 100 : 0;
+        const weeks = recs.length;
+        const weeklyVelocity = weeks > 0 ? netChange / weeks : 0;
+        const monthlyVelocity = weeklyVelocity * 4.3333;
+
+        let peak = 0;
+        let min = Infinity;
+        let maxDrawdownVal = 0;
+        let maxDrawdownPct = 0;
+
+        recs.forEach(r => {
+            const val = Number(r[valKey]) || 0;
+            if (val > peak) peak = val;
+            if (val < min) min = val;
+
+            const ddVal = currency === 'CAD' && r.drawdownCAD !== undefined && r.drawdownCAD !== null
+                ? Number(r.drawdownCAD)
+                : (val - (currency === 'CAD' && r.runningPeakCAD ? Number(r.runningPeakCAD) : peak));
+            const refPeak = currency === 'CAD' && r.runningPeakCAD
+                ? Number(r.runningPeakCAD)
+                : Math.max(peak, val - ddVal);
+            const ddPct = refPeak > 0 ? (ddVal / refPeak) * 100 : 0;
+
+            if (ddVal < maxDrawdownVal) maxDrawdownVal = ddVal;
+            if (ddPct < maxDrawdownPct) maxDrawdownPct = ddPct;
+        });
+
+        if (endVal > peak) peak = endVal;
+
+        return {
+            year,
+            isCurrentYear: isCurrentYr,
+            weeks,
+            records: recs,
+            startVal,
+            endVal,
+            netChange,
+            returnPct,
+            weeklyVelocity,
+            monthlyVelocity,
+            peak,
+            min: min === Infinity ? 0 : min,
+            maxDrawdownVal,
+            maxDrawdownPct
+        };
+    }).filter(Boolean);
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         formatCurrency,
         formatPercent,
         formatDate,
         formatMonthShort,
+        getDayOfYearFraction,
         escapeHtml,
         calculateHoldingsCostBasis,
         computeXeqtProgressionOverlay,
         computePortfolioVsXeqtProgression,
         computeWeeklyPortfolioVsXeqt,
+        computeAnnualSummaries,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,

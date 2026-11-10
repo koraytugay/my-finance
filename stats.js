@@ -108,40 +108,22 @@ function renderTopHoldings() {
 
 function renderAnnualTable() {
     const tbody = document.getElementById('annual-tbody');
-    const years = [...new Set(history.map(r => r.date ? r.date.split('-')[0] : null).filter(Boolean))].sort();
+    const summaries = typeof computeAnnualSummaries === 'function'
+        ? computeAnnualSummaries(history, 'CAD')
+        : [];
 
-    const rows = years.map(yr => {
-        const yearRecords = history.filter(r => r.date.startsWith(yr));
-        if (yearRecords.length === 0) return null;
-
-        const startRec = yearRecords[0];
-        const endRec = yearRecords[yearRecords.length - 1];
-        const startVal = startRec.totalCAD - (startRec.weeklyChangeCAD || 0);
-        const netChange = endRec.totalCAD - startVal;
-        const retPct = startVal > 0 ? (netChange / startVal) * 100 : 0;
-
-        return {
-            year: yr,
-            start: startVal,
-            end: endRec.totalCAD,
-            netChange,
-            retPct,
-            count: yearRecords.length
-        };
-    }).filter(Boolean);
-
-    tbody.innerHTML = rows.map(r => {
+    tbody.innerHTML = summaries.map(r => {
         const isPos = r.netChange >= 0;
         return `
             <tr>
-                <td><strong>${r.year}</strong> <span style="font-size: 0.74rem; color: #64748b;">(${r.count} wks)</span></td>
-                <td class="text-right">${formatCurrency(r.start)}</td>
-                <td class="text-right font-bold">${formatCurrency(r.end)}</td>
+                <td><strong>${r.year}</strong> <span style="font-size: 0.74rem; color: #64748b;">(${r.weeks} wks)</span></td>
+                <td class="text-right">${formatCurrency(r.startVal)}</td>
+                <td class="text-right font-bold">${formatCurrency(r.endVal)}</td>
                 <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
                     ${isPos ? '+' : ''}${formatCurrency(r.netChange)}
                 </td>
                 <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
-                    ${isPos ? '+' : ''}${r.retPct.toFixed(2)}%
+                    ${isPos ? '+' : ''}${r.returnPct.toFixed(2)}%
                 </td>
             </tr>
         `;

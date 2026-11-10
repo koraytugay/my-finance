@@ -12,7 +12,7 @@ const {
   buildRolling52OverlaySeries,
   calculateDrawdownMetrics
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, computeWeeklyPortfolioVsXeqt, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
+const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, computeWeeklyPortfolioVsXeqt, computeAnnualSummaries, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -297,6 +297,14 @@ test('Financial Calculations Suite', async (t) => {
     const firstIdx2025 = history.findIndex(r => r.date.startsWith('2025-'));
     assert.ok(Math.abs(history[firstIdx2025 - 1].totalCAD - initialNetWorth2025) < 0.01,
       'Prior year ending balance must exactly match annual baseline');
+
+    const summaries = computeAnnualSummaries(history, 'CAD');
+    assert.ok(summaries.length >= 2, 'Should produce summaries for multiple years');
+    const sum2025 = summaries.find(s => s.year === '2025');
+    assert.ok(sum2025, '2025 summary should exist');
+    assert.equal(sum2025.startVal, history[firstIdx2025 - 1].totalCAD);
+    assert.equal(sum2025.endVal, end2025.totalCAD);
+    assert.equal(sum2025.netChange, annualNetChange2025);
   });
 
   await t.test('Rolling 52-week best and worst period dynamic calculation', () => {

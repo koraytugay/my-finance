@@ -168,10 +168,6 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
     const pill = document.getElementById('velocity-overall-pill');
     if (!grid || !history || history.length === 0) return;
 
-    const years = [...new Set(history.map(r => r.date ? r.date.split('-')[0] : null).filter(Boolean))].sort();
-    const currentYear = history[history.length - 1]?.date ? history[history.length - 1].date.split('-')[0] : new Date().getFullYear().toString();
-    const yearData = [];
-
     const totalWeeks = history.length;
     const totalNetChange = currentCAD - startingCAD;
     const avgWeeklyNet = totalWeeks > 0 ? (totalNetChange / totalWeeks) : 0;
@@ -181,40 +177,28 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
         pill.textContent = `Average Velocity: +${formatCurrency(avgWeeklyNet, 'CAD')} / week (${formatCurrency(avgMonthlyNet, 'CAD')} / month)`;
     }
 
-    let prevYearEndVal = startingCAD;
+    const summaries = typeof computeAnnualSummaries === 'function'
+        ? computeAnnualSummaries(history, 'CAD', currentCAD)
+        : [];
+    const palette = ['#8250df', '#0969da', '#16a34a', '#d97706', '#dc2626'];
 
-    years.forEach(yr => {
-        const yrRecords = history.filter(r => r.date && r.date.startsWith(yr));
-        if (yrRecords.length === 0) return;
+    const yearData = summaries.map((s, idx) => {
+        const label = s.isCurrentYear ? `${s.year} (YTD - ${s.weeks} wks)` : `${s.year} (${s.weeks} wks)`;
+        const sign = s.netChange >= 0 ? '+' : '';
+        const cardColor = palette[idx % palette.length];
 
-        const weeksInYr = yrRecords.length;
-        const yrStartVal = prevYearEndVal;
-        const isCurrentYr = yr === currentYear;
-        const yrEndVal = (isCurrentYr && currentCAD > 0) ? currentCAD : yrRecords[yrRecords.length - 1].totalCAD;
-        const yrChange = yrEndVal - yrStartVal;
-        const weeklyVel = weeksInYr > 0 ? (yrChange / weeksInYr) : 0;
-        const monthlyVel = weeklyVel * 4.3333;
-        const changePct = yrStartVal > 0 ? (yrChange / yrStartVal) * 100 : 0;
-
-        prevYearEndVal = yrEndVal;
-
-        const label = isCurrentYr ? `${yr} (YTD - ${weeksInYr} wks)` : `${yr} (${weeksInYr} wks)`;
-        const sign = yrChange >= 0 ? '+' : '';
-        const palette = ['#8250df', '#0969da', '#16a34a', '#d97706', '#dc2626'];
-        const cardColor = palette[years.indexOf(yr) % palette.length];
-
-        yearData.push({
-            year: yr,
+        return {
+            year: s.year,
             label,
-            change: yrChange,
-            changePct,
-            weeklyVel,
-            monthlyVel,
-            weeks: weeksInYr,
+            change: s.netChange,
+            changePct: s.returnPct,
+            weeklyVel: s.weeklyVelocity,
+            monthlyVel: s.monthlyVelocity,
+            weeks: s.weeks,
             sign,
             color: cardColor,
-            endVal: yrEndVal
-        });
+            endVal: s.endVal
+        };
     });
 
     grid.innerHTML = yearData.map(yd => `
