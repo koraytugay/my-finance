@@ -12,6 +12,8 @@ if (typeof require !== 'undefined') {
     if (typeof computePortfolioVsXeqtProgression === 'undefined') global.computePortfolioVsXeqtProgression = _api.computePortfolioVsXeqtProgression;
     if (typeof computeWeeklyPortfolioVsXeqt === 'undefined') global.computeWeeklyPortfolioVsXeqt = _api.computeWeeklyPortfolioVsXeqt;
     if (typeof computeAnnualSummaries === 'undefined') global.computeAnnualSummaries = _api.computeAnnualSummaries;
+    if (typeof getSvgPointerX === 'undefined') global.getSvgPointerX = _api.getSvgPointerX;
+    if (typeof bindChartInteractiveOverlay === 'undefined') global.bindChartInteractiveOverlay = _api.bindChartInteractiveOverlay;
 }
 
 let rawHistory = [];
@@ -1053,23 +1055,6 @@ function buildCalendarYearMonthGridHtml(height, padding, plotW, plotH) {
     return html;
 }
 
-function getSvgPointerX(svgEl, e, width, fallbackX = 0) {
-    if (!svgEl || !e) return fallbackX;
-    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
-    if (typeof svgEl.getScreenCTM === 'function') {
-        const ctm = svgEl.getScreenCTM();
-        if (ctm) {
-            const pt = svgEl.createSVGPoint();
-            pt.x = clientX;
-            pt.y = clientY;
-            return pt.matrixTransform(ctm.inverse()).x;
-        }
-    }
-    const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width || 1000 };
-    return (clientX - (rect.left || 0)) * ((width || 1000) / (rect.width || 1));
-}
-
 function renderStandardTimeframePills(containerId, history, currentTimeframe, setterFnName, titleSuffix) {
     if (typeof document === 'undefined') return;
     const container = document.getElementById(containerId);
@@ -1870,7 +1855,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
+        bindChartInteractiveOverlay(overlay, (e) => {
             const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
 
@@ -1889,11 +1874,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 targetIdx = Math.max(0, Math.min(portPoints.length - 1, Math.round(frac * (portPoints.length - 1))));
             }
             setActivePoint(targetIdx);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
-            clearActivePoint();
-        });
+        }, clearActivePoint);
     }
 
     // Set initial card state
@@ -2699,7 +2680,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 
     if (captureRect && cursorLine && hoverDotsGroup && svgEl) {
-        captureRect.addEventListener('mousemove', (e) => {
+        bindChartInteractiveOverlay(captureRect, (e) => {
             const mouseSvgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(width - padding.right, mouseSvgX));
             const frac = (clampedX - padding.left) / plotW;
@@ -2959,9 +2940,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             `;
 
             renderMainChartInfoCard(cardContent, true);
-        });
-
-        captureRect.addEventListener('mouseleave', () => {
+        }, () => {
             cursorLine.style.display = 'none';
             hoverDotsGroup.innerHTML = '';
             renderMainChartInfoCard(buildYearOverlayDefaultCardHtml(), false);
@@ -3470,7 +3449,7 @@ function renderPortfolioVsXeqtChart() {
     }
 
     if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
+        bindChartInteractiveOverlay(overlay, (e) => {
             const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
             let idx = 0;
@@ -3488,9 +3467,7 @@ function renderPortfolioVsXeqtChart() {
                 idx = Math.max(0, Math.min(points.length - 1, Math.round(frac * (points.length - 1))));
             }
             setActivePoint(idx, true);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
+        }, () => {
             setActivePoint(points.length - 1, false);
         });
     }
@@ -3914,14 +3891,12 @@ function renderWeeklyPortfolioVsXeqtChart() {
     }
 
     if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
+        bindChartInteractiveOverlay(overlay, (e) => {
             const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW - 1, svgX));
             const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
             setActiveBar(idx, true);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
+        }, () => {
             if (cursorLine) cursorLine.style.display = 'none';
             const allBars = box.querySelectorAll('.xeqt-weekly-bar');
             allBars.forEach(bar => { bar.style.opacity = '0.88'; });
@@ -5162,7 +5137,7 @@ function renderWeeklyBarChart() {
     const cursorLine = svgWrap.querySelector('#weekly-bar-cursor-line');
 
     if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
+        bindChartInteractiveOverlay(overlay, (e) => {
             const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + chartWidth - 1, svgX));
             const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
@@ -5174,9 +5149,7 @@ function renderWeeklyBarChart() {
                 cursorLine.style.display = 'block';
             }
             renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[idx], currency, unit, true, avgStr), true);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
+        }, () => {
             if (cursorLine) cursorLine.style.display = 'none';
             renderWeeklyBarInfoCard(buildWeeklyBarCardHtml(items[items.length - 1], currency, unit, false, avgStr), false);
         });
@@ -5813,7 +5786,7 @@ function renderDrawdownChart() {
 
     if (!svgEl || !overlay || points.length === 0) return;
 
-    overlay.addEventListener('mousemove', (e) => {
+    bindChartInteractiveOverlay(overlay, (e) => {
         const svgX = getSvgPointerX(svgEl, e, width, padding.left);
         const boundedX = Math.max(padding.left, Math.min(width - padding.right, svgX));
 
@@ -5846,9 +5819,7 @@ function renderDrawdownChart() {
         }
 
         renderDrawdownInfoCard(buildDrawdownCardHtml(nearest, true, currency, unit), true);
-    });
-
-    overlay.addEventListener('mouseleave', () => {
+    }, () => {
         if (cursor) cursor.style.display = 'none';
         if (hoverDot) hoverDot.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';

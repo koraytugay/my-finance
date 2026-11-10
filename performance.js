@@ -1469,15 +1469,10 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
 
     if (!svgEl || !overlay) return;
 
-    overlay.addEventListener('mousemove', (e) => {
-        const ctm = svgEl.getScreenCTM();
-        if (!ctm) return;
-
-        const pt = svgEl.createSVGPoint();
-        pt.x = e.clientX;
-        pt.y = e.clientY;
-        const svgP = pt.matrixTransform(ctm.inverse());
-        const svgX = svgP.x;
+    const handleOverlayMove = (e) => {
+        const svgX = typeof getSvgPointerX === 'function'
+            ? getSvgPointerX(svgEl, e, width, padding.left)
+            : padding.left;
 
         const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
         const fraction = (clampedX - padding.left) / plotW;
@@ -1528,7 +1523,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         }
 
         renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(weekIdx, true), true);
-    });
+    };
 
     function buildR52OverlayCardHtml(weekIdx, isHover = true) {
         const bestPt = bestSeries[weekIdx] || bestSeries[bestSeries.length - 1];
@@ -1630,14 +1625,21 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         `;
     }
 
-    overlay.addEventListener('mouseleave', () => {
+    const handleOverlayLeave = () => {
         if (cursor) cursor.style.display = 'none';
         if (dotCurrent) dotCurrent.style.display = 'none';
         if (dotBest) dotBest.style.display = 'none';
         if (dotWorst) dotWorst.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';
         renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(52, false), false);
-    });
+    };
+
+    if (typeof bindChartInteractiveOverlay === 'function') {
+        bindChartInteractiveOverlay(overlay, handleOverlayMove, handleOverlayLeave);
+    } else {
+        overlay.addEventListener('mousemove', handleOverlayMove);
+        overlay.addEventListener('mouseleave', handleOverlayLeave);
+    }
 
     // Set initial card state
     renderPerfCard('r52-overlay-info-card', buildR52OverlayCardHtml(52, false), false);
@@ -1963,15 +1965,10 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
 
     if (!svgEl || !overlay) return;
 
-    overlay.addEventListener('mousemove', (e) => {
-        const ctm = svgEl.getScreenCTM();
-        if (!ctm) return;
-
-        const pt = svgEl.createSVGPoint();
-        pt.x = e.clientX;
-        pt.y = e.clientY;
-        const svgP = pt.matrixTransform(ctm.inverse());
-        const svgX = svgP.x;
+    const handleOverlayMove = (e) => {
+        const svgX = typeof getSvgPointerX === 'function'
+            ? getSvgPointerX(svgEl, e, width, padding.left)
+            : padding.left;
 
         const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
         const fraction = (clampedX - padding.left) / plotW;
@@ -2005,7 +2002,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         }
 
         renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(idx, true), true);
-    });
+    };
 
     function buildR52TimelineCardHtml(idx, isHover = true) {
         const item = series[idx];
@@ -2078,13 +2075,20 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         `;
     }
 
-    overlay.addEventListener('mouseleave', () => {
+    const handleTimelineLeave = () => {
         if (cursor) cursor.style.display = 'none';
         if (dot) dot.style.display = 'none';
         if (dotXeqt) dotXeqt.style.display = 'none';
         if (tooltip) tooltip.style.display = 'none';
         renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(N - 1, false), false);
-    });
+    };
+
+    if (typeof bindChartInteractiveOverlay === 'function') {
+        bindChartInteractiveOverlay(overlay, handleOverlayMove, handleTimelineLeave);
+    } else {
+        overlay.addEventListener('mousemove', handleOverlayMove);
+        overlay.addEventListener('mouseleave', handleTimelineLeave);
+    }
 
     // Set initial card state
     renderPerfCard('r52-timeline-info-card', buildR52TimelineCardHtml(N - 1, false), false);

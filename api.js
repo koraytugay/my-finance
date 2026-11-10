@@ -1146,6 +1146,35 @@ function computeAnnualSummaries(history, currency = 'CAD', currentOverrideVal = 
     }).filter(Boolean);
 }
 
+function getSvgPointerX(svgEl, e, width, fallbackX = 0) {
+    if (!svgEl || !e) return fallbackX;
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    if (typeof svgEl.getScreenCTM === 'function') {
+        const ctm = svgEl.getScreenCTM();
+        if (ctm) {
+            const pt = svgEl.createSVGPoint();
+            pt.x = clientX;
+            pt.y = clientY;
+            return pt.matrixTransform(ctm.inverse()).x;
+        }
+    }
+    const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width || 1000 };
+    return (clientX - (rect.left || 0)) * ((width || 1000) / (rect.width || 1));
+}
+
+function bindChartInteractiveOverlay(overlay, onMove, onLeave) {
+    if (!overlay || typeof overlay.addEventListener !== 'function') return;
+    if (typeof onMove === 'function') {
+        overlay.addEventListener('mousemove', onMove);
+        overlay.addEventListener('touchstart', onMove, { passive: true });
+        overlay.addEventListener('touchmove', onMove, { passive: true });
+    }
+    if (typeof onLeave === 'function') {
+        overlay.addEventListener('mouseleave', onLeave);
+    }
+}
+
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         formatCurrency,
@@ -1161,6 +1190,8 @@ if (typeof module !== 'undefined' && module.exports) {
         computeAnnualSummaries,
         computeEncryptedPayloadFingerprint,
         loadPortfolioContext,
+        getSvgPointerX,
+        bindChartInteractiveOverlay,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,

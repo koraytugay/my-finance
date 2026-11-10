@@ -724,30 +724,21 @@ function renderChart(records, currency = 'CAD') {
     }
 
     if (overlay && svgEl) {
-        overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const svgP = pt.matrixTransform(ctm.inverse());
-                    svgX = svgP.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
+        const handleMove = (e) => {
+            const svgX = typeof getSvgPointerX === 'function'
+                ? getSvgPointerX(svgEl, e, width, padding.left)
+                : padding.left;
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
             const frac = (clampedX - padding.left) / plotW;
             const idx = Math.max(0, Math.min(records.length - 1, Math.round(frac * (records.length - 1))));
             setActivePoint(idx);
-        });
-
-        overlay.addEventListener('mouseleave', () => {
-            clearActivePoint();
-        });
+        };
+        if (typeof bindChartInteractiveOverlay === 'function') {
+            bindChartInteractiveOverlay(overlay, handleMove, clearActivePoint);
+        } else {
+            overlay.addEventListener('mousemove', handleMove);
+            overlay.addEventListener('mouseleave', clearActivePoint);
+        }
     }
 
     // Set initial card state
