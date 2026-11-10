@@ -984,7 +984,10 @@ function getDayOfYearFraction(dateStr) {
 
 function updateMainTimeframeButtonsUI() {
     if (typeof document === 'undefined') return;
-    const buttons = document.querySelectorAll('.timeframe-pill');
+    const container = document.getElementById('main-timeframe-toggle');
+    const buttons = container && typeof container.querySelectorAll === 'function'
+        ? container.querySelectorAll('.timeframe-pill')
+        : [];
     buttons.forEach(btn => {
         const tf = btn.getAttribute('data-timeframe');
         if (tf === 'all') {
