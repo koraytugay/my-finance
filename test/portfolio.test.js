@@ -12,7 +12,7 @@ const {
   buildRolling52OverlaySeries,
   calculateDrawdownMetrics
 } = require('../performance.js');
-const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, computeWeeklyPortfolioVsXeqt, computeAnnualSummaries, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
+const { computeXeqtProgressionOverlay, computePortfolioVsXeqtProgression, computeWeeklyPortfolioVsXeqt, computeAnnualSummaries, computeEncryptedPayloadFingerprint, formatCurrency, formatMonthShort, formatDateTime, sanitizeHistory, enrichHistoryWithLiveHoldings } = require('../api.js');
 const {
   computeSimpleAllocation,
   isCashHolding,
@@ -227,6 +227,17 @@ test('Encryption & Decryption Suite', async (t) => {
     assert.ok(enc.tag && typeof enc.tag === 'string', 'Payload must contain tag');
     assert.ok(enc.data && typeof enc.data === 'string', 'Payload must contain data');
     assert.ok(enc.salt && typeof enc.salt === 'string', 'Payload must contain salt');
+  });
+
+  await t.test('Encrypted payload fingerprint changes whenever IV or auth tag changes', () => {
+    const enc1 = encrypt({ a: 1 }, 'test-pass');
+    const enc2 = encrypt({ a: 1 }, 'test-pass');
+    const fp1 = computeEncryptedPayloadFingerprint(enc1, enc2);
+    const fp1Repeat = computeEncryptedPayloadFingerprint(enc1, enc2);
+    const fpChanged = computeEncryptedPayloadFingerprint(enc2, enc1);
+    assert.equal(fp1, fp1Repeat);
+    assert.notEqual(fp1, fpChanged);
+    assert.equal(computeEncryptedPayloadFingerprint(null, null), ':::');
   });
 });
 

@@ -330,6 +330,14 @@ function enrichHistoryWithLiveHoldings(history, holdings, cadUsdRate) {
     return historyCopy;
 }
 
+function computeEncryptedPayloadFingerprint(encHoldings, encHistory) {
+    const hIv = (encHoldings && encHoldings.iv) ? encHoldings.iv : '';
+    const hTag = (encHoldings && encHoldings.tag) ? encHoldings.tag : '';
+    const histIv = (encHistory && encHistory.iv) ? encHistory.iv : '';
+    const histTag = (encHistory && encHistory.tag) ? encHistory.tag : '';
+    return `${hIv}:${hTag}:${histIv}:${histTag}`;
+}
+
 async function unlockWithPassword(password, forceRefresh = false) {
     if (!password) {
         throw new Error('Password required');
@@ -353,15 +361,48 @@ async function unlockWithPassword(password, forceRefresh = false) {
         }
 
         const encHoldings = await holdingsRes.json();
-        const holdings = await decryptPayloadWebCrypto(encHoldings, password);
-
-        let history = [];
+        let encHistory = null;
         if (historyRes.ok) {
             try {
-                const encHistory = await historyRes.json();
-                history = await decryptPayloadWebCrypto(encHistory, password);
+                encHistory = await historyRes.json();
             } catch (e) {
-                console.warn('History decrypt warning:', e.message);
+                console.warn('History JSON parse warning:', e.message);
+            }
+        }
+
+        const fingerprint = computeEncryptedPayloadFingerprint(encHoldings, encHistory);
+        let holdings = null;
+        let history = [];
+
+        if (!forceRefresh && typeof sessionStorage !== 'undefined') {
+            try {
+                const cachedFp = sessionStorage.getItem('portfolio_cache_fp');
+                const cachedRaw = sessionStorage.getItem('portfolio_cache_data');
+                const savedPwd = sessionStorage.getItem('portfolio_password');
+                if (cachedFp === fingerprint && cachedRaw && savedPwd === password) {
+                    const parsed = JSON.parse(cachedRaw);
+                    if (Array.isArray(parsed.holdings)) {
+                        holdings = parsed.holdings;
+                        history = Array.isArray(parsed.history) ? parsed.history : [];
+                    }
+                }
+            } catch (_) {}
+        }
+
+        if (!holdings) {
+            holdings = await decryptPayloadWebCrypto(encHoldings, password);
+            if (encHistory) {
+                try {
+                    history = await decryptPayloadWebCrypto(encHistory, password);
+                } catch (e) {
+                    console.warn('History decrypt warning:', e.message);
+                }
+            }
+            if (typeof sessionStorage !== 'undefined') {
+                try {
+                    sessionStorage.setItem('portfolio_cache_fp', fingerprint);
+                    sessionStorage.setItem('portfolio_cache_data', JSON.stringify({ holdings, history }));
+                } catch (_) {}
             }
         }
 
@@ -395,6 +436,8 @@ async function getHoldings(forceRefresh = false) {
             if (cachedHoldings) return cachedHoldings;
         } catch (e) {
             sessionStorage.removeItem('portfolio_password');
+            sessionStorage.removeItem('portfolio_cache_fp');
+            sessionStorage.removeItem('portfolio_cache_data');
         }
     }
 
@@ -417,6 +460,8 @@ async function getHistory(forceRefresh = false) {
             if (cachedHistory) return cachedHistory;
         } catch (e) {
             sessionStorage.removeItem('portfolio_password');
+            sessionStorage.removeItem('portfolio_cache_fp');
+            sessionStorage.removeItem('portfolio_cache_data');
         }
     }
 
@@ -488,6 +533,8 @@ function lockPortfolio() {
     cachedHistory = null;
     isSessionUnlocked = false;
     sessionStorage.removeItem('portfolio_password');
+    sessionStorage.removeItem('portfolio_cache_fp');
+    sessionStorage.removeItem('portfolio_cache_data');
     location.reload();
 }
 
@@ -1085,6 +1132,7 @@ if (typeof module !== 'undefined' && module.exports) {
         computePortfolioVsXeqtProgression,
         computeWeeklyPortfolioVsXeqt,
         computeAnnualSummaries,
+        computeEncryptedPayloadFingerprint,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,
