@@ -2598,8 +2598,27 @@ test('Portfolio vs XEQT Progression Suite', async (t) => {
         assert.ok(Number.isFinite(item.chartVal), `${tf.id} chartVal is finite`);
         assert.ok(Number.isFinite(item.spreadPct), `${tf.id} spreadPct is finite`);
         assert.ok(typeof item.isOutperforming === 'boolean', `${tf.id} isOutperforming is boolean`);
+        assert.ok(typeof item.fraction === 'number' && item.fraction >= 0 && item.fraction <= 1, `${tf.id} fraction in [0, 1]`);
       }
     }
+  });
+
+  await t.test('computePortfolioVsXeqtProgression assigns calendar-year fractions so partial years stop early', () => {
+    const partialYear2026 = [
+      { week: 1, date: '2026-01-02', totalCAD: 500000, totalUSD: 350000 },
+      { week: 2, date: '2026-06-30', totalCAD: 550000, totalUSD: 385000 },
+      { week: 3, date: '2026-10-02', totalCAD: 580000, totalUSD: 406000 }
+    ];
+    const mockPrices = [30, 32, 33];
+
+    const result = computePortfolioVsXeqtProgression(partialYear2026, partialYear2026, mockPrices, 'CAD', null, 'PCT');
+    assert.equal(result.length, 3);
+    // Jan 2 is near start of year (~0.004)
+    assert.ok(result[0].fraction < 0.02);
+    // Jun 30 is near mid-year (~0.495)
+    assert.ok(result[1].fraction > 0.48 && result[1].fraction < 0.51);
+    // Oct 2 stops early around 75% of the year, well before Dec 31 (1.0)
+    assert.ok(result[2].fraction > 0.74 && result[2].fraction < 0.77);
   });
 
   await t.test('setXeqtRelCurrency and setXeqtRelUnit and setXeqtRelTimeframe manage state transitions correctly', () => {

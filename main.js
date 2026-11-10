@@ -3080,6 +3080,7 @@ function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrice
         return {
             index: idx,
             date: pt.date,
+            fraction: getDayOfYearFraction(pt.date),
             week: pt.week,
             portfolioVal: pt.portfolioVal,
             portfolioReturnPct: pt.portfolioReturnPct,
@@ -3384,8 +3385,17 @@ function renderPortfolioVsXeqtChart() {
         step = (maxVal - minVal) / 4 || 1000;
     }
 
+    const isYearTimeframe = /^\d{4}$/.test(timeframe);
     const getY = (val) => padding.top + plotH - ((val - minVal) / (maxVal - minVal || 1)) * plotH;
-    const getX = (i) => padding.left + (i / (points.length - 1 || 1)) * plotW;
+    const getX = (i) => {
+        if (isYearTimeframe) {
+            const frac = typeof points[i].fraction === 'number'
+                ? points[i].fraction
+                : getDayOfYearFraction(points[i].date);
+            return padding.left + frac * plotW;
+        }
+        return padding.left + (i / (points.length - 1 || 1)) * plotW;
+    };
 
     points.forEach((p, i) => {
         p.x = getX(i);
@@ -3419,16 +3429,38 @@ function renderPortfolioVsXeqtChart() {
 
     // X Date ticks
     let xTicksHtml = '';
-    const numTicks = Math.min(points.length, 7);
-    for (let i = 0; i < numTicks; i++) {
-        const idx = Math.round((i / (numTicks - 1 || 1)) * (points.length - 1));
-        const pt = points[idx];
-        const x = getX(idx);
-        const label = typeof formatMonthShort === 'function' ? formatMonthShort(pt.date) : formatDate(pt.date);
-        xTicksHtml += `
-            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
-        `;
+    if (isYearTimeframe) {
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const monthDayStarts = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        const monthDaysCount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        for (let m = 0; m < 12; m++) {
+            const startFrac = monthDayStarts[m] / 365;
+            const midFrac = (monthDayStarts[m] + monthDaysCount[m] / 2) / 365;
+            const startX = padding.left + startFrac * plotW;
+            const midX = padding.left + midFrac * plotW;
+
+            if (m > 0) {
+                xTicksHtml += `
+                    <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+                `;
+            }
+            xTicksHtml += `
+                <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${monthNames[m]}</text>
+            `;
+        }
+    } else {
+        const numTicks = Math.min(points.length, 7);
+        for (let i = 0; i < numTicks; i++) {
+            const idx = Math.round((i / (numTicks - 1 || 1)) * (points.length - 1));
+            const pt = points[idx];
+            const x = getX(idx);
+            const label = typeof formatMonthShort === 'function' ? formatMonthShort(pt.date) : formatDate(pt.date);
+            xTicksHtml += `
+                <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+                <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+            `;
+        }
     }
 
     // Area & Line paths
@@ -3540,8 +3572,20 @@ function renderPortfolioVsXeqtChart() {
             }
 
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
-            const frac = (clampedX - padding.left) / (plotW || 1);
-            const idx = Math.max(0, Math.min(points.length - 1, Math.round(frac * (points.length - 1))));
+            let idx = 0;
+            if (isYearTimeframe) {
+                let minDist = Infinity;
+                for (let i = 0; i < points.length; i++) {
+                    const dist = Math.abs(points[i].x - clampedX);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        idx = i;
+                    }
+                }
+            } else {
+                const frac = (clampedX - padding.left) / (plotW || 1);
+                idx = Math.max(0, Math.min(points.length - 1, Math.round(frac * (points.length - 1))));
+            }
             setActivePoint(idx, true);
         });
 

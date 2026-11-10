@@ -604,6 +604,22 @@ function formatMonthShort(dateStr) {
     return monthNames[monthIdx] || dateStr;
 }
 
+function getDayOfYearFraction(dateStr) {
+    if (!dateStr || typeof dateStr !== 'string') return 0;
+    const parts = dateStr.split('-');
+    if (parts.length < 3) return 0;
+    const y = parseInt(parts[0], 10);
+    const m = parseInt(parts[1], 10) - 1;
+    const d = parseInt(parts[2], 10);
+
+    const target = new Date(Date.UTC(y, m, d, 12, 0, 0));
+    const startOfYear = new Date(Date.UTC(y, 0, 1, 0, 0, 0));
+    const endOfYear = new Date(Date.UTC(y, 11, 31, 23, 59, 59));
+
+    const fraction = (target - startOfYear) / (endOfYear - startOfYear);
+    return Math.max(0, Math.min(1, fraction));
+}
+
 function formatDateTime(isoStr) {
     if (!isoStr) return '';
     const date = new Date(isoStr);
@@ -793,6 +809,7 @@ function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrice
         return {
             index: idx,
             date: pt.date,
+            fraction: getDayOfYearFraction(pt.date),
             week: pt.week,
             portfolioVal: pt.portfolioVal,
             portfolioReturnPct: pt.portfolioReturnPct,
