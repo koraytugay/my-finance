@@ -5,6 +5,15 @@
  * 2. Account Type (Non-Registered vs Registered) + Growth & Milestone Metrics
  * 3. Category (High-level asset categories)
  */
+if (typeof require !== 'undefined') {
+    const _api = require('./api.js');
+    if (typeof getDayOfYearFraction === 'undefined') global.getDayOfYearFraction = _api.getDayOfYearFraction;
+    if (typeof computeXeqtProgressionOverlay === 'undefined') global.computeXeqtProgressionOverlay = _api.computeXeqtProgressionOverlay;
+    if (typeof computePortfolioVsXeqtProgression === 'undefined') global.computePortfolioVsXeqtProgression = _api.computePortfolioVsXeqtProgression;
+    if (typeof computeWeeklyPortfolioVsXeqt === 'undefined') global.computeWeeklyPortfolioVsXeqt = _api.computeWeeklyPortfolioVsXeqt;
+    if (typeof computeAnnualSummaries === 'undefined') global.computeAnnualSummaries = _api.computeAnnualSummaries;
+}
+
 let rawHistory = [];
 let rawBenchmarks = null;
 let currentMainTimeframe = 'last-52';
@@ -960,26 +969,6 @@ function getMainYearColor(year) {
         return palette[Math.abs(num) % palette.length];
     }
     return '#0969da';
-}
-
-/**
- * Calculates normalized progress of a calendar date within its year [0, 1].
- * Jan 1 = 0.0, Dec 31 = 1.0.
- */
-function getDayOfYearFraction(dateStr) {
-    if (!dateStr || typeof dateStr !== 'string') return 0;
-    const parts = dateStr.split('-');
-    if (parts.length < 3) return 0;
-    const y = parseInt(parts[0], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    const d = parseInt(parts[2], 10);
-
-    const target = new Date(Date.UTC(y, m, d, 12, 0, 0));
-    const startOfYear = new Date(Date.UTC(y, 0, 1, 0, 0, 0));
-    const endOfYear = new Date(Date.UTC(y, 11, 31, 23, 59, 59));
-
-    const fraction = (target - startOfYear) / (endOfYear - startOfYear);
-    return Math.max(0, Math.min(1, fraction));
 }
 
 function updateMainTimeframeButtonsUI() {
@@ -3050,56 +3039,6 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
 /* ================= Portfolio vs XEQT Progression Graph ================= */
 
-/**
- * Pure calculation function: Computes portfolio progression relative to XEQT benchmark.
- * Tracks portfolio growth over time compared to XEQT progression
- * (e.g., if XEQT is +20% and portfolio is +25%, spread is +5%).
- */
-function computePortfolioVsXeqtProgression(records, fullHistory, xeqtWeeklyPrices, currency = 'CAD', currentBenchmarkPrice = null, unit = 'PCT') {
-    if (!records || records.length === 0 || !xeqtWeeklyPrices) {
-        return [];
-    }
-
-    const fn = (typeof computeXeqtProgressionOverlay === 'function')
-        ? computeXeqtProgressionOverlay
-        : (typeof window !== 'undefined' && window.computeXeqtProgressionOverlay)
-            ? window.computeXeqtProgressionOverlay
-            : null;
-
-    if (!fn) return [];
-
-    const overlay = fn(records, fullHistory, xeqtWeeklyPrices, currency, currentBenchmarkPrice);
-    if (!overlay || overlay.length === 0) {
-        return [];
-    }
-
-    const isPct = unit === 'PCT';
-
-    return overlay.map((pt, idx) => {
-        const spreadPct = Number(pt.spreadPct) || 0;
-        const spreadVal = Number(pt.spreadVal) || 0;
-        const chartVal = isPct ? spreadPct : spreadVal;
-
-        return {
-            index: idx,
-            date: pt.date,
-            fraction: getDayOfYearFraction(pt.date),
-            week: pt.week,
-            portfolioVal: pt.portfolioVal,
-            portfolioReturnPct: pt.portfolioReturnPct,
-            portfolioGain: pt.portfolioGain,
-            xeqtPrice: pt.price,
-            xeqtVal: pt.val,
-            xeqtReturnPct: pt.returnPct,
-            xeqtGain: pt.gain,
-            spreadPct: spreadPct,
-            spreadVal: spreadVal,
-            chartVal: chartVal,
-            isOutperforming: spreadPct >= 0
-        };
-    });
-}
-
 function syncXeqtRelTimeframeButtons(history) {
     if (typeof document === 'undefined') return;
     const container = document.getElementById('xeqt-rel-timeframe-toggle');
@@ -3602,150 +3541,6 @@ function renderPortfolioVsXeqtChart() {
 }
 
 /* ================= Weekly Portfolio vs XEQT Bar Chart ================= */
-
-/**
- * Pure calculation function: Computes weekly portfolio performance relative to XEQT benchmark.
- * Tracks by how much percentage (or dollar value) the portfolio beat or lost against XEQT in each week.
- */
-function computeWeeklyPortfolioVsXeqt(history, xeqtWeeklyPrices, currency = 'CAD', unit = 'PCT', timeframe = 'last-52', currentBenchmarkPrice = null) {
-    if (!history || history.length <= 1 || !xeqtWeeklyPrices) {
-        return [];
-    }
-
-    const prices = Array.isArray(xeqtWeeklyPrices) ? xeqtWeeklyPrices : (xeqtWeeklyPrices.weeklyPrices || []);
-    if (prices.length === 0) {
-        return [];
-    }
-
-    const livePrice = (currentBenchmarkPrice != null && Number.isFinite(Number(currentBenchmarkPrice)))
-        ? Number(currentBenchmarkPrice)
-        : (!Array.isArray(xeqtWeeklyPrices) && xeqtWeeklyPrices.currentPrice ? xeqtWeeklyPrices.currentPrice : null);
-
-    const latestHistoryRec = history[history.length - 1];
-
-    function getXeqtPrice(rec, idx) {
-        let pIdx = -1;
-        if (rec.week !== undefined && rec.week !== null && Number.isFinite(Number(rec.week))) {
-            pIdx = Number(rec.week) - 1;
-        } else if (Array.isArray(history)) {
-            pIdx = history.findIndex(h => h.date === rec.date);
-        }
-        if (pIdx < 0) pIdx = 0;
-
-        const isLatestRecord = (rec === latestHistoryRec) || (latestHistoryRec && rec.date === latestHistoryRec.date);
-        if (isLatestRecord && livePrice != null && livePrice > 0) {
-            if (pIdx >= prices.length - 1 || (history[history.length - 2] && history[history.length - 2].date !== rec.date)) {
-                return livePrice;
-            }
-        }
-
-        const clampedIdx = Math.min(Math.max(0, pIdx), prices.length - 1);
-        return prices[clampedIdx] || prices[prices.length - 1] || 0;
-    }
-
-    const isUsd = currency === 'USD';
-    const isPct = unit === 'PCT';
-
-    const allItems = [];
-    for (let i = 1; i < history.length; i++) {
-        const r = history[i];
-        const prev = history[i - 1];
-
-        // XEQT Price & Return
-        const prevPriceCAD = getXeqtPrice(prev, i - 1);
-        const curPriceCAD = getXeqtPrice(r, i);
-
-        const prevRate = (prev.totalCAD && prev.totalUSD) ? (prev.totalUSD / prev.totalCAD) : 1;
-        const curRate = (r.totalCAD && r.totalUSD) ? (r.totalUSD / r.totalCAD) : 1;
-
-        const prevXeqtPrice = isUsd ? (prevPriceCAD * prevRate) : prevPriceCAD;
-        const curXeqtPrice = isUsd ? (curPriceCAD * curRate) : curPriceCAD;
-
-        const xeqtReturnPct = prevXeqtPrice > 0
-            ? (((curXeqtPrice - prevXeqtPrice) / prevXeqtPrice) * 100)
-            : 0;
-
-        // Portfolio Price & Return
-        const prevPortVal = isUsd ? Number(prev.totalUSD || 0) : Number(prev.totalCAD || 0);
-        const curPortVal = isUsd ? Number(r.totalUSD || 0) : Number(r.totalCAD || 0);
-
-        let portChangeVal;
-        if (isUsd) {
-            if (r.weeklyChangeUSD !== undefined && r.weeklyChangeUSD !== null) {
-                portChangeVal = Number(r.weeklyChangeUSD);
-            } else if (r.totalUSD !== undefined && prev.totalUSD !== undefined) {
-                portChangeVal = Number(r.totalUSD) - Number(prev.totalUSD);
-            } else {
-                const fx = (r.totalUSD && r.totalCAD) ? (r.totalUSD / r.totalCAD) : 0.74;
-                const changeCAD = (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null)
-                    ? Number(r.weeklyChangeCAD)
-                    : (Number(r.totalCAD || 0) - Number(prev.totalCAD || 0));
-                portChangeVal = changeCAD * fx;
-            }
-        } else {
-            if (r.weeklyChangeCAD !== undefined && r.weeklyChangeCAD !== null) {
-                portChangeVal = Number(r.weeklyChangeCAD);
-            } else {
-                portChangeVal = curPortVal - prevPortVal;
-            }
-        }
-
-        let portReturnPct;
-        if (isUsd) {
-            if (r.weeklyChangeUSDPct !== undefined && r.weeklyChangeUSDPct !== null) {
-                portReturnPct = Number(r.weeklyChangeUSDPct);
-            } else if (prevPortVal > 0) {
-                portReturnPct = (portChangeVal / prevPortVal) * 100;
-            } else {
-                portReturnPct = 0;
-            }
-        } else {
-            if (r.weeklyChangePct !== undefined && r.weeklyChangePct !== null) {
-                portReturnPct = Number(r.weeklyChangePct);
-            } else if (prevPortVal > 0) {
-                portReturnPct = (portChangeVal / prevPortVal) * 100;
-            } else {
-                portReturnPct = 0;
-            }
-        }
-
-        const spreadPct = portReturnPct - xeqtReturnPct;
-        const xeqtGainOnPortVal = prevPortVal * (xeqtReturnPct / 100);
-        const spreadVal = portChangeVal - xeqtGainOnPortVal;
-        const chartVal = isPct ? spreadPct : spreadVal;
-
-        allItems.push({
-            index: i - 1,
-            week: r.week,
-            date: r.date,
-            prevDate: prev.date,
-            portfolioStartVal: prevPortVal,
-            portfolioEndVal: curPortVal,
-            portfolioChange: Number(portChangeVal.toFixed(2)),
-            portfolioReturnPct: Number(portReturnPct.toFixed(2)),
-            prevXeqtPrice: Number(prevXeqtPrice.toFixed(2)),
-            curXeqtPrice: Number(curXeqtPrice.toFixed(2)),
-            xeqtReturnPct: Number(xeqtReturnPct.toFixed(2)),
-            xeqtGainOnPortVal: Number(xeqtGainOnPortVal.toFixed(2)),
-            spreadPct: Number(spreadPct.toFixed(2)),
-            spreadVal: Number(spreadVal.toFixed(2)),
-            chartVal: Number(chartVal.toFixed(2)),
-            isBeat: spreadPct >= 0
-        });
-    }
-
-    if (!timeframe || timeframe === 'all') {
-        return allItems;
-    }
-    if (timeframe === 'last-52') {
-        return allItems.length > 52 ? allItems.slice(-52) : allItems;
-    }
-    if (/^\d{4}$/.test(timeframe)) {
-        return allItems.filter(it => it.date && it.date.startsWith(timeframe));
-    }
-
-    return allItems;
-}
 
 function syncXeqtWeeklyTimeframeButtons(history) {
     if (typeof document === 'undefined') return;
