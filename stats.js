@@ -11,17 +11,9 @@ async function initStats() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [h, hist] = await Promise.all([
-            getHoldings(),
-            getHistory()
-        ]);
-
-        holdings = h || [];
-        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(hist) : (hist || []);
-        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate) || 0.7073;
-        history = typeof enrichHistoryWithLiveHoldings === 'function'
-            ? enrichHistoryWithLiveHoldings(validHistory, holdings, cadUsdRate)
-            : validHistory;
+        const ctx = await loadPortfolioContext();
+        holdings = ctx.holdings;
+        history = ctx.history;
 
         renderKeyMetrics();
         renderMilestones();

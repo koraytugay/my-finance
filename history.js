@@ -14,25 +14,12 @@ async function initHistory() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [hist, h, benchmarks] = await Promise.all([
-            getHistory(),
-            getHoldings(),
-            typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
-        ]);
-        if (typeof sanitizeHistory === 'function') {
-            allHistory = sanitizeHistory(hist);
-        } else {
-            allHistory = (hist || []).filter(r => r && typeof r.totalCAD === 'number' && !isNaN(r.totalCAD) && r.totalCAD > 0);
-        }
-        allHoldings = h || [];
+        const { holdings, history, benchmarks } = await loadPortfolioContext({
+            includeBenchmarks: true
+        });
+        allHistory = history;
+        allHoldings = holdings;
         allBenchmarks = benchmarks;
-
-        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
-            || (typeof benchmarks !== 'undefined' && benchmarks?.fx?.cadUsdRate)
-            || 0.7073;
-        if (typeof enrichHistoryWithLiveHoldings === 'function') {
-            allHistory = enrichHistoryWithLiveHoldings(allHistory, allHoldings, cadUsdRate);
-        }
 
         updateStatCards();
         applyHistoryFilter();

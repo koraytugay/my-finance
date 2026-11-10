@@ -13,26 +13,13 @@ async function initPerformance() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [history, holdings, benchmarks] = await Promise.all([
-            getHistory(),
-            getHoldings(),
-            typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null)
-        ]);
+        const { holdings, history, benchmarks } = await loadPortfolioContext({
+            includeBenchmarks: true
+        });
 
-        if (typeof sanitizeHistory === 'function') {
-            allHistory = sanitizeHistory(history);
-        } else {
-            allHistory = (history || []).filter(r => r && typeof r.totalCAD === 'number' && !isNaN(r.totalCAD) && r.totalCAD > 0);
-        }
+        allHistory = history;
         allHoldings = holdings;
         allBenchmarks = benchmarks;
-
-        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
-            || (typeof benchmarks !== 'undefined' && benchmarks?.fx?.cadUsdRate)
-            || 0.7073;
-        if (typeof enrichHistoryWithLiveHoldings === 'function') {
-            allHistory = enrichHistoryWithLiveHoldings(allHistory, allHoldings, cadUsdRate);
-        }
 
         if (!allHistory || allHistory.length === 0) {
             throw new Error('No historical records found');

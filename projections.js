@@ -12,10 +12,7 @@ async function initProjections() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [holdings, history] = await Promise.all([
-            getHoldings(),
-            getHistory()
-        ]);
+        const { holdings, history: validHistory } = await loadPortfolioContext();
 
         if (!holdings || holdings.length === 0) {
             throw new Error('No holdings data available.');
@@ -27,7 +24,6 @@ async function initProjections() {
         document.getElementById('input-starting-nw').value = Math.round(baselineNetWorth);
 
         // Estimate monthly contribution from actual net savings added if history & holdings available
-        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
         if (validHistory && validHistory.length > 10) {
             const first = validHistory[0];
             const latest = validHistory[validHistory.length - 1];

@@ -55,22 +55,13 @@ async function initMain() {
     const errorEl = document.getElementById('error');
 
     try {
-        const [holdings, history, benchmarks, syncStatus] = await Promise.all([
-            getHoldings(),
-            getHistory(),
-            typeof getBenchmarks === 'function' ? getBenchmarks().catch(() => null) : Promise.resolve(null),
-            typeof getSyncStatus === 'function' ? getSyncStatus().catch(() => null) : Promise.resolve(null)
-        ]);
+        const { holdings, history: enrichedHistory, benchmarks, syncStatus } = await loadPortfolioContext({
+            includeBenchmarks: true,
+            includeSyncStatus: true
+        });
 
         renderMainLastSynced(syncStatus, benchmarks);
 
-        const validHistory = typeof sanitizeHistory === 'function' ? sanitizeHistory(history) : (history || []);
-        const cadUsdRate = (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
-            || (benchmarks?.fx?.cadUsdRate)
-            || 0.7073;
-        const enrichedHistory = typeof enrichHistoryWithLiveHoldings === 'function'
-            ? enrichHistoryWithLiveHoldings(validHistory, holdings, cadUsdRate)
-            : validHistory;
         rawHistory = enrichedHistory;
         rawBenchmarks = benchmarks;
 

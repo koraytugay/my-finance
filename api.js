@@ -469,14 +469,41 @@ async function getHistory(forceRefresh = false) {
 }
 
 async function getMainData(forceRefresh = false) {
-    const [holdings, history] = await Promise.all([
-        getHoldings(forceRefresh),
-        getHistory(forceRefresh)
-    ]);
+    const { holdings, history } = await loadPortfolioContext({ forceRefresh });
     if (typeof calculateMainData === 'function') {
         return calculateMainData(holdings, history);
     }
     return { holdings, history };
+}
+
+/**
+ * Shared loader that fetches holdings, sanitized + live-enriched history,
+ * and optional benchmarks and sync status in parallel.
+ */
+async function loadPortfolioContext({ includeBenchmarks = false, includeSyncStatus = false, forceRefresh = false } = {}) {
+    const [holdings, rawHistory, benchmarks, syncStatus] = await Promise.all([
+        getHoldings(forceRefresh),
+        getHistory(forceRefresh),
+        includeBenchmarks && typeof getBenchmarks === 'function' ? getBenchmarks(forceRefresh).catch(() => null) : Promise.resolve(null),
+        includeSyncStatus && typeof getSyncStatus === 'function' ? getSyncStatus(forceRefresh).catch(() => null) : Promise.resolve(null)
+    ]);
+
+    const cadUsdRate = (cachedPrices && cachedPrices.cadUsdRate)
+        || (benchmarks && benchmarks.fx && benchmarks.fx.cadUsdRate)
+        || (typeof window !== 'undefined' && window.cachedPrices?.cadUsdRate)
+        || 0.7073;
+
+    const validHistory = sanitizeHistory(rawHistory);
+    const history = enrichHistoryWithLiveHoldings(validHistory, holdings, cadUsdRate);
+    cachedHistory = history;
+
+    return {
+        holdings: holdings || [],
+        history,
+        benchmarks,
+        syncStatus,
+        cadUsdRate
+    };
 }
 
 let cachedBenchmarks = null;
@@ -1133,6 +1160,7 @@ if (typeof module !== 'undefined' && module.exports) {
         computeWeeklyPortfolioVsXeqt,
         computeAnnualSummaries,
         computeEncryptedPayloadFingerprint,
+        loadPortfolioContext,
         sanitizeHistory,
         enrichHistoryWithLiveHoldings,
         formatDateTime,
