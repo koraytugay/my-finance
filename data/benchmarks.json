@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-09T21:45:25.031Z",
+  "updatedAt": "2026-11-10T14:00:40.728Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-11-09",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4119,
-    "cadUsdRate": 0.7083,
-    "updatedAt": "2026-11-09T21:45:25.031Z"
+    "usdCadRate": 1.4169,
+    "cadUsdRate": 0.7058,
+    "updatedAt": "2026-11-10T14:00:40.728Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -416,8 +416,8 @@
       "category": "Canadian corporate bond index",
       "color": "#64748b",
       "startPrice": 20.03,
-      "currentPrice": 19.86,
-      "returnPct": -0.82,
+      "currentPrice": 19.87,
+      "returnPct": -0.8,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-11-09",
@@ -538,7 +538,7 @@
         19.71,
         19.69,
         19.87,
-        19.86
+        19.87
       ]
     }
   }
