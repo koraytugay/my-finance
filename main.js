@@ -1029,6 +1029,80 @@ function updateMainTimeframeButtonsUI() {
     }
 }
 
+const CALENDAR_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const CALENDAR_MONTH_DAY_STARTS = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+const CALENDAR_MONTH_DAYS_COUNT = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+function buildCalendarYearMonthGridHtml(height, padding, plotW, plotH) {
+    let html = '';
+    for (let m = 0; m < 12; m++) {
+        const startFrac = CALENDAR_MONTH_DAY_STARTS[m] / 365;
+        const midFrac = (CALENDAR_MONTH_DAY_STARTS[m] + CALENDAR_MONTH_DAYS_COUNT[m] / 2) / 365;
+        const startX = padding.left + startFrac * plotW;
+        const midX = padding.left + midFrac * plotW;
+
+        if (m > 0) {
+            html += `
+                <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+            `;
+        }
+        html += `
+            <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${CALENDAR_MONTH_NAMES[m]}</text>
+        `;
+    }
+    return html;
+}
+
+function getSvgPointerX(svgEl, e, width, fallbackX = 0) {
+    if (!svgEl || !e) return fallbackX;
+    const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+    const clientY = (e.touches && e.touches[0]) ? e.touches[0].clientY : e.clientY;
+    if (typeof svgEl.getScreenCTM === 'function') {
+        const ctm = svgEl.getScreenCTM();
+        if (ctm) {
+            const pt = svgEl.createSVGPoint();
+            pt.x = clientX;
+            pt.y = clientY;
+            return pt.matrixTransform(ctm.inverse()).x;
+        }
+    }
+    const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width || 1000 };
+    return (clientX - (rect.left || 0)) * ((width || 1000) / (rect.width || 1));
+}
+
+function renderStandardTimeframePills(containerId, history, currentTimeframe, setterFnName, titleSuffix) {
+    if (typeof document === 'undefined') return;
+    const container = document.getElementById(containerId);
+    if (!container || !history || history.length === 0) return;
+
+    const availableYears = [...new Set(
+        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
+    )].sort();
+
+    if (availableYears.length === 0) return;
+
+    let html = '';
+    availableYears.forEach((year, idx) => {
+        const isActive = currentTimeframe === year;
+        const bg = isActive ? '#1f2328' : 'white';
+        const color = isActive ? 'white' : '#24292f';
+        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
+        html += `
+            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} ${titleSuffix}">${year}</button>
+        `;
+    });
+
+    const isLast52Active = currentTimeframe === 'last-52';
+    const isAllActive = currentTimeframe === 'all';
+
+    html += `
+        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
+        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time ${titleSuffix}">All Time</button>
+    `;
+
+    container.innerHTML = html;
+}
+
 function syncMainTimeframeButtons(history) {
     const container = document.getElementById('main-timeframe-toggle');
     if (!container || !history || history.length === 0) return;
@@ -1797,20 +1871,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
     if (overlay && svgEl) {
         overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const svgP = pt.matrixTransform(ctm.inverse());
-                    svgX = svgP.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
+            const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
 
             let targetIdx = 0;
@@ -2326,26 +2387,8 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     }
 
     // X-Axis (Full Year: 12 Month columns Jan - Dec)
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const monthDayStarts = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-    const monthDaysCount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    let xGridHtml = '';
-    for (let m = 0; m < 12; m++) {
-        const startFrac = monthDayStarts[m] / 365;
-        const midFrac = (monthDayStarts[m] + monthDaysCount[m] / 2) / 365;
-        const startX = padding.left + startFrac * plotW;
-        const midX = padding.left + midFrac * plotW;
-
-        if (m > 0) {
-            xGridHtml += `
-                <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            `;
-        }
-        xGridHtml += `
-            <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${monthNames[m]}</text>
-        `;
-    }
+    const monthNames = CALENDAR_MONTH_NAMES;
+    const xGridHtml = buildCalendarYearMonthGridHtml(height, padding, plotW, plotH);
 
     // SVG paths and point markers
     let defsHtml = '';
@@ -2657,21 +2700,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
     if (captureRect && cursorLine && hoverDotsGroup && svgEl) {
         captureRect.addEventListener('mousemove', (e) => {
-            let mouseSvgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const svgP = pt.matrixTransform(ctm.inverse());
-                    mouseSvgX = svgP.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: 1000 };
-                mouseSvgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
-
+            const mouseSvgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(width - padding.right, mouseSvgX));
             const frac = (clampedX - padding.left) / plotW;
 
@@ -3031,36 +3060,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 /* ================= Portfolio vs XEQT Progression Graph ================= */
 
 function syncXeqtRelTimeframeButtons(history) {
-    if (typeof document === 'undefined') return;
-    const container = document.getElementById('xeqt-rel-timeframe-toggle');
-    if (!container || !history || history.length === 0) return;
-
-    const availableYears = [...new Set(
-        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
-    )].sort();
-
-    if (availableYears.length === 0) return;
-
-    let html = '';
-    availableYears.forEach((year, idx) => {
-        const isActive = currentXeqtRelTimeframe === year;
-        const bg = isActive ? '#1f2328' : 'white';
-        const color = isActive ? 'white' : '#24292f';
-        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
-        html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setXeqtRelTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} relative progression">${year}</button>
-        `;
-    });
-
-    const isLast52Active = currentXeqtRelTimeframe === 'last-52';
-    const isAllActive = currentXeqtRelTimeframe === 'all';
-
-    html += `
-        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setXeqtRelTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks relative progression">Last 52W</button>
-        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setXeqtRelTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time relative progression">All Time</button>
-    `;
-
-    container.innerHTML = html;
+    renderStandardTimeframePills('xeqt-rel-timeframe-toggle', history, currentXeqtRelTimeframe, 'setXeqtRelTimeframe', 'relative progression');
 }
 
 function updateXeqtRelControlsUI() {
@@ -3363,25 +3363,7 @@ function renderPortfolioVsXeqtChart() {
     // X Date ticks
     let xTicksHtml = '';
     if (isYearTimeframe) {
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const monthDayStarts = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
-        const monthDaysCount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-        for (let m = 0; m < 12; m++) {
-            const startFrac = monthDayStarts[m] / 365;
-            const midFrac = (monthDayStarts[m] + monthDaysCount[m] / 2) / 365;
-            const startX = padding.left + startFrac * plotW;
-            const midX = padding.left + midFrac * plotW;
-
-            if (m > 0) {
-                xTicksHtml += `
-                    <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-                `;
-            }
-            xTicksHtml += `
-                <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${monthNames[m]}</text>
-            `;
-        }
+        xTicksHtml = buildCalendarYearMonthGridHtml(height, padding, plotW, plotH);
     } else {
         const numTicks = Math.min(points.length, 7);
         for (let i = 0; i < numTicks; i++) {
@@ -3489,21 +3471,7 @@ function renderPortfolioVsXeqtChart() {
 
     if (overlay && svgEl) {
         overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const p = svgEl.createSVGPoint();
-                    p.x = e.clientX;
-                    p.y = e.clientY;
-                    const sp = p.matrixTransform(ctm.inverse());
-                    svgX = sp.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
-
+            const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW, svgX));
             let idx = 0;
             if (isYearTimeframe) {
@@ -3534,36 +3502,7 @@ function renderPortfolioVsXeqtChart() {
 /* ================= Weekly Portfolio vs XEQT Bar Chart ================= */
 
 function syncXeqtWeeklyTimeframeButtons(history) {
-    if (typeof document === 'undefined') return;
-    const container = document.getElementById('xeqt-weekly-timeframe-toggle');
-    if (!container || !history || history.length === 0) return;
-
-    const availableYears = [...new Set(
-        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
-    )].sort();
-
-    if (availableYears.length === 0) return;
-
-    let html = '';
-    availableYears.forEach((year, idx) => {
-        const isActive = currentXeqtWeeklyTimeframe === year;
-        const bg = isActive ? '#1f2328' : 'white';
-        const color = isActive ? 'white' : '#24292f';
-        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
-        html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setXeqtWeeklyTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} weekly relative performance">${year}</button>
-        `;
-    });
-
-    const isLast52Active = currentXeqtWeeklyTimeframe === 'last-52';
-    const isAllActive = currentXeqtWeeklyTimeframe === 'all';
-
-    html += `
-        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setXeqtWeeklyTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks weekly relative performance">Last 52W</button>
-        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setXeqtWeeklyTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time weekly relative performance">All Time</button>
-    `;
-
-    container.innerHTML = html;
+    renderStandardTimeframePills('xeqt-weekly-timeframe-toggle', history, currentXeqtWeeklyTimeframe, 'setXeqtWeeklyTimeframe', 'weekly relative performance');
 }
 
 function updateXeqtWeeklyControlsUI() {
@@ -3976,21 +3915,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
 
     if (overlay && svgEl) {
         overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const sp = pt.matrixTransform(ctm.inverse());
-                    svgX = sp.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
-
+            const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + plotW - 1, svgX));
             const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
             setActiveBar(idx, true);
@@ -4933,38 +4858,7 @@ function setWeeklyBarTimeframe(tf) {
 }
 
 function syncWeeklyTimeframeButtons(history) {
-    if (typeof document === 'undefined') return;
-    const container = document.getElementById('weekly-timeframe-toggle');
-    if (!container || !history || history.length === 0) return;
-
-    // Chronological order: 2024, 2025, 2026...
-    const availableYears = [...new Set(
-        history.map(r => r.date ? r.date.split('-')[0] : null).filter(y => y && /^\d{4}$/.test(y))
-    )].sort();
-
-    if (availableYears.length === 0) return;
-
-    let html = '';
-
-    availableYears.forEach((year, idx) => {
-        const isActive = currentWeeklyBarTimeframe === year;
-        const bg = isActive ? '#1f2328' : 'white';
-        const color = isActive ? 'white' : '#24292f';
-        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
-        html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setWeeklyBarTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} weekly changes">${year}</button>
-        `;
-    });
-
-    const isLast52Active = currentWeeklyBarTimeframe === 'last-52';
-    const isAllActive = currentWeeklyBarTimeframe === 'all';
-
-    html += `
-        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setWeeklyBarTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks weekly changes">Last 52W</button>
-        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setWeeklyBarTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time weekly changes">All Time</button>
-    `;
-
-    container.innerHTML = html;
+    renderStandardTimeframePills('weekly-timeframe-toggle', history, currentWeeklyBarTimeframe, 'setWeeklyBarTimeframe', 'weekly changes');
 }
 
 function setWeeklyBarCurrency(currency) {
@@ -5269,21 +5163,7 @@ function renderWeeklyBarChart() {
 
     if (overlay && svgEl) {
         overlay.addEventListener('mousemove', (e) => {
-            let svgX = padding.left;
-            if (typeof svgEl.getScreenCTM === 'function') {
-                const ctm = svgEl.getScreenCTM();
-                if (ctm) {
-                    const pt = svgEl.createSVGPoint();
-                    pt.x = e.clientX;
-                    pt.y = e.clientY;
-                    const svgP = pt.matrixTransform(ctm.inverse());
-                    svgX = svgP.x;
-                }
-            } else {
-                const rect = svgEl.getBoundingClientRect ? svgEl.getBoundingClientRect() : { left: 0, width: width };
-                svgX = (e.clientX - (rect.left || 0)) * (width / (rect.width || 1));
-            }
-
+            const svgX = getSvgPointerX(svgEl, e, width, padding.left);
             const clampedX = Math.max(padding.left, Math.min(padding.left + chartWidth - 1, svgX));
             const idx = Math.max(0, Math.min(items.length - 1, Math.floor((clampedX - padding.left) / stepW)));
             const barCenterX = padding.left + (idx * stepW) + (barWidth / 2);
@@ -5934,16 +5814,7 @@ function renderDrawdownChart() {
     if (!svgEl || !overlay || points.length === 0) return;
 
     overlay.addEventListener('mousemove', (e) => {
-        const ctm = svgEl.getScreenCTM();
-        if (!ctm) return;
-
-        // Convert mouse event client coordinates to SVG coordinate system
-        const pt = svgEl.createSVGPoint();
-        pt.x = e.clientX;
-        pt.y = e.clientY;
-        const svgP = pt.matrixTransform(ctm.inverse());
-        const svgX = svgP.x;
-
+        const svgX = getSvgPointerX(svgEl, e, width, padding.left);
         const boundedX = Math.max(padding.left, Math.min(width - padding.right, svgX));
 
         let nearest = points[0];
