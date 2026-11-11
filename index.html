@@ -41,7 +41,7 @@
         <!-- Main Content -->
         <div id="main-content" style="display: none;">
             <!-- Top Stat Cards (2 Rows of 7 Cards: CAD Top Row, USD Bottom Row) -->
-            <div class="kt-stat-row stats-grid-7" style="margin-bottom: 12px;">
+            <div class="kt-stat-row stats-grid-7 kt-mb-3">
                 <div class="kt-stat">
                     <span class="kt-stat__value" id="main-stat-total-cad">$0.00</span>
                     <span class="kt-stat__label">Total Portfolio CAD</span>
@@ -78,7 +78,7 @@
                     <span class="kt-stat__sub" id="main-stat-alts-pct">0.0% of portfolio</span>
                 </div>
             </div>
-            <div class="kt-stat-row stats-grid-7" style="margin-bottom: 24px;">
+            <div class="kt-stat-row stats-grid-7 kt-mb-6">
                 <div class="kt-stat">
                     <span class="kt-stat__value" id="main-stat-total-usd">US$0.00</span>
                     <span class="kt-stat__label">Total Portfolio USD</span>
@@ -121,11 +121,11 @@
                 <div class="kt-section-title kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="main-chart-title">📈 Net Worth Progression</h2>
-                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #8250df; cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="color: #8250df; cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
                             <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: #8250df; cursor: pointer; width: 14px; height: 14px;">
                             ATHs
                         </label>
-                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
                             <input type="checkbox" id="main-overlay-xeqt" onchange="toggleMainXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             Overlay XEQT
                         </label>
@@ -150,11 +150,11 @@
                 </div>
                 <div class="kt-chart-layout">
                     <div class="kt-chart-layout__plot">
-                        <div class="chart-container" id="main-chart-container" style="margin: 0;">
+                        <div class="chart-container kt-m-0" id="main-chart-container">
                             <div id="main-chart-svg-box"></div>
                             <div id="main-chart-tooltip" class="chart-tooltip"></div>
                         </div>
-                        <div class="kt-legend" id="main-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                        <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="main-chart-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
                             </div>
@@ -192,11 +192,11 @@
                 </div>
                 <div class="kt-chart-layout">
                     <div class="kt-chart-layout__plot">
-                        <div class="chart-container" id="xeqt-rel-chart-container" style="margin: 0;">
+                        <div class="chart-container kt-m-0" id="xeqt-rel-chart-container">
                             <div id="xeqt-rel-svg-box"></div>
                             <div id="xeqt-rel-tooltip" class="chart-tooltip"></div>
                         </div>
-                        <div class="kt-legend" id="xeqt-rel-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                        <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="xeqt-rel-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Portfolio vs XEQT &bull; Hover any data point to inspect breakdown
                             </div>
@@ -234,11 +234,11 @@
                 </div>
                 <div class="kt-chart-layout">
                     <div class="kt-chart-layout__plot">
-                        <div class="chart-container" id="xeqt-weekly-chart-container" style="margin: 0; position: relative;">
+                        <div class="chart-container kt-m-0" id="xeqt-weekly-chart-container" style="position: relative;">
                             <div id="xeqt-weekly-svg-box"></div>
                             <div id="xeqt-weekly-tooltip" class="chart-tooltip" style="display: none;"></div>
                         </div>
-                        <div class="kt-legend" id="xeqt-weekly-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                        <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="xeqt-weekly-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <!-- Injected dynamically via main.js -->
                         </div>
                     </div>
@@ -253,7 +253,7 @@
                 <div class="kt-section-title kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="ath-bar-chart-title">🏆 All-Time High Increments</h2>
-                        <span id="ath-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Growth jump per All-Time High milestone</span>
+                        <span class="kt-fs-sm kt-text-muted kt-fw-medium" id="ath-bar-chart-subtitle">Growth jump per All-Time High milestone</span>
                     </div>
                     <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="ath-currency-toggle" role="group">
@@ -268,11 +268,11 @@
                 </div>
                 <div class="kt-chart-layout">
                     <div class="kt-chart-layout__plot">
-                        <div class="chart-container" id="ath-chart-container" style="margin: 0; position: relative;">
+                        <div class="chart-container kt-m-0" id="ath-chart-container" style="position: relative;">
                             <div id="ath-chart-svg-box"></div>
                             <div id="ath-chart-tooltip" class="chart-tooltip"></div>
                         </div>
-                        <div class="kt-legend" id="ath-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                        <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="ath-chart-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> ATH Milestone Increments
                             </div>
@@ -293,10 +293,10 @@
                 <div class="kt-section-title kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="heatmap-title">🗓️ Monthly Returns Heatmap</h2>
-                        <span id="heatmap-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
+                        <span class="kt-fs-sm kt-text-muted kt-fw-medium" id="heatmap-subtitle">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
                     <div class="kt-cluster kt-ml-auto">
-                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
                             <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             vs XEQT
                         </label>
@@ -311,7 +311,7 @@
                     </div>
                 </div>
                 <div class="kt-table-wrap" style="overflow-x: auto;">
-                    <table class="kt-table kt-table--hover" id="heatmap-table" style="font-size: 0.82rem;">
+                    <table class="kt-table kt-table--hover kt-fs-sm" id="heatmap-table">
                         <thead>
                             <tr>
                                 <th>Year</th>
@@ -327,7 +327,7 @@
                                 <th class="kt-align-center">Oct</th>
                                 <th class="kt-align-center">Nov</th>
                                 <th class="kt-align-center">Dec</th>
-                                <th style="text-align: center; font-weight: 800;">Full Year</th>
+                                <th class="kt-align-center kt-fw-heavy">Full Year</th>
                             </tr>
                         </thead>
                         <tbody id="heatmap-body">
@@ -342,7 +342,7 @@
                 <div class="kt-section-title kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="weekly-bar-chart-title">📊 Weekly Net Worth Change</h2>
-                        <span id="weekly-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Weekly gain and pullback timeline</span>
+                        <span class="kt-fs-sm kt-text-muted kt-fw-medium" id="weekly-bar-chart-subtitle">Weekly gain and pullback timeline</span>
                     </div>
                     <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="weekly-timeframe-toggle" role="group">
@@ -368,7 +368,7 @@
                             <div id="weekly-bar-svg-wrap" style="width: 100%; height: 100%;"></div>
                             <div id="weekly-bar-tooltip" class="chart-tooltip" style="display: none;"></div>
                         </div>
-                        <div class="kt-legend" id="weekly-bar-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
+                        <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="weekly-bar-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> Weekly Gain
                             </div>
@@ -409,8 +409,8 @@
                 <div class="kt-grid kt-grid--fit kt-mb-4" style="--kt-grid-min: 180px; --kt-grid-gap: 12px;">
                     <div class="kt-stat kt-stat--inset">
                         <div id="dd-stat-max-title" class="kt-stat__label">Max Drawdown (All-Time)</div>
-                        <div id="dd-stat-max" class="kt-stat__value" style="color: #dc2626;">-$0.00 (-0.0%)</div>
-                        <div id="dd-stat-max-date" class="kt-stat__sub" style="color: #b91c1c;">Week - (-)</div>
+                        <div id="dd-stat-max" class="kt-stat__value kt-text-danger">-$0.00 (-0.0%)</div>
+                        <div id="dd-stat-max-date" class="kt-stat__sub kt-text-danger">Week - (-)</div>
                     </div>
                     <div id="dd-stat-current-card" class="kt-stat kt-stat--inset">
                         <div id="dd-stat-current-title" class="kt-stat__label">Current Drawdown</div>
@@ -518,15 +518,15 @@
                     </div>
 
                     <!-- Mini Visual Category Allocation Bar -->
-                    <div style="margin-top: 18px;">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; color: #64748b; margin-bottom: 6px;">
+                    <div class="kt-mt-4">
+                        <div class="kt-split kt-fs-xs kt-fw-bold kt-text-muted kt-mb-1">
                             <span>CATEGORY DISTRIBUTION</span>
                             <span id="cat-bar-total">$0.00 CAD</span>
                         </div>
                         <div id="cat-progress-bar" style="height: 12px; border-radius: 6px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
                             <!-- Injected via JS -->
                         </div>
-                        <div id="cat-legend" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.74rem;">
+                        <div class="kt-mt-2 kt-fs-xs" id="cat-legend" style="display: flex; flex-wrap: wrap; gap: 10px;">
                             <!-- Injected via JS -->
                         </div>
                     </div>

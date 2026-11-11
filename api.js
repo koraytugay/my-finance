@@ -584,7 +584,7 @@ function showUnlockModal(onSuccess) {
                 <div class="kt-modal__body">
                     <div class="kt-empty__icon">🔒</div>
                     <h2 class="kt-modal__title">My Finance is Encrypted</h2>
-                    <p class="kt-text-secondary kt-fs-sm" style="margin: 6px 0 20px;">
+                    <p class="kt-text-secondary kt-fs-sm kt-mt-1 kt-mb-5">
                         Enter your password to decrypt your portfolio holdings and history.
                     </p>
                     <form id="unlock-form" class="kt-stack" onsubmit="event.preventDefault(); submitUnlock();">
