@@ -474,9 +474,9 @@ function renderProjectionInfoCard(html, isActive = false) {
     if (!card) return;
     card.innerHTML = html;
     if (isActive) {
-        card.classList.add('active');
+        card.classList.add('is-active');
     } else {
-        card.classList.remove('active');
+        card.classList.remove('is-active');
     }
 }
 
@@ -493,55 +493,55 @@ function buildProjectionCardHtml(point, isHover = false) {
 
     let badgeHtml = '';
     if (isHover) {
-        badgeHtml = `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`;
+        badgeHtml = `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`;
     } else if (point.year === horizonYears) {
-        badgeHtml = `<span class="chart-card-badge" style="background: #ede9fe; color: #6d28d9;">TARGET (YR ${point.year})</span>`;
+        badgeHtml = `<span class="kt-badge" style="background: #ede9fe; color: #6d28d9;">TARGET (YR ${point.year})</span>`;
     } else {
-        badgeHtml = `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
+        badgeHtml = `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
     }
 
     return `
-        <div class="chart-card-header">
-            <span class="chart-card-date">Year ${point.year} &bull; ${point.timelineYear}</span>
+        <div class="kt-readout__header">
+            <span class="kt-readout__title">Year ${point.year} &bull; ${point.timelineYear}</span>
             ${badgeHtml}
         </div>
-        <div class="chart-card-primary-val" style="color: #0969da;">
+        <div class="kt-readout__value" style="color: #0969da;">
             ${formatCurrency(point.expected)}
         </div>
-        <div class="chart-card-sub-val" style="color: #64748b;">
+        <div class="kt-readout__sub" style="color: #64748b;">
             Expected Return Trajectory
         </div>
-        <div class="chart-card-section-divider">
+        <div class="kt-readout__section">
             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Scenario Projections</div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #16a34a; font-weight: 600;">● Optimistic (+2%):</span>
                 <strong>${formatCurrency(point.optimistic)}</strong>
             </div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #0969da; font-weight: 600;">● Expected:</span>
                 <strong>${formatCurrency(point.expected)}</strong>
             </div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #d97706; font-weight: 600;">● Conservative (-2%):</span>
                 <strong>${formatCurrency(point.conservative)}</strong>
             </div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #64748b; font-weight: 600;">● Capital Invested:</span>
                 <strong>${formatCurrency(point.invested)}</strong>
             </div>
         </div>
-        <div class="chart-card-section-divider">
+        <div class="kt-readout__section">
             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Safe Withdrawal (${swrPctStr}%)</div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span>Safe Annual Spend:</span>
                 <strong style="color: #166534;">${formatCurrency(annualSWR)} / yr</strong>
             </div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span>Safe Monthly Spend:</span>
                 <strong style="color: #0969da;">${formatCurrency(monthlySWR)} / mo</strong>
             </div>
         </div>
-        <div class="chart-card-footer">
+        <div class="kt-readout__footer">
             💡 Hover over graph to inspect any year
         </div>
     `;

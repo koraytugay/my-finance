@@ -554,11 +554,11 @@ function renderChart(records, currency = 'CAD') {
             const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
             const spreadBg = lastItem.spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
             legendEl.innerHTML = `
-                <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
-                    <span class="legend-dot" style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
+                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span class="kt-legend__swatch" style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
                     <strong style="color: #1f2328;">Total Net Worth (Portfolio)</strong>
                 </div>
-                <div class="legend-item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
                     <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
                 </div>
@@ -568,7 +568,7 @@ function renderChart(records, currency = 'CAD') {
             `;
         } else {
             legendEl.innerHTML = `
-                <div class="legend-item"><span class="legend-dot" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
             `;
         }
     }
@@ -581,8 +581,8 @@ function renderChart(records, currency = 'CAD') {
         const card = document.getElementById('hist-chart-info-card');
         if (!card) return;
         card.innerHTML = html;
-        if (isActive) card.classList.add('active');
-        else card.classList.remove('active');
+        if (isActive) card.classList.add('is-active');
+        else card.classList.remove('is-active');
     }
 
     function buildHistCardHtml(idx, isHover = true) {
@@ -622,16 +622,16 @@ function renderChart(records, currency = 'CAD') {
             const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
             xeqtSection = `
-                <div class="chart-card-section-divider">
+                <div class="kt-readout__section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                         <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
                         <strong style="color: #16a34a;">${xeqtValStr}</strong>
                     </div>
-                    <div class="chart-card-row" style="color: #64748b;">
+                    <div class="kt-readout__row" style="color: #64748b;">
                         <span>Return:</span>
                         <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xeqtRetStr}</strong></span>
                     </div>
-                    <div class="chart-card-row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
+                    <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                         <span>Spread:</span>
                         <span>${spreadValStr} (${spreadPctStr})</span>
                     </div>
@@ -645,43 +645,43 @@ function renderChart(records, currency = 'CAD') {
         const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
 
         const badgeHtml = isHover
-            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+            ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
+            : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
 
         const weekPrefix = r.week ? `Week ${r.week} &bull; ` : '';
 
         return `
-            <div class="chart-card-header">
-                <span class="chart-card-date">${weekPrefix}${dateStr}</span>
+            <div class="kt-readout__header">
+                <span class="kt-readout__title">${weekPrefix}${dateStr}</span>
                 ${badgeHtml}
             </div>
-            <div class="chart-card-primary-val">
+            <div class="kt-readout__value">
                 ${totalVal}
             </div>
-            <div class="chart-card-sub-val" style="color: ${changeColor}; font-weight: 600;">
+            <div class="kt-readout__sub" style="color: ${changeColor}; font-weight: 600;">
                 Weekly: ${weeklyChangeStr}
             </div>
             ${xeqtSection}
-            <div class="chart-card-section-divider">
+            <div class="kt-readout__section">
                 <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Stocks:</span>
                     <strong>${formatCurrency(sVal, currency)}</strong>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Fixed Income:</span>
                     <strong>${formatCurrency(fVal, currency)}</strong>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Precious Metals:</span>
                     <strong>${formatCurrency(mVal, currency)}</strong>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Crypto:</span>
                     <strong>${formatCurrency(cVal, currency)}</strong>
                 </div>
             </div>
-            <div class="chart-card-footer">
+            <div class="kt-readout__footer">
                 💡 Hover over graph to inspect historical weeks
             </div>
         `;

@@ -816,8 +816,8 @@ function renderPerfCard(cardId, html, isActive = false) {
     const card = document.getElementById(cardId);
     if (!card) return;
     card.innerHTML = html;
-    if (isActive) card.classList.add('active');
-    else card.classList.remove('active');
+    if (isActive) card.classList.add('is-active');
+    else card.classList.remove('is-active');
 }
 
 
@@ -1550,8 +1550,8 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         };
 
         const badgeHtml = isHover
-            ? `<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">WEEK ${weekIdx}</span>`
-            : `<span class="chart-card-badge" style="background: #f1f5f9; color: #475569;">OVERVIEW</span>`;
+            ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">WEEK ${weekIdx}</span>`
+            : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">OVERVIEW</span>`;
 
         let spreadStr = '';
         if (bestPt && worstPt) {
@@ -1568,14 +1568,14 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         }
 
         return `
-            <div class="chart-card-header">
-                <span class="chart-card-date">${weekIdx === 0 ? 'Baseline Inception' : `Elapsed Week ${weekIdx} of 52`}</span>
+            <div class="kt-readout__header">
+                <span class="kt-readout__title">${weekIdx === 0 ? 'Baseline Inception' : `Elapsed Week ${weekIdx} of 52`}</span>
                 ${badgeHtml}
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 ${showCurrent && currentPt ? `
                 <div>
-                    <div class="chart-card-row">
+                    <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
                             <strong style="color: #0969da;">Current 52W:</strong>
@@ -1587,7 +1587,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
 
                 ${showBest && bestPt ? `
                 <div>
-                    <div class="chart-card-row">
+                    <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
                             <strong style="color: #16a34a;">Best 52W:</strong>
@@ -1599,7 +1599,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
 
                 ${showWorst && worstPt ? `
                 <div>
-                    <div class="chart-card-row">
+                    <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cf222e;"></span>
                             <strong style="color: #cf222e;">Worst 52W:</strong>
@@ -1610,14 +1610,14 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 </div>` : ''}
 
                 ${spreadStr ? `
-                <div class="chart-card-section-divider">
-                    <div class="chart-card-row" style="color: #8250df; font-weight: 700;">
+                <div class="kt-readout__section">
+                    <div class="kt-readout__row" style="color: #8250df; font-weight: 700;">
                         <span>Best/Worst Spread:</span>
                         <span>${spreadStr}</span>
                     </div>
                 </div>` : ''}
             </div>
-            <div class="chart-card-footer">
+            <div class="kt-readout__footer">
                 💡 Move cursor across weeks to compare trajectory
             </div>
         `;
@@ -2015,10 +2015,10 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         const isLatest = idx === N - 1;
 
         let tag = '';
-        if (isPeak) tag = '<span class="chart-card-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
-        else if (isLowest) tag = '<span class="chart-card-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
-        else if (isLatest) tag = '<span class="chart-card-badge" style="background: #0969da; color: white;">CURRENT</span>';
-        else tag = isHover ? '<span class="chart-card-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>' : '<span class="chart-card-badge">WINDOW</span>';
+        if (isPeak) tag = '<span class="kt-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
+        else if (isLowest) tag = '<span class="kt-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
+        else if (isLatest) tag = '<span class="kt-badge" style="background: #0969da; color: white;">CURRENT</span>';
+        else tag = isHover ? '<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
 
         const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
         const signDiff = diff >= 0 ? '+' : '';
@@ -2028,46 +2028,46 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
             : item.startDate;
 
         return `
-            <div class="chart-card-header">
-                <span class="chart-card-date">Week ${item.endWeek} Trailing 52W</span>
+            <div class="kt-readout__header">
+                <span class="kt-readout__title">Week ${item.endWeek} Trailing 52W</span>
                 ${tag}
             </div>
             <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 6px;">
                 ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
             </div>
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #0969da; font-weight: 700;">● Portfolio:</span>
                 <strong style="color: #0969da; font-size: 1.05rem;">${formatMetricVal(item.val)}</strong>
             </div>
             ${rolling52ShowXeqt && xeqtItem ? `
-            <div class="chart-card-row">
+            <div class="kt-readout__row">
                 <span style="color: #16a34a; font-weight: 700;">● XEQT:</span>
                 <strong style="color: #16a34a;">${formatMetricVal(xeqtItem.val)}</strong>
             </div>
-            <div class="chart-card-row" style="font-weight: 700; color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
+            <div class="kt-readout__row" style="font-weight: 700; color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
                 <span>Spread vs XEQT:</span>
                 <span>${signDiff}${metric === 'pct' ? diff.toFixed(1) + '%' : formatCurrency(diff, metric === 'usd' ? 'USD' : 'CAD')}</span>
             </div>
             ` : ''}
-            <div class="chart-card-section-divider">
-                <div class="chart-card-row">
+            <div class="kt-readout__section">
+                <div class="kt-readout__row">
                     <span>Gain (CAD):</span>
                     <strong>${signCad}${formatCurrency(item.gainCAD, 'CAD')}</strong>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Gain (USD):</span>
                     <strong>${signUsd}${formatCurrency(item.gainUSD, 'USD')}</strong>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Window Valuation:</span>
                     <span>${formatCurrency(item.startValCAD, 'CAD')} &rarr; ${formatCurrency(item.endValCAD, 'CAD')}</span>
                 </div>
-                <div class="chart-card-row">
+                <div class="kt-readout__row">
                     <span>Win Consistency:</span>
                     <span>${item.upWeeks} up / ${item.downWeeks} down (${item.winRate.toFixed(1)}%)</span>
                 </div>
             </div>
-            <div class="chart-card-footer">
+            <div class="kt-readout__footer">
                 💡 Move cursor across timeline to inspect rolling 1-year windows
             </div>
         `;
