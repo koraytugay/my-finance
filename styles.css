@@ -2,7 +2,7 @@
    My Finance — app-specific styles
    The shared look (tokens, page header, nav, stat cards, toolbar, buttons,
    tables, badges, loading/error/empty states) comes from kt-styles:
-     https://koraytugay.github.io/kt-styles/css/kt.css   (linked before this file)
+     https://koraytugay.github.io/kt-styles/dist/kt.min.css   (linked before this file)
    Only what is unique to this app lives here, and it uses --kt-* tokens.
    If something here turns out to be generic, move it to kt-styles instead.
    ========================================================================== */
