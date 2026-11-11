@@ -286,7 +286,7 @@ function renderTable(items, totalCAD) {
         return `
             <tr onclick="showHoldingModal('${safeId}')" title="Click to view details">
                 <td>
-                    <strong style="color: #0969da;">${safeTicker}</strong>
+                    <strong class="kt-text-accent">${safeTicker}</strong>
                 </td>
                 <td>
                     <div>${safeName}</div>
@@ -382,7 +382,7 @@ function renderCards(items, totalCAD) {
 
                 <div class="card-details">
                     <span>${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} units @ ${formatCurrency(h.unitPrice)}</span>
-                    ${avgCost > 0 ? `<span style="font-size: 0.74rem; color: #64748b;">Avg: ${formatCurrency(avgCost)}</span>` : ''}
+                    ${avgCost > 0 ? `<span class="kt-fs-xs kt-text-muted">Avg: ${formatCurrency(avgCost)}</span>` : ''}
                     <span class="${(h.dayChangePct || 0) >= 0 ? 'kt-text-success' : 'kt-text-danger'}">
                         ${h.dayChangePct !== undefined ? formatPercent(h.dayChangePct, true) : ''}
                     </span>
@@ -544,17 +544,17 @@ function showHoldingModal(id) {
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
                 <span class="kt-stat__label">Market Value</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.sum)}</span>
-                <span style="font-size: 0.74rem; color: #64748b;">${weightPct.toFixed(2)}% of portfolio</span>
+                <span class="kt-fs-xs kt-text-muted">${weightPct.toFixed(2)}% of portfolio</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
                 <span class="kt-stat__label">Book Cost</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${totalCost > 0 ? formatCurrency(totalCost) : '-'}</span>
-                <span style="font-size: 0.74rem; color: #64748b;">${avgCost > 0 ? `Avg: ${formatCurrency(avgCost)}` : 'No cost basis'}</span>
+                <span class="kt-fs-xs kt-text-muted">${avgCost > 0 ? `Avg: ${formatCurrency(avgCost)}` : 'No cost basis'}</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
                 <span class="kt-stat__label">Current Unit Price</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.unitPrice)}</span>
-                <span style="font-size: 0.74rem; color: #64748b;">${holding.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} shares</span>
+                <span class="kt-fs-xs kt-text-muted">${holding.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} shares</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
                 <span class="kt-stat__label">Unrealized Gain</span>

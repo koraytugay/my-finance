@@ -146,7 +146,7 @@
             </div>
 
             <!-- Tax Assumptions Accordion/Panel -->
-            <div id="tax-settings-panel" class="kt-toolbar" style="display: none; padding: 18px 22px; margin-bottom: 22px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <div id="tax-settings-panel" class="kt-card kt-card--padded" style="display: none; margin-bottom: 22px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #1e293b;">🇨🇦 Tax Policy &amp; Bracket Assumptions</h4>
@@ -183,12 +183,12 @@
             <!-- Top Stat Cards -->
             <div class="kt-stat-row">
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-annual-income" style="color: #166534;">$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-annual-income">$0.00</span>
                     <span class="kt-stat__label" id="label-annual-income">Projected Net Annual Income</span>
                     <span class="kt-stat__sub" id="stat-annual-sub">Gross: $0.00 | Tax: -$0.00</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-monthly-income" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="stat-monthly-income">$0.00</span>
                     <span class="kt-stat__label" id="label-monthly-income">Monthly In-Pocket Cashflow</span>
                     <span class="kt-stat__sub" id="stat-monthly-sub">Average net per month</span>
                 </div>
@@ -210,16 +210,16 @@
             </div>
 
             <!-- Tax Location of Cashflow Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🛡️ Tax Efficiency &amp; Drag Breakdown
                     </h3>
                     <span style="font-size: 0.78rem; font-weight: 700; color: #475569;" id="tax-efficiency-summary">
                         Total Portfolio Take-Home: 0.0%
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Complete breakdown of your passive distributions across registered tax-shelters and taxable accounts under Canadian CRA tax rules.
                 </p>
 
@@ -227,35 +227,35 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
                     <div class="tax-shelter-card" style="border-left: 4px solid #16a34a;">
                         <div style="font-size: 0.73rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">100% Tax-Free (TFSA &amp; FHSA)</div>
-                        <div id="tax-card-taxfree" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
-                        <div id="tax-card-taxfree-sub" style="font-size: 0.75rem; color: #64748b;">0% CRA tax drag on distributions</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-taxfree">$0.00 / yr</div>
+                        <div class="kt-fs-xs kt-text-muted" id="tax-card-taxfree-sub">0% CRA tax drag on distributions</div>
                     </div>
                     <div class="tax-shelter-card" style="border-left: 4px solid #8250df;">
                         <div style="font-size: 0.73rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Tax-Deferred (RRSP)</div>
-                        <div id="tax-card-deferred" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
-                        <div id="tax-card-deferred-sub" style="font-size: 0.75rem; color: #64748b;">0% current tax (compounds gross)</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-deferred">$0.00 / yr</div>
+                        <div class="kt-fs-xs kt-text-muted" id="tax-card-deferred-sub">0% current tax (compounds gross)</div>
                     </div>
                     <div class="tax-shelter-card" style="border-left: 4px solid #0284c7;">
                         <div style="font-size: 0.73rem; font-weight: 700; color: #0284c7; text-transform: uppercase;">🍁 Eligible Divs (Non-Reg)</div>
-                        <div id="tax-card-eligible" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
-                        <div id="tax-card-eligible-sub" style="font-size: 0.75rem; color: #64748b;">~8.9% effective tax (DTC applied)</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-eligible">$0.00 / yr</div>
+                        <div class="kt-fs-xs kt-text-muted" id="tax-card-eligible-sub">~8.9% effective tax (DTC applied)</div>
                     </div>
                     <div class="tax-shelter-card" style="border-left: 4px solid #ea580c;">
                         <div style="font-size: 0.73rem; font-weight: 700; color: #ea580c; text-transform: uppercase;">🌐 Foreign Divs (Non-Reg)</div>
-                        <div id="tax-card-foreign" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
-                        <div id="tax-card-foreign-sub" style="font-size: 0.75rem; color: #64748b;">30.0% marginal rate (US &amp; Intl)</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-foreign">$0.00 / yr</div>
+                        <div class="kt-fs-xs kt-text-muted" id="tax-card-foreign-sub">30.0% marginal rate (US &amp; Intl)</div>
                     </div>
                     <div class="tax-shelter-card" style="border-left: 4px solid #dc2626;">
                         <div style="font-size: 0.73rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">💵 Cash &amp; Fixed (Non-Reg)</div>
-                        <div id="tax-card-cash" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00 / yr</div>
-                        <div id="tax-card-cash-sub" style="font-size: 0.75rem; color: #64748b;">30.0% tax on cash &amp; 2% fixed income</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-cash">$0.00 / yr</div>
+                        <div class="kt-fs-xs kt-text-muted" id="tax-card-cash-sub">30.0% tax on cash &amp; 2% fixed income</div>
                     </div>
                 </div>
 
                 <!-- Gross-to-Net Cashflow Waterfall Bar -->
                 <div style="margin-top: 10px;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 6px;">
-                        <span id="bar-label-net" style="color: #166534;">■ Real In-Pocket Cashflow: $0.00 (0.0%)</span>
+                        <span class="kt-text-success" id="bar-label-net">■ Real In-Pocket Cashflow: $0.00 (0.0%)</span>
                         <span id="bar-label-drag" style="color: #dc2626;">■ CRA Tax Drag: -$0.00 (0.0%)</span>
                     </div>
                     <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: #e2e8f0;">
@@ -266,10 +266,10 @@
             </div>
 
             <!-- Estimated Monthly Distribution Calendar -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-3">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        <h3 class="kt-card__title kt-m-0">
                             📅 12-Month Distribution Schedule
                         </h3>
                         <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
@@ -289,10 +289,10 @@
             </div>
 
             <!-- Holdings Income Table Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        <h3 class="kt-card__title kt-m-0">
                             📋 Holding Passive Income &amp; Tax Breakdown
                         </h3>
                         <span id="filtered-count" class="kt-badge kt-badge--pill kt-ml-auto" style="margin-left: 0; font-size: 0.8rem; color: #64748b;">0 positions</span>
@@ -321,15 +321,15 @@
                                 <th onclick="sortTable('ticker')" style="cursor: pointer;">Holding / Asset ⬍</th>
                                 <th onclick="sortTable('account')" style="cursor: pointer;">Account &amp; Brokerage ⬍</th>
                                 <th>Strategy</th>
-                                <th style="text-align: right;" onclick="sortTable('sum')" style="cursor: pointer;">Market Value ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('yield')" style="cursor: pointer;">Est. Yield ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('yoc')" style="cursor: pointer;">Yield on Cost ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('gross')" style="cursor: pointer;">Gross Income ⬍</th>
-                                <th style="text-align: center;" onclick="sortTable('taxRate')" style="cursor: pointer;">Tax Treatment ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('taxDrag')" style="cursor: pointer;">Est. Tax Drag ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('netAnnual')" style="cursor: pointer;">Net Income (CAD) ⬍</th>
-                                <th style="text-align: right;" onclick="sortTable('netMonthly')" style="cursor: pointer;">Net Monthly ⬍</th>
-                                <th style="text-align: center;">Frequency</th>
+                                <th class="kt-align-right" onclick="sortTable('sum')" style="cursor: pointer;">Market Value ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('yield')" style="cursor: pointer;">Est. Yield ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('yoc')" style="cursor: pointer;">Yield on Cost ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('gross')" style="cursor: pointer;">Gross Income ⬍</th>
+                                <th class="kt-align-center" onclick="sortTable('taxRate')" style="cursor: pointer;">Tax Treatment ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('taxDrag')" style="cursor: pointer;">Est. Tax Drag ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('netAnnual')" style="cursor: pointer;">Net Income (CAD) ⬍</th>
+                                <th class="kt-align-right" onclick="sortTable('netMonthly')" style="cursor: pointer;">Net Monthly ⬍</th>
+                                <th class="kt-align-center">Frequency</th>
                             </tr>
                         </thead>
                         <tbody id="dividend-table-body">

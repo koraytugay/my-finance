@@ -43,7 +43,7 @@
             <!-- Key Metric Stat Cards -->
             <div class="kt-stat-row">
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-total-gain" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-total-gain">+$0.00</span>
                     <span class="kt-stat__label">Current Unrealized Gains</span>
                     <span class="kt-stat__sub" id="stat-total-gain-pct">Open positions</span>
                 </div>
@@ -53,7 +53,7 @@
                     <span class="kt-stat__sub" id="stat-invested-sub">Added since Week 1</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-growth-cad" style="color: #0969da;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="stat-growth-cad">+$0.00</span>
                     <span class="kt-stat__label">Total Growth</span>
                     <span class="kt-stat__sub" id="stat-growth-sub">+0.0% all-time</span>
                 </div>
@@ -63,12 +63,12 @@
                     <span class="kt-stat__sub" id="stat-win-count">0 up / 0 down</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-best-week" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-best-week">+$0.00</span>
                     <span class="kt-stat__label">Best Week</span>
                     <span class="kt-stat__sub" id="stat-best-week-date">-</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-worst-week" style="color: #cf222e;">-$0.00</span>
+                    <span class="kt-stat__value kt-text-danger" id="stat-worst-week">-$0.00</span>
                     <span class="kt-stat__label">Worst Week</span>
                     <span class="kt-stat__sub" id="stat-worst-week-date">-</span>
                 </div>
@@ -82,22 +82,22 @@
             <!-- Weekly Momentum & Streak Analytics Cards (CAD & USD) -->
             <div class="kt-stat-row" style="margin-bottom: 24px;">
                 <div class="kt-stat" id="card-cad-up-streak" style="border-top: 3px solid #16a34a;">
-                    <span class="kt-stat__value" id="stat-cad-up-streak" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-cad-up-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Up Streak (CAD)</span>
                     <span class="kt-stat__sub" id="stat-cad-up-streak-sub">Total gain: +$0.00 (+0.0%)</span>
                 </div>
                 <div class="kt-stat" id="card-cad-down-streak" style="border-top: 3px solid #cf222e;">
-                    <span class="kt-stat__value" id="stat-cad-down-streak" style="color: #cf222e;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-danger" id="stat-cad-down-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Down Streak (CAD)</span>
                     <span class="kt-stat__sub" id="stat-cad-down-streak-sub">Total down: -$0.00 (-0.0%)</span>
                 </div>
                 <div class="kt-stat" id="card-usd-up-streak" style="border-top: 3px solid #16a34a;">
-                    <span class="kt-stat__value" id="stat-usd-up-streak" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-usd-up-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Up Streak (USD)</span>
                     <span class="kt-stat__sub" id="stat-usd-up-streak-sub">Total gain: +US$0.00 (+0.0%)</span>
                 </div>
                 <div class="kt-stat" id="card-usd-down-streak" style="border-top: 3px solid #cf222e;">
-                    <span class="kt-stat__value" id="stat-usd-down-streak" style="color: #cf222e;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-danger" id="stat-usd-down-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Down Streak (USD)</span>
                     <span class="kt-stat__sub" id="stat-usd-down-streak-sub">Total down: -US$0.00 (-0.0%)</span>
                 </div>
@@ -114,8 +114,8 @@
             </div>
 
             <!-- Longest Streaks Without All-Time Highs (CAD & USD) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                <div class="kt-split kt-mb-2">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
                         <span>🏔️ Longest Streaks Without All-Time Highs</span>
                     </h3>
@@ -123,7 +123,7 @@
                         -
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Top 3 longest consolidation periods without setting a new portfolio peak (measuring resilience and recovery duration below all-time highs).
                 </p>
 
@@ -157,16 +157,16 @@
             </div>
 
             <!-- Wealth Creation & Capital Decomposition Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         💎 Portfolio Growth &amp; Capital Decomposition
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="wealth-summary-pill">
                         Current Unrealized Gains: +$0.00
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Tracking overall portfolio growth (contributions and realized gains since Week 1) alongside current unrealized gains in open holdings.
                 </p>
 
@@ -174,13 +174,13 @@
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Starting Baseline (Week 1)</div>
-                        <div id="wealth-stat-starting" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00</div>
-                        <div id="wealth-stat-starting-sub" style="font-size: 0.75rem; color: #64748b;">Portfolio baseline at inception</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-starting">$0.00</div>
+                        <div class="kt-fs-xs kt-text-muted" id="wealth-stat-starting-sub">Portfolio baseline at inception</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Contributions &amp; Realized Growth</div>
-                        <div id="wealth-stat-savings" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">+$0.00</div>
-                        <div id="wealth-stat-savings-sub" style="font-size: 0.75rem; color: #64748b;">Cumulative deposits &amp; realized gains since Week 1</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-savings">+$0.00</div>
+                        <div class="kt-fs-xs kt-text-muted" id="wealth-stat-savings-sub">Cumulative deposits &amp; realized gains since Week 1</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Current Unrealized Gains</div>
@@ -189,17 +189,17 @@
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #1f2328; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #1f2328; text-transform: uppercase;">Current Total Net Worth</div>
-                        <div id="wealth-stat-current" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">$0.00</div>
-                        <div id="wealth-stat-current-sub" style="font-size: 0.75rem; color: #64748b;">Live portfolio valuation</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-current">$0.00</div>
+                        <div class="kt-fs-xs kt-text-muted" id="wealth-stat-current-sub">Live portfolio valuation</div>
                     </div>
                 </div>
 
                 <!-- Visual Wealth Decomposition Stack Bar -->
                 <div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 6px; color: #475569; flex-wrap: wrap; gap: 6px;">
-                        <span id="wealth-bar-label-starting" style="color: #0969da;">■ Starting Baseline: $0.00 (0.0%)</span>
+                        <span class="kt-text-accent" id="wealth-bar-label-starting">■ Starting Baseline: $0.00 (0.0%)</span>
                         <span id="wealth-bar-label-savings" style="color: #8250df;">■ Contributions &amp; Realized: +$0.00 (0.0%)</span>
-                        <span id="wealth-bar-label-gains" style="color: #16a34a;">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
+                        <span class="kt-text-success" id="wealth-bar-label-gains">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
                     </div>
                     <div style="width: 100%; height: 18px; border-radius: 8px; overflow: hidden; display: flex; background: #e2e8f0;">
                         <div id="wealth-bar-starting" style="background: #0969da; height: 100%; width: 50%;" title="Starting Baseline"></div>
@@ -210,7 +210,7 @@
             </div>
 
             <!-- Purchasing Power & Real Wealth (Inflation-Adjusted) Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
@@ -235,22 +235,22 @@
                 <!-- 4 Purchasing Power Stat Cards -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 16px 0 16px 0;">
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Real Net Worth (Inception $)</div>
+                        <div class="kt-eyebrow">Real Net Worth (Inception $)</div>
                         <div id="pp-real-nw" style="font-size: 1.35rem; font-weight: 800; color: #0969da; margin-top: 3px;">$0.00</div>
                         <div id="pp-real-nw-sub" style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">In constant Aug 2024 dollars</div>
                     </div>
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Real Purchasing Power Gain</div>
+                        <div class="kt-eyebrow">Real Purchasing Power Gain</div>
                         <div id="pp-real-gain" style="font-size: 1.35rem; font-weight: 800; color: #16a34a; margin-top: 3px;">+$0.00</div>
                         <div id="pp-real-gain-sub" style="font-size: 0.72rem; color: #15803d; font-weight: 600; margin-top: 2px;">+0.0% real growth above inflation</div>
                     </div>
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Estimated Inflation Drag</div>
+                        <div class="kt-eyebrow">Estimated Inflation Drag</div>
                         <div id="pp-inf-drag" style="font-size: 1.35rem; font-weight: 800; color: #d97706; margin-top: 3px;">-$0.00</div>
                         <div id="pp-inf-drag-sub" style="font-size: 0.72rem; color: #b45309; margin-top: 2px;">Nominal dollars absorbed by inflation</div>
                     </div>
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
-                        <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Real Weekly Accumulation</div>
+                        <div class="kt-eyebrow">Real Weekly Accumulation</div>
                         <div id="pp-weekly-pace" style="font-size: 1.35rem; font-weight: 800; color: #1f2328; margin-top: 3px;">+$0.00 / wk</div>
                         <div id="pp-weekly-pace-sub" style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">vs +$0.00 / wk nominal pace</div>
                     </div>
@@ -259,7 +259,7 @@
                 <!-- Visual Stack Bar: Real Gain vs Inflation Drag -->
                 <div style="margin-bottom: 12px;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 700; margin-bottom: 5px; color: #475569; flex-wrap: wrap; gap: 6px;">
-                        <span id="pp-bar-label-real" style="color: #16a34a;">■ Real Purchasing Power Expansion: +$0.00 (0.0%)</span>
+                        <span class="kt-text-success" id="pp-bar-label-real">■ Real Purchasing Power Expansion: +$0.00 (0.0%)</span>
                         <span id="pp-bar-label-drag" style="color: #d97706;">■ Cost-of-Living Drag: -$0.00 (0.0%)</span>
                     </div>
                     <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: #e2e8f0;">
@@ -275,16 +275,16 @@
             </div>
 
             <!-- Benchmark Comparison Section (Feature 1) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🎯 Benchmark Comparison: Asset Mix vs. The Market
                     </h3>
                     <span id="bench-window-dates" style="font-size: 0.8rem; font-weight: 700; color: #0969da;">
                         Inception to Date
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Comparing your portfolio's total wealth growth (contributions + gains) and downside risk profile against common Canadian ETF benchmarks over the exact same timeframe.
                 </p>
 
@@ -298,22 +298,22 @@
                         <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">My Finance Portfolio</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #0969da; margin: 4px 0;" id="bench-my-etf-return">+97.8%</div>
                         <div style="font-size: 0.75rem; color: #16a34a; font-weight: 700;" id="bench-my-nw-return">+97.8% Growth (contributions + gains)</div>
-                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Max Drawdown: <strong style="color: #1f2328;" id="bench-my-drawdown">-7.6%</strong> (High stability)</div>
+                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Max Drawdown: <strong class="kt-text-primary" id="bench-my-drawdown">-7.6%</strong> (High stability)</div>
                     </div>
 
                     <!-- Card 2: 100% Equity XEQT -->
                     <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Global Equity (XEQT)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #16a34a; margin: 4px 0;" id="bench-xeqt-return">+43.8%</div>
-                        <div style="font-size: 0.75rem; color: #64748b;" id="bench-xeqt-sub">100% All-Equity passive blend</div>
-                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong style="color: #cf222e;" id="bench-xeqt-drawdown">-15.3%</strong></div>
+                        <div class="kt-fs-xs kt-text-muted" id="bench-xeqt-sub">100% All-Equity passive blend</div>
+                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong class="kt-text-danger" id="bench-xeqt-drawdown">-15.3%</strong></div>
                     </div>
 
                     <!-- Card 3: 60/40 Balanced XBAL -->
                     <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Balanced 60/40 (XBAL)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #8250df; margin: 4px 0;" id="bench-xbal-return">+22.3%</div>
-                        <div style="font-size: 0.75rem; color: #64748b;" id="bench-xbal-sub">60% Stocks / 40% Bonds benchmark</div>
+                        <div class="kt-fs-xs kt-text-muted" id="bench-xbal-sub">60% Stocks / 40% Bonds benchmark</div>
                         <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong style="color: #475569;" id="bench-xbal-drawdown">-9.9%</strong></div>
                     </div>
 
@@ -321,16 +321,16 @@
                     <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #d97706; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #d97706; text-transform: uppercase;">S&amp;P 500 CAD (VFV)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #d97706; margin: 4px 0;" id="bench-vfv-return">+43.1%</div>
-                        <div style="font-size: 0.75rem; color: #64748b;" id="bench-vfv-sub">100% US Mega-cap equity (CAD)</div>
-                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong style="color: #cf222e;" id="bench-vfv-drawdown">-19.3%</strong></div>
+                        <div class="kt-fs-xs kt-text-muted" id="bench-vfv-sub">100% US Mega-cap equity (CAD)</div>
+                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong class="kt-text-danger" id="bench-vfv-drawdown">-19.3%</strong></div>
                     </div>
 
                     <!-- Card 5: Canadian Bonds XCB -->
                     <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #64748b; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">CDN Corp Bonds (XCB)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #64748b; margin: 4px 0;" id="bench-xcb-return">-2.1%</div>
-                        <div style="font-size: 0.75rem; color: #64748b;" id="bench-xcb-sub">Canadian corporate bond index</div>
-                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong style="color: #16a34a;" id="bench-xcb-drawdown">-4.9%</strong></div>
+                        <div class="kt-fs-xs kt-text-muted" id="bench-xcb-sub">Canadian corporate bond index</div>
+                        <div style="font-size: 0.73rem; color: #64748b; margin-top: 6px;">Est. Max Drawdown: <strong class="kt-text-success" id="bench-xcb-drawdown">-4.9%</strong></div>
                     </div>
                 </div>
 
@@ -355,9 +355,9 @@
 
 
             <!-- Rolling 52-Week Extremes: Best & Worst Graphs Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <div style="margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                    <h3 class="kt-card__title kt-m-0">
                         🏆 Rolling 52-Week Extremes: Best &amp; Worst Performance
                     </h3>
                     <p id="r52-section-sub" style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
@@ -370,7 +370,7 @@
                     <!-- Best 52-Week Card -->
                     <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #16a34a; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📈 Best 52-Week Period</span>
                                 <span id="r52-best-weeks-pill" class="kt-badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
                             </div>
@@ -380,19 +380,19 @@
                         <!-- 3 Progress Metrics: %, CAD, USD -->
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (%)</div>
+                                <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-best-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin-top: 2px;">+0.00%</div>
-                                <div id="r52-best-progress-usd-pct" style="font-size: 0.7rem; color: #64748b;">+0.00% USD</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-best-progress-usd-pct">+0.00% USD</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (CAD)</div>
-                                <div id="r52-best-progress-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+$0.00</div>
-                                <div id="r52-best-start-end-cad" style="font-size: 0.7rem; color: #64748b;">$0k &rarr; $0k</div>
+                                <div class="kt-eyebrow">Progress (CAD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-best-progress-cad">+$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-best-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (USD)</div>
-                                <div id="r52-best-progress-usd" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+US$0.00</div>
-                                <div id="r52-best-start-end-usd" style="font-size: 0.7rem; color: #64748b;">US$0k &rarr; US$0k</div>
+                                <div class="kt-eyebrow">Progress (USD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-best-progress-usd">+US$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-best-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
 
@@ -406,7 +406,7 @@
                     <!-- Current 52-Week Card -->
                     <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #0969da; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">⏱️ Current (Last) 52 Weeks</span>
                                 <span id="r52-current-weeks-pill" class="kt-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">-</span>
                             </div>
@@ -416,19 +416,19 @@
                         <!-- 3 Progress Metrics: %, CAD, USD -->
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (%)</div>
+                                <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-current-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin-top: 2px;">+0.00%</div>
-                                <div id="r52-current-progress-usd-pct" style="font-size: 0.7rem; color: #64748b;">+0.00% USD</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-current-progress-usd-pct">+0.00% USD</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (CAD)</div>
-                                <div id="r52-current-progress-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+$0.00</div>
-                                <div id="r52-current-start-end-cad" style="font-size: 0.7rem; color: #64748b;">$0k &rarr; $0k</div>
+                                <div class="kt-eyebrow">Progress (CAD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-current-progress-cad">+$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-current-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (USD)</div>
-                                <div id="r52-current-progress-usd" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+US$0.00</div>
-                                <div id="r52-current-start-end-usd" style="font-size: 0.7rem; color: #64748b;">US$0k &rarr; US$0k</div>
+                                <div class="kt-eyebrow">Progress (USD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-current-progress-usd">+US$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-current-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
 
@@ -442,7 +442,7 @@
                     <!-- Worst 52-Week Card -->
                     <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #cf222e; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📉 Worst 52-Week Period</span>
                                 <span id="r52-worst-weeks-pill" class="kt-badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
                             </div>
@@ -452,19 +452,19 @@
                         <!-- 3 Progress Metrics: %, CAD, USD -->
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (%)</div>
+                                <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-worst-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #cf222e; margin-top: 2px;">+0.00%</div>
-                                <div id="r52-worst-progress-usd-pct" style="font-size: 0.7rem; color: #64748b;">+0.00% USD</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-worst-progress-usd-pct">+0.00% USD</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (CAD)</div>
-                                <div id="r52-worst-progress-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+$0.00</div>
-                                <div id="r52-worst-start-end-cad" style="font-size: 0.7rem; color: #64748b;">$0k &rarr; $0k</div>
+                                <div class="kt-eyebrow">Progress (CAD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-worst-progress-cad">+$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-worst-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
-                                <div style="font-size: 0.68rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Progress (USD)</div>
-                                <div id="r52-worst-progress-usd" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin-top: 2px;">+US$0.00</div>
-                                <div id="r52-worst-start-end-usd" style="font-size: 0.7rem; color: #64748b;">US$0k &rarr; US$0k</div>
+                                <div class="kt-eyebrow">Progress (USD)</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-text-primary" id="r52-worst-progress-usd">+US$0.00</div>
+                                <div class="kt-fs-xs kt-text-muted" id="r52-worst-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
 
@@ -527,7 +527,7 @@
 
                     <!-- Rolling 52-Week Trailing Returns Timeline Chart -->
                     <div id="r52-timeline-box" class="kt-card kt-card--padded chart-wrapper" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; margin-bottom: 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div class="kt-split kt-mb-3">
                             <div>
                                 <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
                                     📈 Continuous Rolling 52-Week Trailing Returns Timeline
@@ -551,11 +551,11 @@
 
                         <!-- Mini stats banner above timeline -->
                         <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; align-items: center;">
-                            <span>Portfolio Avg: <strong id="r52-timeline-stat-avg" style="color: #0969da;">-</strong></span>
-                            <span id="r52-timeline-banner-xeqt" style="display: inline;">XEQT Avg: <strong id="r52-timeline-stat-xeqt-avg" style="color: #16a34a;">-</strong></span>
-                            <span>Portfolio Peak: <strong id="r52-timeline-stat-peak" style="color: #0969da;">-</strong></span>
-                            <span>Portfolio Lowest: <strong id="r52-timeline-stat-low" style="color: #cf222e;">-</strong></span>
-                            <span>Current 52W: <strong id="r52-timeline-stat-current" style="color: #1f2328;">-</strong></span>
+                            <span>Portfolio Avg: <strong class="kt-text-accent" id="r52-timeline-stat-avg">-</strong></span>
+                            <span id="r52-timeline-banner-xeqt" style="display: inline;">XEQT Avg: <strong class="kt-text-success" id="r52-timeline-stat-xeqt-avg">-</strong></span>
+                            <span>Portfolio Peak: <strong class="kt-text-accent" id="r52-timeline-stat-peak">-</strong></span>
+                            <span>Portfolio Lowest: <strong class="kt-text-danger" id="r52-timeline-stat-low">-</strong></span>
+                            <span>Current 52W: <strong class="kt-text-primary" id="r52-timeline-stat-current">-</strong></span>
                             <span id="r52-timeline-stat-spread-wrap" style="color: #8250df; background: #f3e8ff; padding: 1px 6px; border-radius: 4px;">Spread: <strong id="r52-timeline-stat-spread">+0.0%</strong></span>
                         </div>
 
@@ -576,7 +576,7 @@
             </div>
 
             <!-- Annual Performance Summary Table -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 30px;">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 30px;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     📈 Annual Growth &amp; Drawdown Summary
                 </h3>
@@ -585,13 +585,13 @@
                         <thead>
                             <tr>
                                 <th>Year</th>
-                                <th style="text-align: right;">Start Balance</th>
-                                <th style="text-align: right;">End Balance</th>
-                                <th style="text-align: right;">Net Change ($)</th>
-                                <th style="text-align: right;">Annual Return (%)</th>
-                                <th style="text-align: right;">Year Peak ($)</th>
-                                <th style="text-align: right;">Max Drawdown ($)</th>
-                                <th style="text-align: right;">Max Drawdown (%)</th>
+                                <th class="kt-align-right">Start Balance</th>
+                                <th class="kt-align-right">End Balance</th>
+                                <th class="kt-align-right">Net Change ($)</th>
+                                <th class="kt-align-right">Annual Return (%)</th>
+                                <th class="kt-align-right">Year Peak ($)</th>
+                                <th class="kt-align-right">Max Drawdown ($)</th>
+                                <th class="kt-align-right">Max Drawdown (%)</th>
                             </tr>
                         </thead>
                         <tbody id="annual-table-body">
@@ -602,7 +602,7 @@
             </div>
 
             <!-- Risk & Volatility Analytics Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     🛡️ Risk-Adjusted Return &amp; Volatility Metrics
                 </h3>
@@ -613,7 +613,7 @@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Annualized Volatility (σ)</div>
                         <div id="stat-risk-volatility" style="font-size: 1.3rem; font-weight: 800; color: #1e293b; margin: 4px 0;">0.0%</div>
-                        <div id="stat-risk-volatility-sub" style="font-size: 0.75rem; color: #64748b;">Based on weekly std dev</div>
+                        <div class="kt-fs-xs kt-text-muted" id="stat-risk-volatility-sub">Based on weekly std dev</div>
                     </div>
                     <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase;">Sharpe Ratio</div>
@@ -634,7 +634,7 @@
             </div>
 
             <!-- Historical Crisis Stress-Test Simulator Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 30px;">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 30px;">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     ⚡ Historical Crisis Stress-Test Simulator
                 </h3>

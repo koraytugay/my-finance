@@ -207,7 +207,7 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
                     <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Weekly Pace</div>
                     <div style="font-weight: 700; color: #1f2328;">+${formatCurrency(yd.weeklyVel, 'CAD')}/wk</div>
                 </div>
-                <div style="text-align: right;">
+                <div class="kt-align-right">
                     <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Monthly Pace</div>
                     <div style="font-weight: 700; color: #1f2328;">+${formatCurrency(yd.monthlyVel, 'CAD')}/mo</div>
                 </div>
@@ -554,13 +554,13 @@ function renderChart(records, currency = 'CAD') {
             const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
             const spreadBg = lastItem.spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
             legendEl.innerHTML = `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span class="kt-legend__swatch" style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
-                    <strong style="color: #1f2328;">Total Net Worth (Portfolio)</strong>
+                    <strong class="kt-text-primary">Total Net Worth (Portfolio)</strong>
                 </div>
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
+                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
                 </div>
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
                     Spread: ${spreadSign}${formatCurrency(lastItem.spreadVal, currency)} (${spreadSign}${lastItem.spreadPct.toFixed(2)}%)
@@ -625,11 +625,11 @@ function renderChart(records, currency = 'CAD') {
                 <div class="kt-readout__section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                         <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
-                        <strong style="color: #16a34a;">${xeqtValStr}</strong>
+                        <strong class="kt-text-success">${xeqtValStr}</strong>
                     </div>
-                    <div class="kt-readout__row" style="color: #64748b;">
+                    <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                         <span>Spread:</span>
@@ -645,8 +645,8 @@ function renderChart(records, currency = 'CAD') {
         const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
 
         const badgeHtml = isHover
-            ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-            : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+            ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+            : `<span class="kt-badge">LATEST</span>`;
 
         const weekPrefix = r.week ? `Week ${r.week} &bull; ` : '';
 
@@ -663,7 +663,7 @@ function renderChart(records, currency = 'CAD') {
             </div>
             ${xeqtSection}
             <div class="kt-readout__section">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                <div class="kt-eyebrow kt-mb-1">Asset Breakdown</div>
                 <div class="kt-readout__row">
                     <span>Stocks:</span>
                     <strong>${formatCurrency(sVal, currency)}</strong>
@@ -771,7 +771,7 @@ function renderTable(records) {
                 <td class="kt-align-right">${formatCurrency(r.fixed)}</td>
                 <td class="kt-align-right">${formatCurrency(r.preciousMetals)}</td>
                 <td class="kt-align-right">${formatCurrency(r.crypto)}</td>
-                <td class="kt-align-right kt-fw-bold" style="color: #0969da;">${formatCurrency(r.totalCAD)}</td>
+                <td class="kt-align-right kt-fw-bold kt-text-accent">${formatCurrency(r.totalCAD)}</td>
                 <td class="kt-align-right">${formatCurrency(r.totalUSD, 'USD')}</td>
                 <td class="kt-align-right kt-fw-bold ${weeklyClass}">
                     ${weeklySign}${formatCurrency(r.weeklyChangeCAD)}

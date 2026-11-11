@@ -144,12 +144,12 @@ function renderTaxMatrix() {
     const headerRow = document.getElementById('tax-matrix-header');
     headerRow.innerHTML = `
         <th>Asset Class</th>
-        <th style="text-align: right;">TFSA</th>
-        <th style="text-align: right;">RRSP</th>
-        <th style="text-align: right;">FHSA</th>
-        <th style="text-align: right;">Non-Registered</th>
-        <th style="text-align: right;">Total CAD</th>
-        <th style="text-align: center;">% Sheltered</th>
+        <th class="kt-align-right">TFSA</th>
+        <th class="kt-align-right">RRSP</th>
+        <th class="kt-align-right">FHSA</th>
+        <th class="kt-align-right">Non-Registered</th>
+        <th class="kt-align-right">Total CAD</th>
+        <th class="kt-align-center">% Sheltered</th>
     `;
 
     // Render Table Body
@@ -174,17 +174,17 @@ function renderTaxMatrix() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
-                <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="kt-cluster">
                     <span style="width: 10px; height: 10px; border-radius: 50%; background: ${ac.color}; display: inline-block;"></span>
                     <strong>${ac.label}</strong>
                 </div>
             </td>
-            <td style="text-align: right;">${row.TFSA > 0 ? formatCurrency(row.TFSA, 'CAD') : '-'}</td>
-            <td style="text-align: right;">${row.RRSP > 0 ? formatCurrency(row.RRSP, 'CAD') : '-'}</td>
-            <td style="text-align: right;">${row.FHSA > 0 ? formatCurrency(row.FHSA, 'CAD') : '-'}</td>
-            <td style="text-align: right;">${row['NON-REG'] > 0 ? formatCurrency(row['NON-REG'], 'CAD') : '-'}</td>
+            <td class="kt-align-right">${row.TFSA > 0 ? formatCurrency(row.TFSA, 'CAD') : '-'}</td>
+            <td class="kt-align-right">${row.RRSP > 0 ? formatCurrency(row.RRSP, 'CAD') : '-'}</td>
+            <td class="kt-align-right">${row.FHSA > 0 ? formatCurrency(row.FHSA, 'CAD') : '-'}</td>
+            <td class="kt-align-right">${row['NON-REG'] > 0 ? formatCurrency(row['NON-REG'], 'CAD') : '-'}</td>
             <td style="text-align: right; font-weight: 700;">${formatCurrency(row.total, 'CAD')}</td>
-            <td style="text-align: center;">
+            <td class="kt-align-center">
                 <span class="kt-badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 700;">
                     ${shelteredPct.toFixed(1)}%
                 </span>
@@ -199,11 +199,11 @@ function renderTaxMatrix() {
     tfoot.innerHTML = `
         <tr>
             <td>Total</td>
-            <td style="text-align: right;">${formatCurrency(categoryTotals.TFSA, 'CAD')}</td>
-            <td style="text-align: right;">${formatCurrency(categoryTotals.RRSP, 'CAD')}</td>
-            <td style="text-align: right;">${formatCurrency(categoryTotals.FHSA, 'CAD')}</td>
-            <td style="text-align: right;">${formatCurrency(categoryTotals['NON-REG'], 'CAD')}</td>
-            <td style="text-align: right;">${formatCurrency(categoryTotals.total, 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(categoryTotals.TFSA, 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(categoryTotals.RRSP, 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(categoryTotals.FHSA, 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(categoryTotals['NON-REG'], 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(categoryTotals.total, 'CAD')}</td>
             <td style="text-align: center; color: #16a34a;">${totalShelteredPct.toFixed(1)}%</td>
         </tr>
     `;

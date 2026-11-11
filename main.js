@@ -662,7 +662,7 @@ function renderAssetClassTable(mainData, holdings) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(item.value, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: #0969da;">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
@@ -685,7 +685,7 @@ function renderAssetClassTable(mainData, holdings) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(item.value, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
             <td style="text-align: right; color: #64748b;">${item.percentage ? escapeHtml(item.percentage) : '&mdash;'}</td>
         `;
         tbody.appendChild(tr);
@@ -716,7 +716,7 @@ function renderAccountTypeTable(mainData, holdings, history) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(item.value, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: #0969da;">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
@@ -757,7 +757,7 @@ function renderCategoryTable(mainData, holdings) {
                 <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${color}; margin-right: 6px;"></span>
                 <strong>${escapeHtml(item.name)}</strong>
             </td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(item.value, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: #0969da;">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
@@ -1354,7 +1354,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     if (records.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No data available for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty">No data available for this timeframe.</p>';
         return;
     }
 
@@ -1405,7 +1405,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     if (portPoints.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes found in this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty">No All-Time High nodes found in this timeframe.</p>';
         return;
     }
 
@@ -1592,24 +1592,24 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 const downValStr = formatCurrency(Math.abs(lastPort.downCAD), currency);
                 const downPctStr = Math.abs(lastPort.downPct).toFixed(2);
                 statusHtml = `
-                    <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <div class="kt-legend__item">
                         <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span>
                         <strong style="color: #b91c1c;">Current Drawdown</strong>: <span style="color: #dc2626; font-weight: 700;">-${downValStr} (-${downPctStr}%)</span>
                     </div>
                 `;
             } else {
                 statusHtml = `
-                    <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <div class="kt-legend__item">
                         <span style="font-size: 0.8rem;">🎉</span>
-                        <strong style="color: #16a34a;">Sitting at All-Time High!</strong>
+                        <strong class="kt-text-success">Sitting at All-Time High!</strong>
                     </div>
                 `;
             }
 
             legendEl.innerHTML = `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #16a34a;"></span>
-                    <strong style="color: #1f2328;">${athCount} All-Time Highs</strong> (${isPct ? `Peak Return: +${peakPct.toFixed(2)}%` : `Peak: ${formatCurrency(peakVal, currency)}`})
+                    <strong class="kt-text-primary">${athCount} All-Time Highs</strong> (${isPct ? `Peak Return: +${peakPct.toFixed(2)}%` : `Peak: ${formatCurrency(peakVal, currency)}`})
                 </div>
                 ${statusHtml}
                 <div style="font-size: 0.72rem; color: #64748b;">
@@ -1626,13 +1626,13 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const xeqtSign = lastItem.returnPct >= 0 ? '+' : '';
 
             legendEl.innerHTML = `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
-                    <strong style="color: #1f2328;">Portfolio</strong>: ${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : `${formatCurrency(lastPort.val, currency)} (${portSign}${lastPort.pct.toFixed(2)}%)`}
+                    <strong class="kt-text-primary">Portfolio</strong>: ${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : `${formatCurrency(lastPort.val, currency)} (${portSign}${lastPort.pct.toFixed(2)}%)`}
                 </div>
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
+                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
                 </div>
                 <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
                     Spread: ${spreadSign}${lastItem.spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(lastItem.spreadVal, currency)})
@@ -1642,7 +1642,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const lastPort = portPoints[portPoints.length - 1];
             const portSign = lastPort.pct >= 0 ? '+' : '';
             legendEl.innerHTML = `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
                     Total Net Worth: <strong>${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : formatCurrency(lastPort.val, currency)}</strong> &bull; Hover any data point to inspect breakdown
                 </div>
@@ -1698,11 +1698,11 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 <div class="kt-readout__section">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                         <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
-                        <strong style="color: #16a34a;">${isPct ? xeqtRetStr : xeqtValStr}</strong>
+                        <strong class="kt-text-success">${isPct ? xeqtRetStr : xeqtValStr}</strong>
                     </div>
-                    <div class="kt-readout__row" style="color: #64748b;">
+                    <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                         <span>Spread:</span>
@@ -1726,8 +1726,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             }
         } else {
             badgeHtml = isHover
-                ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-                : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+                ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+                : `<span class="kt-badge">LATEST</span>`;
         }
 
         let subValHtml = '';
@@ -1766,12 +1766,12 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             <div class="kt-readout__value">
                 ${isPct ? `${pctSign}${pt.pct.toFixed(2)}%` : totalVal}
             </div>
-            <div class="kt-readout__sub" style="color: #64748b;">
+            <div class="kt-readout__sub kt-text-muted">
                 ${subValHtml}
             </div>
             ${xeqtSection}
             <div class="kt-readout__section">
-                <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                <div class="kt-eyebrow kt-mb-1">Asset Breakdown</div>
                 <div class="kt-readout__row">
                     <span>Stocks:</span>
                     <strong>${formatCurrency(sVal, currency)}</strong>
@@ -2180,7 +2180,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     let { yearSeries, paddedMin, paddedMax, paddedDollarMin, paddedDollarMax, step } = overlayData;
 
     if (yearSeries.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
+        box.innerHTML = '<p class="kt-empty">No data available for the selected years.</p>';
         return;
     }
 
@@ -2209,7 +2209,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
         const totalAthPoints = yearSeries.reduce((acc, s) => acc + s.points.length, 0);
         if (totalAthPoints === 0) {
-            box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes recorded in the selected years.</p>';
+            box.innerHTML = '<p class="kt-empty">No All-Time High nodes recorded in the selected years.</p>';
             return;
         }
 
@@ -2538,11 +2538,11 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     <div class="kt-readout__section">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                             <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
-                            <strong style="color: #16a34a;">${isPct ? xRetStr : xValStr}</strong>
+                            <strong class="kt-text-success">${isPct ? xRetStr : xValStr}</strong>
                         </div>
-                        <div class="kt-readout__row" style="color: #64748b;">
+                        <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong style="color: #0969da;">${portRetStr}</strong> | XEQT: <strong style="color: #16a34a;">${xRetStr}</strong></span>
+                            <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2583,7 +2583,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
                 assetBreakdownHtml = `
                     <div class="kt-readout__section">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                        <div class="kt-eyebrow kt-mb-1">Asset Breakdown</div>
                         <div class="kt-readout__row">
                             <span>Stocks:</span>
                             <strong>${formatCurrency(sVal, currency)}</strong>
@@ -2607,12 +2607,12 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             return `
                 <div class="kt-readout__header">
                     <span class="kt-readout__title">${weekPrefix}${dateStr}</span>
-                    <span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>
+                    <span class="kt-badge">LATEST</span>
                 </div>
                 <div class="kt-readout__value">
                     ${isPct ? `${pctSign}${last.pct.toFixed(2)}%` : totalVal}
                 </div>
-                <div class="kt-readout__sub" style="color: #64748b;">
+                <div class="kt-readout__sub kt-text-muted">
                     ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${last.pct.toFixed(2)}%</strong>`}
                     &bull; <span style="color: ${yearlyGainColor}; font-weight: 600;">${yearlyGainStr}</span>
                 </div>
@@ -2827,11 +2827,11 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     <div class="kt-readout__section">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
                             <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
-                            <strong style="color: #16a34a;">${isPct ? xRetStr : xValStr}</strong>
+                            <strong class="kt-text-success">${isPct ? xRetStr : xValStr}</strong>
                         </div>
-                        <div class="kt-readout__row" style="color: #64748b;">
+                        <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong style="color: #0969da;">${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong style="color: #16a34a;">${xRetStr}</strong></span>
+                            <span>Port: <strong class="kt-text-accent">${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2857,7 +2857,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                             <span>Diff (${newest.year} vs ${prior.year}):</span>
                             <strong style="color: ${spColor};">${spSign}${pctDiff.toFixed(2)}% pts</strong>
                         </div>
-                        <div class="kt-readout__row" style="color: #64748b;">
+                        <div class="kt-readout__row kt-text-muted">
                             <span>Net Worth Gap:</span>
                             <span>${valSign}${formatCurrency(valDiff, currency)}</span>
                         </div>
@@ -2880,7 +2880,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
                     hoverAssetBreakdownHtml = `
                         <div class="kt-readout__section">
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Asset Breakdown</div>
+                            <div class="kt-eyebrow kt-mb-1">Asset Breakdown</div>
                             <div class="kt-readout__row">
                                 <span>Stocks:</span>
                                 <strong>${formatCurrency(sVal, currency)}</strong>
@@ -2909,7 +2909,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const cardContent = `
                 <div class="kt-readout__header">
                     ${singleHoverHeader}
-                    <span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>
+                    <span class="kt-badge kt-badge--soft-info">INSPECTING</span>
                 </div>
                 <div>${yearRows}</div>
                 ${xeqtCardHtml}
@@ -2940,7 +2940,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const last = s.points[s.points.length - 1];
                 const valStr = last ? formatCurrency(last.val, currency) : '$0.00';
                 return `
-                    <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <div class="kt-legend__item">
                         <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
                         <strong style="color: ${s.color};">${s.year}</strong>:
                         <span style="font-weight: 700; color: #15803d;">${athCount} ATHs</span>
@@ -2955,7 +2955,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 ? `<span style="font-size: 0.68rem; color: #d97706; background: rgba(217, 119, 6, 0.12); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
                 : '';
             return `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
                     <strong style="color: ${s.color};">${s.year}</strong>${chainedBadge}:
                     <span style="font-weight: 700; color: ${color};">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</span>
@@ -3001,9 +3001,9 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const spreadBg = spreadPct >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
 
             itemsHtml += `
-                <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                <div class="kt-legend__item">
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong style="color: #16a34a;">XEQT Benchmark (${currency})</strong>:
+                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong>:
                     <span style="font-weight: 700; color: ${xeqtColor};">${isPct ? `${xeqtSign}${lastXeqt.pct.toFixed(2)}%` : formatCurrency(lastXeqt.val, currency)}</span>
                     <span style="color: #64748b; font-size: 0.74rem;">(${isPct ? formatCurrency(lastXeqt.val, currency) : `${xeqtSign}${lastXeqt.pct.toFixed(2)}%`})</span>
                 </div>
@@ -3099,7 +3099,7 @@ function renderXeqtRelInfoCard(html, isActive = false) {
 
 function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCapital = 0, startXeqtPrice = 0) {
     if (!pt) {
-        return '<p class="kt-empty" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>';
+        return '<p class="kt-empty">No relative benchmark data available.</p>';
     }
 
     const isPct = unit === 'PCT';
@@ -3109,8 +3109,8 @@ function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCap
 
     const dateStr = typeof formatDate === 'function' ? formatDate(pt.date) : pt.date;
     const badgeHtml = isInspecting
-        ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-        : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        : `<span class="kt-badge">LATEST</span>`;
 
     const primaryValStr = isPct
         ? `${spreadSign}${pt.spreadPct.toFixed(2)}%`
@@ -3131,11 +3131,11 @@ function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCap
         <div class="kt-readout__value">
             ${primaryValStr}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             ${subValHtml}
         </div>
         <div class="kt-readout__section">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Benchmark Comparison</div>
+            <div class="kt-eyebrow kt-mb-1">Benchmark Comparison</div>
             <div class="kt-readout__row">
                 <span>Portfolio Growth:</span>
                 <strong>${portSign}${pt.portfolioReturnPct.toFixed(2)}% (${typeof formatCurrency === 'function' ? formatCurrency(pt.portfolioVal, currency) : pt.portfolioVal})</strong>
@@ -3204,8 +3204,8 @@ function renderPortfolioVsXeqtChart() {
     }
 
     if (records.length <= 1) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
-        renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
+        box.innerHTML = '<p class="kt-empty">At least two weekly records are required for relative benchmark comparison.</p>';
+        renderXeqtRelInfoCard('<p class="kt-empty">No relative benchmark data available.</p>', false);
         return;
     }
 
@@ -3214,8 +3214,8 @@ function renderPortfolioVsXeqtChart() {
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
 
     if (!xeqtPrices || xeqtPrices.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
-        renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
+        box.innerHTML = '<p class="kt-empty">XEQT benchmark price data is loading or unavailable.</p>';
+        renderXeqtRelInfoCard('<p class="kt-empty">Waiting for XEQT prices...</p>', false);
         return;
     }
 
@@ -3226,13 +3226,13 @@ function renderPortfolioVsXeqtChart() {
             : null;
 
     if (!calcFunc) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">Progression calculation function not found.</p>';
+        box.innerHTML = '<p class="kt-empty">Progression calculation function not found.</p>';
         return;
     }
 
     const points = calcFunc(records, rawHistory, xeqtPrices, currency, currentXeqtPrice, unit);
     if (points.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No progression points calculated for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty">No progression points calculated for this timeframe.</p>';
         return;
     }
 
@@ -3378,15 +3378,15 @@ function renderPortfolioVsXeqtChart() {
         const xeqtSign = lastPt.xeqtReturnPct >= 0 ? '+' : '';
 
         legendEl.innerHTML = `
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
-                <strong style="color: #1f2328;">Spread vs XEQT</strong>: <span style="font-weight: 700;">${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts (${spreadValSign}${formatCurrency(lastPt.spreadVal, currency)})</span>
+                <strong class="kt-text-primary">Spread vs XEQT</strong>: <span style="font-weight: 700;">${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts (${spreadValSign}${formatCurrency(lastPt.spreadVal, currency)})</span>
             </div>
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
                 <span style="color: #64748b; font-weight: 600;">0.0% Parity (XEQT Baseline)</span>
             </div>
-            <div style="font-size: 0.75rem; color: #64748b;">
+            <div class="kt-fs-xs kt-text-muted">
                 Portfolio: <strong>${portSign}${lastPt.portfolioReturnPct.toFixed(2)}%</strong> &bull; XEQT: <strong>${xeqtSign}${lastPt.xeqtReturnPct.toFixed(2)}%</strong>
             </div>
         `;
@@ -3529,7 +3529,7 @@ function renderXeqtWeeklyInfoCard(html, isActive = false) {
 
 function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '', beatCount = 0, totalWeeks = 0, beatPct = 0) {
     if (!it) {
-        return '<p class="kt-empty" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative weekly data available.</p>';
+        return '<p class="kt-empty">No relative weekly data available.</p>';
     }
 
     const isPct = unit === 'PCT';
@@ -3540,8 +3540,8 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
 
     const dateStr = typeof formatDate === 'function' ? formatDate(it.date) : it.date;
     const badgeHtml = isHover
-        ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-        : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        : `<span class="kt-badge">LATEST</span>`;
 
     const primaryValStr = isPct
         ? `${sign}${it.spreadPct.toFixed(2)}%`
@@ -3567,11 +3567,11 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
         <div class="kt-readout__value" style="color: ${color};">
             ${primaryValStr}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             ${subValHtml}
         </div>
         <div class="kt-readout__section">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Weekly Breakdown</div>
+            <div class="kt-eyebrow kt-mb-1">Weekly Breakdown</div>
             <div class="kt-readout__row">
                 <span>Portfolio Weekly Return:</span>
                 <strong>${portSign}${it.portfolioReturnPct.toFixed(2)}% (${portValSign}${typeof formatCurrency === 'function' ? formatCurrency(it.portfolioChange, currency) : it.portfolioChange})</strong>
@@ -3593,7 +3593,7 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
             ${avgStr ? `
             <div class="kt-readout__row">
                 <span>Timeline Average Spread:</span>
-                <strong style="color: #b45309;">${avgStr}</strong>
+                <strong class="kt-text-warning">${avgStr}</strong>
             </div>
             ` : ''}
         </div>
@@ -3610,9 +3610,9 @@ function renderWeeklyPortfolioVsXeqtChart() {
     const legendEl = document.getElementById('xeqt-weekly-legend');
     if (!box || !rawHistory || rawHistory.length <= 1) {
         if (box) {
-            box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
+            box.innerHTML = '<p class="kt-empty">At least two weekly records are required for relative benchmark comparison.</p>';
         }
-        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
+        renderXeqtWeeklyInfoCard('<p class="kt-empty">No relative benchmark data available.</p>', false);
         return;
     }
 
@@ -3633,8 +3633,8 @@ function renderWeeklyPortfolioVsXeqtChart() {
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
 
     if (!xeqtPrices || xeqtPrices.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
-        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
+        box.innerHTML = '<p class="kt-empty">XEQT benchmark price data is loading or unavailable.</p>';
+        renderXeqtWeeklyInfoCard('<p class="kt-empty">Waiting for XEQT prices...</p>', false);
         return;
     }
 
@@ -3645,14 +3645,14 @@ function renderWeeklyPortfolioVsXeqtChart() {
             : null;
 
     if (!calcFunc) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">Weekly comparison calculation function not found.</p>';
+        box.innerHTML = '<p class="kt-empty">Weekly comparison calculation function not found.</p>';
         return;
     }
 
     const items = calcFunc(rawHistory, xeqtPrices, currency, unit, timeframe, currentXeqtPrice);
     if (!items || items.length === 0) {
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly comparison data available for this timeframe.</p>';
-        renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>', false);
+        box.innerHTML = '<p class="kt-empty">No weekly comparison data available for this timeframe.</p>';
+        renderXeqtWeeklyInfoCard('<p class="kt-empty">No weekly data available.</p>', false);
         return;
     }
 
@@ -3804,21 +3804,21 @@ function renderWeeklyPortfolioVsXeqtChart() {
     // Update legend
     if (legendEl) {
         legendEl.innerHTML = `
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span>
-                <strong style="color: #1f2328;">Beat XEQT</strong>: <span style="font-weight: 700; color: #16a34a;">${beatCount} weeks (${beatPct}%)</span>
+                <strong class="kt-text-primary">Beat XEQT</strong>: <span style="font-weight: 700; color: #16a34a;">${beatCount} weeks (${beatPct}%)</span>
             </div>
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span>
-                <strong style="color: #1f2328;">Lagged XEQT</strong>: <span style="font-weight: 700; color: #dc2626;">${lagCount} weeks</span>
+                <strong class="kt-text-primary">Lagged XEQT</strong>: <span style="font-weight: 700; color: #dc2626;">${lagCount} weeks</span>
             </div>
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
                 <span style="color: #64748b; font-weight: 600;">0.0% Parity</span>
             </div>
-            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div class="kt-legend__item">
                 <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #d97706;"></span>
-                <span style="color: #64748b;">Average: <strong style="color: #b45309;">${avgStr}</strong></span>
+                <span class="kt-text-muted">Average: <strong class="kt-text-warning">${avgStr}</strong></span>
             </div>
         `;
     }
@@ -4023,7 +4023,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
         avgCompHtml = `
             <div class="kt-readout__row" style="margin-top: 2px;">
                 <span>Historical Average:</span>
-                <span><strong style="color: #b45309;">${avgFormatted}</strong> (<span style="color: ${compColor}; font-weight: 600;">${compStr}</span>)</span>
+                <span><strong class="kt-text-warning">${avgFormatted}</strong> (<span style="color: ${compColor}; font-weight: 600;">${compStr}</span>)</span>
             </div>
         `;
     }
@@ -4033,10 +4033,10 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
             <span class="kt-readout__title">Week ${m.week} &bull; ${dateStr}</span>
             ${badgeHtml}
         </div>
-        <div class="kt-readout__value" style="color: #16a34a;">
+        <div class="kt-readout__value kt-text-success">
             ${primaryVal}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             ${subValText}
         </div>
         <div class="kt-readout__section">
@@ -4045,7 +4045,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
                 <span>Previous ATH:</span>
                 <strong>${prevValStr}</strong>
             </div>
-            <div class="kt-readout__row" style="color: #64748b;">
+            <div class="kt-readout__row kt-text-muted">
                 <span>Previous Date:</span>
                 <span>Week ${m.prevWeek} &bull; ${prevDateStr}</span>
             </div>
@@ -4055,16 +4055,16 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
             </div>
             <div class="kt-readout__row" style="margin-top: 2px;">
                 <span>Increment (${currency}):</span>
-                <strong style="color: #16a34a;">+${diffValStr}</strong>
+                <strong class="kt-text-success">+${diffValStr}</strong>
             </div>
             <div class="kt-readout__row">
                 <span>Increment (%):</span>
-                <strong style="color: #16a34a;">+${m.diffPct.toFixed(2)}%</strong>
+                <strong class="kt-text-success">+${m.diffPct.toFixed(2)}%</strong>
             </div>
             ${avgCompHtml}
             <div class="kt-readout__row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
                 <span>Time Between Peaks:</span>
-                <strong style="color: #0969da;">${timeStr}</strong>
+                <strong class="kt-text-accent">${timeStr}</strong>
             </div>
         </div>
         <div class="kt-readout__footer" style="margin-top: auto; padding-top: 8px; font-size: 0.72rem; color: #94a3b8; border-top: 1px solid #f1f5f9;">
@@ -4159,9 +4159,9 @@ function renderAthBarChart() {
         if (subTitleEl) {
             subTitleEl.textContent = '0 All-Time High milestones recorded';
         }
-        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High increments recorded yet.</p>';
+        box.innerHTML = '<p class="kt-empty">No All-Time High increments recorded yet.</p>';
         if (infoCard) {
-            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No ATH records available.</p>';
+            infoCard.innerHTML = '<p class="kt-empty">No ATH records available.</p>';
         }
         return;
     }
@@ -4182,7 +4182,7 @@ function renderAthBarChart() {
 
     const legendAvgEl = document.getElementById('ath-legend-avg-text');
     if (legendAvgEl) {
-        legendAvgEl.innerHTML = `Average Increment: <strong style="color: #b45309;">${avgStr}</strong>`;
+        legendAvgEl.innerHTML = `Average Increment: <strong class="kt-text-warning">${avgStr}</strong>`;
     }
 
     const width = 1000;
@@ -4919,8 +4919,8 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
         : `$${(isUsd ? item.totalUSD : item.totalCAD).toFixed(2)}`;
 
     const badgeHtml = isHover
-        ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-        : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        : `<span class="kt-badge">LATEST</span>`;
 
     const contextText = isPct
         ? (changePct >= 0 ? '📈 Percentage Gain' : '📉 Percentage Pullback')
@@ -4934,7 +4934,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
         <div class="kt-readout__value" style="color: ${changeColor};">
             ${primaryVal}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             ${subLabel}: <strong style="color: ${changeColor};">${subVal}</strong>
         </div>
         <div class="kt-readout__section">
@@ -4951,7 +4951,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
             ${avgStr ? `
             <div class="kt-readout__row">
                 <span>Timeline Average:</span>
-                <strong style="color: #b45309;">${avgStr}</strong>
+                <strong class="kt-text-warning">${avgStr}</strong>
             </div>
             ` : ''}
         </div>
@@ -4986,18 +4986,18 @@ function renderWeeklyBarChart() {
     }
 
     if (!rawHistory || rawHistory.length <= 1) {
-        svgWrap.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
+        svgWrap.innerHTML = '<p class="kt-empty">No weekly changes recorded yet.</p>';
         if (infoCard) {
-            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>';
+            infoCard.innerHTML = '<p class="kt-empty">No weekly data available.</p>';
         }
         return;
     }
 
     const items = computeWeeklyBarData(rawHistory, currency, unit, timeframe);
     if (items.length === 0) {
-        svgWrap.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded for this timeframe.</p>';
+        svgWrap.innerHTML = '<p class="kt-empty">No weekly changes recorded for this timeframe.</p>';
         if (infoCard) {
-            infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available for this timeframe.</p>';
+            infoCard.innerHTML = '<p class="kt-empty">No weekly data available for this timeframe.</p>';
         }
         return;
     }
@@ -5010,7 +5010,7 @@ function renderWeeklyBarChart() {
 
     const legendAvgEl = document.getElementById('weekly-legend-avg-text');
     if (legendAvgEl) {
-        legendAvgEl.innerHTML = `Average: <strong style="color: #b45309;">${avgStr}</strong>`;
+        legendAvgEl.innerHTML = `Average: <strong class="kt-text-warning">${avgStr}</strong>`;
     }
 
     if (subTitleEl) {
@@ -5189,8 +5189,8 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
     const formattedDdVal = typeof formatCurrency === 'function' ? formatCurrency(nearest.ddVal, currency) : `$${nearest.ddVal.toFixed(2)}`;
 
     const badgeHtml = isHover
-        ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`
-        : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">LATEST</span>`;
+        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        : `<span class="kt-badge">LATEST</span>`;
 
     let primaryVal = '';
     let subLabel = '';
@@ -5236,7 +5236,7 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
         <div class="kt-readout__value" style="color: ${ddColor};">
             ${primaryVal}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             ${subLabel}: <strong style="color: ${ddColor};">${subVal}</strong>
         </div>
         <div class="kt-readout__section">

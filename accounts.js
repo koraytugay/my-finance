@@ -142,7 +142,7 @@ function renderGroupedViews() {
             return `
                 <div class="account-summary-pill">
                     <span style="font-weight: 600; color: #334155;">${escapeHtml(sg.title)}:</span>
-                    <strong style="color: #0969da;">${formatCurrency(sg.total)}</strong>
+                    <strong class="kt-text-accent">${formatCurrency(sg.total)}</strong>
                     <span style="color: #64748b; font-size: 0.76rem;">(${sgPct.toFixed(1)}%)</span>
                 </div>
             `;
@@ -179,7 +179,7 @@ function renderGroupedViews() {
 
                 return `
                     <tr>
-                        <td style="padding-left: 24px;"><strong style="color: #0969da;">${escapeHtml(h.ticker)}</strong></td>
+                        <td style="padding-left: 24px;"><strong class="kt-text-accent">${escapeHtml(h.ticker)}</strong></td>
                         <td>${escapeHtml(h.name)}</td>
                         <td><span class="kt-badge">${escapeHtml(thirdColValue)}</span></td>
                         <td class="kt-align-right">${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
@@ -245,7 +245,7 @@ function renderGroupedViews() {
                         <h2 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: #1f2328;">${escapeHtml(group.title)}</h2>
                         <span style="font-size: 0.8rem; color: #64748b;">${group.holdings.length} ${group.holdings.length === 1 ? 'position' : 'positions'} across ${sortedSubGroups.length} ${subGroupTypeLabel}</span>
                     </div>
-                    <div style="text-align: right;">
+                    <div class="kt-align-right">
                         <div style="font-size: 1.4rem; font-weight: 800; color: #1f2328;">${formatCurrency(group.total)}</div>
                         <div style="font-size: 0.8rem; color: #0969da; font-weight: 600;">${groupPct.toFixed(2)}% of total portfolio</div>
                     </div>

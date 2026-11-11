@@ -111,17 +111,17 @@
                     <span class="kt-stat__sub" id="main-stat-total-cad-sub">Net Worth (CAD)</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-week-change" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-week-change">+$0.00</span>
                     <span class="kt-stat__label" id="main-stat-week-label">Current Week (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-week-sub">+0.00% &bull; 🟢 Up this week</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-timeback-cad" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-timeback-cad">0 weeks</span>
                     <span class="kt-stat__label">Time Back (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-timeback-cad-sub">🟢 At All-Time High</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-ath" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-ath">🟢 ATH!</span>
                     <span class="kt-stat__label" id="main-stat-ath-label">ATH Status (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-ath-val">$0.00 ATH</span>
                 </div>
@@ -148,17 +148,17 @@
                     <span class="kt-stat__sub" id="main-stat-total-usd-sub">Net Worth (USD)</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-week-change-usd" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-week-change-usd">+$0.00</span>
                     <span class="kt-stat__label" id="main-stat-week-usd-label">Current Week (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-week-usd-sub">+0.00% &bull; 🟢 Up this week</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-timeback-usd" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-timeback-usd">0 weeks</span>
                     <span class="kt-stat__label">Time Back (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-timeback-usd-sub">🟢 At All-Time High</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-ath-usd" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="kt-stat__value kt-text-success" id="main-stat-ath-usd">🟢 ATH!</span>
                     <span class="kt-stat__label" id="main-stat-ath-usd-label">ATH Status (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-ath-usd-val">US$0.00 ATH</span>
                 </div>
@@ -181,9 +181,9 @@
 
             <!-- Net Worth Progression Graph -->
             <div class="kt-card kt-card--padded chart-wrapper">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="main-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Net Worth Progression</h2>
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="main-chart-title">📈 Net Worth Progression</h2>
                         <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #8250df; cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
                             <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: #8250df; cursor: pointer; width: 14px; height: 14px;">
                             ATHs
@@ -193,7 +193,7 @@
                             Overlay XEQT
                         </label>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="main-timeframe-toggle" role="group">
                             <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setMainTimeframe('2024')" title="Toggle Year 2024 overlay">2024</button>
                             <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setMainTimeframe('2025')" title="Toggle Year 2025 overlay">2025</button>
@@ -218,7 +218,7 @@
                             <div id="main-chart-tooltip" class="chart-tooltip"></div>
                         </div>
                         <div class="kt-legend" id="main-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
                             </div>
                         </div>
@@ -230,12 +230,12 @@
             </div>
 
             <!-- Portfolio vs XEQT Progression Graph -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="xeqt-rel-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="xeqt-rel-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Portfolio vs XEQT Progression</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="xeqt-rel-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="xeqt-rel-chart-title">📈 Portfolio vs XEQT Progression</h2>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="xeqt-rel-timeframe-toggle" role="group">
                             <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setXeqtRelTimeframe('2024')" title="Show Year 2024 relative progression">2024</button>
                             <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setXeqtRelTimeframe('2025')" title="Show Year 2025 relative progression">2025</button>
@@ -260,7 +260,7 @@
                             <div id="xeqt-rel-tooltip" class="chart-tooltip"></div>
                         </div>
                         <div class="kt-legend" id="xeqt-rel-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Portfolio vs XEQT &bull; Hover any data point to inspect breakdown
                             </div>
                         </div>
@@ -272,12 +272,12 @@
             </div>
 
             <!-- Weekly Portfolio vs XEQT (Beat / Lag) Bar Chart -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="xeqt-weekly-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="xeqt-weekly-chart-title" style="margin: 0; font-size: 1.15rem;">📊 Weekly Performance vs XEQT</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="xeqt-weekly-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="xeqt-weekly-chart-title">📊 Weekly Performance vs XEQT</h2>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="xeqt-weekly-timeframe-toggle" role="group">
                             <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setXeqtWeeklyTimeframe('2024')" title="Show Year 2024 weekly relative performance">2024</button>
                             <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setXeqtWeeklyTimeframe('2025')" title="Show Year 2025 weekly relative performance">2025</button>
@@ -312,13 +312,13 @@
             </div>
 
             <!-- All-Time High Increments (ATH Diffs) Bar Chart -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="ath-diffs-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="ath-bar-chart-title" style="margin: 0; font-size: 1.15rem;">🏆 All-Time High Increments</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="ath-diffs-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="ath-bar-chart-title">🏆 All-Time High Increments</h2>
                         <span id="ath-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Growth jump per All-Time High milestone</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="ath-currency-toggle" role="group">
                             <button type="button" id="btn-ath-cur-cad" class="is-active" onclick="setAthBarCurrency('CAD')" title="Display increments in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-ath-cur-usd" onclick="setAthBarCurrency('USD')" title="Display increments in US Dollars (USD $)">USD ($)</button>
@@ -336,10 +336,10 @@
                             <div id="ath-chart-tooltip" class="chart-tooltip"></div>
                         </div>
                         <div class="kt-legend" id="ath-chart-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> ATH Milestone Increments
                             </div>
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed #d97706;"></span>
                                 <span id="ath-legend-avg-text">Average Increment</span>
                             </div>
@@ -352,13 +352,13 @@
             </div>
 
             <!-- Monthly Returns Heatmap -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="monthly-heatmap-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="heatmap-title" style="margin: 0; font-size: 1.15rem;">🗓️ Monthly Returns Heatmap</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="monthly-heatmap-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="heatmap-title">🗓️ Monthly Returns Heatmap</h2>
                         <span id="heatmap-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
                             <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             vs XEQT
@@ -378,18 +378,18 @@
                         <thead>
                             <tr>
                                 <th>Year</th>
-                                <th style="text-align: center;">Jan</th>
-                                <th style="text-align: center;">Feb</th>
-                                <th style="text-align: center;">Mar</th>
-                                <th style="text-align: center;">Apr</th>
-                                <th style="text-align: center;">May</th>
-                                <th style="text-align: center;">Jun</th>
-                                <th style="text-align: center;">Jul</th>
-                                <th style="text-align: center;">Aug</th>
-                                <th style="text-align: center;">Sep</th>
-                                <th style="text-align: center;">Oct</th>
-                                <th style="text-align: center;">Nov</th>
-                                <th style="text-align: center;">Dec</th>
+                                <th class="kt-align-center">Jan</th>
+                                <th class="kt-align-center">Feb</th>
+                                <th class="kt-align-center">Mar</th>
+                                <th class="kt-align-center">Apr</th>
+                                <th class="kt-align-center">May</th>
+                                <th class="kt-align-center">Jun</th>
+                                <th class="kt-align-center">Jul</th>
+                                <th class="kt-align-center">Aug</th>
+                                <th class="kt-align-center">Sep</th>
+                                <th class="kt-align-center">Oct</th>
+                                <th class="kt-align-center">Nov</th>
+                                <th class="kt-align-center">Dec</th>
                                 <th style="text-align: center; font-weight: 800;">Full Year</th>
                             </tr>
                         </thead>
@@ -401,13 +401,13 @@
             </div>
 
             <!-- Weekly Net Worth Change SVG Bar Chart -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="weekly-bar-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="weekly-bar-chart-title" style="margin: 0; font-size: 1.15rem;">📊 Weekly Net Worth Change</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="weekly-bar-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="weekly-bar-chart-title">📊 Weekly Net Worth Change</h2>
                         <span id="weekly-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Weekly gain and pullback timeline</span>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="weekly-timeframe-toggle" role="group">
                             <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setWeeklyBarTimeframe('2024')" title="Show Year 2024 weekly changes">2024</button>
                             <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setWeeklyBarTimeframe('2025')" title="Show Year 2025 weekly changes">2025</button>
@@ -432,13 +432,13 @@
                             <div id="weekly-bar-tooltip" class="chart-tooltip" style="display: none;"></div>
                         </div>
                         <div class="kt-legend" id="weekly-bar-legend" style="margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap;">
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> Weekly Gain
                             </div>
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span> Weekly Pullback
                             </div>
-                            <div class="kt-legend__item" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <div class="kt-legend__item">
                                 <span id="weekly-legend-avg-text">Average Weekly Change</span>
                             </div>
                         </div>
@@ -450,12 +450,12 @@
             </div>
 
             <!-- Max Drawdown Underwater Graph -->
-            <div class="kt-card kt-card--padded chart-wrapper" id="drawdown-wrapper" style="margin-top: 24px;">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 id="drawdown-chart-title" style="margin: 0; font-size: 1.15rem;">📉 Portfolio Drawdown from Peak (Underwater Chart)</h2>
+            <div class="kt-card kt-card--padded chart-wrapper kt-mt-6" id="drawdown-wrapper">
+                <div class="kt-section-title kt-split kt-mb-3">
+                    <div class="kt-cluster">
+                        <h2 class="kt-card__title kt-m-0" id="drawdown-chart-title">📉 Portfolio Drawdown from Peak (Underwater Chart)</h2>
                     </div>
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
+                    <div class="kt-cluster kt-ml-auto">
                         <div class="kt-segmented kt-segmented--sm" id="drawdown-currency-toggle" role="group">
                             <button type="button" id="btn-dd-cur-cad" class="is-active" onclick="setDrawdownCurrency('CAD')" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-dd-cur-usd" onclick="setDrawdownCurrency('USD')" title="Display values in US Dollars (USD $)">USD ($)</button>
@@ -483,7 +483,7 @@
                     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Longest Recovery Period</div>
                         <div id="dd-stat-longest-duration" style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">- weeks</div>
-                        <div id="dd-stat-longest-dates" style="font-size: 0.75rem; color: #64748b;">Peak to new high</div>
+                        <div class="kt-fs-xs kt-text-muted" id="dd-stat-longest-dates">Peak to new high</div>
                     </div>
                 </div>
 
@@ -518,8 +518,8 @@
                             <thead>
                                 <tr>
                                     <th>Asset Class</th>
-                                    <th style="text-align: right;">Total Value</th>
-                                    <th style="text-align: right;">Percentage</th>
+                                    <th class="kt-align-right">Total Value</th>
+                                    <th class="kt-align-right">Percentage</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-asset-class">
@@ -544,8 +544,8 @@
                             <thead>
                                 <tr>
                                     <th>Account Type</th>
-                                    <th style="text-align: right;">Total Value</th>
-                                    <th style="text-align: right;">Percentage</th>
+                                    <th class="kt-align-right">Total Value</th>
+                                    <th class="kt-align-right">Percentage</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-account-type">
@@ -570,8 +570,8 @@
                             <thead>
                                 <tr>
                                     <th>Category</th>
-                                    <th style="text-align: right;">Total Value</th>
-                                    <th style="text-align: right;">Percentage</th>
+                                    <th class="kt-align-right">Total Value</th>
+                                    <th class="kt-align-right">Percentage</th>
                                 </tr>
                             </thead>
                             <tbody id="tbody-category">
@@ -610,7 +610,7 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value" id="metric-total-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="metric-total-val">$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Net Worth 1 Year Ago</span>
@@ -618,19 +618,19 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Change in Last 52 Weeks</span>
-                        <span class="metric-value" id="metric-total-gain" style="color: #16a34a;">+$0.00</span>
+                        <span class="metric-value kt-text-success" id="metric-total-gain">+$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Return (Last 52 Weeks)</span>
-                        <span class="metric-value" id="metric-gain-pct" style="color: #16a34a;">+0.00%</span>
+                        <span class="metric-value kt-text-success" id="metric-gain-pct">+0.00%</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value" id="metric-monthly-rate" style="color: #16a34a;">+$0.00 / mo</span>
+                        <span class="metric-value kt-text-success" id="metric-monthly-rate">+$0.00 / mo</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value" id="metric-ath-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="metric-ath-val">$0.00</span>
                     </div>
                 </div>
 
@@ -646,7 +646,7 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value" id="ytd-total-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="ytd-total-val">$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Net Worth at Start of Year</span>
@@ -654,19 +654,19 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Change Year to Date</span>
-                        <span class="metric-value" id="ytd-total-gain" style="color: #16a34a;">+$0.00</span>
+                        <span class="metric-value kt-text-success" id="ytd-total-gain">+$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Return Year to Date</span>
-                        <span class="metric-value" id="ytd-gain-pct" style="color: #16a34a;">+0.00%</span>
+                        <span class="metric-value kt-text-success" id="ytd-gain-pct">+0.00%</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value" id="ytd-monthly-rate" style="color: #16a34a;">+$0.00 / mo</span>
+                        <span class="metric-value kt-text-success" id="ytd-monthly-rate">+$0.00 / mo</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value" id="ytd-peak-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="ytd-peak-val">$0.00</span>
                     </div>
                 </div>
 
@@ -682,7 +682,7 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value" id="alltime-total-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="alltime-total-val">$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Net Worth at Start of History</span>
@@ -690,19 +690,19 @@
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Change All-Time</span>
-                        <span class="metric-value" id="alltime-total-gain" style="color: #16a34a;">+$0.00</span>
+                        <span class="metric-value kt-text-success" id="alltime-total-gain">+$0.00</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Return All-Time</span>
-                        <span class="metric-value" id="alltime-gain-pct" style="color: #16a34a;">+0.00%</span>
+                        <span class="metric-value kt-text-success" id="alltime-gain-pct">+0.00%</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value" id="alltime-monthly-rate" style="color: #16a34a;">+$0.00 / mo</span>
+                        <span class="metric-value kt-text-success" id="alltime-monthly-rate">+$0.00 / mo</span>
                     </div>
                     <div class="metric-row">
                         <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value" id="alltime-peak-val" style="color: #0969da;">$0.00</span>
+                        <span class="metric-value kt-text-accent" id="alltime-peak-val">$0.00</span>
                     </div>
                 </div>
             </div>

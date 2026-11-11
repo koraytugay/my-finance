@@ -352,8 +352,8 @@ function renderTable(tableData, highlightYear = null) {
         }
         tr.innerHTML = `
             <td style="font-weight: 700;">Year ${row.year}${isTarget ? ' <span style="font-size: 0.72rem; color: #0969da; font-weight: 800; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
-            <td style="color: #64748b;">${row.timeline}</td>
-            <td style="text-align: right;">${formatCurrency(row.startBalance)}</td>
+            <td class="kt-text-muted">${row.timeline}</td>
+            <td class="kt-align-right">${formatCurrency(row.startBalance)}</td>
             <td style="text-align: right; color: #0969da;">+${formatCurrency(row.annualContribution)}</td>
             <td style="text-align: right; color: #166534; font-weight: 600;">+${formatCurrency(row.growth)}</td>
             <td style="text-align: right; font-weight: 800;">${formatCurrency(row.endBalance)}</td>
@@ -493,11 +493,11 @@ function buildProjectionCardHtml(point, isHover = false) {
 
     let badgeHtml = '';
     if (isHover) {
-        badgeHtml = `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>`;
+        badgeHtml = `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`;
     } else if (point.year === horizonYears) {
         badgeHtml = `<span class="kt-badge" style="background: #ede9fe; color: #6d28d9;">TARGET (YR ${point.year})</span>`;
     } else {
-        badgeHtml = `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
+        badgeHtml = `<span class="kt-badge">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
     }
 
     return `
@@ -505,14 +505,14 @@ function buildProjectionCardHtml(point, isHover = false) {
             <span class="kt-readout__title">Year ${point.year} &bull; ${point.timelineYear}</span>
             ${badgeHtml}
         </div>
-        <div class="kt-readout__value" style="color: #0969da;">
+        <div class="kt-readout__value kt-text-accent">
             ${formatCurrency(point.expected)}
         </div>
-        <div class="kt-readout__sub" style="color: #64748b;">
+        <div class="kt-readout__sub kt-text-muted">
             Expected Return Trajectory
         </div>
         <div class="kt-readout__section">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Scenario Projections</div>
+            <div class="kt-eyebrow kt-mb-1">Scenario Projections</div>
             <div class="kt-readout__row">
                 <span style="color: #16a34a; font-weight: 600;">● Optimistic (+2%):</span>
                 <strong>${formatCurrency(point.optimistic)}</strong>
@@ -531,14 +531,14 @@ function buildProjectionCardHtml(point, isHover = false) {
             </div>
         </div>
         <div class="kt-readout__section">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px;">Safe Withdrawal (${swrPctStr}%)</div>
+            <div class="kt-eyebrow kt-mb-1">Safe Withdrawal (${swrPctStr}%)</div>
             <div class="kt-readout__row">
                 <span>Safe Annual Spend:</span>
-                <strong style="color: #166534;">${formatCurrency(annualSWR)} / yr</strong>
+                <strong class="kt-text-success">${formatCurrency(annualSWR)} / yr</strong>
             </div>
             <div class="kt-readout__row">
                 <span>Safe Monthly Spend:</span>
-                <strong style="color: #0969da;">${formatCurrency(monthlySWR)} / mo</strong>
+                <strong class="kt-text-accent">${formatCurrency(monthlySWR)} / mo</strong>
             </div>
         </div>
         <div class="kt-readout__footer">

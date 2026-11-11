@@ -124,17 +124,17 @@
             <!-- Top Stat Cards -->
             <div class="kt-stat-row">
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-current-nw" style="color: #1f2328;">$0.00</span>
+                    <span class="kt-stat__value kt-text-primary" id="stat-current-nw">$0.00</span>
                     <span class="kt-stat__label">Current Net Worth</span>
                     <span class="kt-stat__sub">Live portfolio baseline</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-safe-annual" style="color: #166534;">$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="stat-safe-annual">$0.00</span>
                     <span class="kt-stat__label">Safe Annual Withdrawal Today</span>
                     <span class="kt-stat__sub" id="stat-safe-monthly">$0.00 / month</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-fire-target" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="stat-fire-target">$0.00</span>
                     <span class="kt-stat__label">Financial Freedom Number</span>
                     <span class="kt-stat__sub" id="stat-fire-progress">0% reached</span>
                 </div>
@@ -151,17 +151,17 @@
             </div>
 
             <!-- Interactive Parameters Control Card -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        <h3 class="kt-card__title kt-m-0">
                             🎛️ Simulation Parameters &amp; Assumptions
                         </h3>
                         <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
                             Adjust growth rate, monthly contributions, and safe withdrawal assumptions to simulate your financial trajectory.
                         </p>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <div class="kt-cluster">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Currency View:</span>
                         <div class="kt-segmented kt-segmented--sm" role="group">
                             <button type="button" id="btn-mode-nominal" class="is-active" onclick="setInflationMode('nominal')">Nominal (Future $)</button>
@@ -181,7 +181,7 @@
                     <div class="param-item">
                         <label class="kt-field__label" for="input-monthly-save">
                             <span>Monthly Contribution ($ CAD/mo)</span>
-                            <span id="label-monthly-save" style="color: #0969da;">$2,500</span>
+                            <span class="kt-text-accent" id="label-monthly-save">$2,500</span>
                         </label>
                         <input type="range" id="input-monthly-save" min="0" max="15000" step="100" value="2500" oninput="runProjections()">
                     </div>
@@ -189,7 +189,7 @@
                     <div class="param-item">
                         <label class="kt-field__label" for="input-return-rate">
                             <span>Expected Annual Return (%)</span>
-                            <span id="label-return-rate" style="color: #166534;">7.0%</span>
+                            <span class="kt-text-success" id="label-return-rate">7.0%</span>
                         </label>
                         <input type="range" id="input-return-rate" min="2.0" max="14.0" step="0.25" value="7.0" oninput="runProjections()">
                     </div>
@@ -228,7 +228,7 @@
             </div>
 
             <!-- Milestone Countdown Section -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     🏆 Net Worth Milestone Countdown
                 </h3>
@@ -241,10 +241,10 @@
             </div>
 
             <!-- SVG Multi-Scenario Compounding Chart -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-3">
                     <div>
-                        <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                        <h3 class="kt-card__title kt-m-0">
                             📈 30-Year Wealth Trajectory Chart
                         </h3>
                         <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
@@ -252,8 +252,8 @@
                         </p>
                     </div>
                     <div style="display: flex; gap: 12px; font-size: 0.78rem; font-weight: 700; flex-wrap: wrap;">
-                        <span style="color: #16a34a;">● Optimistic (+2%)</span>
-                        <span style="color: #0969da;">● Expected Return</span>
+                        <span class="kt-text-success">● Optimistic (+2%)</span>
+                        <span class="kt-text-accent">● Expected Return</span>
                         <span style="color: #d97706;">● Conservative (-2%)</span>
                         <span style="color: #94a3b8;">● Capital Invested</span>
                     </div>
@@ -272,7 +272,7 @@
             </div>
 
             <!-- Detailed Year-by-Year Compounding Table -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     📋 Year-by-Year Growth &amp; Withdrawal Schedule
                 </h3>
@@ -282,9 +282,9 @@
                             <tr>
                                 <th>Year</th>
                                 <th>Timeline</th>
-                                <th style="text-align: right;">Start Balance</th>
-                                <th style="text-align: right;">Annual Saved</th>
-                                <th style="text-align: right;">Compound Growth ($)</th>
+                                <th class="kt-align-right">Start Balance</th>
+                                <th class="kt-align-right">Annual Saved</th>
+                                <th class="kt-align-right">Compound Growth ($)</th>
                                 <th style="text-align: right; font-weight: 800;">End Balance</th>
                                 <th style="text-align: right; color: #166534;">Safe Annual Spend</th>
                                 <th style="text-align: right; color: #0969da;">Safe Monthly Spend</th>

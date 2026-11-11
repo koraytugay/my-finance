@@ -120,16 +120,16 @@
             </div>
 
             <!-- Currency Exposure & FX Sensitivity Simulator (Feature 5) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🌐 Currency Exposure &amp; FX Sensitivity Simulator
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="fx-live-pill">
                         Baseline FX: 1 USD ≈ 1.370 CAD (0.730 USD/CAD)
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Uncovering your true economic currency exposure (beyond account denominations) and simulating how fluctuations in the CAD/USD exchange rate impact your total net worth.
                 </p>
 
@@ -208,14 +208,14 @@
 
                 <!-- Interactive FX Sensitivity Simulator -->
                 <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <div class="kt-split kt-mb-3">
                         <div>
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
                                 🎛️ Interactive FX Sensitivity Simulator
                             </h4>
                             <span style="font-size: 0.78rem; color: #64748b;">Slide to test portfolio impact if the Canadian Dollar moves against the US Dollar</span>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
+                        <div class="kt-cluster">
                             <span style="font-size: 0.85rem; font-weight: 800; color: #0969da;" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
                             <button type="button" class="kt-btn kt-btn--accent" onclick="resetFXSlider()" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
                         </div>
@@ -233,21 +233,21 @@
                     <!-- Impact Display Cards -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Simulated Portfolio Net Worth</div>
+                            <div class="kt-eyebrow">Simulated Portfolio Net Worth</div>
                             <div id="sim-nw-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 3px 0;">$680,041 CAD</div>
-                            <div id="sim-nw-usd" style="font-size: 0.74rem; color: #64748b;">≈ $496,430 USD</div>
+                            <div class="kt-fs-xs kt-text-muted" id="sim-nw-usd">≈ $496,430 USD</div>
                         </div>
 
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Net Currency Impact ($ CAD)</div>
+                            <div class="kt-eyebrow">Net Currency Impact ($ CAD)</div>
                             <div id="sim-impact-cad" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 3px 0;">+$0 CAD (0.00%)</div>
-                            <div id="sim-impact-desc" style="font-size: 0.74rem; color: #64748b;">Holding unhedged US assets buffers currency swings</div>
+                            <div class="kt-fs-xs kt-text-muted" id="sim-impact-desc">Holding unhedged US assets buffers currency swings</div>
                         </div>
 
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
-                            <div style="font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Natural FX Hedge Efficiency</div>
+                            <div class="kt-eyebrow">Natural FX Hedge Efficiency</div>
                             <div style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin: 3px 0;" id="sim-fx-shield-pct">33.1% US Shield</div>
-                            <div style="font-size: 0.74rem; color: #64748b;">CAD dips boost purchasing power</div>
+                            <div class="kt-fs-xs kt-text-muted">CAD dips boost purchasing power</div>
                         </div>
                     </div>
                 </div>

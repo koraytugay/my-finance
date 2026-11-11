@@ -108,7 +108,7 @@ function renderAnnualTable() {
         const isPos = r.netChange >= 0;
         return `
             <tr>
-                <td><strong>${r.year}</strong> <span style="font-size: 0.74rem; color: #64748b;">(${r.weeks} wks)</span></td>
+                <td><strong>${r.year}</strong> <span class="kt-fs-xs kt-text-muted">(${r.weeks} wks)</span></td>
                 <td class="kt-align-right">${formatCurrency(r.startVal)}</td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(r.endVal)}</td>
                 <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">

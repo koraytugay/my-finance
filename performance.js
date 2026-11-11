@@ -331,16 +331,16 @@ function renderAthStreaksSection(history) {
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                             <span style="background: ${badgeBg}; color: white; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
                             <strong style="font-size: 0.95rem; color: #1f2328;">${s.nonAthWeeks} week${s.nonAthWeeks === 1 ? '' : 's'}</strong>
-                            <span style="font-size: 0.74rem; color: #64748b;">(${s.elapsedWeeks} wks ${s.isOngoing ? 'elapsed' : 'recovery'})</span>
+                            <span class="kt-fs-xs kt-text-muted">(${s.elapsedWeeks} wks ${s.isOngoing ? 'elapsed' : 'recovery'})</span>
                         </div>
-                        <div style="font-size: 0.74rem; color: #64748b;">
+                        <div class="kt-fs-xs kt-text-muted">
                             ${weekRangeStr} &bull; ${dateStr}
                         </div>
                         <div style="font-size: 0.72rem; color: #475569; margin-top: 2px;">
                             Prior Peak: ${peakStr} (W${s.peakWeek}) &rarr; ${recoveryPart}
                         </div>
                     </div>
-                    <div style="text-align: right;">
+                    <div class="kt-align-right">
                         <div style="font-size: 0.88rem; font-weight: 800; color: ${dipColor};">
                             ${formatCurrency(s.maxDD, currency)}
                         </div>
@@ -466,7 +466,7 @@ function renderOverviewCards() {
         const dateRange = formatStreakDates(u.startDate, u.endDate);
         cadUpEl.textContent = `${u.count} week${u.count === 1 ? '' : 's'}`;
         if (cadUpSub) {
-            cadUpSub.innerHTML = `Total gain: +${formatCurrency(u.change, 'CAD')} (+${u.pct.toFixed(2)}%)<br><span style="color: #64748b;">${dateRange}</span>`;
+            cadUpSub.innerHTML = `Total gain: +${formatCurrency(u.change, 'CAD')} (+${u.pct.toFixed(2)}%)<br><span class="kt-text-muted">${dateRange}</span>`;
         }
         const card = document.getElementById('card-cad-up-streak');
         if (card) card.title = `CAD Up Streak: ${dateRange} (+${formatCurrency(u.change, 'CAD')})`;
@@ -477,7 +477,7 @@ function renderOverviewCards() {
         const dateRange = formatStreakDates(d.startDate, d.endDate);
         cadDownEl.textContent = `${d.count} week${d.count === 1 ? '' : 's'}`;
         if (cadDownSub) {
-            cadDownSub.innerHTML = `Total down: ${formatCurrency(d.change, 'CAD')} (${d.pct.toFixed(2)}%)<br><span style="color: #64748b;">${dateRange}</span>`;
+            cadDownSub.innerHTML = `Total down: ${formatCurrency(d.change, 'CAD')} (${d.pct.toFixed(2)}%)<br><span class="kt-text-muted">${dateRange}</span>`;
         }
         const card = document.getElementById('card-cad-down-streak');
         if (card) card.title = `CAD Down Streak: ${dateRange} (${formatCurrency(d.change, 'CAD')})`;
@@ -488,7 +488,7 @@ function renderOverviewCards() {
         const dateRange = formatStreakDates(u.startDate, u.endDate);
         usdUpEl.textContent = `${u.count} week${u.count === 1 ? '' : 's'}`;
         if (usdUpSub) {
-            usdUpSub.innerHTML = `Total gain: +${formatCurrency(u.change, 'USD')} (+${u.pct.toFixed(2)}%)<br><span style="color: #64748b;">${dateRange}</span>`;
+            usdUpSub.innerHTML = `Total gain: +${formatCurrency(u.change, 'USD')} (+${u.pct.toFixed(2)}%)<br><span class="kt-text-muted">${dateRange}</span>`;
         }
         const card = document.getElementById('card-usd-up-streak');
         if (card) card.title = `USD Up Streak: ${dateRange} (+${formatCurrency(u.change, 'USD')})`;
@@ -499,7 +499,7 @@ function renderOverviewCards() {
         const dateRange = formatStreakDates(d.startDate, d.endDate);
         usdDownEl.textContent = `${d.count} week${d.count === 1 ? '' : 's'}`;
         if (usdDownSub) {
-            usdDownSub.innerHTML = `Total down: ${formatCurrency(d.change, 'USD')} (${d.pct.toFixed(2)}%)<br><span style="color: #64748b;">${dateRange}</span>`;
+            usdDownSub.innerHTML = `Total down: ${formatCurrency(d.change, 'USD')} (${d.pct.toFixed(2)}%)<br><span class="kt-text-muted">${dateRange}</span>`;
         }
         const card = document.getElementById('card-usd-down-streak');
         if (card) card.title = `USD Down Streak: ${dateRange} (${formatCurrency(d.change, 'USD')})`;
@@ -590,7 +590,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         }
         if (subEl) {
             if (data.startPrice && data.currentPrice) {
-                subEl.innerHTML = `${item.defaultCategory}<br><span style="font-size: 0.7rem; color: #64748b;">$${data.startPrice.toFixed(2)} &rarr; $${data.currentPrice.toFixed(2)}</span>`;
+                subEl.innerHTML = `${item.defaultCategory}<br><span class="kt-fs-xs kt-text-muted">$${data.startPrice.toFixed(2)} &rarr; $${data.currentPrice.toFixed(2)}</span>`;
             } else {
                 subEl.textContent = item.defaultCategory;
             }
@@ -639,7 +639,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         const vfvDd = bData.VFV?.maxDrawdownPct !== undefined ? bData.VFV.maxDrawdownPct : -19.3;
 
         insightEl.innerHTML = `
-            💡 <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong style="color: #0969da;">${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong style="color: #cf222e;">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong style="color: #cf222e;">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
+            💡 <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong class="kt-text-accent">${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong class="kt-text-danger">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong class="kt-text-danger">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
         `;
     }
 }
@@ -1045,7 +1045,7 @@ function renderRolling52Charts() {
     if (!allHistory || allHistory.length < 52) {
         const wrap = document.getElementById('r52-charts-wrapper');
         if (wrap) {
-            wrap.innerHTML = `<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least 52 weeks of historical records are required to calculate rolling 52-week periods (currently ${allHistory ? allHistory.length : 0} weeks recorded).</p>`;
+            wrap.innerHTML = `<p class="kt-empty">At least 52 weeks of historical records are required to calculate rolling 52-week periods (currently ${allHistory ? allHistory.length : 0} weeks recorded).</p>`;
         }
         return;
     }
@@ -1550,8 +1550,8 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         };
 
         const badgeHtml = isHover
-            ? `<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">WEEK ${weekIdx}</span>`
-            : `<span class="kt-badge" style="background: #f1f5f9; color: #475569;">OVERVIEW</span>`;
+            ? `<span class="kt-badge kt-badge--soft-info">WEEK ${weekIdx}</span>`
+            : `<span class="kt-badge">OVERVIEW</span>`;
 
         let spreadStr = '';
         if (bestPt && worstPt) {
@@ -1578,7 +1578,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                     <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
-                            <strong style="color: #0969da;">Current 52W:</strong>
+                            <strong class="kt-text-accent">Current 52W:</strong>
                         </span>
                         <strong style="color: #0969da; font-size: 0.95rem;">${fmtPrimary(currentPt)}</strong>
                     </div>
@@ -1590,7 +1590,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                     <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
-                            <strong style="color: #16a34a;">Best 52W:</strong>
+                            <strong class="kt-text-success">Best 52W:</strong>
                         </span>
                         <strong style="color: #16a34a; font-size: 0.95rem;">${fmtPrimary(bestPt)}</strong>
                     </div>
@@ -1602,7 +1602,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                     <div class="kt-readout__row">
                         <span style="display: flex; align-items: center; gap: 5px;">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cf222e;"></span>
-                            <strong style="color: #cf222e;">Worst 52W:</strong>
+                            <strong class="kt-text-danger">Worst 52W:</strong>
                         </span>
                         <strong style="color: #cf222e; font-size: 0.95rem;">${fmtPrimary(worstPt)}</strong>
                     </div>
@@ -2018,7 +2018,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         if (isPeak) tag = '<span class="kt-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
         else if (isLowest) tag = '<span class="kt-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
         else if (isLatest) tag = '<span class="kt-badge" style="background: #0969da; color: white;">CURRENT</span>';
-        else tag = isHover ? '<span class="kt-badge" style="background: #e0f2fe; color: #0284c7;">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
+        else tag = isHover ? '<span class="kt-badge kt-badge--soft-info">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
 
         const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
         const signDiff = diff >= 0 ? '+' : '';
@@ -2042,7 +2042,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
             ${rolling52ShowXeqt && xeqtItem ? `
             <div class="kt-readout__row">
                 <span style="color: #16a34a; font-weight: 700;">● XEQT:</span>
-                <strong style="color: #16a34a;">${formatMetricVal(xeqtItem.val)}</strong>
+                <strong class="kt-text-success">${formatMetricVal(xeqtItem.val)}</strong>
             </div>
             <div class="kt-readout__row" style="font-weight: 700; color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
                 <span>Spread vs XEQT:</span>
@@ -2335,11 +2335,11 @@ function renderAnnualSummary() {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${s.year}</strong> (${s.weeks} weeks)</td>
-            <td style="text-align: right;">${formatCurrency(s.startVal, 'CAD')}</td>
+            <td class="kt-align-right">${formatCurrency(s.startVal, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700;">${formatCurrency(s.endVal, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${formatCurrency(s.netChange, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${s.returnPct.toFixed(2)}%</td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(s.peak, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(s.peak, 'CAD')}</td>
             <td style="text-align: right; font-weight: 600; color: ${ddColor};">${formatCurrency(s.maxDrawdownVal, 'CAD')}</td>
             <td style="text-align: right; font-weight: 700; color: ${ddColor};">${s.maxDrawdownPct.toFixed(2)}%</td>
         `;
@@ -2491,15 +2491,15 @@ function renderCrisisStressTest() {
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                 <div>
                     <strong style="font-size: 0.92rem; color: #1e293b;">${escapeHtml(c.title)}</strong>
-                    <div style="font-size: 0.74rem; color: #64748b;">${escapeHtml(c.period)}</div>
+                    <div class="kt-fs-xs kt-text-muted">${escapeHtml(c.period)}</div>
                 </div>
-                <div style="text-align: right;">
+                <div class="kt-align-right">
                     <span style="font-size: 1.15rem; font-weight: 800; color: ${c.color};">${shockPct.toFixed(1)}%</span>
                 </div>
             </div>
             <div style="font-size: 0.78rem; color: #475569; margin-bottom: 10px;">${escapeHtml(c.desc)}</div>
             <div style="background: #f8fafc; border-radius: 6px; padding: 8px 10px; font-size: 0.78rem; display: flex; justify-content: space-between; margin-bottom: 8px;">
-                <span style="color: #64748b;">Simulated Portfolio Impact:</span>
+                <span class="kt-text-muted">Simulated Portfolio Impact:</span>
                 <strong style="color: ${c.color};">${formatCurrency(shockCAD)}</strong>
             </div>
             <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">

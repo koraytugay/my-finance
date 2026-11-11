@@ -735,11 +735,11 @@ function renderTableRows(items) {
                 <span style="font-size: 0.74rem; color: #64748b; margin-left: 4px;">(${escapeHtml(h.brokerage)})</span>
             </td>
             <td><span class="kt-badge">${escapeHtml(h.strategy || 'Broad Market')}</span></td>
-            <td style="text-align: right; font-weight: 600;">${formatCurrency(h.sum)}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(h.sum)}</td>
             <td style="text-align: right; font-weight: 700; color: ${h.yieldPct > 0 ? '#166534' : '#64748b'};">${h.yieldPct.toFixed(2)}%</td>
             <td style="text-align: right; font-weight: 700; color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
             <td style="text-align: right; color: #475569;">${formatCurrency(h.grossAnnualIncome)}</td>
-            <td style="text-align: center;">
+            <td class="kt-align-center">
                 <span class="income-pill ${h.tax.badgeClass}" title="${escapeHtml(h.tax.explanation)}">
                     ${escapeHtml(h.tax.label)}
                 </span>
@@ -749,7 +749,7 @@ function renderTableRows(items) {
             </td>
             <td style="text-align: right; font-weight: 800; color: #166534;">${formatCurrency(h.netAnnualIncome)}</td>
             <td style="text-align: right; font-weight: 600; color: #0969da;">${formatCurrency(h.netMonthlyIncome)}</td>
-            <td style="text-align: center;"><span class="income-pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
+            <td class="kt-align-center"><span class="income-pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
         `;
         tbody.appendChild(tr);
     });

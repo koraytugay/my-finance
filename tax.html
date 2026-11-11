@@ -48,7 +48,7 @@
                     <span class="kt-stat__sub" id="stat-registered-pct">0.0% of portfolio</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-taxable-cad" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="stat-taxable-cad">$0.00</span>
                     <span class="kt-stat__label">Taxable Wealth</span>
                     <span class="kt-stat__sub" id="stat-taxable-pct">0.0% of portfolio</span>
                 </div>
@@ -70,11 +70,11 @@
             </div>
 
             <!-- Tax Location Matrix Table -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-card kt-card--padded kt-mb-6">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     🏛️ Asset Location Matrix
                 </h3>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Shows the dollar distribution of each asset class across tax-sheltered and taxable account wrappers.
                 </p>
                 <div class="table-container">
@@ -83,8 +83,8 @@
                             <tr id="tax-matrix-header">
                                 <th>Asset Class</th>
                                 <!-- Account columns injected dynamically -->
-                                <th style="text-align: right;">Total CAD</th>
-                                <th style="text-align: center;">% Sheltered</th>
+                                <th class="kt-align-right">Total CAD</th>
+                                <th class="kt-align-center">% Sheltered</th>
                             </tr>
                         </thead>
                         <tbody id="tax-matrix-body">
@@ -98,7 +98,7 @@
             </div>
 
             <!-- Tax Location Best Practices & Insights -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 30px;">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 30px;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     💡 Tax Optimization &amp; Placement Principles
                 </h3>

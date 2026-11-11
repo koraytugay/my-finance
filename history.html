@@ -58,7 +58,7 @@
                     <span class="kt-stat__sub" id="hist-current-usd">≈ $0.00 USD</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="hist-starting-cad" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="hist-starting-cad">$0.00</span>
                     <span class="kt-stat__label">Starting Baseline</span>
                     <span class="kt-stat__sub" id="hist-starting-sub">Week 1 (Aug 2024)</span>
                 </div>
@@ -68,12 +68,12 @@
                     <span class="kt-stat__sub" id="hist-total-contributions-sub">Added since Week 1</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="hist-actual-return" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-success" id="hist-actual-return">+$0.00</span>
                     <span class="kt-stat__label">Current Unrealized Gains</span>
                     <span class="kt-stat__sub" id="hist-actual-return-pct">Open positions</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="hist-total-gain" style="color: #0969da;">+$0.00</span>
+                    <span class="kt-stat__value kt-text-accent" id="hist-total-gain">+$0.00</span>
                     <span class="kt-stat__label">Total Growth</span>
                     <span class="kt-stat__sub" id="hist-total-gain-pct">+0.0% all-time</span>
                 </div>
@@ -95,7 +95,7 @@
             </div>
 
             <!-- Capital & Wealth Decomposition Banner -->
-            <div class="kt-toolbar" style="padding: 16px 20px; margin-bottom: 20px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 20px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                     <div style="font-weight: 700; font-size: 0.95rem; color: #1f2328; display: flex; align-items: center; gap: 6px;">
                         <span>💎 Net Worth Growth &amp; Baseline</span>
@@ -106,9 +106,9 @@
                     </span>
                 </div>
                 <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; color: #475569; flex-wrap: wrap; gap: 6px;">
-                    <span id="hist-bar-label-starting" style="color: #0969da;">■ Starting Baseline: $0.00 (0.0%)</span>
+                    <span class="kt-text-accent" id="hist-bar-label-starting">■ Starting Baseline: $0.00 (0.0%)</span>
                     <span id="hist-bar-label-savings" style="color: #8250df;">■ Contributions &amp; Realized: +$0.00 (0.0%)</span>
-                    <span id="hist-bar-label-gains" style="color: #16a34a;">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
+                    <span class="kt-text-success" id="hist-bar-label-gains">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
                 </div>
                 <div style="width: 100%; height: 14px; border-radius: 6px; overflow: hidden; display: flex; background: #e2e8f0;">
                     <div id="hist-bar-starting" style="background: #0969da; height: 100%; width: 50%;" title="Starting Baseline"></div>
@@ -148,7 +148,7 @@
             <!-- Visual Chart Container -->
             <div class="kt-card kt-card--padded chart-wrapper">
                 <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-                    <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    <div class="kt-cluster">
                         <h2 id="chart-title">Net Worth Progression</h2>
                         <span id="chart-subtitle" class="kt-badge kt-badge--pill kt-ml-auto">-</span>
                     </div>
@@ -177,16 +177,16 @@
             </div>
 
             <!-- Savings Velocity & Annual Inflows Section (Feature 2) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         ⚡ Savings Velocity &amp; Annual Wealth Inflows
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="velocity-overall-pill">
                         Average Velocity: +$3,030 / week ($13,120 / month)
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Annual breakdown of portfolio growth showing contribution discipline combined with market appreciation over your history.
                 </p>
 
@@ -196,16 +196,16 @@
             </div>
 
             <!-- Historical Pullback & Downside Resilience Section (Feature 7) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🛡️ Historical Pullback &amp; Downside Resilience
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="resilience-ath-pill">
                         🟢 Sitting at All-Time Peak (0.00% Drawdown)
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Stress-testing portfolio durability: measuring your deepest market pullbacks and recovery speed across your history.
                 </p>
 
@@ -213,22 +213,22 @@
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Current Drawdown</div>
                         <div id="resilience-current-dd" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 4px 0;">0.00%</div>
-                        <div id="resilience-current-dd-sub" style="font-size: 0.75rem; color: #64748b;">At all-time high ($680,041 CAD)</div>
+                        <div class="kt-fs-xs kt-text-muted" id="resilience-current-dd-sub">At all-time high ($680,041 CAD)</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #cf222e; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #cf222e; text-transform: uppercase;">Deepest Pullback (Max DD)</div>
                         <div id="resilience-max-dd" style="font-size: 1.25rem; font-weight: 800; color: #cf222e; margin: 4px 0;">-7.62%</div>
-                        <div id="resilience-max-dd-sub" style="font-size: 0.75rem; color: #64748b;">-$30,694 on Apr 4, 2025</div>
+                        <div class="kt-fs-xs kt-text-muted" id="resilience-max-dd-sub">-$30,694 on Apr 4, 2025</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Longest Pullback Duration</div>
-                        <div id="resilience-recovery-wks" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 4px 0;">6 weeks</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Fast recovery to fresh peak</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="resilience-recovery-wks">6 weeks</div>
+                        <div class="kt-fs-xs kt-text-muted">Fast recovery to fresh peak</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Asset Buffer Efficiency</div>
                         <div style="font-size: 1.25rem; font-weight: 800; color: #8250df; margin: 4px 0;">High Resilience</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Fixed income &amp; gold dampened dips</div>
+                        <div class="kt-fs-xs kt-text-muted">Fixed income &amp; gold dampened dips</div>
                     </div>
                 </div>
             </div>

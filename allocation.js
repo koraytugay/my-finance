@@ -185,7 +185,7 @@ function renderMatrixTable() {
 
         return `
             <tr>
-                <td><strong style="color: #0969da;">${escapeHtml(h.ticker)}</strong></td>
+                <td><strong class="kt-text-accent">${escapeHtml(h.ticker)}</strong></td>
                 <td>${escapeHtml(h.name)}</td>
                 <td><span class="kt-badge">${escapeHtml(h.strategy)}</span></td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(h.sum)}</td>
@@ -473,7 +473,7 @@ function renderSimpleAllocTable() {
 
         return `
             <tr>
-                <td><strong style="color: #0969da;">${escapeHtml(item.asset)}</strong></td>
+                <td><strong class="kt-text-accent">${escapeHtml(item.asset)}</strong></td>
                 <td class="kt-align-right kt-fw-bold">${item.pct.toFixed(2)}%</td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(item.sum)}</td>
                 <td class="kt-align-right">${gainHtml}</td>

@@ -93,16 +93,16 @@
             </div>
 
             <!-- Financial Milestones & Crossover Point (Feature 3) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🎯 Financial Milestones &amp; The "Crossover Point"
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="milestone-current-pill">
                         Current: $680,041 CAD
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Tracking trajectory toward seven-figure financial independence and the tipping point where your portfolio's passive returns outpace active labor savings.
                 </p>
 
@@ -154,10 +154,10 @@
                         <div>
                             <span style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Self-Funding Compounding Momentum</span>
                             <h4 style="margin: 2px 0 0 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
-                                ⚡ The "Crossover Point": <span id="crossover-pct" style="color: #16a34a;">42.7% Replaced</span>
+                                ⚡ The "Crossover Point": <span class="kt-text-success" id="crossover-pct">42.7% Replaced</span>
                             </h4>
                         </div>
-                        <div style="text-align: right;">
+                        <div class="kt-align-right">
                             <div style="font-size: 0.72rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Portfolio Passive Run-Rate</div>
                             <div style="font-size: 1.15rem; font-weight: 800; color: #16a34a;" id="crossover-annual">+$47,603 / yr ($3,967 / mo)</div>
                         </div>
@@ -174,16 +174,16 @@
             </div>
 
             <!-- Fee & MER Drag Audit Section (Feature 4) -->
-            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                    <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-2">
+                    <h3 class="kt-card__title kt-m-0">
                         🛡️ Fee &amp; MER Drag Audit: The "DIY Savings" Validator
                     </h3>
                     <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="mer-savings-pill">
                         DIY Advantage: +$12,172 / year saved
                     </span>
                 </div>
-                <p style="font-size: 0.82rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4">
                     Quantifying how much wealth you protect by managing ultra-low-cost index ETFs instead of paying typical Canadian bank mutual fund fees (1.95%).
                 </p>
 
@@ -191,22 +191,22 @@
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Portfolio Weighted MER</div>
                         <div id="mer-weighted-val" style="font-size: 1.35rem; font-weight: 800; color: #16a34a; margin: 4px 0;">~0.16%</div>
-                        <div id="mer-annual-cost" style="font-size: 0.75rem; color: #64748b;">Cost: $1,088 / year across 37 ETFs</div>
+                        <div class="kt-fs-xs kt-text-muted" id="mer-annual-cost">Cost: $1,088 / year across 37 ETFs</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #cf222e; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #cf222e; text-transform: uppercase;">Bank Mutual Fund Fee (1.95%)</div>
                         <div id="mer-bank-cost" style="font-size: 1.35rem; font-weight: 800; color: #cf222e; margin: 4px 0;">$13,260 / year</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Average Canadian retail MER drag</div>
+                        <div class="kt-fs-xs kt-text-muted">Average Canadian retail MER drag</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Annual Wealth Preserved</div>
                         <div id="mer-annual-saved" style="font-size: 1.35rem; font-weight: 800; color: #0969da; margin: 4px 0;">+$12,172 / yr</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Kept directly compounding for you</div>
+                        <div class="kt-fs-xs kt-text-muted">Kept directly compounding for you</div>
                     </div>
                     <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">10-Year Compounding Edge</div>
                         <div id="mer-10yr-edge" style="font-size: 1.35rem; font-weight: 800; color: #8250df; margin: 4px 0;">+$178,500+</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">Future value of fees saved (at 7%)</div>
+                        <div class="kt-fs-xs kt-text-muted">Future value of fees saved (at 7%)</div>
                     </div>
                 </div>
 
