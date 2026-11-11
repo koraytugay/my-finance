@@ -89,6 +89,56 @@
     border-color: color-mix(in srgb, var(--kt-success) 40%, transparent);
 }
 
+/* ================= Dividends: income category tones (beyond kt soft tones) ================= */
+.pill-foreign-div  { --kt-badge-bg: #ffedd5; --kt-badge-fg: #c2410c; }
+.pill-tax-deferred,
+.pill-semiannual   { --kt-badge-bg: #f3e8ff; --kt-badge-fg: #7e22ce; }
+
+/* ================= Dividends: 12-month distribution bar chart ================= */
+.month-bar {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    cursor: pointer;
+}
+.month-bar:hover .month-col { filter: brightness(0.92); }
+
+.month-col {
+    position: relative;
+    display: flex;
+    flex-direction: column-reverse;
+    width: 100%;
+    max-width: 44px;
+    min-height: 4px;
+    overflow: hidden;
+    border-radius: 5px 5px 0 0;
+    transition: height var(--kt-transition);
+}
+.month-col.peak { outline: 2px solid var(--kt-success); outline-offset: 1px; }
+
+.month-net-part { width: 100%; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); }
+.month-net-part.peak { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
+.month-tax-part { width: 100%; background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%); }
+
+.month-label {
+    margin-top: var(--kt-space-2);
+    font-size: 0.72rem;
+    font-weight: var(--kt-weight-bold);
+    text-align: center;
+    color: var(--kt-text-muted);
+}
+.month-val {
+    margin-bottom: var(--kt-space-1);
+    font-size: 0.72rem;
+    font-weight: var(--kt-weight-bold);
+    white-space: nowrap;
+    color: var(--kt-text);
+}
+
 /* ================= Monthly returns heatmap ================= */
 #heatmap-table {
     border-collapse: separate;

@@ -144,7 +144,7 @@ function getHoldingTaxProfile(h, grossIncome) {
         const isDeferred = acct.includes('RRSP') || acct.includes('LIRA') || acct.includes('RRIF');
         const type = isDeferred ? 'deferred' : 'taxfree';
         const label = isDeferred ? '0.0% (RRSP Deferred)' : '0.0% (Tax-Free)';
-        const badgeClass = isDeferred ? 'pill-tax-deferred' : 'pill-tax-free';
+        const badgeClass = isDeferred ? 'pill-tax-deferred' : 'kt-badge--soft-success';
 
         return {
             isSheltered: true,
@@ -174,7 +174,7 @@ function getHoldingTaxProfile(h, grossIncome) {
             isSheltered: false,
             type: 'cash',
             label: `${rate.toFixed(1)}% (Cash/Interest)`,
-            badgeClass: 'pill-cash-tax',
+            badgeClass: 'kt-badge--soft-danger',
             taxRatePct: rate,
             taxDragCAD: taxDrag,
             netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -190,7 +190,7 @@ function getHoldingTaxProfile(h, grossIncome) {
             isSheltered: false,
             type: 'reit',
             label: `~${rate.toFixed(1)}% (REIT Dist.)`,
-            badgeClass: 'pill-blended',
+            badgeClass: '',
             taxRatePct: rate,
             taxDragCAD: taxDrag,
             netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -213,7 +213,7 @@ function getHoldingTaxProfile(h, grossIncome) {
             isSheltered: false,
             type: 'eligible',
             label: `${rate.toFixed(1)}% (Eligible Div + DTC)`,
-            badgeClass: 'pill-eligible-div',
+            badgeClass: 'kt-badge--soft-info',
             taxRatePct: rate,
             taxDragCAD: taxDrag,
             netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -247,7 +247,7 @@ function getHoldingTaxProfile(h, grossIncome) {
         isSheltered: false,
         type: 'blended',
         label: `${blendedRate.toFixed(1)}% (Blended)`,
-        badgeClass: 'pill-blended',
+        badgeClass: '',
         taxRatePct: Number(blendedRate.toFixed(1)),
         taxDragCAD: taxDrag,
         netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -717,12 +717,12 @@ function renderTableRows(items) {
 
         const tr = document.createElement('tr');
 
-        let freqClass = 'pill-quarterly';
-        if (h.freq === 'Monthly') freqClass = 'pill-monthly';
-        else if (h.freq === 'Annual') freqClass = 'pill-annual';
+        let freqClass = 'kt-badge--soft-warning';
+        if (h.freq === 'Monthly') freqClass = 'kt-badge--soft-info';
+        else if (h.freq === 'Annual') freqClass = '';
         else if (h.freq === 'Semi-Annual') freqClass = 'pill-semiannual';
 
-        const tickerBadge = h.isFixedIncomeAssumed ? '<span class="income-pill pill-fixed" title="Assumed 2.0% Fixed Income rule" style="margin-left:5px;">2% Fixed</span>' : '';
+        const tickerBadge = h.isFixedIncomeAssumed ? '<span class="kt-badge kt-badge--pill kt-badge--soft-success" title="Assumed 2.0% Fixed Income rule" style="margin-left:5px;">2% Fixed</span>' : '';
         const yocDisplay = cashflowMode === 'net' ? h.netYoCPct : h.grossYoCPct;
 
         tr.innerHTML = `
@@ -740,7 +740,7 @@ function renderTableRows(items) {
             <td style="text-align: right; font-weight: 700; color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
             <td style="text-align: right; color: #475569;">${formatCurrency(h.grossAnnualIncome)}</td>
             <td class="kt-align-center">
-                <span class="income-pill ${h.tax.badgeClass}" title="${escapeHtml(h.tax.explanation)}">
+                <span class="kt-badge kt-badge--pill ${h.tax.badgeClass}" title="${escapeHtml(h.tax.explanation)}">
                     ${escapeHtml(h.tax.label)}
                 </span>
             </td>
@@ -749,7 +749,7 @@ function renderTableRows(items) {
             </td>
             <td style="text-align: right; font-weight: 800; color: #166534;">${formatCurrency(h.netAnnualIncome)}</td>
             <td style="text-align: right; font-weight: 600; color: #0969da;">${formatCurrency(h.netMonthlyIncome)}</td>
-            <td class="kt-align-center"><span class="income-pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
+            <td class="kt-align-center"><span class="kt-badge kt-badge--pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
         `;
         tbody.appendChild(tr);
     });

@@ -6,94 +6,6 @@
     <title>My Finance - Dividends &amp; Passive Income</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
     <link rel="stylesheet" href="styles.css?v=4.0">
-    <style>
-        .income-pill {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .pill-monthly { background: #e0f2fe; color: #0369a1; }
-        .pill-quarterly { background: #fef3c7; color: #92400e; }
-        .pill-annual { background: #f1f5f9; color: #475569; }
-        .pill-semiannual { background: #fae8ff; color: #86198f; }
-        .pill-fixed { background: #f0fdf4; color: #166534; }
-
-        .pill-tax-free { background: #dcfce7; color: #15803d; }
-        .pill-tax-deferred { background: #f3e8ff; color: #7e22ce; }
-        .pill-eligible-div { background: #e0f2fe; color: #0284c7; }
-        .pill-foreign-div { background: #ffedd5; color: #c2410c; }
-        .pill-cash-tax { background: #fee2e2; color: #b91c1c; }
-        .pill-blended { background: #f1f5f9; color: #334155; }
-
-        .tax-shelter-card {
-            background: white;
-            border-radius: 10px;
-            padding: 14px 18px;
-            border: 1px solid #edf2f7;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            flex: 1 1 190px;
-            min-width: 180px;
-        }
-
-        .month-bar {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            justify-content: flex-end;
-            position: relative;
-            cursor: pointer;
-        }
-        .month-bar:hover .month-col {
-            filter: brightness(0.92);
-        }
-        .month-col {
-            width: 100%;
-            max-width: 44px;
-            border-radius: 5px 5px 0 0;
-            transition: all 0.2s ease;
-            position: relative;
-            min-height: 4px;
-            display: flex;
-            flex-direction: column-reverse;
-            overflow: hidden;
-        }
-        .month-col.peak {
-            outline: 2px solid #10b981;
-            outline-offset: 1px;
-        }
-        .month-net-part {
-            width: 100%;
-            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
-            transition: height 0.2s ease;
-        }
-        .month-net-part.peak {
-            background: linear-gradient(180deg, #10b981 0%, #059669 100%);
-        }
-        .month-tax-part {
-            width: 100%;
-            background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
-            transition: height 0.2s ease;
-        }
-        .month-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #64748b;
-            margin-top: 8px;
-            text-align: center;
-        }
-        .month-val {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 4px;
-            white-space: nowrap;
-        }
-    </style>
 </head>
 <body>
     <div class="kt-container">
@@ -224,29 +136,29 @@
                 </p>
 
                 <!-- 5 Tax Classification Cards -->
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-                    <div class="tax-shelter-card">
-                        <div style="font-size: 0.73rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">100% Tax-Free (TFSA &amp; FHSA)</div>
+                <div class="kt-grid kt-grid--fit kt-mb-4" style="--kt-grid-min: 180px; --kt-grid-gap: 12px;">
+                    <div class="kt-card kt-card--padded">
+                        <div class="kt-eyebrow" style="color: #16a34a;">100% Tax-Free (TFSA &amp; FHSA)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-taxfree">$0.00 / yr</div>
                         <div class="kt-fs-xs kt-text-muted" id="tax-card-taxfree-sub">0% CRA tax drag on distributions</div>
                     </div>
-                    <div class="tax-shelter-card">
-                        <div style="font-size: 0.73rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Tax-Deferred (RRSP)</div>
+                    <div class="kt-card kt-card--padded">
+                        <div class="kt-eyebrow" style="color: #8250df;">Tax-Deferred (RRSP)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-deferred">$0.00 / yr</div>
                         <div class="kt-fs-xs kt-text-muted" id="tax-card-deferred-sub">0% current tax (compounds gross)</div>
                     </div>
-                    <div class="tax-shelter-card">
-                        <div style="font-size: 0.73rem; font-weight: 700; color: #0284c7; text-transform: uppercase;">🍁 Eligible Divs (Non-Reg)</div>
+                    <div class="kt-card kt-card--padded">
+                        <div class="kt-eyebrow" style="color: #0284c7;">🍁 Eligible Divs (Non-Reg)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-eligible">$0.00 / yr</div>
                         <div class="kt-fs-xs kt-text-muted" id="tax-card-eligible-sub">~8.9% effective tax (DTC applied)</div>
                     </div>
-                    <div class="tax-shelter-card">
-                        <div style="font-size: 0.73rem; font-weight: 700; color: #ea580c; text-transform: uppercase;">🌐 Foreign Divs (Non-Reg)</div>
+                    <div class="kt-card kt-card--padded">
+                        <div class="kt-eyebrow" style="color: #ea580c;">🌐 Foreign Divs (Non-Reg)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-foreign">$0.00 / yr</div>
                         <div class="kt-fs-xs kt-text-muted" id="tax-card-foreign-sub">30.0% marginal rate (US &amp; Intl)</div>
                     </div>
-                    <div class="tax-shelter-card">
-                        <div style="font-size: 0.73rem; font-weight: 700; color: #dc2626; text-transform: uppercase;">💵 Cash &amp; Fixed (Non-Reg)</div>
+                    <div class="kt-card kt-card--padded">
+                        <div class="kt-eyebrow" style="color: #dc2626;">💵 Cash &amp; Fixed (Non-Reg)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="tax-card-cash">$0.00 / yr</div>
                         <div class="kt-fs-xs kt-text-muted" id="tax-card-cash-sub">30.0% tax on cash &amp; 2% fixed income</div>
                     </div>
