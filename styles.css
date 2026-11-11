@@ -62,6 +62,27 @@
     color: var(--kt-text);
 }
 
+/* ================= Accounts: grouped holdings table ================= */
+.subgroup-header-row {
+    background: var(--kt-surface-sunken);
+    border-top: 2px solid var(--kt-border-strong);
+    border-bottom: 1px solid var(--kt-border);
+}
+.subgroup-header-row td { padding: 10px 14px; }
+
+.subgroup-subtotal-row {
+    background: var(--kt-surface-hover);
+    border-top: 1px solid var(--kt-border);
+    border-bottom: 2px solid var(--kt-border-strong);
+}
+.subgroup-subtotal-row td { padding: 8px 14px; font-size: var(--kt-fs-sm); }
+
+.group-total-row {
+    background: var(--kt-success-soft);
+    border-top: 2px solid var(--kt-border-strong);
+}
+.group-total-row td { padding: 12px 14px; color: var(--kt-success-text); }
+
 /* ================= Monthly returns heatmap ================= */
 #heatmap-table {
     border-collapse: separate;

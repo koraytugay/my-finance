@@ -140,11 +140,11 @@ function renderGroupedViews() {
         const pillsHtml = sortedSubGroups.map(sg => {
             const sgPct = group.total > 0 ? (sg.total / group.total) * 100 : 0;
             return `
-                <div class="account-summary-pill">
-                    <span style="font-weight: 600; color: #334155;">${escapeHtml(sg.title)}:</span>
+                <span class="kt-chip">
+                    ${escapeHtml(sg.title)}:
                     <strong class="kt-text-accent">${formatCurrency(sg.total)}</strong>
-                    <span style="color: #64748b; font-size: 0.76rem;">(${sgPct.toFixed(1)}%)</span>
-                </div>
+                    <span class="kt-chip__meta">(${sgPct.toFixed(1)}%)</span>
+                </span>
             `;
         }).join('');
 
@@ -239,23 +239,23 @@ function renderGroupedViews() {
         const subGroupTypeLabel = (groupBy === 'brokerage') ? 'accounts' : (groupBy === 'account-type' ? 'institutions' : 'categories');
 
         return `
-            <div class="group-card">
-                <div class="group-header">
+            <div class="kt-card kt-card--padded kt-mb-6">
+                <div class="kt-split kt-mb-3">
                     <div>
-                        <h2 style="font-size: 1.3rem; font-weight: 800; margin: 0; color: #1f2328;">${escapeHtml(group.title)}</h2>
-                        <span style="font-size: 0.8rem; color: #64748b;">${group.holdings.length} ${group.holdings.length === 1 ? 'position' : 'positions'} across ${sortedSubGroups.length} ${subGroupTypeLabel}</span>
+                        <h2 class="kt-m-0">${escapeHtml(group.title)}</h2>
+                        <span class="kt-fs-xs kt-text-muted">${group.holdings.length} ${group.holdings.length === 1 ? 'position' : 'positions'} across ${sortedSubGroups.length} ${subGroupTypeLabel}</span>
                     </div>
                     <div class="kt-align-right">
-                        <div style="font-size: 1.4rem; font-weight: 800; color: #1f2328;">${formatCurrency(group.total)}</div>
-                        <div style="font-size: 0.8rem; color: #0969da; font-weight: 600;">${groupPct.toFixed(2)}% of total portfolio</div>
+                        <div class="kt-fs-lg kt-fw-heavy">${formatCurrency(group.total)}</div>
+                        <div class="kt-fs-xs kt-fw-semibold kt-text-accent">${groupPct.toFixed(2)}% of total portfolio</div>
                     </div>
                 </div>
 
-                <div class="kt-progress" style="height: 6px; margin-bottom: 12px;">
-                    <div style="width: ${groupPct}%; background-color: #0969da; height: 100%;"></div>
+                <div class="kt-progress kt-mb-3" style="--kt-progress-h: 6px;">
+                    <div class="kt-progress__bar" style="width: ${groupPct}%;"></div>
                 </div>
 
-                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;">
+                <div class="kt-cluster kt-mb-4">
                     ${pillsHtml}
                 </div>
 
