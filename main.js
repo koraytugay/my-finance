@@ -695,7 +695,7 @@ function renderAssetClassTable(mainData, holdings) {
     const grandTotal = mainData.metrics && mainData.metrics.totalValue ? mainData.metrics.totalValue : holdings.reduce((s, h) => s + h.sum, 0);
     const totalTr = document.createElement('tr');
     totalTr.style.background = '#f1f5f9';
-    totalTr.style.borderTop = '2px solid #0969da';
+    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
         <td style="text-align: right; font-weight: 800; color: #0969da; font-size: 0.95rem;">${formatCurrency(grandTotal, 'CAD')}</td>
@@ -725,7 +725,7 @@ function renderAccountTypeTable(mainData, holdings, history) {
     // Total Row
     const totalTr = document.createElement('tr');
     totalTr.style.background = '#f1f5f9';
-    totalTr.style.borderTop = '2px solid #0969da';
+    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
         <td style="text-align: right; font-weight: 800; color: #0969da; font-size: 0.95rem;">${formatCurrency(totalVal, 'CAD')}</td>
@@ -766,7 +766,7 @@ function renderCategoryTable(mainData, holdings) {
     // Total Row
     const totalTr = document.createElement('tr');
     totalTr.style.background = '#f1f5f9';
-    totalTr.style.borderTop = '2px solid #0969da';
+    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
         <td style="text-align: right; font-weight: 800; color: #0969da; font-size: 0.95rem;">${formatCurrency(totalVal, 'CAD')}</td>

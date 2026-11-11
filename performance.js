@@ -2480,12 +2480,7 @@ function renderCrisisStressTest() {
         const postCrashCAD = Math.max(0, totalCAD + shockCAD);
 
         const card = document.createElement('div');
-        card.style.background = '#ffffff';
-        card.style.border = '1px solid #e2e8f0';
-        card.style.borderLeft = `4px solid ${c.color}`;
-        card.style.borderRadius = '8px';
-        card.style.padding = '14px 16px';
-        card.style.boxShadow = '0 2px 6px rgba(0,0,0,0.03)';
+        card.className = 'kt-card kt-card--padded';
 
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">

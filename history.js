@@ -189,7 +189,7 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
     });
 
     grid.innerHTML = yearData.map(yd => `
-        <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid ${yd.color}; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div class="kt-card kt-card--padded">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 0.85rem; font-weight: 800; color: #1f2328;">${yd.label}</span>
                 <span style="font-size: 0.75rem; font-weight: 700; color: ${yd.color}; background: ${yd.color}15; padding: 2px 8px; border-radius: 12px;">

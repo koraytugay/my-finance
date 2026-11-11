@@ -81,32 +81,32 @@
 
             <!-- Weekly Momentum & Streak Analytics Cards (CAD & USD) -->
             <div class="kt-stat-row" style="margin-bottom: 24px;">
-                <div class="kt-stat" id="card-cad-up-streak" style="border-top: 3px solid #16a34a;">
+                <div class="kt-stat" id="card-cad-up-streak">
                     <span class="kt-stat__value kt-text-success" id="stat-cad-up-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Up Streak (CAD)</span>
                     <span class="kt-stat__sub" id="stat-cad-up-streak-sub">Total gain: +$0.00 (+0.0%)</span>
                 </div>
-                <div class="kt-stat" id="card-cad-down-streak" style="border-top: 3px solid #cf222e;">
+                <div class="kt-stat" id="card-cad-down-streak">
                     <span class="kt-stat__value kt-text-danger" id="stat-cad-down-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Down Streak (CAD)</span>
                     <span class="kt-stat__sub" id="stat-cad-down-streak-sub">Total down: -$0.00 (-0.0%)</span>
                 </div>
-                <div class="kt-stat" id="card-usd-up-streak" style="border-top: 3px solid #16a34a;">
+                <div class="kt-stat" id="card-usd-up-streak">
                     <span class="kt-stat__value kt-text-success" id="stat-usd-up-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Up Streak (USD)</span>
                     <span class="kt-stat__sub" id="stat-usd-up-streak-sub">Total gain: +US$0.00 (+0.0%)</span>
                 </div>
-                <div class="kt-stat" id="card-usd-down-streak" style="border-top: 3px solid #cf222e;">
+                <div class="kt-stat" id="card-usd-down-streak">
                     <span class="kt-stat__value kt-text-danger" id="stat-usd-down-streak">0 weeks</span>
                     <span class="kt-stat__label">Longest Down Streak (USD)</span>
                     <span class="kt-stat__sub" id="stat-usd-down-streak-sub">Total down: -US$0.00 (-0.0%)</span>
                 </div>
-                <div class="kt-stat" id="card-cad-ath-streak" style="border-top: 3px solid #0969da;">
+                <div class="kt-stat" id="card-cad-ath-streak">
                     <span class="kt-stat__value" id="stat-cad-ath-streak" style="color: #0969da; font-size: 1.15rem;">-</span>
                     <span class="kt-stat__label">Without ATH (CAD)</span>
                     <span class="kt-stat__sub" id="stat-cad-ath-streak-sub">Top 3 longest droughts</span>
                 </div>
-                <div class="kt-stat" id="card-usd-ath-streak" style="border-top: 3px solid #8250df;">
+                <div class="kt-stat" id="card-usd-ath-streak">
                     <span class="kt-stat__value" id="stat-usd-ath-streak" style="color: #8250df; font-size: 1.15rem;">-</span>
                     <span class="kt-stat__label">Without ATH (USD)</span>
                     <span class="kt-stat__sub" id="stat-usd-ath-streak-sub">Top 3 longest droughts</span>
@@ -129,7 +129,7 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
                     <!-- CAD Streaks Card -->
-                    <div style="background: white; border-radius: 8px; padding: 14px 16px; border: 1px solid #edf2f7; border-top: 3px solid #0969da; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <div class="kt-card kt-card--padded">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
                             <span style="font-size: 0.82rem; font-weight: 800; color: #0969da; text-transform: uppercase; letter-spacing: 0.5px;">🇨🇦 CAD Top 3 Streaks</span>
                             <span id="ath-cad-summary-pill" style="font-size: 0.85rem; font-weight: 800; color: #0969da; background: rgba(9, 105, 218, 0.08); padding: 2px 8px; border-radius: 6px;">
@@ -142,7 +142,7 @@
                     </div>
 
                     <!-- USD Streaks Card -->
-                    <div style="background: white; border-radius: 8px; padding: 14px 16px; border: 1px solid #edf2f7; border-top: 3px solid #8250df; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                    <div class="kt-card kt-card--padded">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
                             <span style="font-size: 0.82rem; font-weight: 800; color: #8250df; text-transform: uppercase; letter-spacing: 0.5px;">🇺🇸 USD Top 3 Streaks</span>
                             <span id="ath-usd-summary-pill" style="font-size: 0.85rem; font-weight: 800; color: #8250df; background: rgba(130, 80, 223, 0.08); padding: 2px 8px; border-radius: 6px;">
@@ -172,22 +172,22 @@
 
                 <!-- 4 Decomposition Cards -->
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #0969da; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
+                    <div class="kt-card kt-card--padded" style="flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Starting Baseline (Week 1)</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-starting">$0.00</div>
                         <div class="kt-fs-xs kt-text-muted" id="wealth-stat-starting-sub">Portfolio baseline at inception</div>
                     </div>
-                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
+                    <div class="kt-card kt-card--padded" style="flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Contributions &amp; Realized Growth</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-savings">+$0.00</div>
                         <div class="kt-fs-xs kt-text-muted" id="wealth-stat-savings-sub">Cumulative deposits &amp; realized gains since Week 1</div>
                     </div>
-                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
+                    <div class="kt-card kt-card--padded" style="flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Current Unrealized Gains</div>
                         <div id="wealth-stat-gains" style="font-size: 1.25rem; font-weight: 800; color: #166534; margin: 4px 0;">+$0.00</div>
                         <div id="wealth-stat-gains-sub" style="font-size: 0.75rem; color: #15803d;">Unrealized gains across open holdings</div>
                     </div>
-                    <div style="background: white; border-radius: 10px; padding: 14px 18px; border: 1px solid #edf2f7; border-left: 4px solid #1f2328; box-shadow: 0 2px 8px rgba(0,0,0,0.03); flex: 1 1 180px;">
+                    <div class="kt-card kt-card--padded" style="flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #1f2328; text-transform: uppercase;">Current Total Net Worth</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="wealth-stat-current">$0.00</div>
                         <div class="kt-fs-xs kt-text-muted" id="wealth-stat-current-sub">Live portfolio valuation</div>
@@ -302,7 +302,7 @@
                     </div>
 
                     <!-- Card 2: 100% Equity XEQT -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #16a34a; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Global Equity (XEQT)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #16a34a; margin: 4px 0;" id="bench-xeqt-return">+43.8%</div>
                         <div class="kt-fs-xs kt-text-muted" id="bench-xeqt-sub">100% All-Equity passive blend</div>
@@ -310,7 +310,7 @@
                     </div>
 
                     <!-- Card 3: 60/40 Balanced XBAL -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #8250df; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Balanced 60/40 (XBAL)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #8250df; margin: 4px 0;" id="bench-xbal-return">+22.3%</div>
                         <div class="kt-fs-xs kt-text-muted" id="bench-xbal-sub">60% Stocks / 40% Bonds benchmark</div>
@@ -318,7 +318,7 @@
                     </div>
 
                     <!-- Card 4: S&P 500 VFV -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #d97706; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #d97706; text-transform: uppercase;">S&amp;P 500 CAD (VFV)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #d97706; margin: 4px 0;" id="bench-vfv-return">+43.1%</div>
                         <div class="kt-fs-xs kt-text-muted" id="bench-vfv-sub">100% US Mega-cap equity (CAD)</div>
@@ -326,7 +326,7 @@
                     </div>
 
                     <!-- Card 5: Canadian Bonds XCB -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; border-top: 4px solid #64748b; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase;">CDN Corp Bonds (XCB)</div>
                         <div style="font-size: 1.45rem; font-weight: 800; color: #64748b; margin: 4px 0;" id="bench-xcb-return">-2.1%</div>
                         <div class="kt-fs-xs kt-text-muted" id="bench-xcb-sub">Canadian corporate bond index</div>
@@ -368,7 +368,7 @@
                 <!-- 3 Overview Summary Cards (Best, Current, Worst) -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 20px;">
                     <!-- Best 52-Week Card -->
-                    <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #16a34a; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📈 Best 52-Week Period</span>
@@ -404,7 +404,7 @@
                     </div>
 
                     <!-- Current 52-Week Card -->
-                    <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #0969da; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">⏱️ Current (Last) 52 Weeks</span>
@@ -440,7 +440,7 @@
                     </div>
 
                     <!-- Worst 52-Week Card -->
-                    <div style="background: white; border: 1px solid #e2e8f0; border-top: 3px solid #cf222e; border-radius: 10px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div class="kt-cluster">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📉 Worst 52-Week Period</span>
