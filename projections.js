@@ -351,14 +351,14 @@ function renderTable(tableData, highlightYear = null) {
             tr.style.background = '#f0f9ff';
         }
         tr.innerHTML = `
-            <td style="font-weight: 700;">Year ${row.year}${isTarget ? ' <span style="font-size: 0.72rem; color: #0969da; font-weight: 800; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
+            <td class="kt-fw-bold">Year ${row.year}${isTarget ? ' <span class="kt-fs-2xs kt-text-accent kt-fw-heavy" style="background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
             <td class="kt-text-muted">${row.timeline}</td>
             <td class="kt-align-right">${formatCurrency(row.startBalance)}</td>
-            <td style="text-align: right; color: #0969da;">+${formatCurrency(row.annualContribution)}</td>
-            <td style="text-align: right; color: #166534; font-weight: 600;">+${formatCurrency(row.growth)}</td>
-            <td style="text-align: right; font-weight: 800;">${formatCurrency(row.endBalance)}</td>
-            <td style="text-align: right; font-weight: 700; color: #166534;">${formatCurrency(row.safeAnnualSpend)}</td>
-            <td style="text-align: right; font-weight: 600; color: #0969da;">${formatCurrency(row.safeMonthlySpend)}</td>
+            <td class="kt-align-right kt-text-accent">+${formatCurrency(row.annualContribution)}</td>
+            <td class="kt-align-right kt-text-success kt-fw-semibold">+${formatCurrency(row.growth)}</td>
+            <td class="kt-align-right kt-fw-heavy">${formatCurrency(row.endBalance)}</td>
+            <td class="kt-align-right kt-fw-bold kt-text-success">${formatCurrency(row.safeAnnualSpend)}</td>
+            <td class="kt-align-right kt-fw-semibold kt-text-accent">${formatCurrency(row.safeMonthlySpend)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -514,19 +514,19 @@ function buildProjectionCardHtml(point, isHover = false) {
         <div class="kt-readout__section">
             <div class="kt-eyebrow kt-mb-1">Scenario Projections</div>
             <div class="kt-readout__row">
-                <span style="color: #16a34a; font-weight: 600;">● Optimistic (+2%):</span>
+                <span class="kt-text-success kt-fw-semibold">● Optimistic (+2%):</span>
                 <strong>${formatCurrency(point.optimistic)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span style="color: #0969da; font-weight: 600;">● Expected:</span>
+                <span class="kt-text-accent kt-fw-semibold">● Expected:</span>
                 <strong>${formatCurrency(point.expected)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span style="color: #d97706; font-weight: 600;">● Conservative (-2%):</span>
+                <span class="kt-text-warning kt-fw-semibold">● Conservative (-2%):</span>
                 <strong>${formatCurrency(point.conservative)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span style="color: #64748b; font-weight: 600;">● Capital Invested:</span>
+                <span class="kt-text-muted kt-fw-semibold">● Capital Invested:</span>
                 <strong>${formatCurrency(point.invested)}</strong>
             </div>
         </div>

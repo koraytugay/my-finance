@@ -71,17 +71,17 @@
 
             <!-- Interactive Parameters Control Card -->
             <div class="kt-card kt-card--padded kt-mb-6">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <div class="kt-split kt-mb-4">
                     <div>
                         <h3 class="kt-card__title kt-m-0">
                             🎛️ Simulation Parameters &amp; Assumptions
                         </h3>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
+                        <p class="kt-fs-sm kt-text-muted kt-mt-0 kt-mb-0">
                             Adjust growth rate, monthly contributions, and safe withdrawal assumptions to simulate your financial trajectory.
                         </p>
                     </div>
                     <div class="kt-cluster">
-                        <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Currency View:</span>
+                        <span class="kt-fs-sm kt-fw-bold kt-text-muted">Currency View:</span>
                         <div class="kt-segmented kt-segmented--sm" role="group">
                             <button type="button" id="btn-mode-nominal" class="is-active" onclick="setInflationMode('nominal')">Nominal (Future $)</button>
                             <button type="button" id="btn-mode-real" onclick="setInflationMode('real')">Real (Today's Power)</button>
@@ -116,7 +116,7 @@
                     <div class="kt-field">
                         <label class="kt-field__label kt-split" for="input-inflation-rate">
                             <span>Assumed Inflation Rate (%)</span>
-                            <span id="label-inflation-rate" style="color: #d97706;">2.5%</span>
+                            <span class="kt-text-warning" id="label-inflation-rate">2.5%</span>
                         </label>
                         <input class="kt-range" type="range" id="input-inflation-rate" min="0.0" max="6.0" step="0.25" value="2.5" oninput="runProjections()">
                     </div>
@@ -148,10 +148,10 @@
 
             <!-- Milestone Countdown Section -->
             <div class="kt-card kt-card--padded kt-mb-6">
-                <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                <h3 class="kt-mt-0 kt-mb-1 kt-fs-base kt-fw-heavy kt-text-primary">
                     🏆 Net Worth Milestone Countdown
                 </h3>
-                <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 16px 0;">
+                <p class="kt-fs-sm kt-text-muted kt-mt-0 kt-mb-4">
                     Projected timeline to hit major financial markers based on your current savings and growth pace.
                 </p>
                 <div class="kt-grid kt-grid--fit kt-mb-6" id="milestones-container" style="--kt-grid-min: 200px; --kt-grid-gap: 14px;">
@@ -166,15 +166,15 @@
                         <h3 class="kt-card__title kt-m-0">
                             📈 30-Year Wealth Trajectory Chart
                         </h3>
-                        <p style="font-size: 0.8rem; color: #64748b; margin: 2px 0 0 0;">
+                        <p class="kt-fs-sm kt-text-muted kt-mt-0 kt-mb-0">
                             Visualizes your wealth compound curves over 30 years under Expected, Optimistic (+2%), and Conservative (-2%) returns vs. Cash Savings Baseline. Hover to inspect values.
                         </p>
                     </div>
-                    <div style="display: flex; gap: 12px; font-size: 0.78rem; font-weight: 700; flex-wrap: wrap;">
+                    <div class="kt-fs-xs kt-fw-bold" style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <span class="kt-text-success">● Optimistic (+2%)</span>
                         <span class="kt-text-accent">● Expected Return</span>
-                        <span style="color: #d97706;">● Conservative (-2%)</span>
-                        <span style="color: #94a3b8;">● Capital Invested</span>
+                        <span class="kt-text-warning">● Conservative (-2%)</span>
+                        <span class="kt-text-muted">● Capital Invested</span>
                     </div>
                 </div>
                 <div class="kt-chart-layout">
@@ -192,7 +192,7 @@
 
             <!-- Detailed Year-by-Year Compounding Table -->
             <div class="kt-card kt-card--padded kt-mb-6">
-                <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
+                <h3 class="kt-mt-0 kt-mb-3 kt-fs-base kt-fw-heavy kt-text-primary">
                     📋 Year-by-Year Growth &amp; Withdrawal Schedule
                 </h3>
                 <div class="table-container">
@@ -204,9 +204,9 @@
                                 <th class="kt-align-right">Start Balance</th>
                                 <th class="kt-align-right">Annual Saved</th>
                                 <th class="kt-align-right">Compound Growth ($)</th>
-                                <th style="text-align: right; font-weight: 800;">End Balance</th>
-                                <th style="text-align: right; color: #166534;">Safe Annual Spend</th>
-                                <th style="text-align: right; color: #0969da;">Safe Monthly Spend</th>
+                                <th class="kt-align-right kt-fw-heavy">End Balance</th>
+                                <th class="kt-align-right kt-text-success">Safe Annual Spend</th>
+                                <th class="kt-align-right kt-text-accent">Safe Monthly Spend</th>
                             </tr>
                         </thead>
                         <tbody id="projections-table-body">
