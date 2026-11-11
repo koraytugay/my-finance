@@ -183,9 +183,9 @@ function renderTaxMatrix() {
             <td class="kt-align-right">${row.RRSP > 0 ? formatCurrency(row.RRSP, 'CAD') : '-'}</td>
             <td class="kt-align-right">${row.FHSA > 0 ? formatCurrency(row.FHSA, 'CAD') : '-'}</td>
             <td class="kt-align-right">${row['NON-REG'] > 0 ? formatCurrency(row['NON-REG'], 'CAD') : '-'}</td>
-            <td style="text-align: right; font-weight: 700;">${formatCurrency(row.total, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-bold">${formatCurrency(row.total, 'CAD')}</td>
             <td class="kt-align-center">
-                <span class="kt-badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 700;">
+                <span class="kt-badge kt-fw-bold" style="background: ${badgeBg}; color: ${badgeColor};">
                     ${shelteredPct.toFixed(1)}%
                 </span>
             </td>
@@ -204,7 +204,7 @@ function renderTaxMatrix() {
             <td class="kt-align-right">${formatCurrency(categoryTotals.FHSA, 'CAD')}</td>
             <td class="kt-align-right">${formatCurrency(categoryTotals['NON-REG'], 'CAD')}</td>
             <td class="kt-align-right">${formatCurrency(categoryTotals.total, 'CAD')}</td>
-            <td style="text-align: center; color: #16a34a;">${totalShelteredPct.toFixed(1)}%</td>
+            <td class="kt-align-center kt-text-success">${totalShelteredPct.toFixed(1)}%</td>
         </tr>
     `;
 }
@@ -240,11 +240,11 @@ function renderTaxInsights() {
         const card = document.createElement('div');
         card.className = 'kt-card kt-card--padded';
         card.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span style="font-size: 1.2rem;">${item.icon}</span>
-                <strong style="font-size: 0.92rem; color: #1f2328;">${item.title}</strong>
+            <div class="kt-cluster kt-mb-1">
+                <span class="kt-fs-md">${item.icon}</span>
+                <strong class="kt-fs-base kt-text-primary">${item.title}</strong>
             </div>
-            <p style="margin: 0; font-size: 0.83rem; color: #64748b; line-height: 1.45;">
+            <p class="kt-m-0 kt-fs-sm kt-text-muted" style="line-height: 1.45;">
                 ${item.text}
             </p>
         `;
