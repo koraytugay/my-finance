@@ -449,7 +449,7 @@ function renderProjectionChart() {
 
             <!-- Trajectory lines -->
             <path d="${pathInv}" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4 3" />
-            <path d="${pathCons}" fill="none" stroke="#d97706" stroke-width="2" />
+            <path d="${pathCons}" fill="none" stroke="#94a3b8" stroke-width="2" />
             <path d="${pathOpt}" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="3 2" />
             <path d="${pathExp}" fill="none" stroke="#0969da" stroke-width="3" />
 
@@ -457,7 +457,7 @@ function renderProjectionChart() {
             <line id="crosshair-x" x1="0" y1="${padT}" x2="0" y2="${height - padB}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 3" style="display: none; pointer-events: none;" />
             <circle id="dot-exp" r="5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
             <circle id="dot-opt" r="4.2" fill="#16a34a" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
-            <circle id="dot-cons" r="4.2" fill="#d97706" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <circle id="dot-cons" r="4.2" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
             <circle id="dot-inv" r="3.8" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
 
             <!-- Full Tracking Overlay Rect -->

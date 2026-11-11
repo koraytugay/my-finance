@@ -500,13 +500,13 @@ function showHoldingModal(id) {
     // Breakdown segments
     const alloc = holding.allocation || {};
     const categories = [
-        { label: 'US Equities', value: alloc.us || 0, color: '#2563eb' },
-        { label: 'Canadian Equities', value: alloc.canada || 0, color: '#dc2626' },
-        { label: 'International Developed', value: alloc.developed || 0, color: '#059669' },
-        { label: 'Emerging Markets', value: alloc.emerging || 0, color: '#d97706' },
-        { label: 'Fixed Income / Cash', value: alloc.fixedIncome || 0, color: '#64748b' },
-        { label: 'Precious Metals', value: alloc.preciousMetals || 0, color: '#eab308' },
-        { label: 'Cryptocurrency', value: alloc.crypto || 0, color: '#8b5cf6' }
+        { label: 'US Equities', value: alloc.us || 0, color: '#1d4ed8' },
+        { label: 'Canadian Equities', value: alloc.canada || 0, color: '#60a5fa' },
+        { label: 'International Developed', value: alloc.developed || 0, color: '#334155' },
+        { label: 'Emerging Markets', value: alloc.emerging || 0, color: '#94a3b8' },
+        { label: 'Fixed Income / Cash', value: alloc.fixedIncome || 0, color: '#93c5fd' },
+        { label: 'Precious Metals', value: alloc.preciousMetals || 0, color: '#cbd5e1' },
+        { label: 'Cryptocurrency', value: alloc.crypto || 0, color: '#64748b' }
     ].filter(c => c.value > 0);
 
     const breakdownHtml = categories.map(cat => {

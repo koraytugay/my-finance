@@ -742,10 +742,10 @@ function renderCategoryTable(mainData, holdings) {
     let totalVal = 0;
 
     const catColors = {
-        'Stocks': '#2563eb',
-        'Fixed Income': '#16a34a',
-        'Precious Metals': '#eab308',
-        'Crypto': '#8b5cf6'
+        'Stocks': '#1d4ed8',
+        'Fixed Income': '#93c5fd',
+        'Precious Metals': '#cbd5e1',
+        'Crypto': '#64748b'
     };
 
     categories.forEach(item => {
@@ -946,17 +946,17 @@ function renderPerformanceCards(mainData) {
 /* ================= Net Worth Progression SVG Chart ================= */
 
 const MAIN_YEAR_COLORS = {
-    '2026': '#0969da', // Vibrant Blue
-    '2025': '#8250df', // Elegant Purple
-    '2024': '#d97706', // Amber / Gold
-    '2023': '#0891b2', // Teal / Cyan
-    '2027': '#e11d48', // Rose
-    '2028': '#16a34a'  // Emerald
+    '2026': '#1d4ed8',
+    '2025': '#334155',
+    '2024': '#94a3b8',
+    '2023': '#60a5fa',
+    '2027': '#93c5fd',
+    '2028': '#64748b'
 };
 
 function getMainYearColor(year) {
     if (MAIN_YEAR_COLORS[year]) return MAIN_YEAR_COLORS[year];
-    const palette = ['#0969da', '#8250df', '#d97706', '#0891b2', '#e11d48', '#4f46e5', '#059669'];
+    const palette = ['#1d4ed8', '#334155', '#94a3b8', '#60a5fa', '#93c5fd', '#64748b', '#cbd5e1'];
     const num = parseInt(year, 10);
     if (!isNaN(num)) {
         return palette[Math.abs(num) % palette.length];
@@ -1509,8 +1509,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     const lastX = portPoints.length > 0 ? portPoints[portPoints.length - 1].x : (padding.left + plotW);
     const areaPathD = linePathD ? `${linePathD} L ${lastX.toFixed(1)},${padding.top + plotH} L ${firstX.toFixed(1)},${padding.top + plotH} Z` : '';
 
-    const strokeColor = currentMainFilterAths ? '#8250df' : '#0969da';
-    const areaGradColor = currentMainFilterAths ? '#8250df' : '#0969da';
+    const strokeColor = currentMainFilterAths ? '#334155' : '#0969da';
+    const areaGradColor = currentMainFilterAths ? '#334155' : '#0969da';
 
     const hoverPointsHtml = portPoints.map((p, i) => {
         if (currentMainFilterAths) {
@@ -3742,7 +3742,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
     if (Math.abs(avgSpread) > 0.01) {
         const avgY = getY(avgSpread);
         avgLineHtml = `
-            <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#d97706" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.85" />
+            <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.85" />
         `;
     }
 
@@ -3817,7 +3817,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
                 <span class="kt-text-muted kt-fw-semibold">0.0% Parity</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #d97706;"></span>
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #94a3b8;"></span>
                 <span class="kt-text-muted">Average: <strong>${avgStr}</strong></span>
             </div>
         `;
@@ -4018,7 +4018,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
         const compStr = compDiff >= 0
             ? (isPctUnit ? `+${compDiff.toFixed(2)}% vs avg` : `+${typeof formatCurrency === 'function' ? formatCurrency(compDiff, currency) : `$${compDiff.toFixed(2)}`} vs avg`)
             : (isPctUnit ? `${compDiff.toFixed(2)}% vs avg` : `-${typeof formatCurrency === 'function' ? formatCurrency(Math.abs(compDiff), currency) : `$${Math.abs(compDiff).toFixed(2)}`} vs avg`);
-        const compColor = compDiff >= 0 ? '#16a34a' : '#d97706';
+        const compColor = compDiff >= 0 ? '#16a34a' : '#94a3b8';
 
         avgCompHtml = `
             <div class="kt-readout__row kt-mt-0">
@@ -4229,7 +4229,7 @@ function renderAthBarChart() {
 
         avgLineSvg = `
             <g class="ath-avg-line-group" pointer-events="none">
-                <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#d97706" stroke-width="1.8" stroke-dasharray="5 3" />
+                <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="5 3" />
             </g>
         `;
     }

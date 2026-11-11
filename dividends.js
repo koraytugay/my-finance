@@ -547,8 +547,8 @@ function renderTaxBreakdown() {
     document.getElementById('tax-bar-net').style.width = `${takeHomePct}%`;
     document.getElementById('tax-bar-drag').style.width = `${dragPct}%`;
 
-    document.getElementById('bar-label-net').textContent = `■ Real In-Pocket Cashflow: ${formatCurrency(totalNet)} (${takeHomePct.toFixed(1)}%)`;
-    document.getElementById('bar-label-drag').textContent = `■ Estimated CRA Tax Drag: -${formatCurrency(totalTaxDrag)} (${dragPct.toFixed(1)}%)`;
+    document.getElementById('bar-label-net').textContent = `Real In-Pocket Cashflow: ${formatCurrency(totalNet)} (${takeHomePct.toFixed(1)}%)`;
+    document.getElementById('bar-label-drag').textContent = `Estimated CRA Tax Drag: -${formatCurrency(totalTaxDrag)} (${dragPct.toFixed(1)}%)`;
 
     document.getElementById('tax-efficiency-summary').textContent = `Total Portfolio Take-Home: ${takeHomePct.toFixed(1)}%`;
 }

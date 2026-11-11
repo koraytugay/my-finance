@@ -167,7 +167,7 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
     const summaries = typeof computeAnnualSummaries === 'function'
         ? computeAnnualSummaries(history, 'CAD', currentCAD)
         : [];
-    const palette = ['#8250df', '#0969da', '#16a34a', '#d97706', '#dc2626'];
+    const palette = ['#334155', '#1d4ed8', '#64748b', '#60a5fa', '#94a3b8'];
 
     const yearData = summaries.map((s, idx) => {
         const label = s.isCurrentYear ? `${s.year} (YTD - ${s.weeks} wks)` : `${s.year} (${s.weeks} wks)`;
@@ -192,11 +192,11 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
         <div class="kt-card kt-card--padded">
             <div class="kt-split kt-mb-2">
                 <span class="kt-fs-sm kt-fw-heavy kt-text-primary">${yd.label}</span>
-                <span class="kt-fs-xs kt-fw-bold" style="color: ${yd.color}; background: ${yd.color}15; padding: 2px 8px; border-radius: 12px;">
+                <span class="kt-badge kt-badge--pill">
                     ${yd.sign}${yd.changePct.toFixed(1)}%
                 </span>
             </div>
-            <div class="kt-fs-lg kt-fw-heavy kt-mb-1" style="color: ${yd.color};">
+            <div class="kt-fs-lg kt-fw-heavy kt-mb-1">
                 ${yd.sign}${formatCurrency(yd.change, 'CAD')}
             </div>
             <div class="kt-fs-xs kt-text-muted kt-mb-3">
@@ -319,9 +319,9 @@ function renderHistoryDecomposition(startingCAD, savingsCAD, gainsCAD, currentCA
     const saveLbl = document.getElementById('hist-bar-label-savings');
     const gainLbl = document.getElementById('hist-bar-label-gains');
 
-    if (startLbl) startLbl.textContent = `■ Starting Baseline: ${formatCurrency(startingCAD, 'CAD')} (${startingPct.toFixed(1)}%)`;
-    if (saveLbl) saveLbl.textContent = `■ Contributions & Realized: +${formatCurrency(savingsCAD, 'CAD')} (${savingsPct.toFixed(1)}%)`;
-    if (gainLbl) gainLbl.textContent = `■ Current Unrealized Gains: +${formatCurrency(gainsCAD, 'CAD')} (${gainsPct.toFixed(1)}%)`;
+    if (startLbl) startLbl.textContent = `Starting Baseline: ${formatCurrency(startingCAD, 'CAD')} (${startingPct.toFixed(1)}%)`;
+    if (saveLbl) saveLbl.textContent = `Contributions & Realized: +${formatCurrency(savingsCAD, 'CAD')} (${savingsPct.toFixed(1)}%)`;
+    if (gainLbl) gainLbl.textContent = `Current Unrealized Gains: +${formatCurrency(gainsCAD, 'CAD')} (${gainsPct.toFixed(1)}%)`;
 
     const startBar = document.getElementById('hist-bar-starting');
     const saveBar = document.getElementById('hist-bar-savings');

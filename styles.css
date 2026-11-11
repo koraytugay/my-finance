@@ -118,11 +118,11 @@
     border-radius: 5px 5px 0 0;
     transition: height var(--kt-transition);
 }
-.month-col.peak { outline: 2px solid var(--kt-success); outline-offset: 1px; }
+.month-col.peak { outline: 2px solid var(--kt-text); outline-offset: 1px; }
 
 .month-net-part { width: 100%; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); }
-.month-net-part.peak { background: linear-gradient(180deg, #10b981 0%, #059669 100%); }
-.month-tax-part { width: 100%; background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%); }
+.month-net-part.peak { background: #1e3a8a; }
+.month-tax-part { width: 100%; background: #94a3b8; }
 
 .month-label {
     margin-top: var(--kt-space-2);
@@ -266,13 +266,13 @@
 
 /* ================= Allocation bar segment colors (inside .kt-progress) ================= */
 /* Asset-class colors (fixed categorical palette for this app) */
-.alloc-seg-us { background-color: #2563eb; }
-.alloc-seg-canada { background-color: #dc2626; }
-.alloc-seg-developed { background-color: #059669; }
-.alloc-seg-emerging { background-color: #d97706; }
-.alloc-seg-fixed { background-color: #64748b; }
-.alloc-seg-crypto { background-color: #8b5cf6; }
-.alloc-seg-metals { background-color: #eab308; }
+.alloc-seg-us { background-color: #1d4ed8; }
+.alloc-seg-canada { background-color: #60a5fa; }
+.alloc-seg-developed { background-color: #334155; }
+.alloc-seg-emerging { background-color: #94a3b8; }
+.alloc-seg-fixed { background-color: #93c5fd; }
+.alloc-seg-crypto { background-color: #64748b; }
+.alloc-seg-metals { background-color: #cbd5e1; }
 
 /* ================= Charts ================= */
 .chart-container {

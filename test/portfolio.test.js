@@ -1014,9 +1014,9 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
   });
 
   await t.test('getMainYearColor provides distinct colors with fallback', () => {
-    assert.equal(getMainYearColor('2026'), '#0969da');
-    assert.equal(getMainYearColor('2025'), '#8250df');
-    assert.equal(getMainYearColor('2024'), '#d97706');
+    assert.equal(getMainYearColor('2026'), '#1d4ed8');
+    assert.equal(getMainYearColor('2025'), '#334155');
+    assert.equal(getMainYearColor('2024'), '#94a3b8');
     assert.ok(/^#[0-9a-fA-F]{6}$/.test(getMainYearColor('2030')));
   });
 
@@ -1093,8 +1093,8 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
 
     assert.ok(s2025, '2025 series exists');
     assert.ok(s2026, '2026 series exists');
-    assert.equal(s2025.color, '#8250df');
-    assert.equal(s2026.color, '#0969da');
+    assert.equal(s2025.color, '#334155');
+    assert.equal(s2026.color, '#1d4ed8');
 
     // Both series must have Jan 1 anchor point with 0.00% return
     assert.equal(s2025.points[0].isAnchor, true, '2025 must start with Jan 1 anchor');

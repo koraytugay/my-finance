@@ -93,10 +93,10 @@ function renderBreakdowns() {
 
     // 1. Global Equity Geography
     const geoItems = [
-        { label: 'US Equities', value: totals.us, color: '#2563eb' },
-        { label: 'Canadian Equities', value: totals.canada, color: '#dc2626' },
-        { label: 'International Developed', value: totals.developed, color: '#059669' },
-        { label: 'Emerging Markets', value: totals.emerging, color: '#d97706' }
+        { label: 'US Equities', value: totals.us, color: '#1d4ed8' },
+        { label: 'Canadian Equities', value: totals.canada, color: '#60a5fa' },
+        { label: 'International Developed', value: totals.developed, color: '#334155' },
+        { label: 'Emerging Markets', value: totals.emerging, color: '#94a3b8' }
     ];
 
     document.getElementById('geo-breakdown-list').innerHTML = geoItems.map(item => {
@@ -118,10 +118,10 @@ function renderBreakdowns() {
 
     // 2. Asset Class Allocation
     const classItems = [
-        { label: 'Equities (Stocks)', value: totalEquities, color: '#2563eb' },
-        { label: 'Fixed Income & Cash', value: totals.fixed, color: '#64748b' },
-        { label: 'Precious Metals', value: totals.metals, color: '#eab308' },
-        { label: 'Cryptocurrency', value: totals.crypto, color: '#8b5cf6' }
+        { label: 'Equities (Stocks)', value: totalEquities, color: '#1d4ed8' },
+        { label: 'Fixed Income & Cash', value: totals.fixed, color: '#93c5fd' },
+        { label: 'Precious Metals', value: totals.metals, color: '#cbd5e1' },
+        { label: 'Cryptocurrency', value: totals.crypto, color: '#64748b' }
     ];
 
     document.getElementById('class-breakdown-list').innerHTML = classItems.map(item => {
@@ -146,11 +146,11 @@ function renderBreakdowns() {
     });
 
     const strategyColors = {
-        'Factor': '#7c3aed',
-        'Broad Market': '#0284c7',
-        'Fixed Income': '#475569',
-        'Precious Metals': '#ca8a04',
-        'Crypto': '#9333ea'
+        'Factor': '#1d4ed8',
+        'Broad Market': '#60a5fa',
+        'Fixed Income': '#93c5fd',
+        'Precious Metals': '#cbd5e1',
+        'Crypto': '#64748b'
     };
 
     const strategyEntries = Object.entries(strategyTotals).sort((a, b) => b[1] - a[1]);

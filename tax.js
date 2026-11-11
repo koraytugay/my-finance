@@ -5,13 +5,13 @@
 let allHoldings = [];
 
 const ASSET_CLASSES = [
-    { key: 'us', label: 'US Equity', color: '#0969da' },
-    { key: 'canada', label: 'Canadian Equity', color: '#cf222e' },
-    { key: 'developed', label: 'Developed Markets', color: '#1a7f37' },
-    { key: 'emerging', label: 'Emerging Markets', color: '#9a6700' },
-    { key: 'fixedIncome', label: 'Fixed Income & Cash', color: '#8250df' },
-    { key: 'preciousMetals', label: 'Precious Metals', color: '#bf8700' },
-    { key: 'crypto', label: 'Crypto', color: '#d97706' }
+    { key: 'us', label: 'US Equity', color: '#1d4ed8' },
+    { key: 'canada', label: 'Canadian Equity', color: '#60a5fa' },
+    { key: 'developed', label: 'Developed Markets', color: '#334155' },
+    { key: 'emerging', label: 'Emerging Markets', color: '#94a3b8' },
+    { key: 'fixedIncome', label: 'Fixed Income & Cash', color: '#93c5fd' },
+    { key: 'preciousMetals', label: 'Precious Metals', color: '#cbd5e1' },
+    { key: 'crypto', label: 'Crypto', color: '#64748b' }
 ];
 
 async function initTax() {
@@ -167,7 +167,7 @@ function renderTaxMatrix() {
             badgeColor = '#dc2626';
             badgeBg = '#fee2e2';
         } else if (shelteredPct < 70) {
-            badgeColor = '#d97706';
+            badgeColor = '#94a3b8';
             badgeBg = '#fef3c7';
         }
 

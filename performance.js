@@ -313,7 +313,7 @@ function renderAthStreaksSection(history) {
     }
 
     function renderStreakItems(streaks, currency) {
-        const badgeBg = currency === 'USD' ? '#8250df' : '#0969da';
+        const badgeBg = currency === 'USD' ? '#334155' : '#0969da';
 
         return streaks.map((s, idx) => {
             const dateStr = formatStreakDates(s.startDate, s.endDate);
@@ -569,10 +569,10 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
     // 3. Benchmark Cards
     const bData = benchmarksData?.benchmarks || {};
     const benchmarkItems = [
-        { id: 'XEQT', key: 'xeqt', defaultCategory: '100% All-Equity passive blend', defaultRet: 43.81, defaultDd: -15.3, color: '#16a34a' },
-        { id: 'XBAL', key: 'xbal', defaultCategory: '60% Stocks / 40% Bonds benchmark', defaultRet: 22.30, defaultDd: -9.9, color: '#8250df' },
-        { id: 'VFV', key: 'vfv', defaultCategory: '100% US Mega-cap equity (CAD)', defaultRet: 43.11, defaultDd: -19.3, color: '#d97706' },
-        { id: 'XCB', key: 'xcb', defaultCategory: 'Canadian corporate bond index', defaultRet: -2.05, defaultDd: -4.9, color: '#64748b' }
+        { id: 'XEQT', key: 'xeqt', defaultCategory: '100% All-Equity passive blend', defaultRet: 43.81, defaultDd: -15.3, color: '#334155' },
+        { id: 'XBAL', key: 'xbal', defaultCategory: '60% Stocks / 40% Bonds benchmark', defaultRet: 22.30, defaultDd: -9.9, color: '#94a3b8' },
+        { id: 'VFV', key: 'vfv', defaultCategory: '100% US Mega-cap equity (CAD)', defaultRet: 43.11, defaultDd: -19.3, color: '#60a5fa' },
+        { id: 'XCB', key: 'xcb', defaultCategory: 'Canadian corporate bond index', defaultRet: -2.05, defaultDd: -4.9, color: '#cbd5e1' }
     ];
 
     benchmarkItems.forEach(item => {
@@ -586,7 +586,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         const sign = ret >= 0 ? '+' : '';
         if (retEl) {
             retEl.textContent = `${sign}${ret.toFixed(1)}%`;
-            retEl.style.color = ret >= 0 ? item.color : '#cf222e';
+            retEl.style.color = ret >= 0 ? '#16a34a' : '#cf222e';
         }
         if (subEl) {
             if (data.startPrice && data.currentPrice) {
@@ -604,11 +604,11 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
     const barsContainer = document.getElementById('bench-bars-container');
     if (barsContainer) {
         const series = [
-            { label: 'My Portfolio (Total Growth)', val: growthPct, color: '#0969da', isPortfolio: true },
-            { label: 'S&P 500 CAD (VFV.TO)', val: (bData.VFV?.returnPct !== undefined ? bData.VFV.returnPct : 43.11), color: '#d97706' },
-            { label: 'Global Equity (XEQT.TO)', val: (bData.XEQT?.returnPct !== undefined ? bData.XEQT.returnPct : 43.81), color: '#16a34a' },
-            { label: 'Balanced 60/40 (XBAL.TO)', val: (bData.XBAL?.returnPct !== undefined ? bData.XBAL.returnPct : 22.30), color: '#8250df' },
-            { label: 'CDN Corp Bonds (XCB.TO)', val: (bData.XCB?.returnPct !== undefined ? bData.XCB.returnPct : -2.05), color: '#64748b' }
+            { label: 'My Portfolio (Total Growth)', val: growthPct, color: '#1d4ed8', isPortfolio: true },
+            { label: 'S&P 500 CAD (VFV.TO)', val: (bData.VFV?.returnPct !== undefined ? bData.VFV.returnPct : 43.11), color: '#60a5fa' },
+            { label: 'Global Equity (XEQT.TO)', val: (bData.XEQT?.returnPct !== undefined ? bData.XEQT.returnPct : 43.81), color: '#334155' },
+            { label: 'Balanced 60/40 (XBAL.TO)', val: (bData.XBAL?.returnPct !== undefined ? bData.XBAL.returnPct : 22.30), color: '#94a3b8' },
+            { label: 'CDN Corp Bonds (XCB.TO)', val: (bData.XCB?.returnPct !== undefined ? bData.XCB.returnPct : -2.05), color: '#cbd5e1' }
         ];
 
         const maxVal = Math.max(...series.map(s => Math.max(0, s.val)), 1);
@@ -620,7 +620,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
                 <div>
                     <div class="kt-split kt-fs-xs kt-mb-1" style="font-weight: ${s.isPortfolio ? '800' : '700'};">
                         <span style="color: ${s.isPortfolio ? '#0969da' : '#1f2328'};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
-                        <span class="kt-fw-heavy" style="color: ${s.color};">${valSign}${s.val.toFixed(1)}%</span>
+                        <span class="kt-fw-heavy" style="color: ${s.val >= 0 ? '#16a34a' : '#cf222e'};">${valSign}${s.val.toFixed(1)}%</span>
                     </div>
                     <div class="kt-progress" style="--kt-progress-h: 10px;">
                         <div class="kt-progress__bar" style="width: ${widthPct.toFixed(1)}%; --kt-progress-color: ${s.color};"></div>
@@ -745,8 +745,8 @@ function renderPurchasingPower() {
         barReal.style.width = `${realShare.toFixed(1)}%`;
         barDrag.style.width = `${dragShare.toFixed(1)}%`;
 
-        if (lblReal) lblReal.textContent = `■ Real Purchasing Power Expansion: +${formatCurrency(pp.realGain, 'CAD')} (${pp.realGainPct.toFixed(1)}%)`;
-        if (lblDrag) lblDrag.textContent = `■ Cost-of-Living Drag: -${formatCurrency(pp.inflationDrag, 'CAD')} (${((pp.deflator - 1) * 100).toFixed(1)}% inflation)`;
+        if (lblReal) lblReal.textContent = `Real Purchasing Power Expansion: +${formatCurrency(pp.realGain, 'CAD')} (${pp.realGainPct.toFixed(1)}%)`;
+        if (lblDrag) lblDrag.textContent = `Cost-of-Living Drag: -${formatCurrency(pp.inflationDrag, 'CAD')} (${((pp.deflator - 1) * 100).toFixed(1)}% inflation)`;
     }
 
     // Insight Note
@@ -805,9 +805,9 @@ function renderWealthDecomposition(startingCAD, savingsCAD, gainsCAD, currentCAD
         barSav.style.width = `${Math.max(2, savPct)}%`;
         barGain.style.width = `${Math.max(2, gainPct)}%`;
 
-        document.getElementById('wealth-bar-label-starting').textContent = `■ Starting Baseline: ${formatCurrency(startingCAD, 'CAD')} (${startPct.toFixed(1)}%)`;
-        document.getElementById('wealth-bar-label-savings').textContent = `■ Contributions & Realized: +${formatCurrency(savingsCAD, 'CAD')} (${savPct.toFixed(1)}%)`;
-        document.getElementById('wealth-bar-label-gains').textContent = `■ Current Unrealized Gains: +${formatCurrency(gainsCAD, 'CAD')} (${gainPct.toFixed(1)}%)`;
+        document.getElementById('wealth-bar-label-starting').textContent = `Starting Baseline: ${formatCurrency(startingCAD, 'CAD')} (${startPct.toFixed(1)}%)`;
+        document.getElementById('wealth-bar-label-savings').textContent = `Contributions & Realized: +${formatCurrency(savingsCAD, 'CAD')} (${savPct.toFixed(1)}%)`;
+        document.getElementById('wealth-bar-label-gains').textContent = `Current Unrealized Gains: +${formatCurrency(gainsCAD, 'CAD')} (${gainPct.toFixed(1)}%)`;
     }
 }
 
@@ -2437,7 +2437,7 @@ function renderCrisisStressTest() {
             desc: 'Global equity plunge with safe-haven flight into bonds and gold.',
             shocks: { us: -0.50, can: -0.45, intl: -0.52, em: -0.54, fixed: +0.08, gold: +0.25, crypto: -0.65 },
             recovery: '38 months to recover peak',
-            color: '#dc2626'
+            color: '#cf222e'
         },
         {
             title: '2020 COVID Flash Crash',
@@ -2445,7 +2445,7 @@ function renderCrisisStressTest() {
             desc: 'Fastest 30% drop in history followed by rapid stimulus rebound.',
             shocks: { us: -0.34, can: -0.37, intl: -0.32, em: -0.31, fixed: +0.03, gold: +0.04, crypto: -0.45 },
             recovery: '6 months to recover peak',
-            color: '#ea580c'
+            color: '#cf222e'
         },
         {
             title: '2022 Inflation & Rate Hike Shock',
@@ -2453,7 +2453,7 @@ function renderCrisisStressTest() {
             desc: 'Simultaneous equity correction and rare bond duration drawdown.',
             shocks: { us: -0.19, can: -0.12, intl: -0.16, em: -0.22, fixed: -0.12, gold: -0.01, crypto: -0.65 },
             recovery: '14 months to recover peak',
-            color: '#d97706'
+            color: '#cf222e'
         },
         {
             title: '2000 Dot-Com Tech Bubble',
@@ -2461,7 +2461,7 @@ function renderCrisisStressTest() {
             desc: 'Severe tech and growth repricing; strong resilience in value and bonds.',
             shocks: { us: -0.45, can: -0.28, intl: -0.38, em: -0.35, fixed: +0.15, gold: +0.12, crypto: -0.50 },
             recovery: '48 months to recover peak',
-            color: '#7c3aed'
+            color: '#cf222e'
         }
     ];
 
