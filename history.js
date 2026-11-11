@@ -190,26 +190,26 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
 
     grid.innerHTML = yearData.map(yd => `
         <div class="kt-card kt-card--padded">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 0.85rem; font-weight: 800; color: #1f2328;">${yd.label}</span>
-                <span style="font-size: 0.75rem; font-weight: 700; color: ${yd.color}; background: ${yd.color}15; padding: 2px 8px; border-radius: 12px;">
+            <div class="kt-split kt-mb-2">
+                <span class="kt-fs-sm kt-fw-heavy kt-text-primary">${yd.label}</span>
+                <span class="kt-fs-xs kt-fw-bold" style="color: ${yd.color}; background: ${yd.color}15; padding: 2px 8px; border-radius: 12px;">
                     ${yd.sign}${yd.changePct.toFixed(1)}%
                 </span>
             </div>
-            <div style="font-size: 1.35rem; font-weight: 800; color: ${yd.color}; margin-bottom: 4px;">
+            <div class="kt-fs-lg kt-fw-heavy kt-mb-1" style="color: ${yd.color};">
                 ${yd.sign}${formatCurrency(yd.change, 'CAD')}
             </div>
-            <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 12px;">
+            <div class="kt-fs-xs kt-text-muted kt-mb-3">
                 Portfolio grew to ${formatCurrency(yd.endVal, 'CAD')}
             </div>
-            <div style="border-top: 1px solid var(--kt-divider); padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.78rem;">
+            <div class="kt-split kt-fs-xs" style="border-top: 1px solid var(--kt-divider); padding-top: 10px;">
                 <div>
-                    <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Weekly Pace</div>
-                    <div style="font-weight: 700; color: #1f2328;">+${formatCurrency(yd.weeklyVel, 'CAD')}/wk</div>
+                    <div class="kt-eyebrow kt-text-muted">Weekly Pace</div>
+                    <div class="kt-fw-bold kt-text-primary">+${formatCurrency(yd.weeklyVel, 'CAD')}/wk</div>
                 </div>
                 <div class="kt-align-right">
-                    <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Monthly Pace</div>
-                    <div style="font-weight: 700; color: #1f2328;">+${formatCurrency(yd.monthlyVel, 'CAD')}/mo</div>
+                    <div class="kt-eyebrow kt-text-muted">Monthly Pace</div>
+                    <div class="kt-fw-bold kt-text-primary">+${formatCurrency(yd.monthlyVel, 'CAD')}/mo</div>
                 </div>
             </div>
         </div>
@@ -562,7 +562,7 @@ function renderChart(records, currency = 'CAD') {
                     <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
                     <strong class="kt-text-success">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
                 </div>
-                <div style="font-size: 0.75rem; font-weight: 700; color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
+                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
                     Spread: ${spreadSign}${formatCurrency(lastItem.spreadVal, currency)} (${spreadSign}${lastItem.spreadPct.toFixed(2)}%)
                 </div>
             `;
@@ -623,15 +623,15 @@ function renderChart(records, currency = 'CAD') {
 
             xeqtSection = `
                 <div class="kt-readout__section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
-                        <span style="color: #16a34a; font-weight: 700;">🟢 XEQT Benchmark:</span>
+                    <div class="kt-split kt-mb-0">
+                        <span class="kt-text-success kt-fw-bold">🟢 XEQT Benchmark:</span>
                         <strong class="kt-text-success">${xeqtValStr}</strong>
                     </div>
                     <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
                         <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
                     </div>
-                    <div class="kt-readout__row" style="margin-top: 2px; font-weight: 700; color: ${spreadColor};">
+                    <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                         <span>Spread:</span>
                         <span>${spreadValStr} (${spreadPctStr})</span>
                     </div>
@@ -658,7 +658,7 @@ function renderChart(records, currency = 'CAD') {
             <div class="kt-readout__value">
                 ${totalVal}
             </div>
-            <div class="kt-readout__sub" style="color: ${changeColor}; font-weight: 600;">
+            <div class="kt-readout__sub kt-fw-semibold" style="color: ${changeColor};">
                 Weekly: ${weeklyChangeStr}
             </div>
             ${xeqtSection}

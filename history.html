@@ -85,17 +85,17 @@
             </div>
 
             <!-- Capital & Wealth Decomposition Banner -->
-            <div class="kt-card kt-card--padded" style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
-                    <div style="font-weight: 700; font-size: 0.95rem; color: #1f2328; display: flex; align-items: center; gap: 6px;">
+            <div class="kt-card kt-card--padded kt-mb-5">
+                <div class="kt-split kt-mb-2">
+                    <div class="kt-cluster kt-fw-bold kt-fs-base kt-text-primary">
                         <span>💎 Net Worth Growth &amp; Baseline</span>
-                        <span style="font-size: 0.75rem; font-weight: 500; color: #64748b;">(Starting Baseline + Contributions &amp; Realized + Current Unrealized Gains)</span>
+                        <span class="kt-fs-xs kt-fw-medium kt-text-muted">(Starting Baseline + Contributions &amp; Realized + Current Unrealized Gains)</span>
                     </div>
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="hist-decomp-summary">
+                    <span class="kt-fs-sm kt-fw-bold kt-text-success" id="hist-decomp-summary">
                         Current Unrealized Gains: +$0.00
                     </span>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: 600; margin-bottom: 6px; color: #475569; flex-wrap: wrap; gap: 6px;">
+                <div class="kt-split kt-fs-xs kt-fw-semibold kt-mb-1 kt-text-secondary">
                     <span class="kt-text-accent" id="hist-bar-label-starting">■ Starting Baseline: $0.00 (0.0%)</span>
                     <span id="hist-bar-label-savings" style="color: #8250df;">■ Contributions &amp; Realized: +$0.00 (0.0%)</span>
                     <span class="kt-text-success" id="hist-bar-label-gains">■ Current Unrealized Gains: +$0.00 (0.0%)</span>
@@ -137,13 +137,13 @@
 
             <!-- Visual Chart Container -->
             <div class="kt-card kt-card--padded chart-wrapper">
-                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="kt-section-title kt-split">
                     <div class="kt-cluster">
                         <h2 id="chart-title">Net Worth Progression</h2>
                         <span id="chart-subtitle" class="kt-badge kt-badge--pill kt-ml-auto">-</span>
                     </div>
                     <div>
-                        <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
                             <input type="checkbox" id="hist-overlay-xeqt" onchange="toggleHistXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             Overlay XEQT
                         </label>
@@ -151,12 +151,12 @@
                 </div>
                 <div class="kt-chart-layout">
                     <div class="kt-chart-layout__plot">
-                        <div class="chart-container" id="chart-container" style="margin: 0;">
+                        <div class="chart-container kt-m-0" id="chart-container">
                             <!-- Dynamic SVG chart injected by history.js -->
                             <div id="chart-svg-box"></div>
                             <div id="chart-tooltip" class="chart-tooltip"></div>
                         </div>
-                        <div class="kt-legend" id="chart-legend" style="margin-top: 10px;">
+                        <div class="kt-legend kt-mt-2" id="chart-legend">
                             <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
                         </div>
                     </div>
@@ -172,7 +172,7 @@
                     <h3 class="kt-card__title kt-m-0">
                         ⚡ Savings Velocity &amp; Annual Wealth Inflows
                     </h3>
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="velocity-overall-pill">
+                    <span class="kt-fs-sm kt-fw-bold kt-text-accent" id="velocity-overall-pill">
                         Average Velocity: +$3,030 / week ($13,120 / month)
                     </span>
                 </div>
@@ -191,7 +191,7 @@
                     <h3 class="kt-card__title kt-m-0">
                         🛡️ Historical Pullback &amp; Downside Resilience
                     </h3>
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #16a34a;" id="resilience-ath-pill">
+                    <span class="kt-fs-sm kt-fw-bold" style="color: #16a34a;" id="resilience-ath-pill">
                         🟢 Sitting at All-Time Peak (0.00% Drawdown)
                     </span>
                 </div>
@@ -201,23 +201,23 @@
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #16a34a; text-transform: uppercase;">Current Drawdown</div>
-                        <div id="resilience-current-dd" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 4px 0;">0.00%</div>
+                        <div class="kt-eyebrow kt-text-success">Current Drawdown</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="resilience-current-dd" style="color: #16a34a;">0.00%</div>
                         <div class="kt-fs-xs kt-text-muted" id="resilience-current-dd-sub">At all-time high ($680,041 CAD)</div>
                     </div>
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #cf222e; text-transform: uppercase;">Deepest Pullback (Max DD)</div>
-                        <div id="resilience-max-dd" style="font-size: 1.25rem; font-weight: 800; color: #cf222e; margin: 4px 0;">-7.62%</div>
+                        <div class="kt-eyebrow kt-text-danger">Deepest Pullback (Max DD)</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-text-danger kt-mt-1 kt-mb-1" id="resilience-max-dd">-7.62%</div>
                         <div class="kt-fs-xs kt-text-muted" id="resilience-max-dd-sub">-$30,694 on Apr 4, 2025</div>
                     </div>
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #0969da; text-transform: uppercase;">Longest Pullback Duration</div>
+                        <div class="kt-eyebrow kt-text-accent">Longest Pullback Duration</div>
                         <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="resilience-recovery-wks">6 weeks</div>
                         <div class="kt-fs-xs kt-text-muted">Fast recovery to fresh peak</div>
                     </div>
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #8250df; text-transform: uppercase;">Asset Buffer Efficiency</div>
-                        <div style="font-size: 1.25rem; font-weight: 800; color: #8250df; margin: 4px 0;">High Resilience</div>
+                        <div class="kt-eyebrow" style="color: #8250df;">Asset Buffer Efficiency</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" style="color: #8250df;">High Resilience</div>
                         <div class="kt-fs-xs kt-text-muted">Fixed income &amp; gold dampened dips</div>
                     </div>
                 </div>
