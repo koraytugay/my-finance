@@ -6,87 +6,6 @@
     <title>My Finance - FIRE &amp; Wealth Projections</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
     <link rel="stylesheet" href="styles.css?v=4.0">
-    <style>
-        .param-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-        .param-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .param-item label {
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #475569;
-            display: flex;
-            justify-content: space-between;
-        }
-        .param-item input[type="range"] {
-            width: 100%;
-            accent-color: #0969da;
-            cursor: pointer;
-        }
-        .param-item input[type="number"],
-        .param-item input[type="text"] {
-            width: 100%;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            border: 1px solid #d0d7de;
-            border-radius: 6px;
-            box-sizing: border-box;
-        }
-        .milestone-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
-            margin-bottom: 24px;
-        }
-        .milestone-card {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 16px 18px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            position: relative;
-            overflow: hidden;
-        }
-        .milestone-card.reached {
-            border-color: #86efac;
-            background: #f0fdf4;
-        }
-        .milestone-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        .badge-pending { background: #e0f2fe; color: #0369a1; }
-        .badge-reached { background: #dcfce7; color: #15803d; }
-
-        .progress-bar-wrap {
-            height: 6px;
-            background: #e2e8f0;
-            border-radius: 3px;
-            overflow: hidden;
-            margin: 10px 0 6px 0;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            background: #0969da;
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        .progress-bar-fill.complete {
-            background: #16a34a;
-        }
-    </style>
 </head>
 <body>
     <div class="kt-container">
@@ -170,59 +89,59 @@
                     </div>
                 </div>
 
-                <div class="param-grid">
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-starting-nw">
+                <div class="kt-grid kt-grid--fit kt-mb-4" style="--kt-grid-min: 220px; --kt-grid-gap: 16px;">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-starting-nw">
                             <span>Starting Portfolio ($ CAD)</span>
                         </label>
-                        <input class="kt-input" type="number" id="input-starting-nw" step="1000" oninput="runProjections()">
+                        <input class="kt-input kt-input--block" type="number" id="input-starting-nw" step="1000" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-monthly-save">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-monthly-save">
                             <span>Monthly Contribution ($ CAD/mo)</span>
                             <span class="kt-text-accent" id="label-monthly-save">$2,500</span>
                         </label>
-                        <input type="range" id="input-monthly-save" min="0" max="15000" step="100" value="2500" oninput="runProjections()">
+                        <input class="kt-range" type="range" id="input-monthly-save" min="0" max="15000" step="100" value="2500" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-return-rate">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-return-rate">
                             <span>Expected Annual Return (%)</span>
                             <span class="kt-text-success" id="label-return-rate">7.0%</span>
                         </label>
-                        <input type="range" id="input-return-rate" min="2.0" max="14.0" step="0.25" value="7.0" oninput="runProjections()">
+                        <input class="kt-range" type="range" id="input-return-rate" min="2.0" max="14.0" step="0.25" value="7.0" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-inflation-rate">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-inflation-rate">
                             <span>Assumed Inflation Rate (%)</span>
                             <span id="label-inflation-rate" style="color: #d97706;">2.5%</span>
                         </label>
-                        <input type="range" id="input-inflation-rate" min="0.0" max="6.0" step="0.25" value="2.5" oninput="runProjections()">
+                        <input class="kt-range" type="range" id="input-inflation-rate" min="0.0" max="6.0" step="0.25" value="2.5" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-swr-rate">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-swr-rate">
                             <span>Safe Withdrawal Rate (SWR %)</span>
                             <span id="label-swr-rate" style="color: #8250df;">4.0%</span>
                         </label>
-                        <input type="range" id="input-swr-rate" min="2.5" max="5.5" step="0.1" value="4.0" oninput="runProjections()">
+                        <input class="kt-range" type="range" id="input-swr-rate" min="2.5" max="5.5" step="0.1" value="4.0" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-target-spend">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-target-spend">
                             <span>Target Annual Spend ($ CAD/yr)</span>
                         </label>
-                        <input class="kt-input" type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
+                        <input class="kt-input kt-input--block" type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
                     </div>
 
-                    <div class="param-item">
-                        <label class="kt-field__label" for="input-horizon-years">
+                    <div class="kt-field">
+                        <label class="kt-field__label kt-split" for="input-horizon-years">
                             <span>Projection Horizon</span>
                             <span id="label-horizon-years" style="color: #6366f1;">20 Years</span>
                         </label>
-                        <input type="range" id="input-horizon-years" min="5" max="20" step="1" value="20" oninput="runProjections()">
+                        <input class="kt-range" type="range" id="input-horizon-years" min="5" max="20" step="1" value="20" oninput="runProjections()">
                     </div>
                 </div>
             </div>
@@ -235,7 +154,7 @@
                 <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 16px 0;">
                     Projected timeline to hit major financial markers based on your current savings and growth pace.
                 </p>
-                <div class="milestone-grid" id="milestones-container">
+                <div class="kt-grid kt-grid--fit kt-mb-6" id="milestones-container" style="--kt-grid-min: 200px; --kt-grid-gap: 14px;">
                     <!-- Populated via JS -->
                 </div>
             </div>

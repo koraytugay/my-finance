@@ -540,7 +540,7 @@ function showHoldingModal(id) {
             <div style="font-size: 0.95rem; color: #64748b; margin-top: 2px;">${escapeHtml(holding.name)}</div>
         </div>
 
-        <div class="kt-grid kt-mb-5" style="--kt-grid-min: 130px; --kt-grid-gap: 10px;">
+        <div class="kt-grid kt-grid--fit kt-mb-5" style="--kt-grid-min: 130px; --kt-grid-gap: 10px;">
             <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Market Value</span>
                 <span class="kt-stat__value">${formatCurrency(holding.sum)}</span>

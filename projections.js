@@ -296,7 +296,7 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
         }
 
         const card = document.createElement('div');
-        card.className = `milestone-card ${reached ? 'reached' : ''}`;
+        card.className = `kt-card kt-card--padded milestone-card ${reached ? 'is-reached' : ''}`;
 
         const progressPct = Math.min(100, Math.max(0, (startingNW / m.target) * 100));
 
@@ -304,30 +304,30 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
         let timeDesc = '';
 
         if (reached) {
-            statusBadge = '<span class="milestone-badge badge-reached">Achieved</span>';
-            timeDesc = `<div style="font-size: 0.85rem; font-weight: 700; color: #166534; margin-top: 6px;">Passed (+${formatCurrency(startingNW - m.target)})</div>`;
+            statusBadge = '<span class="kt-badge kt-badge--soft-success">Achieved</span>';
+            timeDesc = `<div class="kt-fs-sm kt-fw-bold kt-text-success kt-mt-2">Passed (+${formatCurrency(startingNW - m.target)})</div>`;
         } else if (months >= 600) {
-            statusBadge = '<span class="milestone-badge badge-pending">Long-term</span>';
-            timeDesc = `<div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">&gt; 50 years</div>`;
+            statusBadge = '<span class="kt-badge kt-badge--soft-info">Long-term</span>';
+            timeDesc = `<div class="kt-fs-sm kt-fw-bold kt-text-muted kt-mt-2">&gt; 50 years</div>`;
         } else {
-            statusBadge = '<span class="milestone-badge badge-pending">In Progress</span>';
+            statusBadge = '<span class="kt-badge kt-badge--soft-info">In Progress</span>';
             timeDesc = `
-                <div style="font-size: 0.88rem; font-weight: 800; color: #0969da; margin-top: 4px;">
-                    ${monthYearStr} <span style="font-size: 0.78rem; font-weight: 600; color: #64748b;">(${yearsRem} yrs / ${months} mos)</span>
+                <div class="kt-fs-sm kt-fw-heavy kt-text-accent kt-mt-1">
+                    ${monthYearStr} <span class="kt-fs-xs kt-fw-semibold kt-text-muted">(${yearsRem} yrs / ${months} mos)</span>
                 </div>
             `;
         }
 
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="font-size: 0.85rem; font-weight: 700; color: #475569;">${escapeHtml(m.label)}</div>
+            <div class="kt-split">
+                <div class="kt-fs-sm kt-fw-bold kt-text-secondary">${escapeHtml(m.label)}</div>
                 ${statusBadge}
             </div>
             ${timeDesc}
-            <div class="progress-bar-wrap">
-                <div class="progress-bar-fill ${reached ? 'complete' : ''}" style="width: ${progressPct}%;"></div>
+            <div class="kt-progress kt-mt-3 kt-mb-2" style="--kt-progress-h: 6px;">
+                <div class="kt-progress__bar ${reached ? 'kt-progress__bar--success' : ''}" style="width: ${progressPct}%;"></div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b;">
+            <div class="kt-split kt-fs-xs kt-text-muted">
                 <span>${progressPct.toFixed(1)}% funded</span>
                 <span>${reached ? '$0 left' : `${formatCurrency(m.target - startingNW)} left`}</span>
             </div>

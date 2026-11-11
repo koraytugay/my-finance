@@ -83,6 +83,12 @@
 }
 .group-total-row td { padding: 12px 14px; color: var(--kt-success-text); }
 
+/* ================= Projections: reached milestone ================= */
+.milestone-card.is-reached {
+    background: var(--kt-success-soft);
+    border-color: color-mix(in srgb, var(--kt-success) 40%, transparent);
+}
+
 /* ================= Monthly returns heatmap ================= */
 #heatmap-table {
     border-collapse: separate;
