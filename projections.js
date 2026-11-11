@@ -312,7 +312,7 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
         } else {
             statusBadge = '<span class="kt-badge kt-badge--soft-info">In Progress</span>';
             timeDesc = `
-                <div class="kt-fs-sm kt-fw-heavy kt-text-accent kt-mt-1">
+                <div class="kt-fs-sm kt-fw-heavy kt-mt-1">
                     ${monthYearStr} <span class="kt-fs-xs kt-fw-semibold kt-text-muted">(${yearsRem} yrs / ${months} mos)</span>
                 </div>
             `;
@@ -325,7 +325,7 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
             </div>
             ${timeDesc}
             <div class="kt-progress kt-mt-3 kt-mb-2" style="--kt-progress-h: 6px;">
-                <div class="kt-progress__bar ${reached ? 'kt-progress__bar--success' : ''}" style="width: ${progressPct}%;"></div>
+                <div class="kt-progress__bar ${reached ?'kt-progress__bar--success' : ''}" style="width: ${progressPct}%;"></div>
             </div>
             <div class="kt-split kt-fs-xs kt-text-muted">
                 <span>${progressPct.toFixed(1)}% funded</span>
@@ -351,14 +351,14 @@ function renderTable(tableData, highlightYear = null) {
             tr.style.background = '#f0f9ff';
         }
         tr.innerHTML = `
-            <td class="kt-fw-bold">Year ${row.year}${isTarget ? ' <span class="kt-fs-2xs kt-text-accent kt-fw-heavy" style="background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
+            <td class="kt-fw-bold">Year ${row.year}${isTarget ? ' <span class="kt-fs-2xs kt-fw-heavy" style="background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
             <td class="kt-text-muted">${row.timeline}</td>
             <td class="kt-align-right">${formatCurrency(row.startBalance)}</td>
-            <td class="kt-align-right kt-text-accent">+${formatCurrency(row.annualContribution)}</td>
+            <td class="kt-align-right">+${formatCurrency(row.annualContribution)}</td>
             <td class="kt-align-right kt-text-success kt-fw-semibold">+${formatCurrency(row.growth)}</td>
             <td class="kt-align-right kt-fw-heavy">${formatCurrency(row.endBalance)}</td>
             <td class="kt-align-right kt-fw-bold kt-text-success">${formatCurrency(row.safeAnnualSpend)}</td>
-            <td class="kt-align-right kt-fw-semibold kt-text-accent">${formatCurrency(row.safeMonthlySpend)}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(row.safeMonthlySpend)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -495,7 +495,7 @@ function buildProjectionCardHtml(point, isHover = false) {
     if (isHover) {
         badgeHtml = `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`;
     } else if (point.year === horizonYears) {
-        badgeHtml = `<span class="kt-badge" style="background: #ede9fe; color: #6d28d9;">TARGET (YR ${point.year})</span>`;
+        badgeHtml = `<span class="kt-badge" style="background: #ede9fe; ">TARGET (YR ${point.year})</span>`;
     } else {
         badgeHtml = `<span class="kt-badge">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
     }
@@ -505,7 +505,7 @@ function buildProjectionCardHtml(point, isHover = false) {
             <span class="kt-readout__title">Year ${point.year} &bull; ${point.timelineYear}</span>
             ${badgeHtml}
         </div>
-        <div class="kt-readout__value kt-text-accent">
+        <div class="kt-readout__value">
             ${formatCurrency(point.expected)}
         </div>
         <div class="kt-readout__sub kt-text-muted">
@@ -518,11 +518,11 @@ function buildProjectionCardHtml(point, isHover = false) {
                 <strong>${formatCurrency(point.optimistic)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span class="kt-text-accent kt-fw-semibold">● Expected:</span>
+                <span class="kt-fw-semibold">● Expected:</span>
                 <strong>${formatCurrency(point.expected)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span class="kt-text-warning kt-fw-semibold">● Conservative (-2%):</span>
+                <span class="kt-fw-semibold">● Conservative (-2%):</span>
                 <strong>${formatCurrency(point.conservative)}</strong>
             </div>
             <div class="kt-readout__row">
@@ -538,7 +538,7 @@ function buildProjectionCardHtml(point, isHover = false) {
             </div>
             <div class="kt-readout__row">
                 <span>Safe Monthly Spend:</span>
-                <strong class="kt-text-accent">${formatCurrency(monthlySWR)} / mo</strong>
+                <strong>${formatCurrency(monthlySWR)} / mo</strong>
             </div>
         </div>
         <div class="kt-readout__footer">

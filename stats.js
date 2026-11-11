@@ -87,7 +87,7 @@ function renderTopHoldings() {
         return `
             <div class="kt-stat kt-stat--inset">
                 <div class="kt-split" style="width: 100%;">
-                    <span class="kt-fs-md kt-fw-heavy kt-text-accent">${escapeHtml(h.ticker)}</span>
+                    <span class="kt-fs-md kt-fw-heavy">${escapeHtml(h.ticker)}</span>
                     <span class="kt-badge kt-badge--pill">#${i + 1}</span>
                 </div>
                 <div class="kt-fs-sm kt-text-muted kt-mb-2">${escapeHtml(h.name)}</div>
@@ -111,10 +111,10 @@ function renderAnnualTable() {
                 <td><strong>${r.year}</strong> <span class="kt-fs-xs kt-text-muted">(${r.weeks} wks)</span></td>
                 <td class="kt-align-right">${formatCurrency(r.startVal)}</td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(r.endVal)}</td>
-                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ?'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${formatCurrency(r.netChange)}
                 </td>
-                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ?'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${r.returnPct.toFixed(2)}%
                 </td>
             </tr>
@@ -138,10 +138,10 @@ function renderExtremeMoves() {
             <tr>
                 <td>${formatDate(r.date)}</td>
                 <td>Week ${r.week}</td>
-                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ?'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${formatCurrency(r.weeklyChangeCAD)}
                 </td>
-                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ?'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%
                 </td>
             </tr>

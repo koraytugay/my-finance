@@ -53,12 +53,12 @@
                     <span class="kt-stat__sub" id="stat-safe-monthly">$0.00 / month</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value kt-text-accent" id="stat-fire-target">$0.00</span>
+                    <span class="kt-stat__value" id="stat-fire-target">$0.00</span>
                     <span class="kt-stat__label">Financial Freedom Number</span>
                     <span class="kt-stat__sub" id="stat-fire-progress">0% reached</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-time-to-fire" style="color: #8250df;">- years</span>
+                    <span class="kt-stat__value" id="stat-time-to-fire">- years</span>
                     <span class="kt-stat__label">Time to Freedom</span>
                     <span class="kt-stat__sub" id="stat-fire-date">Estimated target date</span>
                 </div>
@@ -100,7 +100,7 @@
                     <div class="kt-field">
                         <label class="kt-field__label kt-split" for="input-monthly-save">
                             <span>Monthly Contribution ($ CAD/mo)</span>
-                            <span class="kt-text-accent" id="label-monthly-save">$2,500</span>
+                            <span id="label-monthly-save">$2,500</span>
                         </label>
                         <input class="kt-range" type="range" id="input-monthly-save" min="0" max="15000" step="100" value="2500" oninput="runProjections()">
                     </div>
@@ -116,7 +116,7 @@
                     <div class="kt-field">
                         <label class="kt-field__label kt-split" for="input-inflation-rate">
                             <span>Assumed Inflation Rate (%)</span>
-                            <span class="kt-text-warning" id="label-inflation-rate">2.5%</span>
+                            <span id="label-inflation-rate">2.5%</span>
                         </label>
                         <input class="kt-range" type="range" id="input-inflation-rate" min="0.0" max="6.0" step="0.25" value="2.5" oninput="runProjections()">
                     </div>
@@ -124,7 +124,7 @@
                     <div class="kt-field">
                         <label class="kt-field__label kt-split" for="input-swr-rate">
                             <span>Safe Withdrawal Rate (SWR %)</span>
-                            <span id="label-swr-rate" style="color: #8250df;">4.0%</span>
+                            <span id="label-swr-rate">4.0%</span>
                         </label>
                         <input class="kt-range" type="range" id="input-swr-rate" min="2.5" max="5.5" step="0.1" value="4.0" oninput="runProjections()">
                     </div>
@@ -172,8 +172,8 @@
                     </div>
                     <div class="kt-fs-xs kt-fw-bold" style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <span class="kt-text-success">● Optimistic (+2%)</span>
-                        <span class="kt-text-accent">● Expected Return</span>
-                        <span class="kt-text-warning">● Conservative (-2%)</span>
+                        <span>● Expected Return</span>
+                        <span>● Conservative (-2%)</span>
                         <span class="kt-text-muted">● Capital Invested</span>
                     </div>
                 </div>
@@ -206,7 +206,7 @@
                                 <th class="kt-align-right">Compound Growth ($)</th>
                                 <th class="kt-align-right kt-fw-heavy">End Balance</th>
                                 <th class="kt-align-right kt-text-success">Safe Annual Spend</th>
-                                <th class="kt-align-right kt-text-accent">Safe Monthly Spend</th>
+                                <th class="kt-align-right">Safe Monthly Spend</th>
                             </tr>
                         </thead>
                         <tbody id="projections-table-body">

@@ -119,7 +119,7 @@ function updateStatCards() {
     if (totalGainEl) {
         const gSign = totalGrowthCAD >= 0 ? '+' : '';
         totalGainEl.textContent = `${gSign}${formatCurrency(totalGrowthCAD, 'CAD')}`;
-        totalGainEl.style.color = totalGrowthCAD >= 0 ? '#0969da' : '#cf222e';
+        totalGainEl.style.color = totalGrowthCAD >= 0 ? '' : '#cf222e';
         if (totalGainPctEl) {
             totalGainPctEl.textContent = `${formatPercent(totalGrowthPct, true)} Growth (contributions + gains)`;
         }
@@ -629,7 +629,7 @@ function renderChart(records, currency = 'CAD') {
                     </div>
                     <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                         <span>Spread:</span>
@@ -771,7 +771,7 @@ function renderTable(records) {
                 <td class="kt-align-right">${formatCurrency(r.fixed)}</td>
                 <td class="kt-align-right">${formatCurrency(r.preciousMetals)}</td>
                 <td class="kt-align-right">${formatCurrency(r.crypto)}</td>
-                <td class="kt-align-right kt-fw-bold kt-text-accent">${formatCurrency(r.totalCAD)}</td>
+                <td class="kt-align-right kt-fw-bold">${formatCurrency(r.totalCAD)}</td>
                 <td class="kt-align-right">${formatCurrency(r.totalUSD, 'USD')}</td>
                 <td class="kt-align-right kt-fw-bold ${weeklyClass}">
                     ${weeklySign}${formatCurrency(r.weeklyChangeCAD)}

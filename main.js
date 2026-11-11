@@ -466,7 +466,7 @@ function renderMainTopStats(mainData, holdings, history) {
     const tbCadSubEl = document.getElementById('main-stat-timeback-cad-sub');
     if (tbCadEl) {
         tbCadEl.textContent = timeBackCAD.label;
-        tbCadEl.style.color = timeBackCAD.weeks > 0 ? (timeBackCAD.weeks >= 4 ? '#cf222e' : '#d97706') : '#16a34a';
+        tbCadEl.style.color = timeBackCAD.weeks > 0 ? (timeBackCAD.weeks >= 4 ? '#cf222e' : '') : '#16a34a';
         if (tbCadSubEl) tbCadSubEl.textContent = timeBackCAD.sub;
     }
 
@@ -474,7 +474,7 @@ function renderMainTopStats(mainData, holdings, history) {
     const tbUsdSubEl = document.getElementById('main-stat-timeback-usd-sub');
     if (tbUsdEl) {
         tbUsdEl.textContent = timeBackUSD.label;
-        tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? '#cf222e' : '#d97706') : '#16a34a';
+        tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? '#cf222e' : '') : '#16a34a';
         if (tbUsdSubEl) tbUsdSubEl.textContent = timeBackUSD.sub;
     }
 
@@ -663,7 +663,7 @@ function renderAssetClassTable(mainData, holdings) {
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold kt-text-accent">${escapeHtml(item.percentage)}</td>
+            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -698,8 +698,8 @@ function renderAssetClassTable(mainData, holdings) {
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent kt-fs-base">${formatCurrency(grandTotal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent">&mdash;</td>
+        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(grandTotal, 'CAD')}</td>
+        <td class="kt-align-right kt-fw-heavy">&mdash;</td>
     `;
     tbody.appendChild(totalTr);
 }
@@ -717,7 +717,7 @@ function renderAccountTypeTable(mainData, holdings, history) {
         tr.innerHTML = `
             <td><strong>${escapeHtml(item.name)}</strong></td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold kt-text-accent">${escapeHtml(item.percentage)}</td>
+            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -728,8 +728,8 @@ function renderAccountTypeTable(mainData, holdings, history) {
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent">100.00%</td>
+        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
+        <td class="kt-align-right kt-fw-heavy">100.00%</td>
     `;
     tbody.appendChild(totalTr);
 }
@@ -758,7 +758,7 @@ function renderCategoryTable(mainData, holdings) {
                 <strong>${escapeHtml(item.name)}</strong>
             </td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold kt-text-accent">${escapeHtml(item.percentage)}</td>
+            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -769,8 +769,8 @@ function renderCategoryTable(mainData, holdings) {
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy kt-text-accent">100.00%</td>
+        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
+        <td class="kt-align-right kt-fw-heavy">100.00%</td>
     `;
     tbody.appendChild(totalTr);
 
@@ -1065,7 +1065,7 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
     availableYears.forEach(year => {
         const isActive = currentTimeframe === year;
         html += `
-            <button type="button" class="timeframe-pill ${isActive ? 'is-active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" title="Show Year ${year} ${titleSuffix}">${year}</button>
+            <button type="button" class="timeframe-pill ${isActive ?'is-active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" title="Show Year ${year} ${titleSuffix}">${year}</button>
         `;
     });
 
@@ -1073,8 +1073,8 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
     const isAllActive = currentTimeframe === 'all';
 
     html += `
-        <button type="button" class="timeframe-pill ${isLast52Active ? 'is-active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
-        <button type="button" class="timeframe-pill ${isAllActive ? 'is-active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" title="Show All-Time ${titleSuffix}">All Time</button>
+        <button type="button" class="timeframe-pill ${isLast52Active ?'is-active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
+        <button type="button" class="timeframe-pill ${isAllActive ?'is-active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" title="Show All-Time ${titleSuffix}">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1097,7 +1097,7 @@ function syncMainTimeframeButtons(history) {
         const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(year);
         const yrColor = getMainYearColor(year);
         html += `
-            <button type="button" class="timeframe-pill ${isActive ? 'is-active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="--kt-segmented-active-bg: ${yrColor}" title="Toggle Year ${year} overlay">${year}</button>
+            <button type="button" class="timeframe-pill ${isActive ?'is-active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="--kt-segmented-active-bg: ${yrColor}" title="Toggle Year ${year} overlay">${year}</button>
         `;
     });
 
@@ -1105,8 +1105,8 @@ function syncMainTimeframeButtons(history) {
     const isAllActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
 
     html += `
-        <button type="button" class="timeframe-pill ${isLast52Active ? 'is-active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" title="Show Last 52 Weeks graph">Last 52W</button>
-        <button type="button" class="timeframe-pill ${isAllActive ? 'is-active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" title="Show All-Time historical graph">All Time</button>
+        <button type="button" class="timeframe-pill ${isLast52Active ?'is-active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" title="Show Last 52 Weeks graph">Last 52W</button>
+        <button type="button" class="timeframe-pill ${isAllActive ?'is-active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" title="Show All-Time historical graph">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1702,7 +1702,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                     </div>
                     <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                         <span>Spread:</span>
@@ -2542,7 +2542,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                         </div>
                         <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong class="kt-text-accent">${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
+                            <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2789,7 +2789,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                             </span>
                         </div>
                         ${p.isOverlayStart ? `
-                            <div class="kt-fs-2xs kt-text-warning kt-fw-semibold" style="padding-left: 13px;">
+                            <div class="kt-fs-2xs kt-fw-semibold" style="padding-left: 13px;">
                                 ↳ Starts from ${p.overlayFromYear} node (${formatDate(p.overlayFromDate)})
                             </div>
                         ` : (!p.isAnchor ? `
@@ -2831,7 +2831,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                         </div>
                         <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong class="kt-text-accent">${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
+                            <span>Port: <strong>${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2952,7 +2952,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const sign = last.pct >= 0 ? '+' : '';
             const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
             const chainedBadge = s.chainedFromYear
-                ? `<span class="kt-fs-2xs kt-text-warning" style="background: rgba(217, 119, 6, 0.12); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
+                ? `<span class="kt-fs-2xs" style="background: rgba(217, 119, 6, 0.12); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
                 : '';
             return `
                 <div class="kt-legend__item">
@@ -3593,7 +3593,7 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
             ${avgStr ? `
             <div class="kt-readout__row">
                 <span>Timeline Average Spread:</span>
-                <strong class="kt-text-warning">${avgStr}</strong>
+                <strong>${avgStr}</strong>
             </div>
             ` : ''}
         </div>
@@ -3818,7 +3818,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
             </div>
             <div class="kt-legend__item">
                 <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #d97706;"></span>
-                <span class="kt-text-muted">Average: <strong class="kt-text-warning">${avgStr}</strong></span>
+                <span class="kt-text-muted">Average: <strong>${avgStr}</strong></span>
             </div>
         `;
     }
@@ -4023,7 +4023,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
         avgCompHtml = `
             <div class="kt-readout__row kt-mt-0">
                 <span>Historical Average:</span>
-                <span><strong class="kt-text-warning">${avgFormatted}</strong> (<span class="kt-fw-semibold" style="color: ${compColor};">${compStr}</span>)</span>
+                <span><strong>${avgFormatted}</strong> (<span class="kt-fw-semibold" style="color: ${compColor};">${compStr}</span>)</span>
             </div>
         `;
     }
@@ -4064,7 +4064,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
             ${avgCompHtml}
             <div class="kt-readout__row kt-mt-1" style="padding-top: 4px; border-top: 1px dashed var(--kt-divider);">
                 <span>Time Between Peaks:</span>
-                <strong class="kt-text-accent">${timeStr}</strong>
+                <strong>${timeStr}</strong>
             </div>
         </div>
         <div class="kt-readout__footer kt-fs-2xs kt-text-muted" style="margin-top: auto; padding-top: 8px; border-top: 1px solid var(--kt-divider);">
@@ -4182,7 +4182,7 @@ function renderAthBarChart() {
 
     const legendAvgEl = document.getElementById('ath-legend-avg-text');
     if (legendAvgEl) {
-        legendAvgEl.innerHTML = `Average Increment: <strong class="kt-text-warning">${avgStr}</strong>`;
+        legendAvgEl.innerHTML = `Average Increment: <strong>${avgStr}</strong>`;
     }
 
     const width = 1000;
@@ -4951,7 +4951,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
             ${avgStr ? `
             <div class="kt-readout__row">
                 <span>Timeline Average:</span>
-                <strong class="kt-text-warning">${avgStr}</strong>
+                <strong>${avgStr}</strong>
             </div>
             ` : ''}
         </div>
@@ -5010,7 +5010,7 @@ function renderWeeklyBarChart() {
 
     const legendAvgEl = document.getElementById('weekly-legend-avg-text');
     if (legendAvgEl) {
-        legendAvgEl.innerHTML = `Average: <strong class="kt-text-warning">${avgStr}</strong>`;
+        legendAvgEl.innerHTML = `Average: <strong>${avgStr}</strong>`;
     }
 
     if (subTitleEl) {
@@ -5538,7 +5538,7 @@ function renderDrawdownChart() {
                 curStatusEl.style.color = '#15803d';
             } else {
                 curStatEl.textContent = `${currentWeeksBack} ${currentWeeksBack === 1 ? 'week' : 'weeks'}`;
-                curStatEl.style.color = currentWeeksBack >= 4 ? '#dc2626' : '#d97706';
+                curStatEl.style.color = currentWeeksBack >= 4 ? '#dc2626' : '';
                 curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} (${currentDDPct.toFixed(2)}%) from ATH`;
                 curStatusEl.style.color = '#b91c1c';
             }

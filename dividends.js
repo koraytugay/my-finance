@@ -597,8 +597,8 @@ function renderCalendar() {
 
         barEl.innerHTML = `
             <div class="month-val">${formatCurrency(displayVal)}</div>
-            <div class="month-col ${isPeak ? 'peak' : ''}" style="height: ${totalHeightPct}%;">
-                <div class="month-net-part ${isPeak ? 'peak' : ''}" style="height: ${netHeightPct}%;"></div>
+            <div class="month-col ${isPeak ?'peak' : ''}" style="height: ${totalHeightPct}%;">
+                <div class="month-net-part ${isPeak ?'peak' : ''}" style="height: ${netHeightPct}%;"></div>
                 ${taxHeightPct > 0 ? `<div class="month-tax-part" style="height: ${taxHeightPct}%;"></div>` : ''}
             </div>
             <div class="month-label">${monthNames[idx]}</div>
@@ -748,7 +748,7 @@ function renderTableRows(items) {
                 ${h.taxDragCAD > 0 ? `-${formatCurrency(h.taxDragCAD)}` : '$0.00'}
             </td>
             <td class="kt-align-right kt-fw-heavy kt-text-success">${formatCurrency(h.netAnnualIncome)}</td>
-            <td class="kt-align-right kt-fw-semibold kt-text-accent">${formatCurrency(h.netMonthlyIncome)}</td>
+            <td class="kt-align-right kt-fw-semibold">${formatCurrency(h.netMonthlyIncome)}</td>
             <td class="kt-align-center"><span class="kt-badge kt-badge--pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
         `;
         tbody.appendChild(tr);

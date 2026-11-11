@@ -142,7 +142,7 @@ function renderGroupedViews() {
             return `
                 <span class="kt-chip">
                     ${escapeHtml(sg.title)}:
-                    <strong class="kt-text-accent">${formatCurrency(sg.total)}</strong>
+                    <strong>${formatCurrency(sg.total)}</strong>
                     <span class="kt-chip__meta">(${sgPct.toFixed(1)}%)</span>
                 </span>
             `;
@@ -179,7 +179,7 @@ function renderGroupedViews() {
 
                 return `
                     <tr>
-                        <td style="padding-left: 24px;"><strong class="kt-text-accent">${escapeHtml(h.ticker)}</strong></td>
+                        <td style="padding-left: 24px;"><strong>${escapeHtml(h.ticker)}</strong></td>
                         <td>${escapeHtml(h.name)}</td>
                         <td><span class="kt-badge">${escapeHtml(thirdColValue)}</span></td>
                         <td class="kt-align-right">${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
@@ -211,7 +211,7 @@ function renderGroupedViews() {
                     <td class="kt-align-right kt-fw-heavy kt-text-primary">
                         ${formatCurrency(sg.total)}
                     </td>
-                    <td class="kt-align-right kt-fw-bold kt-text-accent">
+                    <td class="kt-align-right kt-fw-bold">
                         ${sgPctOfGroup.toFixed(1)}%
                     </td>
                 </tr>
@@ -247,7 +247,7 @@ function renderGroupedViews() {
                     </div>
                     <div class="kt-align-right">
                         <div class="kt-fs-lg kt-fw-heavy">${formatCurrency(group.total)}</div>
-                        <div class="kt-fs-xs kt-fw-semibold kt-text-accent">${groupPct.toFixed(2)}% of total portfolio</div>
+                        <div class="kt-fs-xs kt-fw-semibold">${groupPct.toFixed(2)}% of total portfolio</div>
                     </div>
                 </div>
 

@@ -87,7 +87,7 @@ function renderOverviewCards() {
         statusEl.style.color = '#16a34a';
     } else if (regPct >= 50) {
         statusEl.textContent = 'Balanced Shelter';
-        statusEl.style.color = '#d97706';
+        statusEl.style.color = '';
     } else {
         statusEl.textContent = 'Low Tax Shelter';
         statusEl.style.color = '#dc2626';

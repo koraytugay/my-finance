@@ -320,7 +320,7 @@ function renderAthStreaksSection(history) {
             const peakStr = formatCurrency(s.peakVal, currency);
             const recoveryStr = s.recoveryVal ? formatCurrency(s.recoveryVal, currency) : 'Awaiting ATH';
             const recoveryPart = s.isOngoing
-                ? '<span class="kt-text-warning kt-fw-bold">Ongoing consolidation</span>'
+                ? '<span class="kt-fw-bold">Ongoing consolidation</span>'
                 : `Recovery: ${recoveryStr} (W${s.recoveryWeek})`;
             const dipColor = s.maxDD < 0 ? '#cf222e' : '#16a34a';
             const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
@@ -428,7 +428,7 @@ function renderOverviewCards() {
     if (growthCadEl) {
         const gSign = totalGrowthCAD >= 0 ? '+' : '';
         growthCadEl.textContent = `${gSign}${formatCurrency(totalGrowthCAD, 'CAD')}`;
-        growthCadEl.style.color = totalGrowthCAD >= 0 ? '#0969da' : '#cf222e';
+        growthCadEl.style.color = totalGrowthCAD >= 0 ? '' : '#cf222e';
         growthSubEl.textContent = `${gSign}${totalGrowthPct.toFixed(1)}% Growth (contributions + gains)`;
     }
 
@@ -639,7 +639,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         const vfvDd = bData.VFV?.maxDrawdownPct !== undefined ? bData.VFV.maxDrawdownPct : -19.3;
 
         insightEl.innerHTML = `
-            💡 <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong class="kt-text-accent">${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong class="kt-text-danger">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong class="kt-text-danger">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
+            💡 <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong>${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong class="kt-text-danger">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong class="kt-text-danger">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
         `;
     }
 }
@@ -1124,17 +1124,17 @@ function renderRolling52Charts() {
         if (currentDates) currentDates.textContent = `${formatDate(getWinBaselineDate(current))} – ${formatDate(current.endDate)}`;
         if (currentProgPct) {
             currentProgPct.textContent = `${signOf(current.pctCAD)}${current.pctCAD.toFixed(2)}%`;
-            currentProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#0969da' : '#1f2328';
+            currentProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '' : '#1f2328';
         }
         if (currentProgUsdPct) currentProgUsdPct.textContent = `${signOf(current.pctUSD)}${current.pctUSD.toFixed(2)}% USD`;
         if (currentProgCad) {
             currentProgCad.textContent = `${signOf(current.gainCAD)}${formatCurrency(current.gainCAD, 'CAD')}`;
-            currentProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#0969da' : '#1f2328';
+            currentProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '' : '#1f2328';
         }
         if (currentStartEndCad) currentStartEndCad.innerHTML = `${formatCurrency(current.startValCAD, 'CAD')} &rarr; ${formatCurrency(current.endValCAD, 'CAD')}`;
         if (currentProgUsd) {
             currentProgUsd.textContent = `${signOf(current.gainUSD)}${formatCurrency(current.gainUSD, 'USD')}`;
-            currentProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#0969da' : '#1f2328';
+            currentProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '' : '#1f2328';
         }
         if (currentStartEndUsd) currentStartEndUsd.innerHTML = `${formatCurrency(current.startValUSD, 'USD')} &rarr; ${formatCurrency(current.endValUSD, 'USD')}`;
         if (currentPace) currentPace.textContent = `Avg: +${formatCurrency(current.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(current.avgWeeklyGainUSD, 'USD')} USD)`;
@@ -1578,9 +1578,9 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                     <div class="kt-readout__row">
                         <span class="kt-cluster">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
-                            <strong class="kt-text-accent">Current 52W:</strong>
+                            <strong>Current 52W:</strong>
                         </span>
-                        <strong class="kt-text-accent kt-fs-base">${fmtPrimary(currentPt)}</strong>
+                        <strong class="kt-fs-base">${fmtPrimary(currentPt)}</strong>
                     </div>
                     <div class="kt-fs-2xs kt-text-muted" style="padding-left: 13px;">${fmtSecondary(currentPt)}</div>
                 </div>` : ''}
@@ -1611,7 +1611,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
 
                 ${spreadStr ? `
                 <div class="kt-readout__section">
-                    <div class="kt-readout__row kt-fw-bold" style="color: #8250df;">
+                    <div class="kt-readout__row kt-fw-bold">
                         <span>Best/Worst Spread:</span>
                         <span>${spreadStr}</span>
                     </div>
@@ -2036,8 +2036,8 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
                 ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
             </div>
             <div class="kt-readout__row">
-                <span class="kt-text-accent kt-fw-bold">● Portfolio:</span>
-                <strong class="kt-text-accent kt-fs-base">${formatMetricVal(item.val)}</strong>
+                <span class="kt-fw-bold">● Portfolio:</span>
+                <strong class="kt-fs-base">${formatMetricVal(item.val)}</strong>
             </div>
             ${rolling52ShowXeqt && xeqtItem ? `
             <div class="kt-readout__row">
@@ -2499,7 +2499,7 @@ function renderCrisisStressTest() {
             </div>
             <div class="kt-split kt-fs-xs kt-text-muted">
                 <span>Trough Net Worth: <strong>${formatCurrency(postCrashCAD)}</strong></span>
-                <span class="kt-fw-semibold" style="color: #0369a1;">⏳ ${escapeHtml(c.recovery)}</span>
+                <span class="kt-fw-semibold">⏳ ${escapeHtml(c.recovery)}</span>
             </div>
         `;
         container.appendChild(card);

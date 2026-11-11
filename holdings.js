@@ -263,7 +263,7 @@ function renderTable(items, totalCAD) {
         const isReg = h.registered === true || h.registered === 1 || String(h.registered).toLowerCase() === 'true' || (h.account && /TFSA|RRSP|FHSA/i.test(h.account));
         const accountBadgeClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
         const dayChange = h.dayChangePct !== undefined ? `
-            <div class="kt-fs-2xs" class="${h.dayChangePct >= 0 ? 'kt-text-success' : 'kt-text-danger'}">
+            <div class="kt-fs-2xs" class="${h.dayChangePct >= 0 ?'kt-text-success' : 'kt-text-danger'}">
                 ${formatPercent(h.dayChangePct, true)}
             </div>
         ` : '';
@@ -286,7 +286,7 @@ function renderTable(items, totalCAD) {
         return `
             <tr onclick="showHoldingModal('${safeId}')" title="Click to view details">
                 <td>
-                    <strong class="kt-text-accent">${safeTicker}</strong>
+                    <strong>${safeTicker}</strong>
                 </td>
                 <td>
                     <div>${safeName}</div>
@@ -383,7 +383,7 @@ function renderCards(items, totalCAD) {
                 <div class="card-details">
                     <span>${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} units @ ${formatCurrency(h.unitPrice)}</span>
                     ${avgCost > 0 ? `<span class="kt-fs-xs kt-text-muted">Avg: ${formatCurrency(avgCost)}</span>` : ''}
-                    <span class="${(h.dayChangePct || 0) >= 0 ? 'kt-text-success' : 'kt-text-danger'}">
+                    <span class="${(h.dayChangePct || 0) >= 0 ?'kt-text-success' : 'kt-text-danger'}">
                         ${h.dayChangePct !== undefined ? formatPercent(h.dayChangePct, true) : ''}
                     </span>
                 </div>
@@ -534,7 +534,7 @@ function showHoldingModal(id) {
     modalBody.innerHTML = `
         <div class="kt-mb-4">
             <div style="display: flex; align-items: baseline; gap: 8px;">
-                <h2 class="kt-fs-lg kt-text-accent kt-m-0">${escapeHtml(holding.ticker)}</h2>
+                <h2 class="kt-fs-lg kt-m-0">${escapeHtml(holding.ticker)}</h2>
                 <span class="kt-badge">${escapeHtml(holding.strategy)}</span>
             </div>
             <div class="kt-fs-base kt-text-muted kt-mt-0">${escapeHtml(holding.name)}</div>

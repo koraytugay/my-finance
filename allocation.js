@@ -185,7 +185,7 @@ function renderMatrixTable() {
 
         return `
             <tr>
-                <td><strong class="kt-text-accent">${escapeHtml(h.ticker)}</strong></td>
+                <td><strong>${escapeHtml(h.ticker)}</strong></td>
                 <td>${escapeHtml(h.name)}</td>
                 <td><span class="kt-badge">${escapeHtml(h.strategy)}</span></td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(h.sum)}</td>
@@ -316,7 +316,7 @@ function onFXSliderChange(newRateStr) {
             impactEl.style.color = '#cf222e';
             if (impactDesc) impactDesc.textContent = 'CAD appreciation slightly reduced converted CAD value of US assets';
         } else {
-            impactEl.style.color = '#0969da';
+            impactEl.style.color = '';
             if (impactDesc) impactDesc.textContent = 'Holding unhedged US assets buffers currency swings';
         }
     }
@@ -473,7 +473,7 @@ function renderSimpleAllocTable() {
 
         return `
             <tr>
-                <td><strong class="kt-text-accent">${escapeHtml(item.asset)}</strong></td>
+                <td><strong>${escapeHtml(item.asset)}</strong></td>
                 <td class="kt-align-right kt-fw-bold">${item.pct.toFixed(2)}%</td>
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(item.sum)}</td>
                 <td class="kt-align-right">${gainHtml}</td>
@@ -509,7 +509,7 @@ function renderSimpleAllocTable() {
         if (!iconEl) return;
         if (c === simpleAllocSort.col) {
             iconEl.textContent = simpleAllocSort.dir === 'desc' ? '▼' : '▲';
-            iconEl.style.color = '#0969da';
+            iconEl.style.color = '';
         } else {
             iconEl.textContent = '⬍';
             iconEl.style.color = '#94a3b8';

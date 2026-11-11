@@ -121,7 +121,7 @@
                 <div class="kt-section-title kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="main-chart-title">📈 Net Worth Progression</h2>
-                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="color: #8250df; cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="cursor: pointer; user-select: none; background: rgba(130, 80, 223, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(130, 80, 223, 0.25);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
                             <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: #8250df; cursor: pointer; width: 14px; height: 14px;">
                             ATHs
                         </label>
@@ -548,7 +548,7 @@
                     <dl class="kt-kv kt-kv--divided kt-kv--loose">
                         <div class="kt-kv__row">
                             <dt>Total Portfolio Value</dt>
-                            <dd class="kt-text-accent" id="metric-total-val">$0.00</dd>
+                            <dd id="metric-total-val">$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Net Worth 1 Year Ago</dt>
@@ -556,19 +556,19 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change in Last 52 Weeks</dt>
-                            <dd class="" id="metric-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="metric-total-gain" style="color: #16a34a;">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return (Last 52 Weeks)</dt>
-                            <dd class="" id="metric-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="metric-gain-pct" style="color: #16a34a;">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd class="" id="metric-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="metric-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
-                            <dd class="kt-text-accent" id="metric-ath-val">$0.00</dd>
+                            <dd id="metric-ath-val">$0.00</dd>
                         </div>
                     </dl>
                 </div>
@@ -586,7 +586,7 @@
                     <dl class="kt-kv kt-kv--divided kt-kv--loose">
                         <div class="kt-kv__row">
                             <dt>Total Portfolio Value</dt>
-                            <dd class="kt-text-accent" id="ytd-total-val">$0.00</dd>
+                            <dd id="ytd-total-val">$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Net Worth at Start of Year</dt>
@@ -594,19 +594,19 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change Year to Date</dt>
-                            <dd class="" id="ytd-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="ytd-total-gain" style="color: #16a34a;">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return Year to Date</dt>
-                            <dd class="" id="ytd-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="ytd-gain-pct" style="color: #16a34a;">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd class="" id="ytd-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="ytd-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
-                            <dd class="kt-text-accent" id="ytd-peak-val">$0.00</dd>
+                            <dd id="ytd-peak-val">$0.00</dd>
                         </div>
                     </dl>
                 </div>
@@ -624,7 +624,7 @@
                     <dl class="kt-kv kt-kv--divided kt-kv--loose">
                         <div class="kt-kv__row">
                             <dt>Total Portfolio Value</dt>
-                            <dd class="kt-text-accent" id="alltime-total-val">$0.00</dd>
+                            <dd id="alltime-total-val">$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Net Worth at Start of History</dt>
@@ -632,19 +632,19 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change All-Time</dt>
-                            <dd class="" id="alltime-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="alltime-total-gain" style="color: #16a34a;">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return All-Time</dt>
-                            <dd class="" id="alltime-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="alltime-gain-pct" style="color: #16a34a;">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd class="" id="alltime-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="alltime-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
-                            <dd class="kt-text-accent" id="alltime-peak-val">$0.00</dd>
+                            <dd id="alltime-peak-val">$0.00</dd>
                         </div>
                     </dl>
                 </div>
