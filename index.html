@@ -6,69 +6,6 @@
     <title>My Finance - Main Overview</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
     <link rel="stylesheet" href="styles.css?v=4.0">
-    <style>
-        .main-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .main-card {
-            background: white;
-            border: 1px solid #edf2f7;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-        }
-        .main-card-header {
-            margin-bottom: 14px;
-            padding-bottom: 10px;
-            border-bottom: 1.5px solid #e2e8f0;
-        }
-        .main-card-title {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #1f2328;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .main-card-subtitle {
-            margin: 3px 0 0 0;
-            font-size: 0.78rem;
-            color: #64748b;
-        }
-        .summary-metric-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 14px;
-            margin-top: 16px;
-        }
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.88rem;
-        }
-        .metric-row:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-        .metric-label {
-            color: #475569;
-            font-weight: 500;
-        }
-        .metric-value {
-            font-weight: 700;
-            color: #1f2328;
-        }
-    </style>
 </head>
 <body>
     <div class="kt-container">
@@ -502,14 +439,14 @@
             </div>
 
             <!-- Google Sheets Main Tab 3-Column Tables Layout -->
-            <div class="main-grid">
+            <div class="kt-grid kt-mb-6" style="--kt-grid-min: 350px; --kt-grid-gap: 20px;">
                 <!-- 1. Asset Class Table -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             🌍 Asset Class
                         </h2>
-                        <p class="main-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1">
                             Google Sheets Main Tab &bull; Equities Breakdown &amp; Asset Classes
                         </p>
                     </div>
@@ -530,12 +467,12 @@
                 </div>
 
                 <!-- 2. Account Type Table -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             🏛️ Account Type
                         </h2>
-                        <p class="main-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1">
                             Google Sheets Main Tab &bull; Tax Registration &amp; Portfolio Growth
                         </p>
                     </div>
@@ -556,12 +493,12 @@
                 </div>
 
                 <!-- 3. Category Table -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             📦 Category
                         </h2>
-                        <p class="main-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1">
                             Google Sheets Main Tab &bull; High-Level Asset Categories
                         </p>
                     </div>
@@ -597,113 +534,119 @@
             </div>
 
             <!-- Performance & Growth Tracking Cards (52-Week, YTD, & All-Time) -->
-            <div class="main-grid">
+            <div class="kt-grid kt-mb-6" style="--kt-grid-min: 350px; --kt-grid-gap: 20px;">
                 <!-- 1. 52-Week Performance Tracking Card -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             📈 52-Week Performance Tracking
                         </h2>
-                        <p class="main-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1">
                             Trailing 52-Week Portfolio Growth &amp; Milestones
                         </p>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value kt-text-accent" id="metric-total-val">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Net Worth 1 Year Ago</span>
-                        <span class="metric-value" id="metric-cost-basis">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Change in Last 52 Weeks</span>
-                        <span class="metric-value kt-text-success" id="metric-total-gain">+$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Return (Last 52 Weeks)</span>
-                        <span class="metric-value kt-text-success" id="metric-gain-pct">+0.00%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value kt-text-success" id="metric-monthly-rate">+$0.00 / mo</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value kt-text-accent" id="metric-ath-val">$0.00</span>
-                    </div>
+                    <dl class="kt-kv kt-kv--divided kt-kv--loose">
+                        <div class="kt-kv__row">
+                            <dt>Total Portfolio Value</dt>
+                            <dd class="kt-text-accent" id="metric-total-val">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Net Worth 1 Year Ago</dt>
+                            <dd id="metric-cost-basis">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Change in Last 52 Weeks</dt>
+                            <dd class="kt-text-success" id="metric-total-gain">+$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Return (Last 52 Weeks)</dt>
+                            <dd class="kt-text-success" id="metric-gain-pct">+0.00%</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Monthly Average Change</dt>
+                            <dd class="kt-text-success" id="metric-monthly-rate">+$0.00 / mo</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Peak Net Worth</dt>
+                            <dd class="kt-text-accent" id="metric-ath-val">$0.00</dd>
+                        </div>
+                    </dl>
                 </div>
 
                 <!-- 2. Year to Date (YTD) Tracking Card -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             📅 Year to Date (YTD) Tracking
                         </h2>
-                        <p class="main-card-subtitle" id="ytd-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1" id="ytd-card-subtitle">
                             Calendar Year Performance &amp; Net Wealth Growth
                         </p>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value kt-text-accent" id="ytd-total-val">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Net Worth at Start of Year</span>
-                        <span class="metric-value" id="ytd-start-val">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Change Year to Date</span>
-                        <span class="metric-value kt-text-success" id="ytd-total-gain">+$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Return Year to Date</span>
-                        <span class="metric-value kt-text-success" id="ytd-gain-pct">+0.00%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value kt-text-success" id="ytd-monthly-rate">+$0.00 / mo</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value kt-text-accent" id="ytd-peak-val">$0.00</span>
-                    </div>
+                    <dl class="kt-kv kt-kv--divided kt-kv--loose">
+                        <div class="kt-kv__row">
+                            <dt>Total Portfolio Value</dt>
+                            <dd class="kt-text-accent" id="ytd-total-val">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Net Worth at Start of Year</dt>
+                            <dd id="ytd-start-val">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Change Year to Date</dt>
+                            <dd class="kt-text-success" id="ytd-total-gain">+$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Return Year to Date</dt>
+                            <dd class="kt-text-success" id="ytd-gain-pct">+0.00%</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Monthly Average Change</dt>
+                            <dd class="kt-text-success" id="ytd-monthly-rate">+$0.00 / mo</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Peak Net Worth</dt>
+                            <dd class="kt-text-accent" id="ytd-peak-val">$0.00</dd>
+                        </div>
+                    </dl>
                 </div>
 
                 <!-- 3. All-Time Wealth & Growth Tracking Card -->
-                <div class="main-card">
-                    <div class="main-card-header">
-                        <h2 class="main-card-title">
+                <div class="kt-card kt-card--padded">
+                    <div class="kt-mb-4">
+                        <h2 class="kt-card__title">
                             💎 All-Time Wealth &amp; Growth
                         </h2>
-                        <p class="main-card-subtitle" id="alltime-card-subtitle">
+                        <p class="kt-card__subtitle kt-mt-1" id="alltime-card-subtitle">
                             All-Time Portfolio Growth &amp; Milestones
                         </p>
                     </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Total Portfolio Value</span>
-                        <span class="metric-value kt-text-accent" id="alltime-total-val">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Net Worth at Start of History</span>
-                        <span class="metric-value" id="alltime-start-val">$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Change All-Time</span>
-                        <span class="metric-value kt-text-success" id="alltime-total-gain">+$0.00</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Return All-Time</span>
-                        <span class="metric-value kt-text-success" id="alltime-gain-pct">+0.00%</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Monthly Average Change</span>
-                        <span class="metric-value kt-text-success" id="alltime-monthly-rate">+$0.00 / mo</span>
-                    </div>
-                    <div class="metric-row">
-                        <span class="metric-label">Peak Net Worth</span>
-                        <span class="metric-value kt-text-accent" id="alltime-peak-val">$0.00</span>
-                    </div>
+                    <dl class="kt-kv kt-kv--divided kt-kv--loose">
+                        <div class="kt-kv__row">
+                            <dt>Total Portfolio Value</dt>
+                            <dd class="kt-text-accent" id="alltime-total-val">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Net Worth at Start of History</dt>
+                            <dd id="alltime-start-val">$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Change All-Time</dt>
+                            <dd class="kt-text-success" id="alltime-total-gain">+$0.00</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Return All-Time</dt>
+                            <dd class="kt-text-success" id="alltime-gain-pct">+0.00%</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Monthly Average Change</dt>
+                            <dd class="kt-text-success" id="alltime-monthly-rate">+$0.00 / mo</dd>
+                        </div>
+                        <div class="kt-kv__row">
+                            <dt>Peak Net Worth</dt>
+                            <dd class="kt-text-accent" id="alltime-peak-val">$0.00</dd>
+                        </div>
+                    </dl>
                 </div>
             </div>
         </div>
