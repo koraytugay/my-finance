@@ -62,20 +62,6 @@
     border-radius: var(--kt-radius-md);
 }
 
-/* ================= Toggle groups & timeframe pills =================
-   Still painted by inline styles + JS (migration phase 2 → .kt-segmented). */
-.timeframe-pill:hover,
-.currency-toggle button:hover {
-    background: var(--kt-surface-hover);
-    color: var(--kt-accent);
-}
-
-.timeframe-pill.active,
-.currency-toggle button.active {
-    background: var(--kt-primary);
-    color: var(--kt-text-inverse);
-}
-
 /* ================= Tables ================= */
 /* Sortable columns (sorting is handled in JS via data-col) */
 .kt-table th[data-col] {

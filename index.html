@@ -194,20 +194,20 @@
                         </label>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="timeframe-toggle" id="main-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2024" onclick="setMainTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Toggle Year 2024 overlay">2024</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2025" onclick="setMainTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Toggle Year 2025 overlay">2025</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2026" onclick="setMainTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Toggle Year 2026 overlay">2026</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill active" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Show Last 52 Weeks graph">Last 52W</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show All-Time historical graph">All Time</button>
+                        <div class="kt-segmented kt-segmented--sm" id="main-timeframe-toggle" role="group">
+                            <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setMainTimeframe('2024')" title="Toggle Year 2024 overlay">2024</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setMainTimeframe('2025')" title="Toggle Year 2025 overlay">2025</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2026" onclick="setMainTimeframe('2026')" title="Toggle Year 2026 overlay">2026</button>
+                            <button type="button" class="timeframe-pill is-active" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" title="Show Last 52 Weeks graph">Last 52W</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="all" onclick="setMainTimeframe('all')" title="Show All-Time historical graph">All Time</button>
                         </div>
-                        <div class="currency-toggle" id="main-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-main-cur-cad" class="kt-btn kt-btn--accent active" onclick="setMainCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-main-cur-usd" class="kt-btn kt-btn--accent" onclick="setMainCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="main-currency-toggle" role="group">
+                            <button type="button" id="btn-main-cur-cad" class="is-active" onclick="setMainCurrency('CAD')" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-main-cur-usd" onclick="setMainCurrency('USD')" title="Display values in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="main-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-main-unit-val" class="kt-btn kt-btn--accent active" onclick="setMainUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Currency ($)">$</button>
-                            <button type="button" id="btn-main-unit-pct" class="kt-btn kt-btn--accent" onclick="setMainUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display progression in Percentage (%) return">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="main-unit-toggle" role="group">
+                            <button type="button" id="btn-main-unit-val" class="is-active" onclick="setMainUnit('VAL')" title="Display values in Currency ($)">$</button>
+                            <button type="button" id="btn-main-unit-pct" onclick="setMainUnit('PCT')" title="Display progression in Percentage (%) return">%</button>
                         </div>
                     </div>
                 </div>
@@ -236,20 +236,20 @@
                         <h2 id="xeqt-rel-chart-title" style="margin: 0; font-size: 1.15rem;">📈 Portfolio vs XEQT Progression</h2>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="timeframe-toggle" id="xeqt-rel-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2024" onclick="setXeqtRelTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 relative progression">2024</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2025" onclick="setXeqtRelTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 relative progression">2025</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2026" onclick="setXeqtRelTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2026 relative progression">2026</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill active" data-timeframe="last-52" onclick="setXeqtRelTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Show Last 52 Weeks relative progression">Last 52W</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="all" onclick="setXeqtRelTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show All-Time relative progression">All Time</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-rel-timeframe-toggle" role="group">
+                            <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setXeqtRelTimeframe('2024')" title="Show Year 2024 relative progression">2024</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setXeqtRelTimeframe('2025')" title="Show Year 2025 relative progression">2025</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2026" onclick="setXeqtRelTimeframe('2026')" title="Show Year 2026 relative progression">2026</button>
+                            <button type="button" class="timeframe-pill is-active" data-timeframe="last-52" onclick="setXeqtRelTimeframe('last-52')" title="Show Last 52 Weeks relative progression">Last 52W</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="all" onclick="setXeqtRelTimeframe('all')" title="Show All-Time relative progression">All Time</button>
                         </div>
-                        <div class="currency-toggle" id="xeqt-rel-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-xeqt-rel-cur-cad" class="kt-btn kt-btn--accent active" onclick="setXeqtRelCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-xeqt-rel-cur-usd" class="kt-btn kt-btn--accent" onclick="setXeqtRelCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-rel-currency-toggle" role="group">
+                            <button type="button" id="btn-xeqt-rel-cur-cad" class="is-active" onclick="setXeqtRelCurrency('CAD')" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-xeqt-rel-cur-usd" onclick="setXeqtRelCurrency('USD')" title="Display values in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="xeqt-rel-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-xeqt-rel-unit-val" class="kt-btn kt-btn--accent" onclick="setXeqtRelUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display values in Currency ($)">$</button>
-                            <button type="button" id="btn-xeqt-rel-unit-pct" class="kt-btn kt-btn--accent active" onclick="setXeqtRelUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display progression in Percentage (%) return">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-rel-unit-toggle" role="group">
+                            <button type="button" id="btn-xeqt-rel-unit-val" onclick="setXeqtRelUnit('VAL')" title="Display values in Currency ($)">$</button>
+                            <button type="button" id="btn-xeqt-rel-unit-pct" class="is-active" onclick="setXeqtRelUnit('PCT')" title="Display progression in Percentage (%) return">%</button>
                         </div>
                     </div>
                 </div>
@@ -278,20 +278,20 @@
                         <h2 id="xeqt-weekly-chart-title" style="margin: 0; font-size: 1.15rem;">📊 Weekly Performance vs XEQT</h2>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="timeframe-toggle" id="xeqt-weekly-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2024" onclick="setXeqtWeeklyTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 weekly relative performance">2024</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2025" onclick="setXeqtWeeklyTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 weekly relative performance">2025</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2026" onclick="setXeqtWeeklyTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2026 weekly relative performance">2026</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill active" data-timeframe="last-52" onclick="setXeqtWeeklyTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Show Last 52 Weeks weekly relative performance">Last 52W</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="all" onclick="setXeqtWeeklyTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show All-Time weekly relative performance">All Time</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-weekly-timeframe-toggle" role="group">
+                            <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setXeqtWeeklyTimeframe('2024')" title="Show Year 2024 weekly relative performance">2024</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setXeqtWeeklyTimeframe('2025')" title="Show Year 2025 weekly relative performance">2025</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2026" onclick="setXeqtWeeklyTimeframe('2026')" title="Show Year 2026 weekly relative performance">2026</button>
+                            <button type="button" class="timeframe-pill is-active" data-timeframe="last-52" onclick="setXeqtWeeklyTimeframe('last-52')" title="Show Last 52 Weeks weekly relative performance">Last 52W</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="all" onclick="setXeqtWeeklyTimeframe('all')" title="Show All-Time weekly relative performance">All Time</button>
                         </div>
-                        <div class="currency-toggle" id="xeqt-weekly-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-xeqt-weekly-cur-cad" class="kt-btn kt-btn--accent active" onclick="setXeqtWeeklyCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-xeqt-weekly-cur-usd" class="kt-btn kt-btn--accent" onclick="setXeqtWeeklyCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-weekly-currency-toggle" role="group">
+                            <button type="button" id="btn-xeqt-weekly-cur-cad" class="is-active" onclick="setXeqtWeeklyCurrency('CAD')" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-xeqt-weekly-cur-usd" onclick="setXeqtWeeklyCurrency('USD')" title="Display values in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="xeqt-weekly-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-xeqt-weekly-unit-val" class="kt-btn kt-btn--accent" onclick="setXeqtWeeklyUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display weekly difference in Currency ($)">$</button>
-                            <button type="button" id="btn-xeqt-weekly-unit-pct" class="kt-btn kt-btn--accent active" onclick="setXeqtWeeklyUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display weekly difference in Percentage (%) return">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="xeqt-weekly-unit-toggle" role="group">
+                            <button type="button" id="btn-xeqt-weekly-unit-val" onclick="setXeqtWeeklyUnit('VAL')" title="Display weekly difference in Currency ($)">$</button>
+                            <button type="button" id="btn-xeqt-weekly-unit-pct" class="is-active" onclick="setXeqtWeeklyUnit('PCT')" title="Display weekly difference in Percentage (%) return">%</button>
                         </div>
                     </div>
                 </div>
@@ -319,13 +319,13 @@
                         <span id="ath-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Growth jump per All-Time High milestone</span>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="currency-toggle" id="ath-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-ath-cur-cad" class="kt-btn kt-btn--accent active" onclick="setAthBarCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display increments in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-ath-cur-usd" class="kt-btn kt-btn--accent" onclick="setAthBarCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display increments in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="ath-currency-toggle" role="group">
+                            <button type="button" id="btn-ath-cur-cad" class="is-active" onclick="setAthBarCurrency('CAD')" title="Display increments in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-ath-cur-usd" onclick="setAthBarCurrency('USD')" title="Display increments in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="ath-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-ath-unit-val" class="kt-btn kt-btn--accent active" onclick="setAthBarUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display dollar increment ($)">$</button>
-                            <button type="button" id="btn-ath-unit-pct" class="kt-btn kt-btn--accent" onclick="setAthBarUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display percentage increment (%)">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="ath-unit-toggle" role="group">
+                            <button type="button" id="btn-ath-unit-val" class="is-active" onclick="setAthBarUnit('VAL')" title="Display dollar increment ($)">$</button>
+                            <button type="button" id="btn-ath-unit-pct" onclick="setAthBarUnit('PCT')" title="Display percentage increment (%)">%</button>
                         </div>
                     </div>
                 </div>
@@ -363,13 +363,13 @@
                             <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
                             vs XEQT
                         </label>
-                        <div class="currency-toggle" id="heatmap-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-heatmap-cur-cad" class="kt-btn kt-btn--accent active" onclick="setHeatmapCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-heatmap-cur-usd" class="kt-btn kt-btn--accent" onclick="setHeatmapCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="heatmap-currency-toggle" role="group">
+                            <button type="button" id="btn-heatmap-cur-cad" class="is-active" onclick="setHeatmapCurrency('CAD')" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-heatmap-cur-usd" onclick="setHeatmapCurrency('USD')" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="heatmap-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-heatmap-unit-val" class="kt-btn kt-btn--accent" onclick="setHeatmapUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display dollar gain/loss ($)">$</button>
-                            <button type="button" id="btn-heatmap-unit-pct" class="kt-btn kt-btn--accent active" onclick="setHeatmapUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display percentage return (%)">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="heatmap-unit-toggle" role="group">
+                            <button type="button" id="btn-heatmap-unit-val" onclick="setHeatmapUnit('VAL')" title="Display dollar gain/loss ($)">$</button>
+                            <button type="button" id="btn-heatmap-unit-pct" class="is-active" onclick="setHeatmapUnit('PCT')" title="Display percentage return (%)">%</button>
                         </div>
                     </div>
                 </div>
@@ -408,20 +408,20 @@
                         <span id="weekly-bar-chart-subtitle" style="font-size: 0.82rem; color: #64748b; font-weight: 500;">Weekly gain and pullback timeline</span>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="timeframe-toggle" id="weekly-timeframe-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; flex-wrap: wrap;">
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2024" onclick="setWeeklyBarTimeframe('2024')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Show Year 2024 weekly changes">2024</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2025" onclick="setWeeklyBarTimeframe('2025')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2025 weekly changes">2025</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="2026" onclick="setWeeklyBarTimeframe('2026')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Year 2026 weekly changes">2026</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill" data-timeframe="last-52" onclick="setWeeklyBarTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Show Last 52 Weeks weekly changes">Last 52W</button>
-                            <button type="button" class="kt-btn kt-btn--accent timeframe-pill active" data-timeframe="all" onclick="setWeeklyBarTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Show All-Time weekly changes">All Time</button>
+                        <div class="kt-segmented kt-segmented--sm" id="weekly-timeframe-toggle" role="group">
+                            <button type="button" class="timeframe-pill" data-timeframe="2024" onclick="setWeeklyBarTimeframe('2024')" title="Show Year 2024 weekly changes">2024</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2025" onclick="setWeeklyBarTimeframe('2025')" title="Show Year 2025 weekly changes">2025</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="2026" onclick="setWeeklyBarTimeframe('2026')" title="Show Year 2026 weekly changes">2026</button>
+                            <button type="button" class="timeframe-pill" data-timeframe="last-52" onclick="setWeeklyBarTimeframe('last-52')" title="Show Last 52 Weeks weekly changes">Last 52W</button>
+                            <button type="button" class="timeframe-pill is-active" data-timeframe="all" onclick="setWeeklyBarTimeframe('all')" title="Show All-Time weekly changes">All Time</button>
                         </div>
-                        <div class="currency-toggle" id="weekly-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-weekly-cur-cad" class="kt-btn kt-btn--accent active" onclick="setWeeklyBarCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display weekly change in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-weekly-cur-usd" class="kt-btn kt-btn--accent" onclick="setWeeklyBarCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display weekly change in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="weekly-currency-toggle" role="group">
+                            <button type="button" id="btn-weekly-cur-cad" class="is-active" onclick="setWeeklyBarCurrency('CAD')" title="Display weekly change in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-weekly-cur-usd" onclick="setWeeklyBarCurrency('USD')" title="Display weekly change in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="weekly-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-weekly-unit-val" class="kt-btn kt-btn--accent active" onclick="setWeeklyBarUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display dollar change ($)">$</button>
-                            <button type="button" id="btn-weekly-unit-pct" class="kt-btn kt-btn--accent" onclick="setWeeklyBarUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display percentage change (%)">%</button>
+                        <div class="kt-segmented kt-segmented--sm" id="weekly-unit-toggle" role="group">
+                            <button type="button" id="btn-weekly-unit-val" class="is-active" onclick="setWeeklyBarUnit('VAL')" title="Display dollar change ($)">$</button>
+                            <button type="button" id="btn-weekly-unit-pct" onclick="setWeeklyBarUnit('PCT')" title="Display percentage change (%)">%</button>
                         </div>
                     </div>
                 </div>
@@ -456,14 +456,14 @@
                         <h2 id="drawdown-chart-title" style="margin: 0; font-size: 1.15rem;">📉 Portfolio Drawdown from Peak (Underwater Chart)</h2>
                     </div>
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto;">
-                        <div class="currency-toggle" id="drawdown-currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-dd-cur-cad" class="kt-btn kt-btn--accent active" onclick="setDrawdownCurrency('CAD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
-                            <button type="button" id="btn-dd-cur-usd" class="kt-btn kt-btn--accent" onclick="setDrawdownCurrency('USD')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display values in US Dollars (USD $)">USD ($)</button>
+                        <div class="kt-segmented kt-segmented--sm" id="drawdown-currency-toggle" role="group">
+                            <button type="button" id="btn-dd-cur-cad" class="is-active" onclick="setDrawdownCurrency('CAD')" title="Display values in Canadian Dollars (CAD $)">CAD ($)</button>
+                            <button type="button" id="btn-dd-cur-usd" onclick="setDrawdownCurrency('USD')" title="Display values in US Dollars (USD $)">USD ($)</button>
                         </div>
-                        <div class="unit-toggle" id="drawdown-unit-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-dd-unit-val" class="kt-btn kt-btn--accent" onclick="setDrawdownUnit('VAL')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;" title="Display drawdown in Currency ($)">$</button>
-                            <button type="button" id="btn-dd-unit-pct" class="kt-btn kt-btn--accent active" onclick="setDrawdownUnit('PCT')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;" title="Display drawdown in Percentage (%)">%</button>
-                            <button type="button" id="btn-dd-unit-weeks" class="kt-btn kt-btn--accent" onclick="setDrawdownUnit('WEEKS')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;" title="Display setback in Weeks Back (Time Back)">📅</button>
+                        <div class="kt-segmented kt-segmented--sm" id="drawdown-unit-toggle" role="group">
+                            <button type="button" id="btn-dd-unit-val" onclick="setDrawdownUnit('VAL')" title="Display drawdown in Currency ($)">$</button>
+                            <button type="button" id="btn-dd-unit-pct" class="is-active" onclick="setDrawdownUnit('PCT')" title="Display drawdown in Percentage (%)">%</button>
+                            <button type="button" id="btn-dd-unit-weeks" onclick="setDrawdownUnit('WEEKS')" title="Display setback in Weeks Back (Time Back)">📅</button>
                         </div>
                     </div>
                 </div>

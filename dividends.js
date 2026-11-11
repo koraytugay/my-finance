@@ -348,11 +348,11 @@ function syncViewToggleUI() {
     const btnNet = document.getElementById('btn-mode-net');
     const btnGross = document.getElementById('btn-mode-gross');
     if (cashflowMode === 'net') {
-        btnNet.classList.add('active');
-        btnGross.classList.remove('active');
+        btnNet.classList.add('is-active');
+        btnGross.classList.remove('is-active');
     } else {
-        btnGross.classList.add('active');
-        btnNet.classList.remove('active');
+        btnGross.classList.add('is-active');
+        btnNet.classList.remove('is-active');
     }
 }
 

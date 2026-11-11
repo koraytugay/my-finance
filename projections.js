@@ -61,19 +61,15 @@ async function initProjections() {
 
 function setInflationMode(mode) {
     inflationMode = mode;
-    document.getElementById('btn-mode-nominal').classList.toggle('active', mode === 'nominal');
-    document.getElementById('btn-mode-real').classList.toggle('active', mode === 'real');
+    document.getElementById('btn-mode-nominal').classList.toggle('is-active', mode === 'nominal');
+    document.getElementById('btn-mode-real').classList.toggle('is-active', mode === 'real');
 
     if (mode === 'nominal') {
-        document.getElementById('btn-mode-nominal').style.background = '#1f2328';
-        document.getElementById('btn-mode-nominal').style.color = '#fff';
-        document.getElementById('btn-mode-real').style.background = '#fff';
-        document.getElementById('btn-mode-real').style.color = '#24292f';
+        document.getElementById('btn-mode-nominal').classList.add('is-active');
+        document.getElementById('btn-mode-real').classList.remove('is-active');
     } else {
-        document.getElementById('btn-mode-real').style.background = '#1f2328';
-        document.getElementById('btn-mode-real').style.color = '#fff';
-        document.getElementById('btn-mode-nominal').style.background = '#fff';
-        document.getElementById('btn-mode-nominal').style.color = '#24292f';
+        document.getElementById('btn-mode-real').classList.add('is-active');
+        document.getElementById('btn-mode-nominal').classList.remove('is-active');
     }
 
     runProjections();

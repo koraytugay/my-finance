@@ -224,10 +224,10 @@
                     <!-- Inflation Rate Selector Pills -->
                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                         <span style="font-size: 0.78rem; font-weight: 700; color: #475569;">Annual Inflation:</span>
-                        <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-inf-3" class="kt-btn kt-btn--accent" onclick="setInflationRate(3.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;">3.0% (BoC CPI)</button>
-                            <button type="button" id="btn-inf-5" class="kt-btn kt-btn--accent active" onclick="setInflationRate(5.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;">5.0% (Prudent)</button>
-                            <button type="button" id="btn-inf-7" class="kt-btn kt-btn--accent" onclick="setInflationRate(7.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">7.0% (High)</button>
+                        <div class="kt-segmented kt-segmented--sm" role="group">
+                            <button type="button" id="btn-inf-3" onclick="setInflationRate(3.0)">3.0% (BoC CPI)</button>
+                            <button type="button" id="btn-inf-5" class="is-active" onclick="setInflationRate(5.0)">5.0% (Prudent)</button>
+                            <button type="button" id="btn-inf-7" onclick="setInflationRate(7.0)">7.0% (High)</button>
                         </div>
                     </div>
                 </div>
@@ -488,10 +488,10 @@
                                     Normalized return comparison over 52 consecutive elapsed weeks starting at 0.00%.
                                 </p>
                             </div>
-                            <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; margin-left: auto;">
-                                <button type="button" id="btn-r52-overlay-pct" class="kt-btn kt-btn--accent active" onclick="setRolling52OverlayMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
-                                <button type="button" id="btn-r52-overlay-cad" class="kt-btn kt-btn--accent" onclick="setRolling52OverlayMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD</button>
-                                <button type="button" id="btn-r52-overlay-usd" class="kt-btn kt-btn--accent" onclick="setRolling52OverlayMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD</button>
+                            <div class="kt-segmented kt-segmented--sm kt-ml-auto" role="group">
+                                <button type="button" id="btn-r52-overlay-pct" class="is-active" onclick="setRolling52OverlayMetric('pct')">% Return</button>
+                                <button type="button" id="btn-r52-overlay-cad" onclick="setRolling52OverlayMetric('cad')">$ CAD</button>
+                                <button type="button" id="btn-r52-overlay-usd" onclick="setRolling52OverlayMetric('usd')">$ USD</button>
                             </div>
                         </div>
                         <div id="r52-overlay-legend" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 0.78rem; font-weight: 700; margin-bottom: 12px;">
@@ -541,10 +541,10 @@
                                     <span id="r52-xeqt-check" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
                                     Overlay XEQT Benchmark
                                 </button>
-                                <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                                    <button type="button" id="btn-r52-metric-pct" class="kt-btn kt-btn--accent active" onclick="setRolling52TimelineMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
-                                    <button type="button" id="btn-r52-metric-cad" class="kt-btn kt-btn--accent" onclick="setRolling52TimelineMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD Gain</button>
-                                    <button type="button" id="btn-r52-metric-usd" class="kt-btn kt-btn--accent" onclick="setRolling52TimelineMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD Gain</button>
+                                <div class="kt-segmented kt-segmented--sm" role="group">
+                                    <button type="button" id="btn-r52-metric-pct" class="is-active" onclick="setRolling52TimelineMetric('pct')">% Return</button>
+                                    <button type="button" id="btn-r52-metric-cad" onclick="setRolling52TimelineMetric('cad')">$ CAD Gain</button>
+                                    <button type="button" id="btn-r52-metric-usd" onclick="setRolling52TimelineMetric('usd')">$ USD Gain</button>
                                 </div>
                             </div>
                         </div>

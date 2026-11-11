@@ -1194,38 +1194,38 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       state = getMainChartState();
       assert.equal(state.currentMainCurrency, 'USD');
       assert.equal(state.currentMainUnit, 'VAL');
-      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
-      assert.ok(mockButtons['btn-main-unit-val'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('is-active'));
+      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('is-active'));
+      assert.ok(mockButtons['btn-main-unit-val'].classList.has('is-active'));
+      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('is-active'));
 
       // Switch unit to % (PCT) - currency remains USD and stays highlighted!
       setMainUnit('PCT');
       state = getMainChartState();
       assert.equal(state.currentMainUnit, 'PCT');
       assert.equal(state.currentMainCurrency, 'USD');
-      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-unit-val'].classList.has('active'));
-      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('active'), 'USD remains active even when in % mode');
-      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('is-active'));
+      assert.ok(!mockButtons['btn-main-unit-val'].classList.has('is-active'));
+      assert.ok(mockButtons['btn-main-cur-usd'].classList.has('is-active'), 'USD remains active even when in % mode');
+      assert.ok(!mockButtons['btn-main-cur-cad'].classList.has('is-active'));
 
       // Switch currency to CAD - unit remains % and stays highlighted!
       setMainCurrency('CAD');
       state = getMainChartState();
       assert.equal(state.currentMainCurrency, 'CAD');
       assert.equal(state.currentMainUnit, 'PCT');
-      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-cur-usd'].classList.has('active'));
-      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('active'), '% remains active when switching currency');
+      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('is-active'));
+      assert.ok(!mockButtons['btn-main-cur-usd'].classList.has('is-active'));
+      assert.ok(mockButtons['btn-main-unit-pct'].classList.has('is-active'), '% remains active when switching currency');
 
       // Switch unit to $ (VAL)
       setMainUnit('VAL');
       state = getMainChartState();
       assert.equal(state.currentMainUnit, 'VAL');
       assert.equal(state.currentMainCurrency, 'CAD');
-      assert.ok(mockButtons['btn-main-unit-val'].classList.has('active'));
-      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('active'));
-      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('active'));
+      assert.ok(mockButtons['btn-main-unit-val'].classList.has('is-active'));
+      assert.ok(!mockButtons['btn-main-unit-pct'].classList.has('is-active'));
+      assert.ok(mockButtons['btn-main-cur-cad'].classList.has('is-active'));
 
       // Reset restores CAD and VAL
       resetMainChartState();

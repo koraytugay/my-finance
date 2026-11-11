@@ -668,8 +668,8 @@ function setInflationRate(rate) {
     const btn5 = document.getElementById('btn-inf-5');
     const btn7 = document.getElementById('btn-inf-7');
 
-    const resetBtn = b => { if (b) { b.style.background = 'white'; b.style.color = '#24292f'; } };
-    const setBtn = b => { if (b) { b.style.background = '#1f2328'; b.style.color = 'white'; } };
+    const resetBtn = b => { if (b) { b.classList.remove('is-active'); } };
+    const setBtn = b => { if (b) { b.classList.add('is-active'); } };
 
     resetBtn(btn3);
     resetBtn(btn5);
@@ -834,17 +834,16 @@ function setRolling52OverlayMetric(metric) {
 
     [btnPct, btnCad, btnUsd].forEach(btn => {
         if (btn) {
-            btn.style.background = 'white';
-            btn.style.color = '#24292f';
+            btn.classList.remove('is-active');
         }
     });
 
     if (metric === 'cad') {
-        if (btnCad) { btnCad.style.background = '#1f2328'; btnCad.style.color = 'white'; }
+        if (btnCad) { btnCad.classList.add('is-active'); }
     } else if (metric === 'usd') {
-        if (btnUsd) { btnUsd.style.background = '#1f2328'; btnUsd.style.color = 'white'; }
+        if (btnUsd) { btnUsd.classList.add('is-active'); }
     } else {
-        if (btnPct) { btnPct.style.background = '#1f2328'; btnPct.style.color = 'white'; }
+        if (btnPct) { btnPct.classList.add('is-active'); }
     }
 
     renderRolling52Charts();
@@ -858,17 +857,16 @@ function setRolling52TimelineMetric(metric) {
 
     [btnPct, btnCad, btnUsd].forEach(btn => {
         if (btn) {
-            btn.style.background = 'white';
-            btn.style.color = '#24292f';
+            btn.classList.remove('is-active');
         }
     });
 
     if (metric === 'cad') {
-        if (btnCad) { btnCad.style.background = '#1f2328'; btnCad.style.color = 'white'; }
+        if (btnCad) { btnCad.classList.add('is-active'); }
     } else if (metric === 'usd') {
-        if (btnUsd) { btnUsd.style.background = '#1f2328'; btnUsd.style.color = 'white'; }
+        if (btnUsd) { btnUsd.classList.add('is-active'); }
     } else {
-        if (btnPct) { btnPct.style.background = '#1f2328'; btnPct.style.color = 'white'; }
+        if (btnPct) { btnPct.classList.add('is-active'); }
     }
 
     renderRolling52Charts();
@@ -1202,14 +1200,14 @@ function renderRolling52Charts() {
     const btnOvCad = document.getElementById('btn-r52-overlay-cad');
     const btnOvUsd = document.getElementById('btn-r52-overlay-usd');
     [btnOvPct, btnOvCad, btnOvUsd].forEach(btn => {
-        if (btn) { btn.style.background = 'white'; btn.style.color = '#24292f'; }
+        if (btn) { btn.classList.remove('is-active'); }
     });
     if (rolling52OverlayMetric === 'cad') {
-        if (btnOvCad) { btnOvCad.style.background = '#1f2328'; btnOvCad.style.color = 'white'; }
+        if (btnOvCad) { btnOvCad.classList.add('is-active'); }
     } else if (rolling52OverlayMetric === 'usd') {
-        if (btnOvUsd) { btnOvUsd.style.background = '#1f2328'; btnOvUsd.style.color = 'white'; }
+        if (btnOvUsd) { btnOvUsd.classList.add('is-active'); }
     } else {
-        if (btnOvPct) { btnOvPct.style.background = '#1f2328'; btnOvPct.style.color = 'white'; }
+        if (btnOvPct) { btnOvPct.classList.add('is-active'); }
     }
 
     // Update Overlay Legend values

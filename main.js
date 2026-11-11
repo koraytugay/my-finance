@@ -974,20 +974,15 @@ function updateMainTimeframeButtonsUI() {
         const tf = btn.getAttribute('data-timeframe');
         if (tf === 'all') {
             const isActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
-            btn.classList.toggle('active', isActive);
-            btn.style.background = isActive ? '#1f2328' : 'white';
-            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.classList.toggle('is-active', isActive);
         } else if (tf === 'last-52') {
             const isActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'last-52';
-            btn.classList.toggle('active', isActive);
-            btn.style.background = isActive ? '#1f2328' : 'white';
-            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.classList.toggle('is-active', isActive);
         } else if (/^\d{4}$/.test(tf)) {
             const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(tf);
-            btn.classList.toggle('active', isActive);
+            btn.classList.toggle('is-active', isActive);
             const yrColor = getMainYearColor(tf);
-            btn.style.background = isActive ? yrColor : 'white';
-            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.style.setProperty('--kt-segmented-active-bg', yrColor);
             btn.title = isActive ? `Year ${tf} (Active - click to hide)` : `Year ${tf} (Click to overlay)`;
         }
     });
@@ -1067,13 +1062,10 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
     if (availableYears.length === 0) return;
 
     let html = '';
-    availableYears.forEach((year, idx) => {
+    availableYears.forEach(year => {
         const isActive = currentTimeframe === year;
-        const bg = isActive ? '#1f2328' : 'white';
-        const color = isActive ? 'white' : '#24292f';
-        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
         html += `
-            <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} ${titleSuffix}">${year}</button>
+            <button type="button" class="timeframe-pill ${isActive ? 'is-active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" title="Show Year ${year} ${titleSuffix}">${year}</button>
         `;
     });
 
@@ -1081,8 +1073,8 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
     const isAllActive = currentTimeframe === 'all';
 
     html += `
-        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
-        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time ${titleSuffix}">All Time</button>
+        <button type="button" class="timeframe-pill ${isLast52Active ? 'is-active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
+        <button type="button" class="timeframe-pill ${isAllActive ? 'is-active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" title="Show All-Time ${titleSuffix}">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1101,14 +1093,11 @@ function syncMainTimeframeButtons(history) {
 
     let html = '';
 
-    availableYears.forEach((year, idx) => {
+    availableYears.forEach(year => {
         const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(year);
         const yrColor = getMainYearColor(year);
-        const bg = isActive ? yrColor : 'white';
-        const color = isActive ? 'white' : '#24292f';
-        const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
         html += `
-            <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
+            <button type="button" class="timeframe-pill ${isActive ? 'is-active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="--kt-segmented-active-bg: ${yrColor}" title="Toggle Year ${year} overlay">${year}</button>
         `;
     });
 
@@ -1116,8 +1105,8 @@ function syncMainTimeframeButtons(history) {
     const isAllActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
 
     html += `
-        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
-        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
+        <button type="button" class="timeframe-pill ${isLast52Active ? 'is-active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" title="Show Last 52 Weeks graph">Last 52W</button>
+        <button type="button" class="timeframe-pill ${isAllActive ? 'is-active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" title="Show All-Time historical graph">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1198,29 +1187,21 @@ function updateMainUnitButtonsUI() {
 
     if (btnCad) {
         const isActive = currentMainCurrency === 'CAD';
-        btnCad.classList.toggle('active', isActive);
-        btnCad.style.background = isActive ? '#1f2328' : 'white';
-        btnCad.style.color = isActive ? 'white' : '#24292f';
+        btnCad.classList.toggle('is-active', isActive);
     }
     if (btnUsd) {
         const isActive = currentMainCurrency === 'USD';
-        btnUsd.classList.toggle('active', isActive);
-        btnUsd.style.background = isActive ? '#1f2328' : 'white';
-        btnUsd.style.color = isActive ? 'white' : '#24292f';
+        btnUsd.classList.toggle('is-active', isActive);
     }
 
     const isPct = currentMainUnit === 'PCT';
     if (btnVal) {
         const isActive = !isPct;
-        btnVal.classList.toggle('active', isActive);
-        btnVal.style.background = isActive ? '#1f2328' : 'white';
-        btnVal.style.color = isActive ? 'white' : '#24292f';
+        btnVal.classList.toggle('is-active', isActive);
     }
     if (btnPct) {
         const isActive = isPct;
-        btnPct.classList.toggle('active', isActive);
-        btnPct.style.background = isActive ? '#1f2328' : 'white';
-        btnPct.style.color = isActive ? 'white' : '#24292f';
+        btnPct.classList.toggle('is-active', isActive);
     }
 }
 
@@ -3050,9 +3031,7 @@ function updateXeqtRelControlsUI() {
         buttons.forEach(btn => {
             const tf = btn.getAttribute('data-timeframe');
             const isActive = currentXeqtRelTimeframe === tf;
-            btn.classList.toggle('active', isActive);
-            btn.style.background = isActive ? '#1f2328' : 'white';
-            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.classList.toggle('is-active', isActive);
         });
     }
 
@@ -3060,29 +3039,21 @@ function updateXeqtRelControlsUI() {
     const btnUsd = document.getElementById('btn-xeqt-rel-cur-usd');
     if (btnCad) {
         const isActive = currentXeqtRelCurrency === 'CAD';
-        btnCad.classList.toggle('active', isActive);
-        btnCad.style.background = isActive ? '#1f2328' : 'white';
-        btnCad.style.color = isActive ? 'white' : '#24292f';
+        btnCad.classList.toggle('is-active', isActive);
     }
     if (btnUsd) {
         const isActive = currentXeqtRelCurrency === 'USD';
-        btnUsd.classList.toggle('active', isActive);
-        btnUsd.style.background = isActive ? '#1f2328' : 'white';
-        btnUsd.style.color = isActive ? 'white' : '#24292f';
+        btnUsd.classList.toggle('is-active', isActive);
     }
 
     const btnPct = document.getElementById('btn-xeqt-rel-unit-pct');
     const btnVal = document.getElementById('btn-xeqt-rel-unit-val');
     const isPct = currentXeqtRelUnit === 'PCT';
     if (btnPct) {
-        btnPct.classList.toggle('active', isPct);
-        btnPct.style.background = isPct ? '#1f2328' : 'white';
-        btnPct.style.color = isPct ? 'white' : '#24292f';
+        btnPct.classList.toggle('is-active', isPct);
     }
     if (btnVal) {
-        btnVal.classList.toggle('active', !isPct);
-        btnVal.style.background = !isPct ? '#1f2328' : 'white';
-        btnVal.style.color = !isPct ? 'white' : '#24292f';
+        btnVal.classList.toggle('is-active', !isPct);
     }
 }
 
@@ -3490,9 +3461,7 @@ function updateXeqtWeeklyControlsUI() {
         buttons.forEach(btn => {
             const tf = btn.getAttribute('data-timeframe');
             const isActive = currentXeqtWeeklyTimeframe === tf;
-            btn.classList.toggle('active', isActive);
-            btn.style.background = isActive ? '#1f2328' : 'white';
-            btn.style.color = isActive ? 'white' : '#24292f';
+            btn.classList.toggle('is-active', isActive);
         });
     }
 
@@ -3500,29 +3469,21 @@ function updateXeqtWeeklyControlsUI() {
     const btnUsd = document.getElementById('btn-xeqt-weekly-cur-usd');
     if (btnCad) {
         const isActive = currentXeqtWeeklyCurrency === 'CAD';
-        btnCad.classList.toggle('active', isActive);
-        btnCad.style.background = isActive ? '#1f2328' : 'white';
-        btnCad.style.color = isActive ? 'white' : '#24292f';
+        btnCad.classList.toggle('is-active', isActive);
     }
     if (btnUsd) {
         const isActive = currentXeqtWeeklyCurrency === 'USD';
-        btnUsd.classList.toggle('active', isActive);
-        btnUsd.style.background = isActive ? '#1f2328' : 'white';
-        btnUsd.style.color = isActive ? 'white' : '#24292f';
+        btnUsd.classList.toggle('is-active', isActive);
     }
 
     const btnPct = document.getElementById('btn-xeqt-weekly-unit-pct');
     const btnVal = document.getElementById('btn-xeqt-weekly-unit-val');
     const isPct = currentXeqtWeeklyUnit === 'PCT';
     if (btnPct) {
-        btnPct.classList.toggle('active', isPct);
-        btnPct.style.background = isPct ? '#1f2328' : 'white';
-        btnPct.style.color = isPct ? 'white' : '#24292f';
+        btnPct.classList.toggle('is-active', isPct);
     }
     if (btnVal) {
-        btnVal.classList.toggle('active', !isPct);
-        btnVal.style.background = !isPct ? '#1f2328' : 'white';
-        btnVal.style.color = !isPct ? 'white' : '#24292f';
+        btnVal.classList.toggle('is-active', !isPct);
     }
 }
 
@@ -3988,12 +3949,8 @@ function setAthBarCurrency(currency) {
         const btnCad = document.getElementById('btn-ath-cur-cad');
         const btnUsd = document.getElementById('btn-ath-cur-usd');
         if (btnCad && btnUsd) {
-            btnCad.classList.toggle('active', currency === 'CAD');
-            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
-            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
-            btnUsd.classList.toggle('active', currency === 'USD');
-            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
-            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+            btnCad.classList.toggle('is-active', currency === 'CAD');
+            btnUsd.classList.toggle('is-active', currency === 'USD');
         }
     }
     renderAthBarChart();
@@ -4007,12 +3964,8 @@ function setAthBarUnit(unit) {
         const btnVal = document.getElementById('btn-ath-unit-val');
         const btnPct = document.getElementById('btn-ath-unit-pct');
         if (btnVal && btnPct) {
-            btnVal.classList.toggle('active', unit === 'VAL');
-            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
-            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
-            btnPct.classList.toggle('active', unit === 'PCT');
-            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
-            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+            btnVal.classList.toggle('is-active', unit === 'VAL');
+            btnPct.classList.toggle('is-active', unit === 'PCT');
         }
     }
     renderAthBarChart();
@@ -4623,12 +4576,8 @@ function setHeatmapCurrency(currency) {
         const btnCad = document.getElementById('btn-heatmap-cur-cad');
         const btnUsd = document.getElementById('btn-heatmap-cur-usd');
         if (btnCad && btnUsd) {
-            btnCad.classList.toggle('active', currency === 'CAD');
-            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
-            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
-            btnUsd.classList.toggle('active', currency === 'USD');
-            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
-            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+            btnCad.classList.toggle('is-active', currency === 'CAD');
+            btnUsd.classList.toggle('is-active', currency === 'USD');
         }
     }
     renderMonthlyHeatmap();
@@ -4642,12 +4591,8 @@ function setHeatmapUnit(unit) {
         const btnVal = document.getElementById('btn-heatmap-unit-val');
         const btnPct = document.getElementById('btn-heatmap-unit-pct');
         if (btnVal && btnPct) {
-            btnVal.classList.toggle('active', unit === 'VAL');
-            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
-            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
-            btnPct.classList.toggle('active', unit === 'PCT');
-            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
-            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+            btnVal.classList.toggle('is-active', unit === 'VAL');
+            btnPct.classList.toggle('is-active', unit === 'PCT');
         }
     }
     renderMonthlyHeatmap();
@@ -4823,9 +4768,7 @@ function setWeeklyBarTimeframe(tf) {
             buttons.forEach(btn => {
                 const btnTf = btn.getAttribute('data-timeframe');
                 const isActive = btnTf === tf;
-                btn.classList.toggle('active', isActive);
-                btn.style.background = isActive ? '#1f2328' : 'white';
-                btn.style.color = isActive ? 'white' : '#24292f';
+                btn.classList.toggle('is-active', isActive);
             });
         }
     }
@@ -4844,12 +4787,8 @@ function setWeeklyBarCurrency(currency) {
         const btnCad = document.getElementById('btn-weekly-cur-cad');
         const btnUsd = document.getElementById('btn-weekly-cur-usd');
         if (btnCad && btnUsd) {
-            btnCad.classList.toggle('active', currency === 'CAD');
-            btnCad.style.background = currency === 'CAD' ? '#1f2328' : 'white';
-            btnCad.style.color = currency === 'CAD' ? 'white' : '#24292f';
-            btnUsd.classList.toggle('active', currency === 'USD');
-            btnUsd.style.background = currency === 'USD' ? '#1f2328' : 'white';
-            btnUsd.style.color = currency === 'USD' ? 'white' : '#24292f';
+            btnCad.classList.toggle('is-active', currency === 'CAD');
+            btnUsd.classList.toggle('is-active', currency === 'USD');
         }
     }
     renderWeeklyBarChart();
@@ -4863,12 +4802,8 @@ function setWeeklyBarUnit(unit) {
         const btnVal = document.getElementById('btn-weekly-unit-val');
         const btnPct = document.getElementById('btn-weekly-unit-pct');
         if (btnVal && btnPct) {
-            btnVal.classList.toggle('active', unit === 'VAL');
-            btnVal.style.background = unit === 'VAL' ? '#1f2328' : 'white';
-            btnVal.style.color = unit === 'VAL' ? 'white' : '#24292f';
-            btnPct.classList.toggle('active', unit === 'PCT');
-            btnPct.style.background = unit === 'PCT' ? '#1f2328' : 'white';
-            btnPct.style.color = unit === 'PCT' ? 'white' : '#24292f';
+            btnVal.classList.toggle('is-active', unit === 'VAL');
+            btnPct.classList.toggle('is-active', unit === 'PCT');
         }
     }
     renderWeeklyBarChart();
@@ -5175,19 +5110,15 @@ function updateDrawdownControlsUI() {
 
     if (btnCad && btnUsd) {
         if (currentDrawdownCurrency === 'CAD') {
-            btnCad.classList.add('active');
-            btnCad.style.background = '#1f2328';
-            btnCad.style.color = '#fff';
-            btnUsd.classList.remove('active');
-            btnUsd.style.background = '#fff';
-            btnUsd.style.color = '#24292f';
+            btnCad.classList.add('is-active');
+            btnCad.classList.add('is-active');
+            btnUsd.classList.remove('is-active');
+            btnUsd.classList.remove('is-active');
         } else {
-            btnUsd.classList.add('active');
-            btnUsd.style.background = '#1f2328';
-            btnUsd.style.color = '#fff';
-            btnCad.classList.remove('active');
-            btnCad.style.background = '#fff';
-            btnCad.style.color = '#24292f';
+            btnUsd.classList.add('is-active');
+            btnUsd.classList.add('is-active');
+            btnCad.classList.remove('is-active');
+            btnCad.classList.remove('is-active');
         }
     }
 
@@ -5200,13 +5131,11 @@ function updateDrawdownControlsUI() {
     unitButtons.forEach(({ btn, unit }) => {
         if (!btn) return;
         if (currentDrawdownUnit === unit) {
-            btn.classList.add('active');
-            btn.style.background = '#1f2328';
-            btn.style.color = '#fff';
+            btn.classList.add('is-active');
+            btn.classList.add('is-active');
         } else {
-            btn.classList.remove('active');
-            btn.style.background = '#fff';
-            btn.style.color = '#24292f';
+            btn.classList.remove('is-active');
+            btn.classList.remove('is-active');
         }
     });
 }

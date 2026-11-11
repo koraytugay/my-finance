@@ -163,9 +163,9 @@
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Currency View:</span>
-                        <div class="currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-mode-nominal" class="kt-btn kt-btn--accent active" onclick="setInflationMode('nominal')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">Nominal (Future $)</button>
-                            <button type="button" id="btn-mode-real" class="kt-btn kt-btn--accent" onclick="setInflationMode('real')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">Real (Today's Power)</button>
+                        <div class="kt-segmented kt-segmented--sm" role="group">
+                            <button type="button" id="btn-mode-nominal" class="is-active" onclick="setInflationMode('nominal')">Nominal (Future $)</button>
+                            <button type="button" id="btn-mode-real" onclick="setInflationMode('real')">Real (Today's Power)</button>
                         </div>
                     </div>
                 </div>

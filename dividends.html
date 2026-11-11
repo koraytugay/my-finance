@@ -28,34 +28,6 @@
         .pill-cash-tax { background: #fee2e2; color: #b91c1c; }
         .pill-blended { background: #f1f5f9; color: #334155; }
 
-        .view-toggle {
-            display: inline-flex;
-            background: #e2e8f0;
-            padding: 3px;
-            border-radius: 8px;
-            gap: 2px;
-        }
-        .view-toggle-btn {
-            border: none;
-            background: transparent;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            color: #475569;
-            transition: all 0.15s ease;
-            font-family: inherit;
-        }
-        .view-toggle-btn:hover {
-            color: #0f172a;
-        }
-        .view-toggle-btn.active {
-            background: #ffffff;
-            color: #0f172a;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
         .tax-shelter-card {
             background: white;
             border-radius: 10px;
@@ -161,9 +133,9 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     <span style="font-weight: 700; font-size: 0.85rem; color: #475569;">Cashflow Focus:</span>
-                    <div class="view-toggle">
-                        <button id="btn-mode-net" class="view-toggle-btn active" onclick="setCashflowMode('net')">💰 After-Tax (In-Pocket)</button>
-                        <button id="btn-mode-gross" class="view-toggle-btn" onclick="setCashflowMode('gross')">📊 Pre-Tax (Gross)</button>
+                    <div class="kt-segmented kt-segmented--sm" role="group">
+                        <button id="btn-mode-net" class="is-active" onclick="setCashflowMode('net')">💰 After-Tax (In-Pocket)</button>
+                        <button id="btn-mode-gross" onclick="setCashflowMode('gross')">📊 Pre-Tax (Gross)</button>
                     </div>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
