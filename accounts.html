@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Accounts &amp; Brokerages</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <style>
         .group-card {
             background: white;
@@ -62,68 +63,68 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Accounts &amp; Brokerages</h1>
-            <p class="subtitle">Tax Wrapper Structure &amp; Institution Breakdown</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">Accounts &amp; Brokerages</h1>
+            <p class="kt-page-subtitle">Tax Wrapper Structure &amp; Institution Breakdown</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link">Net Worth History</a>
-                <a href="allocation.html" class="nav-link">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link active">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link">Financial Stats</a>
-                <a href="performance.html" class="nav-link">Performance</a>
-                <a href="projections.html" class="nav-link">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link" aria-current="page">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link">Performance</a>
+                <a href="projections.html" class="kt-nav__link">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Loading account details...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="accounts-content" style="display: none;">
             <!-- Top Stat Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-registered">$0.00</span>
-                    <span class="stat-label">Registered Accounts</span>
-                    <span class="stat-sub" id="stat-registered-pct">RRSP + TFSA + FHSA</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-registered">$0.00</span>
+                    <span class="kt-stat__label">Registered Accounts</span>
+                    <span class="kt-stat__sub" id="stat-registered-pct">RRSP + TFSA + FHSA</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-nonregistered">$0.00</span>
-                    <span class="stat-label">Non-Registered Accounts</span>
-                    <span class="stat-sub" id="stat-nonregistered-pct">Taxable investments</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-nonregistered">$0.00</span>
+                    <span class="kt-stat__label">Non-Registered Accounts</span>
+                    <span class="kt-stat__sub" id="stat-nonregistered-pct">Taxable investments</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-cash-total">$0.00</span>
-                    <span class="stat-label">Cash Reserves</span>
-                    <span class="stat-sub" id="stat-cash-pct">Across all banks</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-cash-total">$0.00</span>
+                    <span class="kt-stat__label">Cash Reserves</span>
+                    <span class="kt-stat__sub" id="stat-cash-pct">Across all banks</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-top-brokerage">-</span>
-                    <span class="stat-label">Primary Brokerage</span>
-                    <span class="stat-sub" id="stat-top-brokerage-val">$0.00 CAD</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-top-brokerage">-</span>
+                    <span class="kt-stat__label">Primary Brokerage</span>
+                    <span class="kt-stat__sub" id="stat-top-brokerage-val">$0.00 CAD</span>
                 </div>
             </div>
 
             <!-- View Toggle Controls -->
-            <div class="controls">
-                <div class="controls-row">
-                    <div class="control-group">
-                        <label for="group-by-select">Group By:</label>
-                        <select id="group-by-select" onchange="renderGroupedViews()">
+            <div class="kt-toolbar">
+                <div class="kt-toolbar__row">
+                    <div class="kt-field kt-field--inline">
+                        <label class="kt-field__label" for="group-by-select">Group By:</label>
+                        <select class="kt-select" id="group-by-select" onchange="renderGroupedViews()">
                             <option value="brokerage">Brokerage / Financial Institution</option>
                             <option value="account-type">Account Type (Tax Wrapper)</option>
                             <option value="registered-status">Tax Status (Registered vs Taxable)</option>

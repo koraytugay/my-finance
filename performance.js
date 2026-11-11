@@ -1047,7 +1047,7 @@ function renderRolling52Charts() {
     if (!allHistory || allHistory.length < 52) {
         const wrap = document.getElementById('r52-charts-wrapper');
         if (wrap) {
-            wrap.innerHTML = `<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">At least 52 weeks of historical records are required to calculate rolling 52-week periods (currently ${allHistory ? allHistory.length : 0} weeks recorded).</p>`;
+            wrap.innerHTML = `<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least 52 weeks of historical records are required to calculate rolling 52-week periods (currently ${allHistory ? allHistory.length : 0} weeks recorded).</p>`;
         }
         return;
     }

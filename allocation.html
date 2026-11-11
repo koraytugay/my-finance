@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Asset Allocation</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <style>
         .alloc-grid {
             display: grid;
@@ -25,69 +26,69 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Asset Allocation</h1>
-            <p class="subtitle">Geographic Diversification &amp; Factor Tilt Analysis</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">Asset Allocation</h1>
+            <p class="kt-page-subtitle">Geographic Diversification &amp; Factor Tilt Analysis</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link">Net Worth History</a>
-                <a href="allocation.html" class="nav-link active">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link">Financial Stats</a>
-                <a href="performance.html" class="nav-link">Performance</a>
-                <a href="projections.html" class="nav-link">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link" aria-current="page">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link">Performance</a>
+                <a href="projections.html" class="kt-nav__link">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Analyzing asset allocation...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="alloc-content" style="display: none;">
             <!-- Top Stat Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-us">$0.00</span>
-                    <span class="stat-label">US Equities</span>
-                    <span class="stat-sub" id="alloc-us-pct">0.0%</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-us">$0.00</span>
+                    <span class="kt-stat__label">US Equities</span>
+                    <span class="kt-stat__sub" id="alloc-us-pct">0.0%</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-canada">$0.00</span>
-                    <span class="stat-label">Canadian Equities</span>
-                    <span class="stat-sub" id="alloc-canada-pct">0.0%</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-canada">$0.00</span>
+                    <span class="kt-stat__label">Canadian Equities</span>
+                    <span class="kt-stat__sub" id="alloc-canada-pct">0.0%</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-dev">$0.00</span>
-                    <span class="stat-label">Developed Markets</span>
-                    <span class="stat-sub" id="alloc-dev-pct">0.0%</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-dev">$0.00</span>
+                    <span class="kt-stat__label">Developed Markets</span>
+                    <span class="kt-stat__sub" id="alloc-dev-pct">0.0%</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-em">$0.00</span>
-                    <span class="stat-label">Emerging Markets</span>
-                    <span class="stat-sub" id="alloc-em-pct">0.0%</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-em">$0.00</span>
+                    <span class="kt-stat__label">Emerging Markets</span>
+                    <span class="kt-stat__sub" id="alloc-em-pct">0.0%</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-fixed">$0.00</span>
-                    <span class="stat-label">Fixed Income &amp; Cash</span>
-                    <span class="stat-sub" id="alloc-fixed-pct">0.0%</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-fixed">$0.00</span>
+                    <span class="kt-stat__label">Fixed Income &amp; Cash</span>
+                    <span class="kt-stat__sub" id="alloc-fixed-pct">0.0%</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="alloc-alts">$0.00</span>
-                    <span class="stat-label">Metals &amp; Crypto</span>
-                    <span class="stat-sub" id="alloc-alts-pct">0.0%</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="alloc-alts">$0.00</span>
+                    <span class="kt-stat__label">Metals &amp; Crypto</span>
+                    <span class="kt-stat__sub" id="alloc-alts-pct">0.0%</span>
                 </div>
             </div>
 
@@ -119,7 +120,7 @@
             </div>
 
             <!-- Currency Exposure & FX Sensitivity Simulator (Feature 5) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🌐 Currency Exposure &amp; FX Sensitivity Simulator
@@ -216,7 +217,7 @@
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <span style="font-size: 0.85rem; font-weight: 800; color: #0969da;" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
-                            <button type="button" class="btn-secondary" onclick="resetFXSlider()" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
+                            <button type="button" class="kt-btn kt-btn--accent" onclick="resetFXSlider()" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
                         </div>
                     </div>
 
@@ -253,17 +254,17 @@
             </div>
 
             <!-- Simplified ETF & Cash Allocation Table (Aggregated) -->
-            <div class="content-section">
-                <div class="section-header">
+            <div class="kt-card kt-card--padded content-section">
+                <div class="kt-section-title">
                     <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                        <h2 class="section-title">ETF &amp; Cash Allocation</h2>
-                        <span id="simple-alloc-count" class="section-count">0 assets</span>
+                        <h2>ETF &amp; Cash Allocation</h2>
+                        <span id="simple-alloc-count" class="kt-badge kt-badge--pill kt-ml-auto">0 assets</span>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button type="button" class="btn-secondary" id="btn-copy-alloc-tsv" onclick="copySimpleAllocationTable('tsv')" title="Copy as tab-separated table (paste directly into Excel / Sheets / Notes)">
+                        <button type="button" class="kt-btn kt-btn--accent" id="btn-copy-alloc-tsv" onclick="copySimpleAllocationTable('tsv')" title="Copy as tab-separated table (paste directly into Excel / Sheets / Notes)">
                             📋 Copy Table
                         </button>
-                        <button type="button" class="btn-secondary" id="btn-copy-alloc-text" onclick="copySimpleAllocationTable('text')" title="Copy as clean text list">
+                        <button type="button" class="kt-btn kt-btn--accent" id="btn-copy-alloc-text" onclick="copySimpleAllocationTable('text')" title="Copy as clean text list">
                             📄 Copy Text
                         </button>
                     </div>
@@ -272,20 +273,20 @@
                     Overall portfolio allocation across ETFs and Cash, aggregated irrespective of account or brokerage. Simple format for copy-pasting.
                 </p>
 
-                <div class="table-responsive">
-                    <table class="data-table" id="simple-alloc-table">
+                <div class="kt-table-wrap">
+                    <table class="kt-table kt-table--hover" id="simple-alloc-table">
                         <thead>
                             <tr>
                                 <th onclick="sortSimpleAlloc('asset')" style="cursor: pointer;" title="Sort by Asset">
                                     Asset <span id="sort-icon-asset" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
                                 </th>
-                                <th class="text-right" onclick="sortSimpleAlloc('pct')" style="cursor: pointer;" title="Sort by Allocation">
+                                <th class="kt-align-right" onclick="sortSimpleAlloc('pct')" style="cursor: pointer;" title="Sort by Allocation">
                                     Allocation <span id="sort-icon-pct" style="font-size: 0.72rem; color: #0969da; margin-left: 2px;">▼</span>
                                 </th>
-                                <th class="text-right" onclick="sortSimpleAlloc('sum')" style="cursor: pointer;" title="Sort by Value">
+                                <th class="kt-align-right" onclick="sortSimpleAlloc('sum')" style="cursor: pointer;" title="Sort by Value">
                                     Value (CAD) <span id="sort-icon-sum" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
                                 </th>
-                                <th class="text-right" onclick="sortSimpleAlloc('gain')" style="cursor: pointer;" title="Sort by Unrealized Gain / Loss">
+                                <th class="kt-align-right" onclick="sortSimpleAlloc('gain')" style="cursor: pointer;" title="Sort by Unrealized Gain / Loss">
                                     Gain / Loss <span id="sort-icon-gain" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
                                 </th>
                             </tr>
@@ -301,27 +302,27 @@
             </div>
 
             <!-- Complete Asset Allocation Matrix Table -->
-            <div class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">Asset Allocation Matrix</h2>
-                    <span id="matrix-count" class="section-count">37 holdings</span>
+            <div class="kt-card kt-card--padded content-section">
+                <div class="kt-section-title">
+                    <h2>Asset Allocation Matrix</h2>
+                    <span id="matrix-count" class="kt-badge kt-badge--pill kt-ml-auto">37 holdings</span>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="data-table">
+                <div class="kt-table-wrap">
+                    <table class="kt-table kt-table--hover">
                         <thead>
                             <tr>
                                 <th>Ticker</th>
                                 <th>Fund / Asset Name</th>
                                 <th>Strategy</th>
-                                <th class="text-right">Total CAD</th>
-                                <th class="text-right">US</th>
-                                <th class="text-right">Canada</th>
-                                <th class="text-right">Developed</th>
-                                <th class="text-right">Emerging</th>
-                                <th class="text-right">Fixed</th>
-                                <th class="text-right">Metals</th>
-                                <th class="text-right">Crypto</th>
+                                <th class="kt-align-right">Total CAD</th>
+                                <th class="kt-align-right">US</th>
+                                <th class="kt-align-right">Canada</th>
+                                <th class="kt-align-right">Developed</th>
+                                <th class="kt-align-right">Emerging</th>
+                                <th class="kt-align-right">Fixed</th>
+                                <th class="kt-align-right">Metals</th>
+                                <th class="kt-align-right">Crypto</th>
                             </tr>
                         </thead>
                         <tbody id="matrix-tbody">

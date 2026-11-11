@@ -156,8 +156,8 @@ function renderGroupedViews() {
             const isSubReg = sg.isReg || (sg.title && /TFSA|RRSP|FHSA/i.test(sg.title));
             const subBadge = (groupBy === 'brokerage' || groupBy === 'registered-status')
                 ? (isSubReg 
-                    ? '<span class="badge badge-registered" style="margin-left: 6px;">Registered</span>' 
-                    : '<span class="badge badge-strategy" style="margin-left: 6px;">Non-Registered / Taxable</span>')
+                    ? '<span class="kt-badge kt-badge--soft-warning" style="margin-left: 6px;">Registered</span>' 
+                    : '<span class="kt-badge" style="margin-left: 6px;">Non-Registered / Taxable</span>')
                 : '';
 
             // 1. Sub-group Section Header Row
@@ -181,11 +181,11 @@ function renderGroupedViews() {
                     <tr>
                         <td style="padding-left: 24px;"><strong style="color: #0969da;">${escapeHtml(h.ticker)}</strong></td>
                         <td>${escapeHtml(h.name)}</td>
-                        <td><span class="badge badge-strategy">${escapeHtml(thirdColValue)}</span></td>
-                        <td class="text-right">${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
-                        <td class="text-right">${formatCurrency(h.unitPrice)}</td>
-                        <td class="text-right font-bold">${formatCurrency(h.sum)}</td>
-                        <td class="text-right">
+                        <td><span class="kt-badge">${escapeHtml(thirdColValue)}</span></td>
+                        <td class="kt-align-right">${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                        <td class="kt-align-right">${formatCurrency(h.unitPrice)}</td>
+                        <td class="kt-align-right kt-fw-bold">${formatCurrency(h.sum)}</td>
+                        <td class="kt-align-right">
                             <span style="font-weight: 600; color: #1f2328;">${hWeightSub.toFixed(1)}%</span>
                             <span style="color: #94a3b8; font-size: 0.74rem; margin-left: 4px;">(${hWeightGroup.toFixed(1)}%)</span>
                         </td>
@@ -208,10 +208,10 @@ function renderGroupedViews() {
                         Subtotal &bull; ${escapeHtml(sg.title)} (${sg.holdings.length} ${sg.holdings.length === 1 ? 'position' : 'positions'}):
                         ${gainText}
                     </td>
-                    <td class="text-right" style="font-weight: 800; color: #1e293b;">
+                    <td class="kt-align-right" style="font-weight: 800; color: #1e293b;">
                         ${formatCurrency(sg.total)}
                     </td>
-                    <td class="text-right" style="font-weight: 700; color: #0969da;">
+                    <td class="kt-align-right" style="font-weight: 700; color: #0969da;">
                         ${sgPctOfGroup.toFixed(1)}%
                     </td>
                 </tr>
@@ -226,10 +226,10 @@ function renderGroupedViews() {
                 <td colspan="5" style="text-align: right; padding-right: 14px;">
                     Total ${escapeHtml(group.title)} (${group.holdings.length} positions across ${sortedSubGroups.length} ${sortedSubGroups.length === 1 ? 'account' : 'accounts'}):
                 </td>
-                <td class="text-right" style="font-weight: 800;">
+                <td class="kt-align-right" style="font-weight: 800;">
                     ${formatCurrency(group.total)}
                 </td>
-                <td class="text-right" style="font-weight: 800;">
+                <td class="kt-align-right" style="font-weight: 800;">
                     100.0%
                 </td>
             </tr>
@@ -259,17 +259,17 @@ function renderGroupedViews() {
                     ${pillsHtml}
                 </div>
 
-                <div class="table-responsive">
-                    <table class="data-table">
+                <div class="kt-table-wrap">
+                    <table class="kt-table kt-table--hover">
                         <thead>
                             <tr>
                                 <th>Ticker</th>
                                 <th>Fund / Asset</th>
                                 <th>${escapeHtml(thirdColHeader)}</th>
-                                <th class="text-right">Shares</th>
-                                <th class="text-right">Price</th>
-                                <th class="text-right">Total CAD</th>
-                                <th class="text-right">% of Subgroup (of Total)</th>
+                                <th class="kt-align-right">Shares</th>
+                                <th class="kt-align-right">Price</th>
+                                <th class="kt-align-right">Total CAD</th>
+                                <th class="kt-align-right">% of Subgroup (of Total)</th>
                             </tr>
                         </thead>
                         <tbody>

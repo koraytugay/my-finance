@@ -734,7 +734,7 @@ function renderTableRows(items) {
                 <span>${escapeHtml(h.account)}</span>
                 <span style="font-size: 0.74rem; color: #64748b; margin-left: 4px;">(${escapeHtml(h.brokerage)})</span>
             </td>
-            <td><span class="badge badge-strategy">${escapeHtml(h.strategy || 'Broad Market')}</span></td>
+            <td><span class="kt-badge">${escapeHtml(h.strategy || 'Broad Market')}</span></td>
             <td style="text-align: right; font-weight: 600;">${formatCurrency(h.sum)}</td>
             <td style="text-align: right; font-weight: 700; color: ${h.yieldPct > 0 ? '#166534' : '#64748b'};">${h.yieldPct.toFixed(2)}%</td>
             <td style="text-align: right; font-weight: 700; color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>

@@ -590,7 +590,7 @@ function showUnlockModal(onSuccess) {
                             style="width: 100%; height: 40px; padding: 0 14px; font-size: 0.95rem; border: 1.5px solid #d0d7de; border-radius: 8px; box-sizing: border-box; text-align: center;">
                     </div>
                     <div id="unlock-error" style="color: #cf222e; font-size: 0.82rem; margin-bottom: 12px; display: none;"></div>
-                    <button type="submit" id="unlock-btn" class="btn-secondary" style="width: 100%; height: 40px; font-size: 0.95rem; font-weight: 700; background: #0969da; color: #fff; border-color: #0969da;">
+                    <button type="submit" id="unlock-btn" class="kt-btn kt-btn--accent" style="width: 100%; height: 40px; font-size: 0.95rem; font-weight: 700; background: #0969da; color: #fff; border-color: #0969da;">
                         Unlock Portfolio
                     </button>
                 </form>

@@ -70,11 +70,11 @@ function renderKeyMetrics() {
 
     document.getElementById('stat-best-week').textContent = `+${formatCurrency(best.weeklyChangeCAD)}`;
     document.getElementById('stat-best-week-date').textContent = `${formatDate(best.date)} (${formatPercent(best.weeklyChangePct, true)})`;
-    document.getElementById('stat-best-week').className = 'stat-number text-positive';
+    document.getElementById('stat-best-week').className = 'kt-stat__value kt-text-success';
 
     document.getElementById('stat-worst-week').textContent = formatCurrency(worst.weeklyChangeCAD);
     document.getElementById('stat-worst-week-date').textContent = `${formatDate(worst.date)} (${formatPercent(worst.weeklyChangePct, true)})`;
-    document.getElementById('stat-worst-week').className = 'stat-number text-negative';
+    document.getElementById('stat-worst-week').className = 'kt-stat__value kt-text-danger';
 }
 
 function renderTopHoldings() {
@@ -109,12 +109,12 @@ function renderAnnualTable() {
         return `
             <tr>
                 <td><strong>${r.year}</strong> <span style="font-size: 0.74rem; color: #64748b;">(${r.weeks} wks)</span></td>
-                <td class="text-right">${formatCurrency(r.startVal)}</td>
-                <td class="text-right font-bold">${formatCurrency(r.endVal)}</td>
-                <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
+                <td class="kt-align-right">${formatCurrency(r.startVal)}</td>
+                <td class="kt-align-right kt-fw-bold">${formatCurrency(r.endVal)}</td>
+                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${formatCurrency(r.netChange)}
                 </td>
-                <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${r.returnPct.toFixed(2)}%
                 </td>
             </tr>
@@ -138,10 +138,10 @@ function renderExtremeMoves() {
             <tr>
                 <td>${formatDate(r.date)}</td>
                 <td>Week ${r.week}</td>
-                <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${formatCurrency(r.weeklyChangeCAD)}
                 </td>
-                <td class="text-right font-bold ${isPos ? 'text-positive' : 'text-negative'}">
+                <td class="kt-align-right kt-fw-bold ${isPos ? 'kt-text-success' : 'kt-text-danger'}">
                     ${isPos ? '+' : ''}${r.weeklyChangePct.toFixed(2)}%
                 </td>
             </tr>

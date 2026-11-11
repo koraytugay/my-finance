@@ -1073,7 +1073,7 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
         const color = isActive ? 'white' : '#24292f';
         const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
         html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} ${titleSuffix}">${year}</button>
+            <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="${setterFnName}('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Show Year ${year} ${titleSuffix}">${year}</button>
         `;
     });
 
@@ -1081,8 +1081,8 @@ function renderStandardTimeframePills(containerId, history, currentTimeframe, se
     const isAllActive = currentTimeframe === 'all';
 
     html += `
-        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
-        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time ${titleSuffix}">All Time</button>
+        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="${setterFnName}('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks ${titleSuffix}">Last 52W</button>
+        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="${setterFnName}('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time ${titleSuffix}">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1108,7 +1108,7 @@ function syncMainTimeframeButtons(history) {
         const color = isActive ? 'white' : '#24292f';
         const borderLeft = idx > 0 ? 'border-left: 1px solid #d0d7de;' : '';
         html += `
-            <button type="button" class="btn-secondary timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
+            <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isActive ? 'active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; ${borderLeft} background: ${bg}; color: ${color};" title="Toggle Year ${year} overlay">${year}</button>
         `;
     });
 
@@ -1116,8 +1116,8 @@ function syncMainTimeframeButtons(history) {
     const isAllActive = currentMainMode === 'single' && currentMainSingleTimeframe === 'all';
 
     html += `
-        <button type="button" class="btn-secondary timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
-        <button type="button" class="btn-secondary timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
+        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isLast52Active ? 'active' : ''}" data-timeframe="last-52" onclick="setMainTimeframe('last-52')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isLast52Active ? '#1f2328' : 'white'}; color: ${isLast52Active ? 'white' : '#24292f'};" title="Show Last 52 Weeks graph">Last 52W</button>
+        <button type="button" class="kt-btn kt-btn--accent timeframe-pill ${isAllActive ? 'active' : ''}" data-timeframe="all" onclick="setMainTimeframe('all')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: ${isAllActive ? '#1f2328' : 'white'}; color: ${isAllActive ? 'white' : '#24292f'};" title="Show All-Time historical graph">All Time</button>
     `;
 
     container.innerHTML = html;
@@ -1373,7 +1373,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     if (records.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No data available for this timeframe.</p>';
         return;
     }
 
@@ -1424,7 +1424,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     }
 
     if (portPoints.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes found in this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes found in this timeframe.</p>';
         return;
     }
 
@@ -2199,7 +2199,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
     let { yearSeries, paddedMin, paddedMax, paddedDollarMin, paddedDollarMax, step } = overlayData;
 
     if (yearSeries.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No data available for the selected years.</p>';
         return;
     }
 
@@ -2228,7 +2228,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
         const totalAthPoints = yearSeries.reduce((acc, s) => acc + s.points.length, 0);
         if (totalAthPoints === 0) {
-            box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes recorded in the selected years.</p>';
+            box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High nodes recorded in the selected years.</p>';
             return;
         }
 
@@ -3128,7 +3128,7 @@ function renderXeqtRelInfoCard(html, isActive = false) {
 
 function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCapital = 0, startXeqtPrice = 0) {
     if (!pt) {
-        return '<p class="empty-state" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>';
+        return '<p class="kt-empty" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>';
     }
 
     const isPct = unit === 'PCT';
@@ -3233,7 +3233,7 @@ function renderPortfolioVsXeqtChart() {
     }
 
     if (records.length <= 1) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
         renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
         return;
     }
@@ -3243,7 +3243,7 @@ function renderPortfolioVsXeqtChart() {
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
 
     if (!xeqtPrices || xeqtPrices.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
         renderXeqtRelInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
         return;
     }
@@ -3255,13 +3255,13 @@ function renderPortfolioVsXeqtChart() {
             : null;
 
     if (!calcFunc) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">Progression calculation function not found.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">Progression calculation function not found.</p>';
         return;
     }
 
     const points = calcFunc(records, rawHistory, xeqtPrices, currency, currentXeqtPrice, unit);
     if (points.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No progression points calculated for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No progression points calculated for this timeframe.</p>';
         return;
     }
 
@@ -3568,7 +3568,7 @@ function renderXeqtWeeklyInfoCard(html, isActive = false) {
 
 function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '', beatCount = 0, totalWeeks = 0, beatPct = 0) {
     if (!it) {
-        return '<p class="empty-state" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative weekly data available.</p>';
+        return '<p class="kt-empty" style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative weekly data available.</p>';
     }
 
     const isPct = unit === 'PCT';
@@ -3649,7 +3649,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
     const legendEl = document.getElementById('xeqt-weekly-legend');
     if (!box || !rawHistory || rawHistory.length <= 1) {
         if (box) {
-            box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
+            box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">At least two weekly records are required for relative benchmark comparison.</p>';
         }
         renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No relative benchmark data available.</p>', false);
         return;
@@ -3672,7 +3672,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
     const currentXeqtPrice = xeqtBenchmark?.currentPrice;
 
     if (!xeqtPrices || xeqtPrices.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">XEQT benchmark price data is loading or unavailable.</p>';
         renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">Waiting for XEQT prices...</p>', false);
         return;
     }
@@ -3684,13 +3684,13 @@ function renderWeeklyPortfolioVsXeqtChart() {
             : null;
 
     if (!calcFunc) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">Weekly comparison calculation function not found.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">Weekly comparison calculation function not found.</p>';
         return;
     }
 
     const items = calcFunc(rawHistory, xeqtPrices, currency, unit, timeframe, currentXeqtPrice);
     if (!items || items.length === 0) {
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly comparison data available for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly comparison data available for this timeframe.</p>';
         renderXeqtWeeklyInfoCard('<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>', false);
         return;
     }
@@ -4206,7 +4206,7 @@ function renderAthBarChart() {
         if (subTitleEl) {
             subTitleEl.textContent = '0 All-Time High milestones recorded';
         }
-        box.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High increments recorded yet.</p>';
+        box.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No All-Time High increments recorded yet.</p>';
         if (infoCard) {
             infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No ATH records available.</p>';
         }
@@ -5051,7 +5051,7 @@ function renderWeeklyBarChart() {
     }
 
     if (!rawHistory || rawHistory.length <= 1) {
-        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
+        svgWrap.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded yet.</p>';
         if (infoCard) {
             infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available.</p>';
         }
@@ -5060,7 +5060,7 @@ function renderWeeklyBarChart() {
 
     const items = computeWeeklyBarData(rawHistory, currency, unit, timeframe);
     if (items.length === 0) {
-        svgWrap.innerHTML = '<p class="empty-state" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded for this timeframe.</p>';
+        svgWrap.innerHTML = '<p class="kt-empty" style="padding: 24px; text-align: center; color: #64748b;">No weekly changes recorded for this timeframe.</p>';
         if (infoCard) {
             infoCard.innerHTML = '<p style="padding: 20px; color: #64748b; font-size: 0.8rem; text-align: center;">No weekly data available for this timeframe.</p>';
         }

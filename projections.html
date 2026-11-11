@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - FIRE &amp; Wealth Projections</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <style>
         .param-grid {
             display: grid;
@@ -88,69 +89,69 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>FIRE &amp; Wealth Projections</h1>
-            <p class="subtitle">Interactive Compounding Simulator, Milestone Countdown &amp; Safe Withdrawal Planner</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">FIRE &amp; Wealth Projections</h1>
+            <p class="kt-page-subtitle">Interactive Compounding Simulator, Milestone Countdown &amp; Safe Withdrawal Planner</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link">Net Worth History</a>
-                <a href="allocation.html" class="nav-link">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link">Financial Stats</a>
-                <a href="performance.html" class="nav-link">Performance</a>
-                <a href="projections.html" class="nav-link active">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link">Performance</a>
+                <a href="projections.html" class="kt-nav__link" aria-current="page">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Loading portfolio baseline &amp; computing projections...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="main-content" style="display: none;">
             <!-- Top Stat Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-current-nw" style="color: #1f2328;">$0.00</span>
-                    <span class="stat-label">Current Net Worth</span>
-                    <span class="stat-sub">Live portfolio baseline</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-current-nw" style="color: #1f2328;">$0.00</span>
+                    <span class="kt-stat__label">Current Net Worth</span>
+                    <span class="kt-stat__sub">Live portfolio baseline</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-safe-annual" style="color: #166534;">$0.00</span>
-                    <span class="stat-label">Safe Annual Withdrawal Today</span>
-                    <span class="stat-sub" id="stat-safe-monthly">$0.00 / month</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-safe-annual" style="color: #166534;">$0.00</span>
+                    <span class="kt-stat__label">Safe Annual Withdrawal Today</span>
+                    <span class="kt-stat__sub" id="stat-safe-monthly">$0.00 / month</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-fire-target" style="color: #0969da;">$0.00</span>
-                    <span class="stat-label">Financial Freedom Number</span>
-                    <span class="stat-sub" id="stat-fire-progress">0% reached</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-fire-target" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__label">Financial Freedom Number</span>
+                    <span class="kt-stat__sub" id="stat-fire-progress">0% reached</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-time-to-fire" style="color: #8250df;">- years</span>
-                    <span class="stat-label">Time to Freedom</span>
-                    <span class="stat-sub" id="stat-fire-date">Estimated target date</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-time-to-fire" style="color: #8250df;">- years</span>
+                    <span class="kt-stat__label">Time to Freedom</span>
+                    <span class="kt-stat__sub" id="stat-fire-date">Estimated target date</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-coast-20yr">$0.00</span>
-                    <span class="stat-label" id="stat-coast-label">Projection in 20 Yrs</span>
-                    <span class="stat-sub" id="stat-coast-sub">With $0 further savings</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-coast-20yr">$0.00</span>
+                    <span class="kt-stat__label" id="stat-coast-label">Projection in 20 Yrs</span>
+                    <span class="kt-stat__sub" id="stat-coast-sub">With $0 further savings</span>
                 </div>
             </div>
 
             <!-- Interactive Parameters Control Card -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
@@ -163,22 +164,22 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span style="font-size: 0.8rem; font-weight: 700; color: #64748b;">Currency View:</span>
                         <div class="currency-toggle" style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-mode-nominal" class="btn-secondary active" onclick="setInflationMode('nominal')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">Nominal (Future $)</button>
-                            <button type="button" id="btn-mode-real" class="btn-secondary" onclick="setInflationMode('real')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">Real (Today's Power)</button>
+                            <button type="button" id="btn-mode-nominal" class="kt-btn kt-btn--accent active" onclick="setInflationMode('nominal')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">Nominal (Future $)</button>
+                            <button type="button" id="btn-mode-real" class="kt-btn kt-btn--accent" onclick="setInflationMode('real')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">Real (Today's Power)</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="param-grid">
                     <div class="param-item">
-                        <label for="input-starting-nw">
+                        <label class="kt-field__label" for="input-starting-nw">
                             <span>Starting Portfolio ($ CAD)</span>
                         </label>
-                        <input type="number" id="input-starting-nw" step="1000" oninput="runProjections()">
+                        <input class="kt-input" type="number" id="input-starting-nw" step="1000" oninput="runProjections()">
                     </div>
 
                     <div class="param-item">
-                        <label for="input-monthly-save">
+                        <label class="kt-field__label" for="input-monthly-save">
                             <span>Monthly Contribution ($ CAD/mo)</span>
                             <span id="label-monthly-save" style="color: #0969da;">$2,500</span>
                         </label>
@@ -186,7 +187,7 @@
                     </div>
 
                     <div class="param-item">
-                        <label for="input-return-rate">
+                        <label class="kt-field__label" for="input-return-rate">
                             <span>Expected Annual Return (%)</span>
                             <span id="label-return-rate" style="color: #166534;">7.0%</span>
                         </label>
@@ -194,7 +195,7 @@
                     </div>
 
                     <div class="param-item">
-                        <label for="input-inflation-rate">
+                        <label class="kt-field__label" for="input-inflation-rate">
                             <span>Assumed Inflation Rate (%)</span>
                             <span id="label-inflation-rate" style="color: #d97706;">2.5%</span>
                         </label>
@@ -202,7 +203,7 @@
                     </div>
 
                     <div class="param-item">
-                        <label for="input-swr-rate">
+                        <label class="kt-field__label" for="input-swr-rate">
                             <span>Safe Withdrawal Rate (SWR %)</span>
                             <span id="label-swr-rate" style="color: #8250df;">4.0%</span>
                         </label>
@@ -210,14 +211,14 @@
                     </div>
 
                     <div class="param-item">
-                        <label for="input-target-spend">
+                        <label class="kt-field__label" for="input-target-spend">
                             <span>Target Annual Spend ($ CAD/yr)</span>
                         </label>
-                        <input type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
+                        <input class="kt-input" type="number" id="input-target-spend" step="5000" value="60000" oninput="runProjections()">
                     </div>
 
                     <div class="param-item">
-                        <label for="input-horizon-years">
+                        <label class="kt-field__label" for="input-horizon-years">
                             <span>Projection Horizon</span>
                             <span id="label-horizon-years" style="color: #6366f1;">20 Years</span>
                         </label>
@@ -227,7 +228,7 @@
             </div>
 
             <!-- Milestone Countdown Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     🏆 Net Worth Milestone Countdown
                 </h3>
@@ -240,7 +241,7 @@
             </div>
 
             <!-- SVG Multi-Scenario Compounding Chart -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
@@ -271,12 +272,12 @@
             </div>
 
             <!-- Detailed Year-by-Year Compounding Table -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     📋 Year-by-Year Growth &amp; Withdrawal Schedule
                 </h3>
                 <div class="table-container">
-                    <table class="data-table" id="projections-table">
+                    <table class="kt-table kt-table--hover" id="projections-table">
                         <thead>
                             <tr>
                                 <th>Year</th>

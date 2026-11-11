@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Financial Stats &amp; Milestones</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <style>
         .top-holdings-grid {
             display: grid;
@@ -30,69 +31,69 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Financial Statistics &amp; Milestones</h1>
-            <p class="subtitle">Portfolio Concentration &amp; Performance Records</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">Financial Statistics &amp; Milestones</h1>
+            <p class="kt-page-subtitle">Portfolio Concentration &amp; Performance Records</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link">Net Worth History</a>
-                <a href="allocation.html" class="nav-link">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link active">Financial Stats</a>
-                <a href="performance.html" class="nav-link">Performance</a>
-                <a href="projections.html" class="nav-link">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link" aria-current="page">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link">Performance</a>
+                <a href="projections.html" class="kt-nav__link">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Computing portfolio statistics...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="stats-content" style="display: none;">
             <!-- Overview Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-avg-growth">0.00%</span>
-                    <span class="stat-label">Avg Weekly Growth</span>
-                    <span class="stat-sub" id="stat-avg-growth-sub">Across history</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-avg-growth">0.00%</span>
+                    <span class="kt-stat__label">Avg Weekly Growth</span>
+                    <span class="kt-stat__sub" id="stat-avg-growth-sub">Across history</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-top3-conc">0.0%</span>
-                    <span class="stat-label">Top 3 Concentration</span>
-                    <span class="stat-sub">Share of total portfolio</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-top3-conc">0.0%</span>
+                    <span class="kt-stat__label">Top 3 Concentration</span>
+                    <span class="kt-stat__sub">Share of total portfolio</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-top5-conc">0.0%</span>
-                    <span class="stat-label">Top 5 Concentration</span>
-                    <span class="stat-sub">Share of total portfolio</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-top5-conc">0.0%</span>
+                    <span class="kt-stat__label">Top 5 Concentration</span>
+                    <span class="kt-stat__sub">Share of total portfolio</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-best-week">+$0.00</span>
-                    <span class="stat-label">Best Single Week</span>
-                    <span class="stat-sub" id="stat-best-week-date">-</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-best-week">+$0.00</span>
+                    <span class="kt-stat__label">Best Single Week</span>
+                    <span class="kt-stat__sub" id="stat-best-week-date">-</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-worst-week">-$0.00</span>
-                    <span class="stat-label">Max Weekly Pullback</span>
-                    <span class="stat-sub" id="stat-worst-week-date">-</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-worst-week">-$0.00</span>
+                    <span class="kt-stat__label">Max Weekly Pullback</span>
+                    <span class="kt-stat__sub" id="stat-worst-week-date">-</span>
                 </div>
             </div>
 
             <!-- Financial Milestones & Crossover Point (Feature 3) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🎯 Financial Milestones &amp; The "Crossover Point"
@@ -173,7 +174,7 @@
             </div>
 
             <!-- Fee & MER Drag Audit Section (Feature 4) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🛡️ Fee &amp; MER Drag Audit: The "DIY Savings" Validator
@@ -215,10 +216,10 @@
             </div>
 
             <!-- Top 5 Holdings by Market Value -->
-            <div class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">Top 5 Largest Positions</h2>
-                    <span class="section-count">Core Pillars</span>
+            <div class="kt-card kt-card--padded content-section">
+                <div class="kt-section-title">
+                    <h2>Top 5 Largest Positions</h2>
+                    <span class="kt-badge kt-badge--pill kt-ml-auto">Core Pillars</span>
                 </div>
                 <div id="top-holdings-grid" class="top-holdings-grid">
                     <!-- Populated by JS -->
@@ -228,19 +229,19 @@
             <!-- Annual Breakdown & Best/Worst Weeks -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
                 <!-- Annual Performance -->
-                <div class="content-section">
-                    <div class="section-header">
-                        <h2 class="section-title">Annual Performance</h2>
+                <div class="kt-card kt-card--padded content-section">
+                    <div class="kt-section-title">
+                        <h2>Annual Performance</h2>
                     </div>
-                    <div class="table-responsive">
-                        <table class="data-table">
+                    <div class="kt-table-wrap">
+                        <table class="kt-table kt-table--hover">
                             <thead>
                                 <tr>
                                     <th>Year</th>
-                                    <th class="text-right">Starting CAD</th>
-                                    <th class="text-right">Ending CAD</th>
-                                    <th class="text-right">Net Growth</th>
-                                    <th class="text-right">Return %</th>
+                                    <th class="kt-align-right">Starting CAD</th>
+                                    <th class="kt-align-right">Ending CAD</th>
+                                    <th class="kt-align-right">Net Growth</th>
+                                    <th class="kt-align-right">Return %</th>
                                 </tr>
                             </thead>
                             <tbody id="annual-tbody">
@@ -251,18 +252,18 @@
                 </div>
 
                 <!-- Record Weeks -->
-                <div class="content-section">
-                    <div class="section-header">
-                        <h2 class="section-title">Extreme Weekly Moves</h2>
+                <div class="kt-card kt-card--padded content-section">
+                    <div class="kt-section-title">
+                        <h2>Extreme Weekly Moves</h2>
                     </div>
-                    <div class="table-responsive">
-                        <table class="data-table">
+                    <div class="kt-table-wrap">
+                        <table class="kt-table kt-table--hover">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Week</th>
-                                    <th class="text-right">Net Change CAD</th>
-                                    <th class="text-right">% Change</th>
+                                    <th class="kt-align-right">Net Change CAD</th>
+                                    <th class="kt-align-right">% Change</th>
                                 </tr>
                             </thead>
                             <tbody id="extreme-tbody">

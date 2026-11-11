@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Net Worth History</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
     <style>
         .chart-wrapper {
             background: white;
@@ -17,84 +18,84 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Net Worth History</h1>
-            <p class="subtitle">Weekly Portfolio Tracking &amp; Growth Trajectory</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">Net Worth History</h1>
+            <p class="kt-page-subtitle">Weekly Portfolio Tracking &amp; Growth Trajectory</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link active">Net Worth History</a>
-                <a href="allocation.html" class="nav-link">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link">Financial Stats</a>
-                <a href="performance.html" class="nav-link">Performance</a>
-                <a href="projections.html" class="nav-link">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link" aria-current="page">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link">Performance</a>
+                <a href="projections.html" class="kt-nav__link">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Loading history records...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="history-content" style="display: none;">
             <!-- Key Metric Stat Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-current-cad">$0.00</span>
-                    <span class="stat-label">Current Net Worth</span>
-                    <span class="stat-sub" id="hist-current-usd">≈ $0.00 USD</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-current-cad">$0.00</span>
+                    <span class="kt-stat__label">Current Net Worth</span>
+                    <span class="kt-stat__sub" id="hist-current-usd">≈ $0.00 USD</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-starting-cad" style="color: #0969da;">$0.00</span>
-                    <span class="stat-label">Starting Baseline</span>
-                    <span class="stat-sub" id="hist-starting-sub">Week 1 (Aug 2024)</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-starting-cad" style="color: #0969da;">$0.00</span>
+                    <span class="kt-stat__label">Starting Baseline</span>
+                    <span class="kt-stat__sub" id="hist-starting-sub">Week 1 (Aug 2024)</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-total-contributions" style="color: #8250df;">+$0.00</span>
-                    <span class="stat-label">Contributions &amp; Realized</span>
-                    <span class="stat-sub" id="hist-total-contributions-sub">Added since Week 1</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-total-contributions" style="color: #8250df;">+$0.00</span>
+                    <span class="kt-stat__label">Contributions &amp; Realized</span>
+                    <span class="kt-stat__sub" id="hist-total-contributions-sub">Added since Week 1</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-actual-return" style="color: #16a34a;">+$0.00</span>
-                    <span class="stat-label">Current Unrealized Gains</span>
-                    <span class="stat-sub" id="hist-actual-return-pct">Open positions</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-actual-return" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__label">Current Unrealized Gains</span>
+                    <span class="kt-stat__sub" id="hist-actual-return-pct">Open positions</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-total-gain" style="color: #0969da;">+$0.00</span>
-                    <span class="stat-label">Total Growth</span>
-                    <span class="stat-sub" id="hist-total-gain-pct">+0.0% all-time</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-total-gain" style="color: #0969da;">+$0.00</span>
+                    <span class="kt-stat__label">Total Growth</span>
+                    <span class="kt-stat__sub" id="hist-total-gain-pct">+0.0% all-time</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-peak-cad">$0.00</span>
-                    <span class="stat-label">All-Time Peak</span>
-                    <span class="stat-sub" id="hist-peak-date">High water mark</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-peak-cad">$0.00</span>
+                    <span class="kt-stat__label">All-Time Peak</span>
+                    <span class="kt-stat__sub" id="hist-peak-date">High water mark</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-drawdown-cad">$0.00</span>
-                    <span class="stat-label">Current Drawdown</span>
-                    <span class="stat-sub" id="hist-drawdown-pct">0.00% from peak</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-drawdown-cad">$0.00</span>
+                    <span class="kt-stat__label">Current Drawdown</span>
+                    <span class="kt-stat__sub" id="hist-drawdown-pct">0.00% from peak</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="hist-total-weeks">0</span>
-                    <span class="stat-label">Total Weeks Tracked</span>
-                    <span class="stat-sub" id="hist-start-date">Since Aug 2024</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="hist-total-weeks">0</span>
+                    <span class="kt-stat__label">Total Weeks Tracked</span>
+                    <span class="kt-stat__sub" id="hist-start-date">Since Aug 2024</span>
                 </div>
             </div>
 
             <!-- Capital & Wealth Decomposition Banner -->
-            <div class="controls" style="padding: 16px 20px; margin-bottom: 20px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div class="kt-toolbar" style="padding: 16px 20px; margin-bottom: 20px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                     <div style="font-weight: 700; font-size: 0.95rem; color: #1f2328; display: flex; align-items: center; gap: 6px;">
                         <span>💎 Net Worth Growth &amp; Baseline</span>
@@ -117,11 +118,11 @@
             </div>
 
             <!-- Controls Toolbar -->
-            <div class="controls">
-                <div class="controls-row">
-                    <div class="control-group">
-                        <label for="timeframe-select">Timeframe:</label>
-                        <select id="timeframe-select" onchange="applyHistoryFilter()">
+            <div class="kt-toolbar">
+                <div class="kt-toolbar__row">
+                    <div class="kt-field kt-field--inline">
+                        <label class="kt-field__label" for="timeframe-select">Timeframe:</label>
+                        <select class="kt-select" id="timeframe-select" onchange="applyHistoryFilter()">
                             <option value="all">All Time</option>
                             <option value="2026">Year 2026</option>
                             <option value="2025">Year 2025</option>
@@ -130,26 +131,26 @@
                         </select>
                     </div>
 
-                    <div class="control-group">
-                        <label for="currency-toggle">Display Currency:</label>
-                        <select id="currency-toggle" onchange="applyHistoryFilter()">
+                    <div class="kt-field kt-field--inline">
+                        <label class="kt-field__label" for="currency-toggle">Display Currency:</label>
+                        <select class="kt-select" id="currency-toggle" onchange="applyHistoryFilter()">
                             <option value="CAD">CAD ($)</option>
                             <option value="USD">USD ($)</option>
                         </select>
                     </div>
 
-                    <div class="control-group" style="margin-left: auto;">
-                        <button class="btn-secondary" onclick="exportHistoryCSV()">Export History CSV</button>
+                    <div class="kt-field kt-field--inline" style="margin-left: auto;">
+                        <button class="kt-btn kt-btn--accent" onclick="exportHistoryCSV()">Export History CSV</button>
                     </div>
                 </div>
             </div>
 
             <!-- Visual Chart Container -->
-            <div class="chart-wrapper">
-                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div class="kt-card kt-card--padded chart-wrapper">
+                <div class="kt-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                     <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                        <h2 class="section-title" id="chart-title">Net Worth Progression</h2>
-                        <span id="chart-subtitle" class="section-count">-</span>
+                        <h2 id="chart-title">Net Worth Progression</h2>
+                        <span id="chart-subtitle" class="kt-badge kt-badge--pill kt-ml-auto">-</span>
                     </div>
                     <div>
                         <label style="display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 700; color: #16a34a; cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
@@ -176,7 +177,7 @@
             </div>
 
             <!-- Savings Velocity & Annual Inflows Section (Feature 2) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         ⚡ Savings Velocity &amp; Annual Wealth Inflows
@@ -195,7 +196,7 @@
             </div>
 
             <!-- Historical Pullback & Downside Resilience Section (Feature 7) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🛡️ Historical Pullback &amp; Downside Resilience
@@ -233,28 +234,28 @@
             </div>
 
             <!-- Historical Data Table -->
-            <div class="content-section">
-                <div class="section-header">
-                    <h2 class="section-title">Weekly Log Records</h2>
-                    <span id="record-count" class="section-count">-</span>
+            <div class="kt-card kt-card--padded content-section">
+                <div class="kt-section-title">
+                    <h2>Weekly Log Records</h2>
+                    <span id="record-count" class="kt-badge kt-badge--pill kt-ml-auto">-</span>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="data-table">
+                <div class="kt-table-wrap">
+                    <table class="kt-table kt-table--hover">
                         <thead>
                             <tr>
-                                <th class="text-center">Week</th>
+                                <th class="kt-align-center">Week</th>
                                 <th>Date</th>
-                                <th class="text-right">Stocks</th>
-                                <th class="text-right">Fixed</th>
-                                <th class="text-right">Precious Metals</th>
-                                <th class="text-right">Crypto</th>
-                                <th class="text-right">Total CAD</th>
-                                <th class="text-right">Total USD</th>
-                                <th class="text-right">Weekly Change</th>
-                                <th class="text-right">Change %</th>
-                                <th class="text-right">Peak CAD</th>
-                                <th class="text-right">Drawdown</th>
+                                <th class="kt-align-right">Stocks</th>
+                                <th class="kt-align-right">Fixed</th>
+                                <th class="kt-align-right">Precious Metals</th>
+                                <th class="kt-align-right">Crypto</th>
+                                <th class="kt-align-right">Total CAD</th>
+                                <th class="kt-align-right">Total USD</th>
+                                <th class="kt-align-right">Weekly Change</th>
+                                <th class="kt-align-right">Change %</th>
+                                <th class="kt-align-right">Peak CAD</th>
+                                <th class="kt-align-right">Drawdown</th>
                             </tr>
                         </thead>
                         <tbody id="history-tbody">

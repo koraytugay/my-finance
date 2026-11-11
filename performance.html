@@ -4,116 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Performance &amp; Return Analytics</title>
-    <link rel="stylesheet" href="styles.css?v=3.5">
+    <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
+    <link rel="stylesheet" href="styles.css?v=4.0">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>My Finance</h1>
-            <p class="subtitle">Personal Portfolio &amp; Net Worth Tracker</p>
+    <div class="kt-container">
+        <header class="kt-page-header">
+            <h1 class="kt-page-title">My Finance</h1>
+            <p class="kt-page-subtitle">Personal Portfolio &amp; Net Worth Tracker</p>
         </header>
 
-        <nav class="page-nav">
-            <div class="nav-row">
-                <a href="index.html" class="nav-link">Main</a>
-                <a href="holdings.html" class="nav-link">Holdings</a>
-                <a href="history.html" class="nav-link">Net Worth History</a>
-                <a href="allocation.html" class="nav-link">Asset Allocation</a>
-                <a href="accounts.html" class="nav-link">Accounts &amp; Brokerages</a>
-                <a href="dividends.html" class="nav-link">Dividends</a>
-                <a href="stats.html" class="nav-link">Financial Stats</a>
-                <a href="performance.html" class="nav-link active">Performance</a>
-                <a href="projections.html" class="nav-link">Projections</a>
-                <a href="tax.html" class="nav-link">Tax Location</a>
+        <nav class="kt-nav kt-nav--sticky">
+            <div class="kt-nav__row">
+                <a href="index.html" class="kt-nav__link">Main</a>
+                <a href="holdings.html" class="kt-nav__link">Holdings</a>
+                <a href="history.html" class="kt-nav__link">Net Worth History</a>
+                <a href="allocation.html" class="kt-nav__link">Asset Allocation</a>
+                <a href="accounts.html" class="kt-nav__link">Accounts &amp; Brokerages</a>
+                <a href="dividends.html" class="kt-nav__link">Dividends</a>
+                <a href="stats.html" class="kt-nav__link">Financial Stats</a>
+                <a href="performance.html" class="kt-nav__link" aria-current="page">Performance</a>
+                <a href="projections.html" class="kt-nav__link">Projections</a>
+                <a href="tax.html" class="kt-nav__link">Tax Location</a>
             </div>
         </nav>
 
         <!-- Loading Indicator -->
-        <div id="loading" class="loading">
-            <div class="spinner"></div>
+        <div id="loading" class="kt-loading">
+            <div class="kt-spinner"></div>
             <p>Loading performance data...</p>
         </div>
 
         <!-- Error Container -->
-        <div id="error" class="error" style="display: none;"></div>
+        <div id="error" class="kt-alert kt-alert--danger kt-alert--center" style="display: none;"></div>
 
         <!-- Main Content -->
         <div id="main-content" style="display: none;">
             <!-- Key Metric Stat Cards -->
-            <div class="stats">
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-total-gain" style="color: #16a34a;">+$0.00</span>
-                    <span class="stat-label">Current Unrealized Gains</span>
-                    <span class="stat-sub" id="stat-total-gain-pct">Open positions</span>
+            <div class="kt-stat-row">
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-total-gain" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__label">Current Unrealized Gains</span>
+                    <span class="kt-stat__sub" id="stat-total-gain-pct">Open positions</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-invested-cad" style="color: #8250df;">+$0.00</span>
-                    <span class="stat-label">Contributions &amp; Realized</span>
-                    <span class="stat-sub" id="stat-invested-sub">Added since Week 1</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-invested-cad" style="color: #8250df;">+$0.00</span>
+                    <span class="kt-stat__label">Contributions &amp; Realized</span>
+                    <span class="kt-stat__sub" id="stat-invested-sub">Added since Week 1</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-growth-cad" style="color: #0969da;">+$0.00</span>
-                    <span class="stat-label">Total Growth</span>
-                    <span class="stat-sub" id="stat-growth-sub">+0.0% all-time</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-growth-cad" style="color: #0969da;">+$0.00</span>
+                    <span class="kt-stat__label">Total Growth</span>
+                    <span class="kt-stat__sub" id="stat-growth-sub">+0.0% all-time</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-win-ratio">0%</span>
-                    <span class="stat-label">Winning Weeks</span>
-                    <span class="stat-sub" id="stat-win-count">0 up / 0 down</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-win-ratio">0%</span>
+                    <span class="kt-stat__label">Winning Weeks</span>
+                    <span class="kt-stat__sub" id="stat-win-count">0 up / 0 down</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-best-week" style="color: #16a34a;">+$0.00</span>
-                    <span class="stat-label">Best Week</span>
-                    <span class="stat-sub" id="stat-best-week-date">-</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-best-week" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__label">Best Week</span>
+                    <span class="kt-stat__sub" id="stat-best-week-date">-</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-worst-week" style="color: #cf222e;">-$0.00</span>
-                    <span class="stat-label">Worst Week</span>
-                    <span class="stat-sub" id="stat-worst-week-date">-</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-worst-week" style="color: #cf222e;">-$0.00</span>
+                    <span class="kt-stat__label">Worst Week</span>
+                    <span class="kt-stat__sub" id="stat-worst-week-date">-</span>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-number" id="stat-avg-week">+$0.00</span>
-                    <span class="stat-label">Average Weekly Gain</span>
-                    <span class="stat-sub" id="stat-weeks-tracked">-</span>
+                <div class="kt-stat">
+                    <span class="kt-stat__value" id="stat-avg-week">+$0.00</span>
+                    <span class="kt-stat__label">Average Weekly Gain</span>
+                    <span class="kt-stat__sub" id="stat-weeks-tracked">-</span>
                 </div>
             </div>
 
             <!-- Weekly Momentum & Streak Analytics Cards (CAD & USD) -->
-            <div class="stats" style="margin-bottom: 24px;">
-                <div class="stat-card" id="card-cad-up-streak" style="border-top: 3px solid #16a34a;">
-                    <span class="stat-number" id="stat-cad-up-streak" style="color: #16a34a;">0 weeks</span>
-                    <span class="stat-label">Longest Up Streak (CAD)</span>
-                    <span class="stat-sub" id="stat-cad-up-streak-sub">Total gain: +$0.00 (+0.0%)</span>
+            <div class="kt-stat-row" style="margin-bottom: 24px;">
+                <div class="kt-stat" id="card-cad-up-streak" style="border-top: 3px solid #16a34a;">
+                    <span class="kt-stat__value" id="stat-cad-up-streak" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__label">Longest Up Streak (CAD)</span>
+                    <span class="kt-stat__sub" id="stat-cad-up-streak-sub">Total gain: +$0.00 (+0.0%)</span>
                 </div>
-                <div class="stat-card" id="card-cad-down-streak" style="border-top: 3px solid #cf222e;">
-                    <span class="stat-number" id="stat-cad-down-streak" style="color: #cf222e;">0 weeks</span>
-                    <span class="stat-label">Longest Down Streak (CAD)</span>
-                    <span class="stat-sub" id="stat-cad-down-streak-sub">Total down: -$0.00 (-0.0%)</span>
+                <div class="kt-stat" id="card-cad-down-streak" style="border-top: 3px solid #cf222e;">
+                    <span class="kt-stat__value" id="stat-cad-down-streak" style="color: #cf222e;">0 weeks</span>
+                    <span class="kt-stat__label">Longest Down Streak (CAD)</span>
+                    <span class="kt-stat__sub" id="stat-cad-down-streak-sub">Total down: -$0.00 (-0.0%)</span>
                 </div>
-                <div class="stat-card" id="card-usd-up-streak" style="border-top: 3px solid #16a34a;">
-                    <span class="stat-number" id="stat-usd-up-streak" style="color: #16a34a;">0 weeks</span>
-                    <span class="stat-label">Longest Up Streak (USD)</span>
-                    <span class="stat-sub" id="stat-usd-up-streak-sub">Total gain: +US$0.00 (+0.0%)</span>
+                <div class="kt-stat" id="card-usd-up-streak" style="border-top: 3px solid #16a34a;">
+                    <span class="kt-stat__value" id="stat-usd-up-streak" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__label">Longest Up Streak (USD)</span>
+                    <span class="kt-stat__sub" id="stat-usd-up-streak-sub">Total gain: +US$0.00 (+0.0%)</span>
                 </div>
-                <div class="stat-card" id="card-usd-down-streak" style="border-top: 3px solid #cf222e;">
-                    <span class="stat-number" id="stat-usd-down-streak" style="color: #cf222e;">0 weeks</span>
-                    <span class="stat-label">Longest Down Streak (USD)</span>
-                    <span class="stat-sub" id="stat-usd-down-streak-sub">Total down: -US$0.00 (-0.0%)</span>
+                <div class="kt-stat" id="card-usd-down-streak" style="border-top: 3px solid #cf222e;">
+                    <span class="kt-stat__value" id="stat-usd-down-streak" style="color: #cf222e;">0 weeks</span>
+                    <span class="kt-stat__label">Longest Down Streak (USD)</span>
+                    <span class="kt-stat__sub" id="stat-usd-down-streak-sub">Total down: -US$0.00 (-0.0%)</span>
                 </div>
-                <div class="stat-card" id="card-cad-ath-streak" style="border-top: 3px solid #0969da;">
-                    <span class="stat-number" id="stat-cad-ath-streak" style="color: #0969da; font-size: 1.15rem;">-</span>
-                    <span class="stat-label">Without ATH (CAD)</span>
-                    <span class="stat-sub" id="stat-cad-ath-streak-sub">Top 3 longest droughts</span>
+                <div class="kt-stat" id="card-cad-ath-streak" style="border-top: 3px solid #0969da;">
+                    <span class="kt-stat__value" id="stat-cad-ath-streak" style="color: #0969da; font-size: 1.15rem;">-</span>
+                    <span class="kt-stat__label">Without ATH (CAD)</span>
+                    <span class="kt-stat__sub" id="stat-cad-ath-streak-sub">Top 3 longest droughts</span>
                 </div>
-                <div class="stat-card" id="card-usd-ath-streak" style="border-top: 3px solid #8250df;">
-                    <span class="stat-number" id="stat-usd-ath-streak" style="color: #8250df; font-size: 1.15rem;">-</span>
-                    <span class="stat-label">Without ATH (USD)</span>
-                    <span class="stat-sub" id="stat-usd-ath-streak-sub">Top 3 longest droughts</span>
+                <div class="kt-stat" id="card-usd-ath-streak" style="border-top: 3px solid #8250df;">
+                    <span class="kt-stat__value" id="stat-usd-ath-streak" style="color: #8250df; font-size: 1.15rem;">-</span>
+                    <span class="kt-stat__label">Without ATH (USD)</span>
+                    <span class="kt-stat__sub" id="stat-usd-ath-streak-sub">Top 3 longest droughts</span>
                 </div>
             </div>
 
             <!-- Longest Streaks Without All-Time Highs (CAD & USD) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
                         <span>🏔️ Longest Streaks Without All-Time Highs</span>
@@ -156,7 +157,7 @@
             </div>
 
             <!-- Wealth Creation & Capital Decomposition Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         💎 Portfolio Growth &amp; Capital Decomposition
@@ -209,7 +210,7 @@
             </div>
 
             <!-- Purchasing Power & Real Wealth (Inflation-Adjusted) Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
@@ -224,9 +225,9 @@
                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                         <span style="font-size: 0.78rem; font-weight: 700; color: #475569;">Annual Inflation:</span>
                         <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                            <button type="button" id="btn-inf-3" class="btn-secondary" onclick="setInflationRate(3.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;">3.0% (BoC CPI)</button>
-                            <button type="button" id="btn-inf-5" class="btn-secondary active" onclick="setInflationRate(5.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;">5.0% (Prudent)</button>
-                            <button type="button" id="btn-inf-7" class="btn-secondary" onclick="setInflationRate(7.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">7.0% (High)</button>
+                            <button type="button" id="btn-inf-3" class="kt-btn kt-btn--accent" onclick="setInflationRate(3.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; background: white; color: #24292f;">3.0% (BoC CPI)</button>
+                            <button type="button" id="btn-inf-5" class="kt-btn kt-btn--accent active" onclick="setInflationRate(5.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: #1f2328; color: white;">5.0% (Prudent)</button>
+                            <button type="button" id="btn-inf-7" class="kt-btn kt-btn--accent" onclick="setInflationRate(7.0)" style="padding: 4px 9px; font-size: 0.76rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">7.0% (High)</button>
                         </div>
                     </div>
                 </div>
@@ -274,7 +275,7 @@
             </div>
 
             <!-- Benchmark Comparison Section (Feature 1) -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🎯 Benchmark Comparison: Asset Mix vs. The Market
@@ -354,7 +355,7 @@
 
 
             <!-- Rolling 52-Week Extremes: Best & Worst Graphs Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <div style="margin-bottom: 16px;">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                         🏆 Rolling 52-Week Extremes: Best &amp; Worst Performance
@@ -371,7 +372,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📈 Best 52-Week Period</span>
-                                <span id="r52-best-weeks-pill" class="badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
+                                <span id="r52-best-weeks-pill" class="kt-badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
                             </div>
                             <span id="r52-best-dates" style="font-size: 0.78rem; color: #64748b; font-weight: 600;">-</span>
                         </div>
@@ -407,7 +408,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">⏱️ Current (Last) 52 Weeks</span>
-                                <span id="r52-current-weeks-pill" class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">-</span>
+                                <span id="r52-current-weeks-pill" class="kt-badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700;">-</span>
                             </div>
                             <span id="r52-current-dates" style="font-size: 0.78rem; color: #64748b; font-weight: 600;">-</span>
                         </div>
@@ -443,7 +444,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span style="font-size: 0.95rem; font-weight: 800; color: #1f2328;">📉 Worst 52-Week Period</span>
-                                <span id="r52-worst-weeks-pill" class="badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
+                                <span id="r52-worst-weeks-pill" class="kt-badge" style="background: #f1f5f9; color: #334155; font-weight: 700;">-</span>
                             </div>
                             <span id="r52-worst-dates" style="font-size: 0.78rem; color: #64748b; font-weight: 600;">-</span>
                         </div>
@@ -477,7 +478,7 @@
 
                 <!-- Graphs Container -->
                 <div id="r52-charts-wrapper">
-                    <div id="r52-overlay-box" class="chart-wrapper" style="margin-bottom: 0;">
+                    <div id="r52-overlay-box" class="kt-card kt-card--padded chart-wrapper" style="margin-bottom: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
                             <div>
                                 <h4 id="r52-overlay-title" style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
@@ -488,9 +489,9 @@
                                 </p>
                             </div>
                             <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden; margin-left: auto;">
-                                <button type="button" id="btn-r52-overlay-pct" class="btn-secondary active" onclick="setRolling52OverlayMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
-                                <button type="button" id="btn-r52-overlay-cad" class="btn-secondary" onclick="setRolling52OverlayMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD</button>
-                                <button type="button" id="btn-r52-overlay-usd" class="btn-secondary" onclick="setRolling52OverlayMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD</button>
+                                <button type="button" id="btn-r52-overlay-pct" class="kt-btn kt-btn--accent active" onclick="setRolling52OverlayMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
+                                <button type="button" id="btn-r52-overlay-cad" class="kt-btn kt-btn--accent" onclick="setRolling52OverlayMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD</button>
+                                <button type="button" id="btn-r52-overlay-usd" class="kt-btn kt-btn--accent" onclick="setRolling52OverlayMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD</button>
                             </div>
                         </div>
                         <div id="r52-overlay-legend" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; font-size: 0.78rem; font-weight: 700; margin-bottom: 12px;">
@@ -525,7 +526,7 @@
                     </div>
 
                     <!-- Rolling 52-Week Trailing Returns Timeline Chart -->
-                    <div id="r52-timeline-box" class="chart-wrapper" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; margin-bottom: 0;">
+                    <div id="r52-timeline-box" class="kt-card kt-card--padded chart-wrapper" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; margin-bottom: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                             <div>
                                 <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
@@ -536,14 +537,14 @@
                                 </p>
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                                <button type="button" id="btn-r52-toggle-xeqt" class="btn-secondary active" onclick="toggleRolling52Xeqt()" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: 1px solid #16a34a; border-radius: 6px; background: #f0fdf4; color: #16a34a; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;">
+                                <button type="button" id="btn-r52-toggle-xeqt" class="kt-btn kt-btn--accent active" onclick="toggleRolling52Xeqt()" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: 1px solid #16a34a; border-radius: 6px; background: #f0fdf4; color: #16a34a; display: inline-flex; align-items: center; gap: 5px; cursor: pointer;">
                                     <span id="r52-xeqt-check" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
                                     Overlay XEQT Benchmark
                                 </button>
                                 <div style="display: inline-flex; border: 1px solid #d0d7de; border-radius: 6px; overflow: hidden;">
-                                    <button type="button" id="btn-r52-metric-pct" class="btn-secondary active" onclick="setRolling52TimelineMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
-                                    <button type="button" id="btn-r52-metric-cad" class="btn-secondary" onclick="setRolling52TimelineMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD Gain</button>
-                                    <button type="button" id="btn-r52-metric-usd" class="btn-secondary" onclick="setRolling52TimelineMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD Gain</button>
+                                    <button type="button" id="btn-r52-metric-pct" class="kt-btn kt-btn--accent active" onclick="setRolling52TimelineMetric('pct')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; background: #1f2328; color: white;">% Return</button>
+                                    <button type="button" id="btn-r52-metric-cad" class="kt-btn kt-btn--accent" onclick="setRolling52TimelineMetric('cad')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ CAD Gain</button>
+                                    <button type="button" id="btn-r52-metric-usd" class="kt-btn kt-btn--accent" onclick="setRolling52TimelineMetric('usd')" style="padding: 4px 10px; font-size: 0.78rem; font-weight: 700; border: none; border-radius: 0; border-left: 1px solid #d0d7de; background: white; color: #24292f;">$ USD Gain</button>
                                 </div>
                             </div>
                         </div>
@@ -575,12 +576,12 @@
             </div>
 
             <!-- Annual Performance Summary Table -->
-            <div class="controls" style="padding: 20px; margin-bottom: 30px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 30px;">
                 <h3 style="margin: 0 0 14px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     📈 Annual Growth &amp; Drawdown Summary
                 </h3>
-                <div class="table-responsive" style="overflow-x: auto;">
-                    <table class="data-table" id="annual-table">
+                <div class="kt-table-wrap" style="overflow-x: auto;">
+                    <table class="kt-table kt-table--hover" id="annual-table">
                         <thead>
                             <tr>
                                 <th>Year</th>
@@ -601,7 +602,7 @@
             </div>
 
             <!-- Risk & Volatility Analytics Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 24px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 24px;">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     🛡️ Risk-Adjusted Return &amp; Volatility Metrics
                 </h3>
@@ -633,7 +634,7 @@
             </div>
 
             <!-- Historical Crisis Stress-Test Simulator Section -->
-            <div class="controls" style="padding: 20px; margin-bottom: 30px;">
+            <div class="kt-toolbar" style="padding: 20px; margin-bottom: 30px;">
                 <h3 style="margin: 0 0 6px 0; font-size: 1.05rem; font-weight: 800; color: #1f2328;">
                     ⚡ Historical Crisis Stress-Test Simulator
                 </h3>

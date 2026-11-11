@@ -187,15 +187,15 @@ function renderMatrixTable() {
             <tr>
                 <td><strong style="color: #0969da;">${escapeHtml(h.ticker)}</strong></td>
                 <td>${escapeHtml(h.name)}</td>
-                <td><span class="badge badge-strategy">${escapeHtml(h.strategy)}</span></td>
-                <td class="text-right font-bold">${formatCurrency(h.sum)}</td>
-                <td class="text-right">${formatCell(a.us)}</td>
-                <td class="text-right">${formatCell(a.canada)}</td>
-                <td class="text-right">${formatCell(a.developed)}</td>
-                <td class="text-right">${formatCell(a.emerging)}</td>
-                <td class="text-right">${formatCell(a.fixedIncome)}</td>
-                <td class="text-right">${formatCell(a.preciousMetals)}</td>
-                <td class="text-right">${formatCell(a.crypto)}</td>
+                <td><span class="kt-badge">${escapeHtml(h.strategy)}</span></td>
+                <td class="kt-align-right kt-fw-bold">${formatCurrency(h.sum)}</td>
+                <td class="kt-align-right">${formatCell(a.us)}</td>
+                <td class="kt-align-right">${formatCell(a.canada)}</td>
+                <td class="kt-align-right">${formatCell(a.developed)}</td>
+                <td class="kt-align-right">${formatCell(a.emerging)}</td>
+                <td class="kt-align-right">${formatCell(a.fixedIncome)}</td>
+                <td class="kt-align-right">${formatCell(a.preciousMetals)}</td>
+                <td class="kt-align-right">${formatCell(a.crypto)}</td>
             </tr>
         `;
     }).join('');
@@ -204,14 +204,14 @@ function renderMatrixTable() {
     tfoot.innerHTML = `
         <tr>
             <td colspan="3">PORTFOLIO TOTALS</td>
-            <td class="text-right">${formatCurrency(totals.totalCAD)}</td>
-            <td class="text-right">${formatCurrency(totals.us)}</td>
-            <td class="text-right">${formatCurrency(totals.canada)}</td>
-            <td class="text-right">${formatCurrency(totals.developed)}</td>
-            <td class="text-right">${formatCurrency(totals.emerging)}</td>
-            <td class="text-right">${formatCurrency(totals.fixed)}</td>
-            <td class="text-right">${formatCurrency(totals.metals)}</td>
-            <td class="text-right">${formatCurrency(totals.crypto)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.totalCAD)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.us)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.canada)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.developed)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.emerging)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.fixed)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.metals)}</td>
+            <td class="kt-align-right">${formatCurrency(totals.crypto)}</td>
         </tr>
     `;
 }
@@ -431,7 +431,7 @@ function renderSimpleAllocTable() {
     }
 
     if (simpleAllocData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state" style="text-align: center; color: #64748b; padding: 16px;">No allocation data available.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="kt-empty" style="text-align: center; color: #64748b; padding: 16px;">No allocation data available.</td></tr>`;
         if (tfoot) tfoot.innerHTML = '';
         return;
     }
@@ -474,9 +474,9 @@ function renderSimpleAllocTable() {
         return `
             <tr>
                 <td><strong style="color: #0969da;">${escapeHtml(item.asset)}</strong></td>
-                <td class="text-right font-bold">${item.pct.toFixed(2)}%</td>
-                <td class="text-right font-bold">${formatCurrency(item.sum)}</td>
-                <td class="text-right">${gainHtml}</td>
+                <td class="kt-align-right kt-fw-bold">${item.pct.toFixed(2)}%</td>
+                <td class="kt-align-right kt-fw-bold">${formatCurrency(item.sum)}</td>
+                <td class="kt-align-right">${gainHtml}</td>
             </tr>
         `;
     }).join('');
@@ -492,9 +492,9 @@ function renderSimpleAllocTable() {
         tfoot.innerHTML = `
             <tr>
                 <td>PORTFOLIO TOTAL</td>
-                <td class="text-right">100.00%</td>
-                <td class="text-right font-bold">${formatCurrency(totalCAD)}</td>
-                <td class="text-right font-bold">
+                <td class="kt-align-right">100.00%</td>
+                <td class="kt-align-right kt-fw-bold">${formatCurrency(totalCAD)}</td>
+                <td class="kt-align-right kt-fw-bold">
                     <div style="color: ${totalGainColor};">${totalGainSign}${formatCurrency(totalGainCAD)}</div>
                     <div style="font-size: 0.72rem; color: ${totalGainColor}; font-weight: normal;">${totalGainSign}${totalGainPct.toFixed(2)}%</div>
                 </td>

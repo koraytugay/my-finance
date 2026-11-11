@@ -133,9 +133,9 @@ function updateStatCards() {
     document.getElementById('hist-drawdown-cad').textContent = formatCurrency(drawdownCAD, 'CAD');
     document.getElementById('hist-drawdown-pct').textContent = `${drawdownPct.toFixed(2)}% from peak`;
     if (drawdownCAD < 0) {
-        document.getElementById('hist-drawdown-cad').className = 'stat-number text-negative';
+        document.getElementById('hist-drawdown-cad').className = 'kt-stat__value kt-text-danger';
     } else {
-        document.getElementById('hist-drawdown-cad').className = 'stat-number text-positive';
+        document.getElementById('hist-drawdown-cad').className = 'kt-stat__value kt-text-success';
     }
 
     // 8. Total Weeks
@@ -400,7 +400,7 @@ function renderChart(records, currency = 'CAD') {
     const tooltip = document.getElementById('chart-tooltip');
 
     if (!records || records.length === 0) {
-        box.innerHTML = '<p class="empty-state">No data available for this timeframe.</p>';
+        box.innerHTML = '<p class="kt-empty">No data available for this timeframe.</p>';
         return;
     }
 
@@ -751,7 +751,7 @@ function renderTable(records) {
     const tbody = document.getElementById('history-tbody');
 
     if (!records || records.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="empty-state">No records match your selection.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="kt-empty">No records match your selection.</td></tr>`;
         return;
     }
 
@@ -759,28 +759,28 @@ function renderTable(records) {
     const sorted = [...records].reverse();
 
     tbody.innerHTML = sorted.map(r => {
-        const weeklyClass = r.weeklyChangeCAD >= 0 ? 'text-positive' : 'text-negative';
+        const weeklyClass = r.weeklyChangeCAD >= 0 ? 'kt-text-success' : 'kt-text-danger';
         const weeklySign = r.weeklyChangeCAD > 0 ? '+' : '';
-        const drawdownClass = r.drawdownCAD < 0 ? 'text-negative' : '';
+        const drawdownClass = r.drawdownCAD < 0 ? 'kt-text-danger' : '';
 
         return `
             <tr>
-                <td class="text-center font-bold">${r.week}</td>
+                <td class="kt-align-center kt-fw-bold">${r.week}</td>
                 <td>${formatDate(r.date)}</td>
-                <td class="text-right">${formatCurrency(r.stocks)}</td>
-                <td class="text-right">${formatCurrency(r.fixed)}</td>
-                <td class="text-right">${formatCurrency(r.preciousMetals)}</td>
-                <td class="text-right">${formatCurrency(r.crypto)}</td>
-                <td class="text-right font-bold" style="color: #0969da;">${formatCurrency(r.totalCAD)}</td>
-                <td class="text-right">${formatCurrency(r.totalUSD, 'USD')}</td>
-                <td class="text-right font-bold ${weeklyClass}">
+                <td class="kt-align-right">${formatCurrency(r.stocks)}</td>
+                <td class="kt-align-right">${formatCurrency(r.fixed)}</td>
+                <td class="kt-align-right">${formatCurrency(r.preciousMetals)}</td>
+                <td class="kt-align-right">${formatCurrency(r.crypto)}</td>
+                <td class="kt-align-right kt-fw-bold" style="color: #0969da;">${formatCurrency(r.totalCAD)}</td>
+                <td class="kt-align-right">${formatCurrency(r.totalUSD, 'USD')}</td>
+                <td class="kt-align-right kt-fw-bold ${weeklyClass}">
                     ${weeklySign}${formatCurrency(r.weeklyChangeCAD)}
                 </td>
-                <td class="text-right font-bold ${weeklyClass}">
+                <td class="kt-align-right kt-fw-bold ${weeklyClass}">
                     ${weeklySign}${r.weeklyChangePct.toFixed(2)}%
                 </td>
-                <td class="text-right">${formatCurrency(r.runningPeakCAD)}</td>
-                <td class="text-right ${drawdownClass}">
+                <td class="kt-align-right">${formatCurrency(r.runningPeakCAD)}</td>
+                <td class="kt-align-right ${drawdownClass}">
                     ${formatCurrency(r.drawdownCAD)}
                 </td>
             </tr>

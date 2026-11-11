@@ -247,7 +247,7 @@ function renderTable(items, totalCAD) {
     const tbody = document.getElementById('holdings-tbody');
 
     if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="empty-state">No holdings match your filters.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="kt-empty">No holdings match your filters.</td></tr>`;
         return;
     }
 
@@ -261,9 +261,9 @@ function renderTable(items, totalCAD) {
         const safeStrategy = escapeHtml(h.strategy);
 
         const isReg = h.registered === true || h.registered === 1 || String(h.registered).toLowerCase() === 'true' || (h.account && /TFSA|RRSP|FHSA/i.test(h.account));
-        const accountBadgeClass = isReg ? 'badge badge-account badge-account-registered' : 'badge badge-account';
+        const accountBadgeClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
         const dayChange = h.dayChangePct !== undefined ? `
-            <div style="font-size: 0.72rem;" class="${h.dayChangePct >= 0 ? 'text-positive' : 'text-negative'}">
+            <div style="font-size: 0.72rem;" class="${h.dayChangePct >= 0 ? 'kt-text-success' : 'kt-text-danger'}">
                 ${formatPercent(h.dayChangePct, true)}
             </div>
         ` : '';
@@ -292,38 +292,38 @@ function renderTable(items, totalCAD) {
                     <div>${safeName}</div>
                 </td>
                 <td>
-                    <span class="badge badge-brokerage">${safeBrokerage}</span>
+                    <span class="kt-badge kt-badge--soft-info">${safeBrokerage}</span>
                 </td>
                 <td>
                     <span class="${accountBadgeClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>${safeAccount}</span>
                 </td>
-                <td class="text-right">
+                <td class="kt-align-right">
                     ${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })}
                 </td>
-                <td class="text-right" style="color: #475569;">
+                <td class="kt-align-right" style="color: #475569;">
                     ${avgCost > 0 ? formatCurrency(avgCost) : '<span style="color:#94a3b8;">-</span>'}
                 </td>
-                <td class="text-right">
+                <td class="kt-align-right">
                     ${formatCurrency(h.unitPrice)}
                     ${dayChange}
                 </td>
-                <td class="text-right" style="color: #475569;">
+                <td class="kt-align-right" style="color: #475569;">
                     ${totalCost > 0 ? formatCurrency(totalCost) : '<span style="color:#94a3b8;">-</span>'}
                 </td>
-                <td class="text-right font-bold">
+                <td class="kt-align-right kt-fw-bold">
                     ${formatCurrency(h.sum)}
                 </td>
-                <td class="text-right">
+                <td class="kt-align-right">
                     ${gainHtml}
                 </td>
-                <td class="text-right">
+                <td class="kt-align-right">
                     <div>${weightPct.toFixed(2)}%</div>
                     <div class="allocation-bar-wrap" style="height: 4px; margin-top: 4px;" title="Weight in portfolio">
                         <div style="width: ${weightPct}%; background-color: #0969da; height: 100%;"></div>
                     </div>
                 </td>
                 <td>
-                    <span class="badge badge-strategy">${safeStrategy}</span>
+                    <span class="kt-badge">${safeStrategy}</span>
                 </td>
             </tr>
         `;
@@ -334,7 +334,7 @@ function renderCards(items, totalCAD) {
     const container = document.getElementById('holdings-cards-container');
 
     if (items.length === 0) {
-        container.innerHTML = `<p class="empty-state">No holdings match your filters.</p>`;
+        container.innerHTML = `<p class="kt-empty">No holdings match your filters.</p>`;
         return;
     }
 
@@ -348,7 +348,7 @@ function renderCards(items, totalCAD) {
         const safeStrategy = escapeHtml(h.strategy);
 
         const isReg = h.registered === true || h.registered === 1 || String(h.registered).toLowerCase() === 'true' || (h.account && /TFSA|RRSP|FHSA/i.test(h.account));
-        const accountBadgeClass = isReg ? 'badge badge-account badge-account-registered' : 'badge badge-account';
+        const accountBadgeClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
 
         const avgCost = h.averageCost || 0;
         const totalCost = h.totalCost || (avgCost > 0 && h.count > 0 ? (avgCost * h.count) : 0);
@@ -361,7 +361,7 @@ function renderCards(items, totalCAD) {
             const color = gainCAD >= 0 ? '#166534' : '#cf222e';
             const bg = gainCAD >= 0 ? '#dcfce7' : '#fee2e2';
             gainBadge = `
-                <span class="badge" style="background: ${bg}; color: ${color}; font-weight: 700;">
+                <span class="kt-badge" style="background: ${bg}; color: ${color}; font-weight: 700;">
                     ${sign}${formatCurrency(gainCAD)} (${sign}${gainPct.toFixed(1)}%)
                 </span>
             `;
@@ -383,15 +383,15 @@ function renderCards(items, totalCAD) {
                 <div class="card-details">
                     <span>${h.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} units @ ${formatCurrency(h.unitPrice)}</span>
                     ${avgCost > 0 ? `<span style="font-size: 0.74rem; color: #64748b;">Avg: ${formatCurrency(avgCost)}</span>` : ''}
-                    <span class="${(h.dayChangePct || 0) >= 0 ? 'text-positive' : 'text-negative'}">
+                    <span class="${(h.dayChangePct || 0) >= 0 ? 'kt-text-success' : 'kt-text-danger'}">
                         ${h.dayChangePct !== undefined ? formatPercent(h.dayChangePct, true) : ''}
                     </span>
                 </div>
 
                 <div class="card-badges">
-                    <span class="badge badge-brokerage">${safeBrokerage}</span>
+                    <span class="kt-badge kt-badge--soft-info">${safeBrokerage}</span>
                     <span class="${accountBadgeClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>${safeAccount}</span>
-                    <span class="badge badge-strategy">${safeStrategy}</span>
+                    <span class="kt-badge">${safeStrategy}</span>
                     ${gainBadge}
                 </div>
             </div>
@@ -445,7 +445,7 @@ function setSort(column) {
 }
 
 function updateHeaderSortIndicators(sortValue) {
-    const headers = document.querySelectorAll('.data-table thead th[data-col]');
+    const headers = document.querySelectorAll('.kt-table thead th[data-col]');
     headers.forEach(th => {
         const col = th.getAttribute('data-col');
         const raw = th.getAttribute('data-title') || th.textContent;
@@ -529,35 +529,35 @@ function showHoldingModal(id) {
         : null;
 
     const isReg = holding.registered === true || holding.registered === 1 || String(holding.registered).toLowerCase() === 'true' || (holding.account && /TFSA|RRSP|FHSA/i.test(holding.account));
-    const modalAccountClass = isReg ? 'badge badge-account badge-account-registered' : 'badge badge-account';
+    const modalAccountClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
 
     modalBody.innerHTML = `
         <div style="margin-bottom: 16px;">
             <div style="display: flex; align-items: baseline; gap: 8px;">
                 <h2 style="font-size: 1.5rem; color: #0969da; margin: 0;">${escapeHtml(holding.ticker)}</h2>
-                <span class="badge badge-strategy">${escapeHtml(holding.strategy)}</span>
+                <span class="kt-badge">${escapeHtml(holding.strategy)}</span>
             </div>
             <div style="font-size: 0.95rem; color: #64748b; margin-top: 2px;">${escapeHtml(holding.name)}</div>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px;">
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
-                <span class="stat-label">Market Value</span>
+                <span class="kt-stat__label">Market Value</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.sum)}</span>
                 <span style="font-size: 0.74rem; color: #64748b;">${weightPct.toFixed(2)}% of portfolio</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
-                <span class="stat-label">Book Cost</span>
+                <span class="kt-stat__label">Book Cost</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${totalCost > 0 ? formatCurrency(totalCost) : '-'}</span>
                 <span style="font-size: 0.74rem; color: #64748b;">${avgCost > 0 ? `Avg: ${formatCurrency(avgCost)}` : 'No cost basis'}</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
-                <span class="stat-label">Current Unit Price</span>
+                <span class="kt-stat__label">Current Unit Price</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.unitPrice)}</span>
                 <span style="font-size: 0.74rem; color: #64748b;">${holding.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} shares</span>
             </div>
             <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
-                <span class="stat-label">Unrealized Gain</span>
+                <span class="kt-stat__label">Unrealized Gain</span>
                 <span style="font-size: 1.25rem; font-weight: 800; color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${formatCurrency(gainCAD)}` : '-'}</span>
                 <span style="font-size: 0.74rem; color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${gainPct.toFixed(2)}% all-time` : 'Awaiting cost'}</span>
             </div>
@@ -566,9 +566,9 @@ function showHoldingModal(id) {
         <div style="margin-bottom: 20px;">
             <h4 style="font-size: 0.85rem; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 8px;">Account Details</h4>
             <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.84rem;">
-                <span class="badge badge-brokerage">Brokerage: ${escapeHtml(holding.brokerage)}</span>
+                <span class="kt-badge kt-badge--soft-info">Brokerage: ${escapeHtml(holding.brokerage)}</span>
                 <span class="${modalAccountClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>Account: ${escapeHtml(holding.account)}</span>
-                <span class="badge badge-strategy">Strategy: ${escapeHtml(holding.strategy || 'Broad Market')}</span>
+                <span class="kt-badge">Strategy: ${escapeHtml(holding.strategy || 'Broad Market')}</span>
             </div>
         </div>
 
@@ -579,7 +579,7 @@ function showHoldingModal(id) {
 
         ${yahooUrl ? `
             <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #edf2f7; display: flex; justify-content: flex-end;">
-                <a href="${yahooUrl}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="text-decoration: none;">
+                <a href="${yahooUrl}" target="_blank" rel="noopener noreferrer" class="kt-btn kt-btn--accent" style="text-decoration: none;">
                     View on Yahoo Finance &rarr;
                 </a>
             </div>

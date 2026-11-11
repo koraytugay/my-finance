@@ -185,7 +185,7 @@ function renderTaxMatrix() {
             <td style="text-align: right;">${row['NON-REG'] > 0 ? formatCurrency(row['NON-REG'], 'CAD') : '-'}</td>
             <td style="text-align: right; font-weight: 700;">${formatCurrency(row.total, 'CAD')}</td>
             <td style="text-align: center;">
-                <span class="badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 700;">
+                <span class="kt-badge" style="background: ${badgeBg}; color: ${badgeColor}; font-weight: 700;">
                     ${shelteredPct.toFixed(1)}%
                 </span>
             </td>
