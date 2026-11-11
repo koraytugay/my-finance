@@ -578,7 +578,7 @@ function showHoldingModal(id) {
         </div>
 
         ${yahooUrl ? `
-            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #edf2f7; display: flex; justify-content: flex-end;">
+            <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--kt-divider); display: flex; justify-content: flex-end;">
                 <a href="${yahooUrl}" target="_blank" rel="noopener noreferrer" class="kt-btn kt-btn--accent" style="text-decoration: none;">
                     View on Yahoo Finance &rarr;
                 </a>

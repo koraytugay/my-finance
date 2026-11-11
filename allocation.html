@@ -118,7 +118,7 @@
                 <!-- 2 Comparison Columns: Account Denomination vs Look-Through Economic Exposure -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
                     <!-- Column 1: Account Denomination -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
                             1. Direct Account Denomination
                         </div>
@@ -148,7 +148,7 @@
                     </div>
 
                     <!-- Column 2: True Look-Through Economic Currency Exposure -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 1px solid #edf2f7; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="kt-card kt-card--padded">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
                             2. True Economic Exposure (Look-Through)
                         </div>
@@ -189,7 +189,7 @@
                 </div>
 
                 <!-- Interactive FX Sensitivity Simulator -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px;">
+                <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 10px; padding: 18px 20px;">
                     <div class="kt-split kt-mb-3">
                         <div>
                             <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
@@ -214,19 +214,19 @@
 
                     <!-- Impact Display Cards -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Simulated Portfolio Net Worth</div>
                             <div id="sim-nw-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 3px 0;">$680,041 CAD</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-nw-usd">≈ $496,430 USD</div>
                         </div>
 
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Net Currency Impact ($ CAD)</div>
                             <div id="sim-impact-cad" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 3px 0;">+$0 CAD (0.00%)</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-impact-desc">Holding unhedged US assets buffers currency swings</div>
                         </div>
 
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid #e2e8f0;">
+                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Natural FX Hedge Efficiency</div>
                             <div style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin: 3px 0;" id="sim-fx-shield-pct">33.1% US Shield</div>
                             <div class="kt-fs-xs kt-text-muted">CAD dips boost purchasing power</div>

@@ -213,14 +213,12 @@
     background: var(--kt-surface);
     border: 1px solid var(--kt-border);
     border-radius: var(--kt-radius-lg);
-    box-shadow: var(--kt-shadow-md);
     cursor: pointer;
-    transition: box-shadow var(--kt-transition), border-color var(--kt-transition);
+    transition: border-color var(--kt-transition);
 }
 
 .holding-card:hover {
-    box-shadow: var(--kt-shadow-lg);
-    border-color: var(--kt-border-strong);
+    border-color: var(--kt-border-hover);
 }
 
 .card-top {

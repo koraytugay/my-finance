@@ -326,7 +326,7 @@ function renderAthStreaksSection(history) {
             const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
 
             return `
-                <div style="background: #f8fafc; border-radius: 8px; padding: 10px 14px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="background: #f8fafc; border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                             <span style="background: ${badgeBg}; color: white; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>

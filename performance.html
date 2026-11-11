@@ -114,7 +114,7 @@
             </div>
 
             <!-- Longest Streaks Without All-Time Highs (CAD & USD) -->
-            <div class="kt-card kt-card--padded" style="margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 24px;">
                 <div class="kt-split kt-mb-2">
                     <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
                         <span>🏔️ Longest Streaks Without All-Time Highs</span>
@@ -130,7 +130,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
                     <!-- CAD Streaks Card -->
                     <div class="kt-card kt-card--padded">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--kt-divider);">
                             <span style="font-size: 0.82rem; font-weight: 800; color: #0969da; text-transform: uppercase; letter-spacing: 0.5px;">🇨🇦 CAD Top 3 Streaks</span>
                             <span id="ath-cad-summary-pill" style="font-size: 0.85rem; font-weight: 800; color: #0969da; background: rgba(9, 105, 218, 0.08); padding: 2px 8px; border-radius: 6px;">
                                 -
@@ -143,7 +143,7 @@
 
                     <!-- USD Streaks Card -->
                     <div class="kt-card kt-card--padded">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--kt-divider);">
                             <span style="font-size: 0.82rem; font-weight: 800; color: #8250df; text-transform: uppercase; letter-spacing: 0.5px;">🇺🇸 USD Top 3 Streaks</span>
                             <span id="ath-usd-summary-pill" style="font-size: 0.85rem; font-weight: 800; color: #8250df; background: rgba(130, 80, 223, 0.08); padding: 2px 8px; border-radius: 6px;">
                                 -
@@ -210,7 +210,7 @@
             </div>
 
             <!-- Purchasing Power & Real Wealth (Inflation-Adjusted) Section -->
-            <div class="kt-card kt-card--padded" style="margin-bottom: 24px; background: white; border: 1px solid #edf2f7; border-radius: 10px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);">
+            <div class="kt-card kt-card--padded" style="margin-bottom: 24px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <h3 style="margin: 0; font-size: 1.05rem; font-weight: 800; color: #1f2328; display: flex; align-items: center; gap: 8px;">
@@ -234,22 +234,22 @@
 
                 <!-- 4 Purchasing Power Stat Cards -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 16px 0 16px 0;">
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
                         <div class="kt-eyebrow">Real Net Worth (Inception $)</div>
                         <div id="pp-real-nw" style="font-size: 1.35rem; font-weight: 800; color: #0969da; margin-top: 3px;">$0.00</div>
                         <div id="pp-real-nw-sub" style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">In constant Aug 2024 dollars</div>
                     </div>
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
                         <div class="kt-eyebrow">Real Purchasing Power Gain</div>
                         <div id="pp-real-gain" style="font-size: 1.35rem; font-weight: 800; color: #16a34a; margin-top: 3px;">+$0.00</div>
                         <div id="pp-real-gain-sub" style="font-size: 0.72rem; color: #15803d; font-weight: 600; margin-top: 2px;">+0.0% real growth above inflation</div>
                     </div>
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
                         <div class="kt-eyebrow">Estimated Inflation Drag</div>
                         <div id="pp-inf-drag" style="font-size: 1.35rem; font-weight: 800; color: #d97706; margin-top: 3px;">-$0.00</div>
                         <div id="pp-inf-drag-sub" style="font-size: 0.72rem; color: #b45309; margin-top: 2px;">Nominal dollars absorbed by inflation</div>
                     </div>
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
                         <div class="kt-eyebrow">Real Weekly Accumulation</div>
                         <div id="pp-weekly-pace" style="font-size: 1.35rem; font-weight: 800; color: #1f2328; margin-top: 3px;">+$0.00 / wk</div>
                         <div id="pp-weekly-pace-sub" style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">vs +$0.00 / wk nominal pace</div>
@@ -269,7 +269,7 @@
                 </div>
 
                 <!-- Insight Note -->
-                <div id="pp-insight-note" style="font-size: 0.78rem; color: #475569; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; line-height: 1.5;">
+                <div id="pp-insight-note" style="font-size: 0.78rem; color: #475569; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 6px; padding: 10px 12px; line-height: 1.5;">
                     <!-- Injected dynamically via JS -->
                 </div>
             </div>
@@ -291,7 +291,7 @@
                 <!-- Comparison Grid Cards -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px;">
                     <!-- Card 1: Your Portfolio -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 2px solid #0969da; box-shadow: 0 4px 12px rgba(9,105,218,0.08); position: relative;">
+                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 2px solid var(--kt-accent); position: relative;">
                         <div style="position: absolute; top: -10px; right: 14px; background: #0969da; color: white; font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">
                             Your Portfolio
                         </div>
@@ -335,7 +335,7 @@
                 </div>
 
                 <!-- Comparative Visual Bars & Risk-Adjusted Commentary -->
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px 18px;">
+                <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 10px; padding: 16px 18px;">
                     <h4 style="margin: 0 0 4px 0; font-size: 0.9rem; font-weight: 800; color: #1f2328;">
                         📈 Visual Return Comparison: Portfolio Growth vs. Market Benchmarks
                     </h4>
@@ -345,7 +345,7 @@
 
                     <div id="bench-bars-container" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;"></div>
 
-                    <div id="bench-insight" style="font-size: 0.8rem; color: #475569; line-height: 1.5; border-top: 1px solid #e2e8f0; padding-top: 12px;"></div>
+                    <div id="bench-insight" style="font-size: 0.8rem; color: #475569; line-height: 1.5; border-top: 1px solid var(--kt-divider); padding-top: 12px;"></div>
                 </div>
 
 
@@ -378,7 +378,7 @@
                         </div>
 
                         <!-- 3 Progress Metrics: %, CAD, USD -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 12px;">
                             <div>
                                 <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-best-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin-top: 2px;">+0.00%</div>
@@ -414,7 +414,7 @@
                         </div>
 
                         <!-- 3 Progress Metrics: %, CAD, USD -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 12px;">
                             <div>
                                 <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-current-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin-top: 2px;">+0.00%</div>
@@ -450,7 +450,7 @@
                         </div>
 
                         <!-- 3 Progress Metrics: %, CAD, USD -->
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 12px;">
                             <div>
                                 <div class="kt-eyebrow">Progress (%)</div>
                                 <div id="r52-worst-progress-pct" style="font-size: 1.25rem; font-weight: 800; color: #cf222e; margin-top: 2px;">+0.00%</div>
@@ -526,7 +526,7 @@
                     </div>
 
                     <!-- Rolling 52-Week Trailing Returns Timeline Chart -->
-                    <div id="r52-timeline-box" class="kt-card kt-card--padded chart-wrapper" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #e2e8f0; margin-bottom: 0;">
+                    <div id="r52-timeline-box" class="kt-card kt-card--padded chart-wrapper" style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--kt-divider); margin-bottom: 0;">
                         <div class="kt-split kt-mb-3">
                             <div>
                                 <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
@@ -550,7 +550,7 @@
                         </div>
 
                         <!-- Mini stats banner above timeline -->
-                        <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; align-items: center;">
+                        <div style="display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 6px; padding: 8px 12px; align-items: center;">
                             <span>Portfolio Avg: <strong class="kt-text-accent" id="r52-timeline-stat-avg">-</strong></span>
                             <span id="r52-timeline-banner-xeqt" style="display: inline;">XEQT Avg: <strong class="kt-text-success" id="r52-timeline-stat-xeqt-avg">-</strong></span>
                             <span>Portfolio Peak: <strong class="kt-text-accent" id="r52-timeline-stat-peak">-</strong></span>
@@ -610,7 +610,7 @@
                     Institutional risk metrics calculated directly from your historical volatility profile.
                 </p>
                 <div style="display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;">
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; flex: 1 1 180px;">
+                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 16px; flex: 1 1 180px;">
                         <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Annualized Volatility (σ)</div>
                         <div id="stat-risk-volatility" style="font-size: 1.3rem; font-weight: 800; color: #1e293b; margin: 4px 0;">0.0%</div>
                         <div class="kt-fs-xs kt-text-muted" id="stat-risk-volatility-sub">Based on weekly std dev</div>

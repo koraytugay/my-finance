@@ -4062,12 +4062,12 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
                 <strong class="kt-text-success">+${m.diffPct.toFixed(2)}%</strong>
             </div>
             ${avgCompHtml}
-            <div class="kt-readout__row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
+            <div class="kt-readout__row" style="margin-top: 4px; padding-top: 4px; border-top: 1px dashed var(--kt-divider);">
                 <span>Time Between Peaks:</span>
                 <strong class="kt-text-accent">${timeStr}</strong>
             </div>
         </div>
-        <div class="kt-readout__footer" style="margin-top: auto; padding-top: 8px; font-size: 0.72rem; color: #94a3b8; border-top: 1px solid #f1f5f9;">
+        <div class="kt-readout__footer" style="margin-top: auto; padding-top: 8px; font-size: 0.72rem; color: #94a3b8; border-top: 1px solid var(--kt-divider);">
             💡 Click or hover any bar to inspect that All-Time High milestone
         </div>
     `;

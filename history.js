@@ -202,7 +202,7 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
             <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 12px;">
                 Portfolio grew to ${formatCurrency(yd.endVal, 'CAD')}
             </div>
-            <div style="border-top: 1px solid #f1f5f9; padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.78rem;">
+            <div style="border-top: 1px solid var(--kt-divider); padding-top: 10px; display: flex; justify-content: space-between; font-size: 0.78rem;">
                 <div>
                     <div style="color: #64748b; font-size: 0.7rem; text-transform: uppercase; font-weight: 700;">Weekly Pace</div>
                     <div style="font-weight: 700; color: #1f2328;">+${formatCurrency(yd.weeklyVel, 'CAD')}/wk</div>

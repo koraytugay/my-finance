@@ -238,7 +238,7 @@ function renderTaxInsights() {
 
     insights.forEach(item => {
         const card = document.createElement('div');
-        card.style.cssText = 'background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);';
+        card.className = 'kt-card kt-card--padded';
         card.innerHTML = `
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
                 <span style="font-size: 1.2rem;">${item.icon}</span>
