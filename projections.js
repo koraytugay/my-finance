@@ -307,10 +307,10 @@ function renderMilestones(milestones, startingNW, monthlySave, rate, fireTarget)
             statusBadge = '<span class="kt-badge kt-badge--soft-success">Achieved</span>';
             timeDesc = `<div class="kt-fs-sm kt-fw-bold kt-text-success kt-mt-2">Passed (+${formatCurrency(startingNW - m.target)})</div>`;
         } else if (months >= 600) {
-            statusBadge = '<span class="kt-badge kt-badge--soft-info">Long-term</span>';
+            statusBadge = '<span class="kt-badge">Long-term</span>';
             timeDesc = `<div class="kt-fs-sm kt-fw-bold kt-text-muted kt-mt-2">&gt; 50 years</div>`;
         } else {
-            statusBadge = '<span class="kt-badge kt-badge--soft-info">In Progress</span>';
+            statusBadge = '<span class="kt-badge">In Progress</span>';
             timeDesc = `
                 <div class="kt-fs-sm kt-fw-heavy kt-mt-1">
                     ${monthYearStr} <span class="kt-fs-xs kt-fw-semibold kt-text-muted">(${yearsRem} yrs / ${months} mos)</span>
@@ -493,7 +493,7 @@ function buildProjectionCardHtml(point, isHover = false) {
 
     let badgeHtml = '';
     if (isHover) {
-        badgeHtml = `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`;
+        badgeHtml = `<span class="kt-badge">INSPECTING</span>`;
     } else if (point.year === horizonYears) {
         badgeHtml = `<span class="kt-badge" style="background: #ede9fe; ">TARGET (YR ${point.year})</span>`;
     } else {

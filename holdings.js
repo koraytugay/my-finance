@@ -261,7 +261,7 @@ function renderTable(items, totalCAD) {
         const safeStrategy = escapeHtml(h.strategy);
 
         const isReg = h.registered === true || h.registered === 1 || String(h.registered).toLowerCase() === 'true' || (h.account && /TFSA|RRSP|FHSA/i.test(h.account));
-        const accountBadgeClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
+        const accountBadgeClass = 'kt-badge';
         const dayChange = h.dayChangePct !== undefined ? `
             <div class="kt-fs-2xs" class="${h.dayChangePct >= 0 ?'kt-text-success' : 'kt-text-danger'}">
                 ${formatPercent(h.dayChangePct, true)}
@@ -292,7 +292,7 @@ function renderTable(items, totalCAD) {
                     <div>${safeName}</div>
                 </td>
                 <td>
-                    <span class="kt-badge kt-badge--soft-info">${safeBrokerage}</span>
+                    <span class="kt-badge">${safeBrokerage}</span>
                 </td>
                 <td>
                     <span class="${accountBadgeClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>${safeAccount}</span>
@@ -348,7 +348,7 @@ function renderCards(items, totalCAD) {
         const safeStrategy = escapeHtml(h.strategy);
 
         const isReg = h.registered === true || h.registered === 1 || String(h.registered).toLowerCase() === 'true' || (h.account && /TFSA|RRSP|FHSA/i.test(h.account));
-        const accountBadgeClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
+        const accountBadgeClass = 'kt-badge';
 
         const avgCost = h.averageCost || 0;
         const totalCost = h.totalCost || (avgCost > 0 && h.count > 0 ? (avgCost * h.count) : 0);
@@ -389,7 +389,7 @@ function renderCards(items, totalCAD) {
                 </div>
 
                 <div class="card-badges">
-                    <span class="kt-badge kt-badge--soft-info">${safeBrokerage}</span>
+                    <span class="kt-badge">${safeBrokerage}</span>
                     <span class="${accountBadgeClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>${safeAccount}</span>
                     <span class="kt-badge">${safeStrategy}</span>
                     ${gainBadge}
@@ -529,7 +529,7 @@ function showHoldingModal(id) {
         : null;
 
     const isReg = holding.registered === true || holding.registered === 1 || String(holding.registered).toLowerCase() === 'true' || (holding.account && /TFSA|RRSP|FHSA/i.test(holding.account));
-    const modalAccountClass = isReg ? 'kt-badge kt-badge--soft-warning' : 'kt-badge kt-badge--soft-success';
+    const modalAccountClass = 'kt-badge';
 
     modalBody.innerHTML = `
         <div class="kt-mb-4">
@@ -566,7 +566,7 @@ function showHoldingModal(id) {
         <div class="kt-mb-5">
             <h4 class="kt-fs-sm kt-text-muted kt-mb-2" style="text-transform: uppercase; letter-spacing: 0.5px;">Account Details</h4>
             <div class="kt-fs-sm" style="display: flex; flex-wrap: wrap; gap: 8px;">
-                <span class="kt-badge kt-badge--soft-info">Brokerage: ${escapeHtml(holding.brokerage)}</span>
+                <span class="kt-badge">Brokerage: ${escapeHtml(holding.brokerage)}</span>
                 <span class="${modalAccountClass}" ${isReg ? 'title="Registered Tax-Advantaged Account"' : ''}>Account: ${escapeHtml(holding.account)}</span>
                 <span class="kt-badge">Strategy: ${escapeHtml(holding.strategy || 'Broad Market')}</span>
             </div>

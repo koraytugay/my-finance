@@ -645,7 +645,7 @@ function renderChart(records, currency = 'CAD') {
         const cVal = isUSD ? (r.crypto * recRate) : r.crypto;
 
         const badgeHtml = isHover
-            ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+            ? `<span class="kt-badge">INSPECTING</span>`
             : `<span class="kt-badge">LATEST</span>`;
 
         const weekPrefix = r.week ? `Week ${r.week} &bull; ` : '';

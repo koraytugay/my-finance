@@ -156,7 +156,7 @@ function renderGroupedViews() {
             const isSubReg = sg.isReg || (sg.title && /TFSA|RRSP|FHSA/i.test(sg.title));
             const subBadge = (groupBy === 'brokerage' || groupBy === 'registered-status')
                 ? (isSubReg 
-                    ? '<span class="kt-badge kt-badge--soft-warning" style="margin-left: 6px;">Registered</span>' 
+                    ? '<span class="kt-badge" style="margin-left: 6px;">Registered</span>' 
                     : '<span class="kt-badge" style="margin-left: 6px;">Non-Registered / Taxable</span>')
                 : '';
 

@@ -1726,7 +1726,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             }
         } else {
             badgeHtml = isHover
-                ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+                ? `<span class="kt-badge">INSPECTING</span>`
                 : `<span class="kt-badge">LATEST</span>`;
         }
 
@@ -2909,7 +2909,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const cardContent = `
                 <div class="kt-readout__header">
                     ${singleHoverHeader}
-                    <span class="kt-badge kt-badge--soft-info">INSPECTING</span>
+                    <span class="kt-badge">INSPECTING</span>
                 </div>
                 <div>${yearRows}</div>
                 ${xeqtCardHtml}
@@ -2952,7 +2952,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const sign = last.pct >= 0 ? '+' : '';
             const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
             const chainedBadge = s.chainedFromYear
-                ? `<span class="kt-fs-2xs" style="background: rgba(217, 119, 6, 0.12); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
+                ? `<span class="kt-fs-2xs" style="background: var(--kt-surface-hover); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
                 : '';
             return `
                 <div class="kt-legend__item">
@@ -3109,7 +3109,7 @@ function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCap
 
     const dateStr = typeof formatDate === 'function' ? formatDate(pt.date) : pt.date;
     const badgeHtml = isInspecting
-        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        ? `<span class="kt-badge">INSPECTING</span>`
         : `<span class="kt-badge">LATEST</span>`;
 
     const primaryValStr = isPct
@@ -3540,7 +3540,7 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
 
     const dateStr = typeof formatDate === 'function' ? formatDate(it.date) : it.date;
     const badgeHtml = isHover
-        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        ? `<span class="kt-badge">INSPECTING</span>`
         : `<span class="kt-badge">LATEST</span>`;
 
     const primaryValStr = isPct
@@ -4919,7 +4919,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
         : `$${(isUsd ? item.totalUSD : item.totalCAD).toFixed(2)}`;
 
     const badgeHtml = isHover
-        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        ? `<span class="kt-badge">INSPECTING</span>`
         : `<span class="kt-badge">LATEST</span>`;
 
     const contextText = isPct
@@ -5189,7 +5189,7 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
     const formattedDdVal = typeof formatCurrency === 'function' ? formatCurrency(nearest.ddVal, currency) : `$${nearest.ddVal.toFixed(2)}`;
 
     const badgeHtml = isHover
-        ? `<span class="kt-badge kt-badge--soft-info">INSPECTING</span>`
+        ? `<span class="kt-badge">INSPECTING</span>`
         : `<span class="kt-badge">LATEST</span>`;
 
     let primaryVal = '';

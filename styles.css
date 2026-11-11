@@ -89,11 +89,6 @@
     border-color: color-mix(in srgb, var(--kt-success) 40%, transparent);
 }
 
-/* ================= Dividends: income category tones (beyond kt soft tones) ================= */
-.pill-foreign-div  { --kt-badge-bg: #ffedd5; --kt-badge-fg: #c2410c; }
-.pill-tax-deferred,
-.pill-semiannual   { --kt-badge-bg: #f3e8ff; --kt-badge-fg: #7e22ce; }
-
 /* ================= Dividends: 12-month distribution bar chart ================= */
 .month-bar {
     position: relative;

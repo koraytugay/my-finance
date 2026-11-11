@@ -144,7 +144,7 @@ function getHoldingTaxProfile(h, grossIncome) {
         const isDeferred = acct.includes('RRSP') || acct.includes('LIRA') || acct.includes('RRIF');
         const type = isDeferred ? 'deferred' : 'taxfree';
         const label = isDeferred ? '0.0% (RRSP Deferred)' : '0.0% (Tax-Free)';
-        const badgeClass = isDeferred ? 'pill-tax-deferred' : 'kt-badge--soft-success';
+        const badgeClass = isDeferred ? '' : 'kt-badge--soft-success';
 
         return {
             isSheltered: true,
@@ -213,7 +213,7 @@ function getHoldingTaxProfile(h, grossIncome) {
             isSheltered: false,
             type: 'eligible',
             label: `${rate.toFixed(1)}% (Eligible Div + DTC)`,
-            badgeClass: 'kt-badge--soft-info',
+            badgeClass: '',
             taxRatePct: rate,
             taxDragCAD: taxDrag,
             netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -229,7 +229,7 @@ function getHoldingTaxProfile(h, grossIncome) {
             isSheltered: false,
             type: 'foreign',
             label: `${rate.toFixed(1)}% (Foreign Div)`,
-            badgeClass: 'pill-foreign-div',
+            badgeClass: 'kt-badge--soft-danger',
             taxRatePct: rate,
             taxDragCAD: taxDrag,
             netIncomeCAD: Math.max(0, grossIncome - taxDrag),
@@ -717,12 +717,12 @@ function renderTableRows(items) {
 
         const tr = document.createElement('tr');
 
-        let freqClass = 'kt-badge--soft-warning';
-        if (h.freq === 'Monthly') freqClass = 'kt-badge--soft-info';
+        let freqClass = '';
+        if (h.freq === 'Monthly') freqClass = '';
         else if (h.freq === 'Annual') freqClass = '';
-        else if (h.freq === 'Semi-Annual') freqClass = 'pill-semiannual';
+        else if (h.freq === 'Semi-Annual') freqClass = '';
 
-        const tickerBadge = h.isFixedIncomeAssumed ? '<span class="kt-badge kt-badge--pill kt-badge--soft-success" title="Assumed 2.0% Fixed Income rule" style="margin-left:5px;">2% Fixed</span>' : '';
+        const tickerBadge = h.isFixedIncomeAssumed ? '<span class="kt-badge kt-badge--pill" title="Assumed 2.0% Fixed Income rule" style="margin-left:5px;">2% Fixed</span>' : '';
         const yocDisplay = cashflowMode === 'net' ? h.netYoCPct : h.grossYoCPct;
 
         tr.innerHTML = `

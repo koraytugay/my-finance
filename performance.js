@@ -1550,7 +1550,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         };
 
         const badgeHtml = isHover
-            ? `<span class="kt-badge kt-badge--soft-info">WEEK ${weekIdx}</span>`
+            ? `<span class="kt-badge">WEEK ${weekIdx}</span>`
             : `<span class="kt-badge">OVERVIEW</span>`;
 
         let spreadStr = '';
@@ -2018,7 +2018,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         if (isPeak) tag = '<span class="kt-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
         else if (isLowest) tag = '<span class="kt-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
         else if (isLatest) tag = '<span class="kt-badge" style="background: #0969da; color: white;">CURRENT</span>';
-        else tag = isHover ? '<span class="kt-badge kt-badge--soft-info">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
+        else tag = isHover ? '<span class="kt-badge">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
 
         const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
         const signDiff = diff >= 0 ? '+' : '';
