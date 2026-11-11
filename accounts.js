@@ -164,9 +164,9 @@ function renderGroupedViews() {
             const headerRow = `
                 <tr class="subgroup-header-row">
                     <td colspan="7">
-                        <strong style="color: #0f172a; font-size: 0.95rem;">📁 ${escapeHtml(sg.title)}</strong>
+                        <strong class="kt-text-primary kt-fs-base">📁 ${escapeHtml(sg.title)}</strong>
                         ${subBadge}
-                        <span style="color: #64748b; font-size: 0.78rem; margin-left: 8px;">(${sg.holdings.length} ${sg.holdings.length === 1 ? 'position' : 'positions'})</span>
+                        <span class="kt-text-muted kt-fs-xs" style="margin-left: 8px;">(${sg.holdings.length} ${sg.holdings.length === 1 ? 'position' : 'positions'})</span>
                     </td>
                 </tr>
             `;
@@ -186,8 +186,8 @@ function renderGroupedViews() {
                         <td class="kt-align-right">${formatCurrency(h.unitPrice)}</td>
                         <td class="kt-align-right kt-fw-bold">${formatCurrency(h.sum)}</td>
                         <td class="kt-align-right">
-                            <span style="font-weight: 600; color: #1f2328;">${hWeightSub.toFixed(1)}%</span>
-                            <span style="color: #94a3b8; font-size: 0.74rem; margin-left: 4px;">(${hWeightGroup.toFixed(1)}%)</span>
+                            <span class="kt-fw-semibold kt-text-primary">${hWeightSub.toFixed(1)}%</span>
+                            <span class="kt-text-muted kt-fs-xs" style="margin-left: 4px;">(${hWeightGroup.toFixed(1)}%)</span>
                         </td>
                     </tr>
                 `;
@@ -200,18 +200,18 @@ function renderGroupedViews() {
             const hasCost = sg.holdings.some(h => (h.averageCost || 0) > 0);
             const gainSign = sgGain >= 0 ? '+' : '';
             const gainColor = sgGain >= 0 ? '#166534' : '#cf222e';
-            const gainText = hasCost ? `<span style="font-size: 0.78rem; color: ${gainColor}; font-weight: 600; margin-left: 6px;">(${gainSign}${formatCurrency(sgGain)} / ${gainSign}${sgGainPct.toFixed(1)}%)</span>` : '';
+            const gainText = hasCost ? `<span class="kt-fs-xs kt-fw-semibold" style="color: ${gainColor}; margin-left: 6px;">(${gainSign}${formatCurrency(sgGain)} / ${gainSign}${sgGainPct.toFixed(1)}%)</span>` : '';
 
             const subtotalRow = `
                 <tr class="subgroup-subtotal-row">
-                    <td colspan="5" style="text-align: right; padding-right: 14px; font-weight: 700;">
+                    <td class="kt-align-right kt-fw-bold" colspan="5" style="padding-right: 14px;">
                         Subtotal &bull; ${escapeHtml(sg.title)} (${sg.holdings.length} ${sg.holdings.length === 1 ? 'position' : 'positions'}):
                         ${gainText}
                     </td>
-                    <td class="kt-align-right" style="font-weight: 800; color: #1e293b;">
+                    <td class="kt-align-right kt-fw-heavy kt-text-primary">
                         ${formatCurrency(sg.total)}
                     </td>
-                    <td class="kt-align-right" style="font-weight: 700; color: #0969da;">
+                    <td class="kt-align-right kt-fw-bold kt-text-accent">
                         ${sgPctOfGroup.toFixed(1)}%
                     </td>
                 </tr>
@@ -223,13 +223,13 @@ function renderGroupedViews() {
         // 4. Brokerage / Group Grand Total Row
         const groupTotalRow = `
             <tr class="group-total-row">
-                <td colspan="5" style="text-align: right; padding-right: 14px;">
+                <td class="kt-align-right" colspan="5" style="padding-right: 14px;">
                     Total ${escapeHtml(group.title)} (${group.holdings.length} positions across ${sortedSubGroups.length} ${sortedSubGroups.length === 1 ? 'account' : 'accounts'}):
                 </td>
-                <td class="kt-align-right" style="font-weight: 800;">
+                <td class="kt-align-right kt-fw-heavy">
                     ${formatCurrency(group.total)}
                 </td>
-                <td class="kt-align-right" style="font-weight: 800;">
+                <td class="kt-align-right kt-fw-heavy">
                     100.0%
                 </td>
             </tr>
