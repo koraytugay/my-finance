@@ -108,7 +108,7 @@ function renderBreakdowns() {
                     <span><strong style="color: ${item.color};">&bull;</strong> ${item.label}</span>
                     <span><strong>${formatCurrency(item.value)}</strong> (${pctOfEquities.toFixed(1)}% equity)</span>
                 </div>
-                <div class="allocation-bar-wrap" style="height: 8px;">
+                <div class="kt-progress" style="height: 8px;">
                     <div style="width: ${pctOfEquities}%; background-color: ${item.color}; height: 100%;"></div>
                 </div>
                 <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px; text-align: right;">${pctOfPortfolio.toFixed(1)}% of total portfolio</div>
@@ -132,7 +132,7 @@ function renderBreakdowns() {
                     <span><strong style="color: ${item.color};">&bull;</strong> ${item.label}</span>
                     <span><strong>${formatCurrency(item.value)}</strong> (${pct.toFixed(1)}%)</span>
                 </div>
-                <div class="allocation-bar-wrap" style="height: 8px;">
+                <div class="kt-progress" style="height: 8px;">
                     <div style="width: ${pct}%; background-color: ${item.color}; height: 100%;"></div>
                 </div>
             </div>
@@ -164,7 +164,7 @@ function renderBreakdowns() {
                     <span><strong style="color: ${color};">&bull;</strong> ${strat}</span>
                     <span><strong>${formatCurrency(val)}</strong> (${pct.toFixed(1)}%)</span>
                 </div>
-                <div class="allocation-bar-wrap" style="height: 8px;">
+                <div class="kt-progress" style="height: 8px;">
                     <div style="width: ${pct}%; background-color: ${color}; height: 100%;"></div>
                 </div>
             </div>

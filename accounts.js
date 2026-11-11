@@ -251,7 +251,7 @@ function renderGroupedViews() {
                     </div>
                 </div>
 
-                <div class="allocation-bar-wrap" style="height: 6px; margin-bottom: 12px;">
+                <div class="kt-progress" style="height: 6px; margin-bottom: 12px;">
                     <div style="width: ${groupPct}%; background-color: #0969da; height: 100%;"></div>
                 </div>
 

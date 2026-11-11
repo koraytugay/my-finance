@@ -318,7 +318,7 @@ function renderTable(items, totalCAD) {
                 </td>
                 <td class="kt-align-right">
                     <div>${weightPct.toFixed(2)}%</div>
-                    <div class="allocation-bar-wrap" style="height: 4px; margin-top: 4px;" title="Weight in portfolio">
+                    <div class="kt-progress" style="height: 4px; margin-top: 4px;" title="Weight in portfolio">
                         <div style="width: ${weightPct}%; background-color: #0969da; height: 100%;"></div>
                     </div>
                 </td>
@@ -517,7 +517,7 @@ function showHoldingModal(id) {
                     <span><strong style="color: ${cat.color};">&bull;</strong> ${cat.label}</span>
                     <span><strong>${formatCurrency(cat.value)}</strong> (${pct.toFixed(1)}%)</span>
                 </div>
-                <div class="allocation-bar-wrap" style="height: 6px;">
+                <div class="kt-progress" style="height: 6px;">
                     <div style="width: ${pct}%; background-color: ${cat.color}; height: 100%;"></div>
                 </div>
             </div>
@@ -540,26 +540,26 @@ function showHoldingModal(id) {
             <div style="font-size: 0.95rem; color: #64748b; margin-top: 2px;">${escapeHtml(holding.name)}</div>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 20px;">
-            <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
+        <div class="kt-grid kt-mb-5" style="--kt-grid-min: 130px; --kt-grid-gap: 10px;">
+            <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Market Value</span>
-                <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.sum)}</span>
-                <span class="kt-fs-xs kt-text-muted">${weightPct.toFixed(2)}% of portfolio</span>
+                <span class="kt-stat__value">${formatCurrency(holding.sum)}</span>
+                <span class="kt-stat__sub">${weightPct.toFixed(2)}% of portfolio</span>
             </div>
-            <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
+            <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Book Cost</span>
-                <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${totalCost > 0 ? formatCurrency(totalCost) : '-'}</span>
-                <span class="kt-fs-xs kt-text-muted">${avgCost > 0 ? `Avg: ${formatCurrency(avgCost)}` : 'No cost basis'}</span>
+                <span class="kt-stat__value">${totalCost > 0 ? formatCurrency(totalCost) : '-'}</span>
+                <span class="kt-stat__sub">${avgCost > 0 ? `Avg: ${formatCurrency(avgCost)}` : 'No cost basis'}</span>
             </div>
-            <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
+            <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Current Unit Price</span>
-                <span style="font-size: 1.25rem; font-weight: 800; color: #1f2328;">${formatCurrency(holding.unitPrice)}</span>
-                <span class="kt-fs-xs kt-text-muted">${holding.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} shares</span>
+                <span class="kt-stat__value">${formatCurrency(holding.unitPrice)}</span>
+                <span class="kt-stat__sub">${holding.count.toLocaleString('en-US', { maximumFractionDigits: 2 })} shares</span>
             </div>
-            <div class="stat-card-box" style="padding: 10px; align-items: flex-start; text-align: left;">
+            <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Unrealized Gain</span>
-                <span style="font-size: 1.25rem; font-weight: 800; color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${formatCurrency(gainCAD)}` : '-'}</span>
-                <span style="font-size: 0.74rem; color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${gainPct.toFixed(2)}% all-time` : 'Awaiting cost'}</span>
+                <span class="kt-stat__value" style="color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${formatCurrency(gainCAD)}` : '-'}</span>
+                <span class="kt-stat__sub" style="color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${gainPct.toFixed(2)}% all-time` : 'Awaiting cost'}</span>
             </div>
         </div>
 

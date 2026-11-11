@@ -622,8 +622,8 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
                         <span style="color: ${s.isPortfolio ? '#0969da' : '#1f2328'};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
                         <span style="color: ${s.color}; font-weight: 800;">${valSign}${s.val.toFixed(1)}%</span>
                     </div>
-                    <div style="width: 100%; height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
-                        <div style="width: ${widthPct.toFixed(1)}%; height: 100%; background: ${s.color}; border-radius: 5px; transition: width 0.4s ease;"></div>
+                    <div class="kt-progress" style="--kt-progress-h: 10px;">
+                        <div class="kt-progress__bar" style="width: ${widthPct.toFixed(1)}%; --kt-progress-color: ${s.color};"></div>
                     </div>
                 </div>
             `;

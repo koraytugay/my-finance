@@ -52,16 +52,6 @@
     }
 }
 
-/* Small inset stat box used inside chart/info panels */
-.stat-card-box {
-    display: flex;
-    flex-direction: column;
-    padding: 10px var(--kt-space-3);
-    background: var(--kt-surface-hover);
-    border: 1px solid var(--kt-border);
-    border-radius: var(--kt-radius-md);
-}
-
 /* ================= Tables ================= */
 /* Sortable columns (sorting is handled in JS via data-col) */
 .kt-table th[data-col] {
@@ -199,16 +189,7 @@
     gap: 6px;
 }
 
-/* ================= Mini allocation bar ================= */
-.allocation-bar-wrap {
-    display: flex;
-    width: 100%;
-    height: 8px;
-    background: var(--kt-surface-sunken);
-    border-radius: var(--kt-radius-sm);
-    overflow: hidden;
-}
-
+/* ================= Allocation bar segment colors (inside .kt-progress) ================= */
 /* Asset-class colors (fixed categorical palette for this app) */
 .alloc-seg-us { background-color: #2563eb; }
 .alloc-seg-canada { background-color: #dc2626; }
