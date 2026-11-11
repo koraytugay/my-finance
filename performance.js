@@ -320,31 +320,31 @@ function renderAthStreaksSection(history) {
             const peakStr = formatCurrency(s.peakVal, currency);
             const recoveryStr = s.recoveryVal ? formatCurrency(s.recoveryVal, currency) : 'Awaiting ATH';
             const recoveryPart = s.isOngoing
-                ? '<span style="color: #d97706; font-weight: 700;">Ongoing consolidation</span>'
+                ? '<span class="kt-text-warning kt-fw-bold">Ongoing consolidation</span>'
                 : `Recovery: ${recoveryStr} (W${s.recoveryWeek})`;
             const dipColor = s.maxDD < 0 ? '#cf222e' : '#16a34a';
             const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
 
             return `
-                <div style="background: var(--kt-surface-hover); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div class="kt-split" style="background: var(--kt-surface-hover); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider);">
                     <div>
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                            <span style="background: ${badgeBg}; color: white; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
-                            <strong style="font-size: 0.95rem; color: #1f2328;">${s.nonAthWeeks} week${s.nonAthWeeks === 1 ? '' : 's'}</strong>
+                        <div class="kt-cluster kt-mb-0">
+                            <span class="kt-fs-2xs kt-fw-heavy" style="background: ${badgeBg}; color: white; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
+                            <strong class="kt-fs-base kt-text-primary">${s.nonAthWeeks} week${s.nonAthWeeks === 1 ? '' : 's'}</strong>
                             <span class="kt-fs-xs kt-text-muted">(${s.elapsedWeeks} wks ${s.isOngoing ? 'elapsed' : 'recovery'})</span>
                         </div>
                         <div class="kt-fs-xs kt-text-muted">
                             ${weekRangeStr} &bull; ${dateStr}
                         </div>
-                        <div style="font-size: 0.72rem; color: #475569; margin-top: 2px;">
+                        <div class="kt-fs-2xs kt-text-secondary kt-mt-0">
                             Prior Peak: ${peakStr} (W${s.peakWeek}) &rarr; ${recoveryPart}
                         </div>
                     </div>
                     <div class="kt-align-right">
-                        <div style="font-size: 0.88rem; font-weight: 800; color: ${dipColor};">
+                        <div class="kt-fs-sm kt-fw-heavy" style="color: ${dipColor};">
                             ${formatCurrency(s.maxDD, currency)}
                         </div>
-                        <div style="font-size: 0.72rem; color: ${dipColor}; font-weight: 600;">
+                        <div class="kt-fs-2xs kt-fw-semibold" style="color: ${dipColor};">
                             ${s.maxDDPct.toFixed(2)}% max dip
                         </div>
                     </div>
@@ -618,9 +618,9 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
             const valSign = s.val >= 0 ? '+' : '';
             return `
                 <div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.78rem; font-weight: ${s.isPortfolio ? '800' : '700'}; margin-bottom: 3px;">
+                    <div class="kt-split kt-fs-xs kt-mb-1" style="font-weight: ${s.isPortfolio ? '800' : '700'};">
                         <span style="color: ${s.isPortfolio ? '#0969da' : '#1f2328'};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
-                        <span style="color: ${s.color}; font-weight: 800;">${valSign}${s.val.toFixed(1)}%</span>
+                        <span class="kt-fw-heavy" style="color: ${s.color};">${valSign}${s.val.toFixed(1)}%</span>
                     </div>
                     <div class="kt-progress" style="--kt-progress-h: 10px;">
                         <div class="kt-progress__bar" style="width: ${widthPct.toFixed(1)}%; --kt-progress-color: ${s.color};"></div>
@@ -1576,42 +1576,42 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 ${showCurrent && currentPt ? `
                 <div>
                     <div class="kt-readout__row">
-                        <span style="display: flex; align-items: center; gap: 5px;">
+                        <span class="kt-cluster">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
                             <strong class="kt-text-accent">Current 52W:</strong>
                         </span>
-                        <strong style="color: #0969da; font-size: 0.95rem;">${fmtPrimary(currentPt)}</strong>
+                        <strong class="kt-text-accent kt-fs-base">${fmtPrimary(currentPt)}</strong>
                     </div>
-                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(currentPt)}</div>
+                    <div class="kt-fs-2xs kt-text-muted" style="padding-left: 13px;">${fmtSecondary(currentPt)}</div>
                 </div>` : ''}
 
                 ${showBest && bestPt ? `
                 <div>
                     <div class="kt-readout__row">
-                        <span style="display: flex; align-items: center; gap: 5px;">
+                        <span class="kt-cluster">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
                             <strong class="kt-text-success">Best 52W:</strong>
                         </span>
-                        <strong style="color: #16a34a; font-size: 0.95rem;">${fmtPrimary(bestPt)}</strong>
+                        <strong class="kt-text-success kt-fs-base">${fmtPrimary(bestPt)}</strong>
                     </div>
-                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(bestPt)}</div>
+                    <div class="kt-fs-2xs kt-text-muted" style="padding-left: 13px;">${fmtSecondary(bestPt)}</div>
                 </div>` : ''}
 
                 ${showWorst && worstPt ? `
                 <div>
                     <div class="kt-readout__row">
-                        <span style="display: flex; align-items: center; gap: 5px;">
+                        <span class="kt-cluster">
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cf222e;"></span>
                             <strong class="kt-text-danger">Worst 52W:</strong>
                         </span>
-                        <strong style="color: #cf222e; font-size: 0.95rem;">${fmtPrimary(worstPt)}</strong>
+                        <strong class="kt-text-danger kt-fs-base">${fmtPrimary(worstPt)}</strong>
                     </div>
-                    <div style="font-size: 0.71rem; color: #64748b; padding-left: 13px;">${fmtSecondary(worstPt)}</div>
+                    <div class="kt-fs-2xs kt-text-muted" style="padding-left: 13px;">${fmtSecondary(worstPt)}</div>
                 </div>` : ''}
 
                 ${spreadStr ? `
                 <div class="kt-readout__section">
-                    <div class="kt-readout__row" style="color: #8250df; font-weight: 700;">
+                    <div class="kt-readout__row kt-fw-bold" style="color: #8250df;">
                         <span>Best/Worst Spread:</span>
                         <span>${spreadStr}</span>
                     </div>
@@ -2032,19 +2032,19 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
                 <span class="kt-readout__title">Week ${item.endWeek} Trailing 52W</span>
                 ${tag}
             </div>
-            <div style="font-size: 0.72rem; color: #64748b; margin-bottom: 6px;">
+            <div class="kt-fs-2xs kt-text-muted kt-mb-1">
                 ${fmt(baselineDate)} &rarr; ${fmt(item.endDate)}
             </div>
             <div class="kt-readout__row">
-                <span style="color: #0969da; font-weight: 700;">● Portfolio:</span>
-                <strong style="color: #0969da; font-size: 1.05rem;">${formatMetricVal(item.val)}</strong>
+                <span class="kt-text-accent kt-fw-bold">● Portfolio:</span>
+                <strong class="kt-text-accent kt-fs-base">${formatMetricVal(item.val)}</strong>
             </div>
             ${rolling52ShowXeqt && xeqtItem ? `
             <div class="kt-readout__row">
-                <span style="color: #16a34a; font-weight: 700;">● XEQT:</span>
+                <span class="kt-text-success kt-fw-bold">● XEQT:</span>
                 <strong class="kt-text-success">${formatMetricVal(xeqtItem.val)}</strong>
             </div>
-            <div class="kt-readout__row" style="font-weight: 700; color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
+            <div class="kt-readout__row kt-fw-bold" style="color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
                 <span>Spread vs XEQT:</span>
                 <span>${signDiff}${metric === 'pct' ? diff.toFixed(1) + '%' : formatCurrency(diff, metric === 'usd' ? 'USD' : 'CAD')}</span>
             </div>
@@ -2336,12 +2336,12 @@ function renderAnnualSummary() {
         tr.innerHTML = `
             <td><strong>${s.year}</strong> (${s.weeks} weeks)</td>
             <td class="kt-align-right">${formatCurrency(s.startVal, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700;">${formatCurrency(s.endVal, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${formatCurrency(s.netChange, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${color};">${sign}${s.returnPct.toFixed(2)}%</td>
+            <td class="kt-align-right kt-fw-bold">${formatCurrency(s.endVal, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${color};">${sign}${formatCurrency(s.netChange, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${color};">${sign}${s.returnPct.toFixed(2)}%</td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(s.peak, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 600; color: ${ddColor};">${formatCurrency(s.maxDrawdownVal, 'CAD')}</td>
-            <td style="text-align: right; font-weight: 700; color: ${ddColor};">${s.maxDrawdownPct.toFixed(2)}%</td>
+            <td class="kt-align-right kt-fw-semibold" style="color: ${ddColor};">${formatCurrency(s.maxDrawdownVal, 'CAD')}</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${ddColor};">${s.maxDrawdownPct.toFixed(2)}%</td>
         `;
         tbody.appendChild(tr);
     });
@@ -2483,23 +2483,23 @@ function renderCrisisStressTest() {
         card.className = 'kt-card kt-card--padded';
 
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+            <div class="kt-split kt-mb-1">
                 <div>
-                    <strong style="font-size: 0.92rem; color: #1e293b;">${escapeHtml(c.title)}</strong>
+                    <strong class="kt-fs-base kt-text-primary">${escapeHtml(c.title)}</strong>
                     <div class="kt-fs-xs kt-text-muted">${escapeHtml(c.period)}</div>
                 </div>
                 <div class="kt-align-right">
-                    <span style="font-size: 1.15rem; font-weight: 800; color: ${c.color};">${shockPct.toFixed(1)}%</span>
+                    <span class="kt-fs-md kt-fw-heavy" style="color: ${c.color};">${shockPct.toFixed(1)}%</span>
                 </div>
             </div>
-            <div style="font-size: 0.78rem; color: #475569; margin-bottom: 10px;">${escapeHtml(c.desc)}</div>
-            <div style="background: var(--kt-surface-hover); border-radius: 6px; padding: 8px 10px; font-size: 0.78rem; display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <div class="kt-fs-xs kt-text-secondary kt-mb-2">${escapeHtml(c.desc)}</div>
+            <div class="kt-split kt-fs-xs kt-mb-2" style="background: var(--kt-surface-hover); border-radius: 6px; padding: 8px 10px;">
                 <span class="kt-text-muted">Simulated Portfolio Impact:</span>
                 <strong style="color: ${c.color};">${formatCurrency(shockCAD)}</strong>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
+            <div class="kt-split kt-fs-xs kt-text-muted">
                 <span>Trough Net Worth: <strong>${formatCurrency(postCrashCAD)}</strong></span>
-                <span style="color: #0369a1; font-weight: 600;">⏳ ${escapeHtml(c.recovery)}</span>
+                <span class="kt-fw-semibold" style="color: #0369a1;">⏳ ${escapeHtml(c.recovery)}</span>
             </div>
         `;
         container.appendChild(card);
