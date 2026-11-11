@@ -78,7 +78,7 @@
             <div class="kt-grid kt-grid--fit kt-mb-6" style="--kt-grid-min: 320px; --kt-grid-gap: 18px;">
                 <!-- Global Geographic Equity Distribution -->
                 <div class="kt-card kt-card--padded">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Global Equity Geography</h3>
+                    <h3 class="kt-fs-md kt-fw-bold kt-mb-3">Global Equity Geography</h3>
                     <div id="geo-breakdown-list">
                         <!-- Populated by JS -->
                     </div>
@@ -86,7 +86,7 @@
 
                 <!-- Asset Class Distribution -->
                 <div class="kt-card kt-card--padded">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Asset Class Allocation</h3>
+                    <h3 class="kt-fs-md kt-fw-bold kt-mb-3">Asset Class Allocation</h3>
                     <div id="class-breakdown-list">
                         <!-- Populated by JS -->
                     </div>
@@ -94,7 +94,7 @@
 
                 <!-- Factor vs Broad Market Strategy Tilt -->
                 <div class="kt-card kt-card--padded">
-                    <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Investment Strategy Tilts</h3>
+                    <h3 class="kt-fs-md kt-fw-bold kt-mb-3">Investment Strategy Tilts</h3>
                     <div id="strategy-breakdown-list">
                         <!-- Populated by JS -->
                     </div>
@@ -107,7 +107,7 @@
                     <h3 class="kt-card__title kt-m-0">
                         🌐 Currency Exposure &amp; FX Sensitivity Simulator
                     </h3>
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0969da;" id="fx-live-pill">
+                    <span class="kt-fs-sm kt-fw-bold kt-text-accent" id="fx-live-pill">
                         Baseline FX: 1 USD ≈ 1.370 CAD (0.730 USD/CAD)
                     </span>
                 </div>
@@ -116,18 +116,18 @@
                 </p>
 
                 <!-- 2 Comparison Columns: Account Denomination vs Look-Through Economic Exposure -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <div class="kt-mb-5" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px;">
                     <!-- Column 1: Account Denomination -->
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+                        <div class="kt-eyebrow kt-text-muted kt-mb-2">
                             1. Direct Account Denomination
                         </div>
-                        <div style="font-size: 0.82rem; color: #475569; margin-bottom: 12px;">
+                        <div class="kt-fs-sm kt-text-secondary kt-mb-3">
                             Currency your assets are directly quoted in at Questrade &amp; IBKR:
                         </div>
 
-                        <div style="margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                        <div class="kt-mb-2">
+                            <div class="kt-split kt-fs-sm kt-fw-bold kt-mb-1">
                                 <span>🇨🇦 CAD-Denominated Accounts</span>
                                 <span id="fx-direct-cad-val">$663,858 (97.6%)</span>
                             </div>
@@ -137,7 +137,7 @@
                         </div>
 
                         <div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                            <div class="kt-split kt-fs-sm kt-fw-bold kt-mb-1">
                                 <span>🇺🇸 USD-Denominated Cash &amp; Equities</span>
                                 <span id="fx-direct-usd-val">$16,183 (2.4%)</span>
                             </div>
@@ -149,15 +149,15 @@
 
                     <!-- Column 2: True Look-Through Economic Currency Exposure -->
                     <div class="kt-card kt-card--padded">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+                        <div class="kt-eyebrow kt-text-muted kt-mb-2">
                             2. True Economic Exposure (Look-Through)
                         </div>
-                        <div style="font-size: 0.82rem; color: #475569; margin-bottom: 12px;">
+                        <div class="kt-fs-sm kt-text-secondary kt-mb-3">
                             Underlying currencies powering your ETF revenue and corporate earnings:
                         </div>
 
-                        <div style="margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                        <div class="kt-mb-2">
+                            <div class="kt-split kt-fs-sm kt-fw-bold kt-mb-1">
                                 <span>🇺🇸 US Dollar Revenue (VFV, US Equities)</span>
                                 <span id="fx-econ-usd-val">$225,100 CAD (33.1%)</span>
                             </div>
@@ -166,8 +166,8 @@
                             </div>
                         </div>
 
-                        <div style="margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                        <div class="kt-mb-2">
+                            <div class="kt-split kt-fs-sm kt-fw-bold kt-mb-1">
                                 <span>🇨🇦 Canadian Dollar (TSX Equities &amp; Bonds)</span>
                                 <span id="fx-econ-cad-val">$307,200 CAD (45.2%)</span>
                             </div>
@@ -177,7 +177,7 @@
                         </div>
 
                         <div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 700; margin-bottom: 3px;">
+                            <div class="kt-split kt-fs-sm kt-fw-bold kt-mb-1">
                                 <span>🌍 Global &amp; Non-Fiat (EUR, JPY, Gold, Crypto)</span>
                                 <span id="fx-econ-intl-val">$147,741 CAD (21.7%)</span>
                             </div>
@@ -192,20 +192,20 @@
                 <div style="background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 10px; padding: 18px 20px;">
                     <div class="kt-split kt-mb-3">
                         <div>
-                            <h4 style="margin: 0; font-size: 0.95rem; font-weight: 800; color: #1f2328;">
+                            <h4 class="kt-m-0 kt-fs-base kt-fw-heavy kt-text-primary">
                                 🎛️ Interactive FX Sensitivity Simulator
                             </h4>
-                            <span style="font-size: 0.78rem; color: #64748b;">Slide to test portfolio impact if the Canadian Dollar moves against the US Dollar</span>
+                            <span class="kt-fs-xs kt-text-muted">Slide to test portfolio impact if the Canadian Dollar moves against the US Dollar</span>
                         </div>
                         <div class="kt-cluster">
-                            <span style="font-size: 0.85rem; font-weight: 800; color: #0969da;" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
-                            <button type="button" class="kt-btn kt-btn--accent" onclick="resetFXSlider()" style="padding: 2px 8px; font-size: 0.75rem; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
+                            <span class="kt-fs-sm kt-fw-heavy kt-text-accent" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
+                            <button type="button" class="kt-btn kt-btn--accent kt-fs-xs" onclick="resetFXSlider()" style="padding: 2px 8px; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
                         </div>
                     </div>
 
-                    <div style="margin-bottom: 16px;">
+                    <div class="kt-mb-4">
                         <input type="range" id="fx-slider" min="0.65" max="0.80" step="0.005" value="0.73" style="width: 100%; cursor: pointer;" oninput="onFXSliderChange(this.value)">
-                        <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b; margin-top: 4px;">
+                        <div class="kt-split kt-fs-2xs kt-text-muted kt-mt-1">
                             <span>0.650 (Weaker CAD / Stronger USD)</span>
                             <span>0.730 (Baseline)</span>
                             <span>0.800 (Stronger CAD / Weaker USD)</span>
@@ -216,19 +216,19 @@
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Simulated Portfolio Net Worth</div>
-                            <div id="sim-nw-cad" style="font-size: 1.25rem; font-weight: 800; color: #1f2328; margin: 3px 0;">$680,041 CAD</div>
+                            <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="sim-nw-cad">$680,041 CAD</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-nw-usd">≈ $496,430 USD</div>
                         </div>
 
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Net Currency Impact ($ CAD)</div>
-                            <div id="sim-impact-cad" style="font-size: 1.25rem; font-weight: 800; color: #16a34a; margin: 3px 0;">+$0 CAD (0.00%)</div>
+                            <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="sim-impact-cad" style="color: #16a34a;">+$0 CAD (0.00%)</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-impact-desc">Holding unhedged US assets buffers currency swings</div>
                         </div>
 
                         <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Natural FX Hedge Efficiency</div>
-                            <div style="font-size: 1.25rem; font-weight: 800; color: #0969da; margin: 3px 0;" id="sim-fx-shield-pct">33.1% US Shield</div>
+                            <div class="kt-fs-lg kt-fw-heavy kt-text-accent kt-mt-1 kt-mb-1" id="sim-fx-shield-pct">33.1% US Shield</div>
                             <div class="kt-fs-xs kt-text-muted">CAD dips boost purchasing power</div>
                         </div>
                     </div>
@@ -238,7 +238,7 @@
             <!-- Simplified ETF & Cash Allocation Table (Aggregated) -->
             <div class="kt-card kt-card--padded content-section">
                 <div class="kt-section-title">
-                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="kt-cluster">
                         <h2>ETF &amp; Cash Allocation</h2>
                         <span id="simple-alloc-count" class="kt-badge kt-badge--pill kt-ml-auto">0 assets</span>
                     </div>
@@ -251,7 +251,7 @@
                         </button>
                     </div>
                 </div>
-                <p style="font-size: 0.84rem; color: #64748b; margin-top: -6px; margin-bottom: 16px;">
+                <p class="kt-fs-sm kt-text-muted kt-mb-4" style="margin-top: -6px;">
                     Overall portfolio allocation across ETFs and Cash, aggregated irrespective of account or brokerage. Simple format for copy-pasting.
                 </p>
 
@@ -260,23 +260,23 @@
                         <thead>
                             <tr>
                                 <th onclick="sortSimpleAlloc('asset')" style="cursor: pointer;" title="Sort by Asset">
-                                    Asset <span id="sort-icon-asset" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
+                                    Asset <span class="kt-fs-2xs kt-text-muted" id="sort-icon-asset" style="margin-left: 2px;">⬍</span>
                                 </th>
                                 <th class="kt-align-right" onclick="sortSimpleAlloc('pct')" style="cursor: pointer;" title="Sort by Allocation">
-                                    Allocation <span id="sort-icon-pct" style="font-size: 0.72rem; color: #0969da; margin-left: 2px;">▼</span>
+                                    Allocation <span class="kt-fs-2xs kt-text-accent" id="sort-icon-pct" style="margin-left: 2px;">▼</span>
                                 </th>
                                 <th class="kt-align-right" onclick="sortSimpleAlloc('sum')" style="cursor: pointer;" title="Sort by Value">
-                                    Value (CAD) <span id="sort-icon-sum" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
+                                    Value (CAD) <span class="kt-fs-2xs kt-text-muted" id="sort-icon-sum" style="margin-left: 2px;">⬍</span>
                                 </th>
                                 <th class="kt-align-right" onclick="sortSimpleAlloc('gain')" style="cursor: pointer;" title="Sort by Unrealized Gain / Loss">
-                                    Gain / Loss <span id="sort-icon-gain" style="font-size: 0.72rem; color: #94a3b8; margin-left: 2px;">⬍</span>
+                                    Gain / Loss <span class="kt-fs-2xs kt-text-muted" id="sort-icon-gain" style="margin-left: 2px;">⬍</span>
                                 </th>
                             </tr>
                         </thead>
                         <tbody id="simple-alloc-tbody">
                             <!-- Populated by JS -->
                         </tbody>
-                        <tfoot id="simple-alloc-tfoot" style="font-weight: 800; background: var(--kt-surface-hover);">
+                        <tfoot class="kt-fw-heavy" id="simple-alloc-tfoot" style="background: var(--kt-surface-hover);">
                             <!-- Populated by JS -->
                         </tfoot>
                     </table>
@@ -310,7 +310,7 @@
                         <tbody id="matrix-tbody">
                             <!-- Populated by JS -->
                         </tbody>
-                        <tfoot id="matrix-tfoot" style="font-weight: 800; background: var(--kt-surface-hover);">
+                        <tfoot class="kt-fw-heavy" id="matrix-tfoot" style="background: var(--kt-surface-hover);">
                             <!-- Populated by JS -->
                         </tfoot>
                     </table>

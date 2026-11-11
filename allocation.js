@@ -103,15 +103,15 @@ function renderBreakdowns() {
         const pctOfEquities = (item.value / totalEquities) * 100;
         const pctOfPortfolio = (item.value / t) * 100;
         return `
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 3px;">
+            <div class="kt-mb-3">
+                <div class="kt-split kt-fs-sm kt-mb-1">
                     <span><strong style="color: ${item.color};">&bull;</strong> ${item.label}</span>
                     <span><strong>${formatCurrency(item.value)}</strong> (${pctOfEquities.toFixed(1)}% equity)</span>
                 </div>
                 <div class="kt-progress" style="height: 8px;">
                     <div style="width: ${pctOfEquities}%; background-color: ${item.color}; height: 100%;"></div>
                 </div>
-                <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px; text-align: right;">${pctOfPortfolio.toFixed(1)}% of total portfolio</div>
+                <div class="kt-fs-2xs kt-text-muted kt-mt-0 kt-align-right">${pctOfPortfolio.toFixed(1)}% of total portfolio</div>
             </div>
         `;
     }).join('');
@@ -127,8 +127,8 @@ function renderBreakdowns() {
     document.getElementById('class-breakdown-list').innerHTML = classItems.map(item => {
         const pct = (item.value / t) * 100;
         return `
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 3px;">
+            <div class="kt-mb-3">
+                <div class="kt-split kt-fs-sm kt-mb-1">
                     <span><strong style="color: ${item.color};">&bull;</strong> ${item.label}</span>
                     <span><strong>${formatCurrency(item.value)}</strong> (${pct.toFixed(1)}%)</span>
                 </div>
@@ -159,8 +159,8 @@ function renderBreakdowns() {
         const pct = (val / t) * 100;
         const color = strategyColors[strat] || '#64748b';
         return `
-            <div style="margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.84rem; margin-bottom: 3px;">
+            <div class="kt-mb-3">
+                <div class="kt-split kt-fs-sm kt-mb-1">
                     <span><strong style="color: ${color};">&bull;</strong> ${strat}</span>
                     <span><strong>${formatCurrency(val)}</strong> (${pct.toFixed(1)}%)</span>
                 </div>
@@ -431,7 +431,7 @@ function renderSimpleAllocTable() {
     }
 
     if (simpleAllocData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="kt-empty" style="text-align: center; color: #64748b; padding: 16px;">No allocation data available.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="4" class="kt-empty kt-align-center kt-text-muted" style="padding: 16px;">No allocation data available.</td></tr>`;
         if (tfoot) tfoot.innerHTML = '';
         return;
     }
@@ -459,15 +459,15 @@ function renderSimpleAllocTable() {
         let gainHtml = '';
         if (isCash || (gainCAD === 0 && item.cost === item.sum)) {
             gainHtml = `
-                <div style="font-weight: 700; color: #64748b;">$0.00</div>
-                <div style="font-size: 0.72rem; color: #64748b;">0.00%</div>
+                <div class="kt-fw-bold kt-text-muted">$0.00</div>
+                <div class="kt-fs-2xs kt-text-muted">0.00%</div>
             `;
         } else {
             const sign = gainCAD > 0 ? '+' : '';
             const color = gainCAD > 0 ? '#166534' : (gainCAD < 0 ? '#cf222e' : '#64748b');
             gainHtml = `
-                <div style="font-weight: 700; color: ${color};">${sign}${formatCurrency(gainCAD)}</div>
-                <div style="font-size: 0.72rem; color: ${color};">${sign}${gainPct.toFixed(2)}%</div>
+                <div class="kt-fw-bold" style="color: ${color};">${sign}${formatCurrency(gainCAD)}</div>
+                <div class="kt-fs-2xs" style="color: ${color};">${sign}${gainPct.toFixed(2)}%</div>
             `;
         }
 
@@ -496,7 +496,7 @@ function renderSimpleAllocTable() {
                 <td class="kt-align-right kt-fw-bold">${formatCurrency(totalCAD)}</td>
                 <td class="kt-align-right kt-fw-bold">
                     <div style="color: ${totalGainColor};">${totalGainSign}${formatCurrency(totalGainCAD)}</div>
-                    <div style="font-size: 0.72rem; color: ${totalGainColor}; font-weight: normal;">${totalGainSign}${totalGainPct.toFixed(2)}%</div>
+                    <div class="kt-fs-2xs kt-fw-regular" style="color: ${totalGainColor};">${totalGainSign}${totalGainPct.toFixed(2)}%</div>
                 </td>
             </tr>
         `;
@@ -578,9 +578,9 @@ function copySimpleAllocationTable(format = 'tsv') {
         const htmlRows = sorted.map(item => {
             const sign = item.gainCAD > 0 ? '+' : '';
             const color = item.gainCAD > 0 ? '#166534' : (item.gainCAD < 0 ? '#cf222e' : '#64748b');
-            return `<tr><td>${escapeHtml(item.asset)}</td><td style="text-align:right;">${item.pct.toFixed(2)}%</td><td style="text-align:right;">${formatCurrency(item.sum)}</td><td style="text-align:right;color:${color};">${sign}${formatCurrency(item.gainCAD)} (${sign}${item.gainPct.toFixed(2)}%)</td></tr>`;
+            return `<tr><td>${escapeHtml(item.asset)}</td><td class="kt-align-right">${item.pct.toFixed(2)}%</td><td class="kt-align-right">${formatCurrency(item.sum)}</td><td class="kt-align-right" style="color: ${color};">${sign}${formatCurrency(item.gainCAD)} (${sign}${item.gainPct.toFixed(2)}%)</td></tr>`;
         }).join('');
-        htmlContent = `<table><thead><tr><th>Asset</th><th>Allocation</th><th>Value (CAD)</th><th>Gain / Loss (CAD)</th></tr></thead><tbody>${htmlRows}</tbody><tfoot><tr><td>Total</td><td style="text-align:right;">100.00%</td><td style="text-align:right;">${formatCurrency(totalCAD)}</td><td style="text-align:right;">${totalGainSign}${formatCurrency(totalGainCAD)} (${totalGainSign}${totalGainPct.toFixed(2)}%)</td></tr></tfoot></table>`;
+        htmlContent = `<table><thead><tr><th>Asset</th><th>Allocation</th><th>Value (CAD)</th><th>Gain / Loss (CAD)</th></tr></thead><tbody>${htmlRows}</tbody><tfoot><tr><td>Total</td><td class="kt-align-right">100.00%</td><td class="kt-align-right">${formatCurrency(totalCAD)}</td><td class="kt-align-right">${totalGainSign}${formatCurrency(totalGainCAD)} (${totalGainSign}${totalGainPct.toFixed(2)}%)</td></tr></tfoot></table>`;
     }
 
     const btnId = format === 'text' ? 'btn-copy-alloc-text' : 'btn-copy-alloc-tsv';
