@@ -5536,21 +5536,11 @@ function renderDrawdownChart() {
                 curStatEl.style.color = '#16a34a';
                 curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
                 curStatusEl.style.color = '#15803d';
-                if (curCardEl) {
-                    curCardEl.style.background = '#f0fdf4';
-                    curCardEl.style.borderColor = '#bbf7d0';
-                }
-                if (curTitleEl) curTitleEl.style.color = '#166534';
             } else {
                 curStatEl.textContent = `${currentWeeksBack} ${currentWeeksBack === 1 ? 'week' : 'weeks'}`;
                 curStatEl.style.color = currentWeeksBack >= 4 ? '#dc2626' : '#d97706';
                 curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} (${currentDDPct.toFixed(2)}%) from ATH`;
                 curStatusEl.style.color = '#b91c1c';
-                if (curCardEl) {
-                    curCardEl.style.background = '#fef2f2';
-                    curCardEl.style.borderColor = '#fecaca';
-                }
-                if (curTitleEl) curTitleEl.style.color = '#991b1b';
             }
         } else {
             if (currentDDVal >= -1) {
@@ -5558,21 +5548,11 @@ function renderDrawdownChart() {
                 curStatEl.style.color = '#16a34a';
                 curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
                 curStatusEl.style.color = '#15803d';
-                if (curCardEl) {
-                    curCardEl.style.background = '#f0fdf4';
-                    curCardEl.style.borderColor = '#bbf7d0';
-                }
-                if (curTitleEl) curTitleEl.style.color = '#166534';
             } else {
                 curStatEl.textContent = `${formatCurrency(currentDDVal, currency)} (${currentDDPct.toFixed(2)}%)`;
                 curStatEl.style.color = '#dc2626';
                 curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} from ATH (${formatCurrency(overallPeakVal, currency)})`;
                 curStatusEl.style.color = '#b91c1c';
-                if (curCardEl) {
-                    curCardEl.style.background = '#fef2f2';
-                    curCardEl.style.borderColor = '#fecaca';
-                }
-                if (curTitleEl) curTitleEl.style.color = '#991b1b';
             }
         }
     }

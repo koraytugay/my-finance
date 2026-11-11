@@ -406,21 +406,21 @@
                 </div>
 
                 <!-- Drawdown Stat Cards -->
-                <div style="display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;">
-                    <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div id="dd-stat-max-title" style="font-size: 0.72rem; font-weight: 700; color: #991b1b; text-transform: uppercase;">Max Drawdown (All-Time)</div>
-                        <div id="dd-stat-max" style="font-size: 1.25rem; font-weight: 800; color: #dc2626;">-$0.00 (-0.0%)</div>
-                        <div id="dd-stat-max-date" style="font-size: 0.75rem; color: #b91c1c;">Week - (-)</div>
+                <div class="kt-grid kt-grid--fit kt-mb-4" style="--kt-grid-min: 180px; --kt-grid-gap: 12px;">
+                    <div class="kt-stat kt-stat--inset">
+                        <div id="dd-stat-max-title" class="kt-stat__label">Max Drawdown (All-Time)</div>
+                        <div id="dd-stat-max" class="kt-stat__value" style="color: #dc2626;">-$0.00 (-0.0%)</div>
+                        <div id="dd-stat-max-date" class="kt-stat__sub" style="color: #b91c1c;">Week - (-)</div>
                     </div>
-                    <div id="dd-stat-current-card" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div id="dd-stat-current-title" style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase;">Current Drawdown</div>
-                        <div id="dd-stat-current" style="font-size: 1.25rem; font-weight: 800; color: #16a34a;">$0.00 (0.0%)</div>
-                        <div id="dd-stat-current-status" style="font-size: 0.75rem; color: #15803d;">At All-Time High</div>
+                    <div id="dd-stat-current-card" class="kt-stat kt-stat--inset">
+                        <div id="dd-stat-current-title" class="kt-stat__label">Current Drawdown</div>
+                        <div id="dd-stat-current" class="kt-stat__value" style="color: #16a34a;">$0.00 (0.0%)</div>
+                        <div id="dd-stat-current-status" class="kt-stat__sub" style="color: #15803d;">At All-Time High</div>
                     </div>
-                    <div style="background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 14px; flex: 1 1 180px;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #475569; text-transform: uppercase;">Longest Recovery Period</div>
-                        <div id="dd-stat-longest-duration" style="font-size: 1.25rem; font-weight: 800; color: #1e293b;">- weeks</div>
-                        <div class="kt-fs-xs kt-text-muted" id="dd-stat-longest-dates">Peak to new high</div>
+                    <div class="kt-stat kt-stat--inset">
+                        <div class="kt-stat__label">Longest Recovery Period</div>
+                        <div id="dd-stat-longest-duration" class="kt-stat__value">- weeks</div>
+                        <div class="kt-stat__sub" id="dd-stat-longest-dates">Peak to new high</div>
                     </div>
                 </div>
 
@@ -523,7 +523,7 @@
                             <span>CATEGORY DISTRIBUTION</span>
                             <span id="cat-bar-total">$0.00 CAD</span>
                         </div>
-                        <div id="cat-progress-bar" style="height: 12px; border-radius: 6px; overflow: hidden; display: flex; background: #e2e8f0;">
+                        <div id="cat-progress-bar" style="height: 12px; border-radius: 6px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
                             <!-- Injected via JS -->
                         </div>
                         <div id="cat-legend" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.74rem;">

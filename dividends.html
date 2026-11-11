@@ -58,7 +58,7 @@
             </div>
 
             <!-- Tax Assumptions Accordion/Panel -->
-            <div id="tax-settings-panel" class="kt-card kt-card--padded" style="display: none; margin-bottom: 22px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px;">
+            <div id="tax-settings-panel" class="kt-card kt-card--padded" style="display: none; margin-bottom: 22px; background: var(--kt-surface); border: 1px solid #cbd5e1; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h4 style="margin: 0; font-size: 0.98rem; font-weight: 800; color: #1e293b;">🇨🇦 Tax Policy &amp; Bracket Assumptions</h4>
@@ -86,7 +86,7 @@
                     </div>
                     <div>
                         <label style="font-size: 0.78rem; font-weight: 700; color: #334155; display: block; margin-bottom: 4px;">Registered Accounts (TFSA / RRSP / FHSA):</label>
-                        <input class="kt-input" type="text" value="0.0% (Tax-Free / Deferred)" disabled style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--kt-divider); background: #f8fafc; border-radius: 6px; color: #166534; font-weight: 700;">
+                        <input class="kt-input" type="text" value="0.0% (Tax-Free / Deferred)" disabled style="width: 100%; padding: 6px 10px; font-size: 0.85rem; border: 1px solid var(--kt-divider); background: var(--kt-surface-hover); border-radius: 6px; color: #166534; font-weight: 700;">
                         <span style="font-size: 0.71rem; color: #64748b;">Assumed 0% current tax per portfolio specification</span>
                     </div>
                 </div>
@@ -170,7 +170,7 @@
                         <span class="kt-text-success" id="bar-label-net">■ Real In-Pocket Cashflow: $0.00 (0.0%)</span>
                         <span id="bar-label-drag" style="color: #dc2626;">■ CRA Tax Drag: -$0.00 (0.0%)</span>
                     </div>
-                    <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: #e2e8f0;">
+                    <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
                         <div id="tax-bar-net" style="background: #16a34a; height: 100%; width: 85%;" title="Net In-Pocket"></div>
                         <div id="tax-bar-drag" style="background: #ea580c; height: 100%; width: 15%;" title="Tax Drag"></div>
                     </div>
@@ -195,7 +195,7 @@
                 </div>
 
                 <!-- Calendar Bars Container -->
-                <div style="height: 180px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 10px 10px 10px; background: #f8fafc; border: 1px solid var(--kt-divider); border-radius: 8px; position: relative;" id="calendar-bars-wrap">
+                <div style="height: 180px; display: flex; align-items: flex-end; gap: 8px; padding: 20px 10px 10px 10px; background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 8px; position: relative;" id="calendar-bars-wrap">
                     <!-- Populated via JS -->
                 </div>
             </div>

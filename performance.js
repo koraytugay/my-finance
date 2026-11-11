@@ -326,7 +326,7 @@ function renderAthStreaksSection(history) {
             const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
 
             return `
-                <div style="background: #f8fafc; border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                <div style="background: var(--kt-surface-hover); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                     <div>
                         <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                             <span style="background: ${badgeBg}; color: white; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
@@ -2493,7 +2493,7 @@ function renderCrisisStressTest() {
                 </div>
             </div>
             <div style="font-size: 0.78rem; color: #475569; margin-bottom: 10px;">${escapeHtml(c.desc)}</div>
-            <div style="background: #f8fafc; border-radius: 6px; padding: 8px 10px; font-size: 0.78rem; display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <div style="background: var(--kt-surface-hover); border-radius: 6px; padding: 8px 10px; font-size: 0.78rem; display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span class="kt-text-muted">Simulated Portfolio Impact:</span>
                 <strong style="color: ${c.color};">${formatCurrency(shockCAD)}</strong>
             </div>
