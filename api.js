@@ -575,25 +575,26 @@ function showUnlockModal(onSuccess) {
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'unlock-modal-overlay';
-        overlay.className = 'modal-overlay active';
-        overlay.style.zIndex = '2000';
+        overlay.className = 'kt-modal kt-modal--sm kt-modal--center is-open';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.style.zIndex = 'var(--kt-z-toast)';
         overlay.innerHTML = `
-            <div class="modal-content" style="max-width: 420px; text-align: center; padding: 32px 24px;">
-                <div style="font-size: 2.8rem; margin-bottom: 12px;">🔒</div>
-                <h2 style="font-size: 1.45rem; font-weight: 800; margin-bottom: 6px; color: #1f2328;">My Finance is Encrypted</h2>
-                <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 20px;">
-                    Enter your password to decrypt your portfolio holdings and history.
-                </p>
-                <form id="unlock-form" onsubmit="event.preventDefault(); submitUnlock();">
-                    <div style="margin-bottom: 14px;">
-                        <input type="password" id="unlock-password" placeholder="Enter password..." autocomplete="current-password"
-                            style="width: 100%; height: 40px; padding: 0 14px; font-size: 0.95rem; border: 1.5px solid #d0d7de; border-radius: 8px; box-sizing: border-box; text-align: center;">
-                    </div>
-                    <div id="unlock-error" style="color: #cf222e; font-size: 0.82rem; margin-bottom: 12px; display: none;"></div>
-                    <button type="submit" id="unlock-btn" class="kt-btn kt-btn--accent" style="width: 100%; height: 40px; font-size: 0.95rem; font-weight: 700; background: #0969da; color: #fff; border-color: #0969da;">
-                        Unlock Portfolio
-                    </button>
-                </form>
+            <div class="kt-modal__dialog">
+                <div class="kt-modal__body">
+                    <div class="kt-empty__icon">🔒</div>
+                    <h2 class="kt-modal__title">My Finance is Encrypted</h2>
+                    <p class="kt-text-secondary kt-fs-sm" style="margin: 6px 0 20px;">
+                        Enter your password to decrypt your portfolio holdings and history.
+                    </p>
+                    <form id="unlock-form" class="kt-stack" onsubmit="event.preventDefault(); submitUnlock();">
+                        <input type="password" id="unlock-password" class="kt-input kt-input--lg kt-input--block kt-align-center" placeholder="Enter password..." autocomplete="current-password">
+                        <div id="unlock-error" class="kt-field__hint is-invalid" style="display: none;"></div>
+                        <button type="submit" id="unlock-btn" class="kt-btn kt-btn--primary kt-btn--lg kt-btn--block">
+                            Unlock Portfolio
+                        </button>
+                    </form>
+                </div>
             </div>
         `;
         document.body.appendChild(overlay);
@@ -634,7 +635,7 @@ function showUnlockModal(onSuccess) {
             }
         };
     } else {
-        overlay.classList.add('active');
+        overlay.classList.add('is-open');
     }
 
     setTimeout(() => {

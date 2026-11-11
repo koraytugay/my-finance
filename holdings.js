@@ -586,11 +586,11 @@ function showHoldingModal(id) {
         ` : ''}
     `;
 
-    document.getElementById('holding-modal').classList.add('active');
+    document.getElementById('holding-modal').classList.add('is-open');
 }
 
 function closeHoldingModal() {
-    document.getElementById('holding-modal').classList.remove('active');
+    document.getElementById('holding-modal').classList.remove('is-open');
 }
 
 function closeModalOnOverlay(e) {

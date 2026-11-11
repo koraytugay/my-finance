@@ -218,63 +218,6 @@
 .alloc-seg-crypto { background-color: #8b5cf6; }
 .alloc-seg-metals { background-color: #eab308; }
 
-/* ================= Modal (candidate for kt-styles) ================= */
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: var(--kt-z-overlay);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--kt-space-4);
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(2px);
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity var(--kt-transition), visibility var(--kt-transition);
-}
-
-.modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal-content {
-    position: relative;
-    width: 100%;
-    max-width: 620px;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: var(--kt-space-6);
-    background: var(--kt-surface);
-    border: 1px solid var(--kt-border);
-    border-radius: var(--kt-radius-xl);
-    box-shadow: var(--kt-shadow-xl);
-}
-
-.modal-close {
-    position: absolute;
-    top: 18px;
-    right: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    font-size: 1.5rem;
-    line-height: 1;
-    color: var(--kt-text-muted);
-    background: transparent;
-    border: none;
-    border-radius: var(--kt-radius-md);
-    cursor: pointer;
-}
-
-.modal-close:hover {
-    background: var(--kt-surface-hover);
-    color: var(--kt-text);
-}
-
 /* ================= Charts ================= */
 .chart-container {
     position: relative;

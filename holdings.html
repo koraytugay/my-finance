@@ -188,10 +188,10 @@
         </div>
 
         <!-- Holding Details Modal -->
-        <div id="holding-modal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
-            <div class="modal-content">
-                <button class="modal-close" onclick="closeHoldingModal()">&times;</button>
-                <div id="modal-body">
+        <div id="holding-modal" class="kt-modal kt-modal--lg" role="dialog" aria-modal="true" onclick="closeModalOnOverlay(event)">
+            <div class="kt-modal__dialog">
+                <button class="kt-btn kt-btn--ghost kt-btn--icon kt-modal__close" onclick="closeHoldingModal()" aria-label="Close">✕</button>
+                <div id="modal-body" class="kt-modal__body">
                     <!-- Populated by JavaScript -->
                 </div>
             </div>
