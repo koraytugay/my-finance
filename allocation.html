@@ -6,24 +6,6 @@
     <title>My Finance - Asset Allocation</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/css/kt.css">
     <link rel="stylesheet" href="styles.css?v=4.0">
-    <style>
-        .alloc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 18px;
-            margin-bottom: 24px;
-        }
-        .alloc-card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid #edf2f7;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
-        }
-        .alloc-bar-segment {
-            transition: width 0.3s ease;
-        }
-    </style>
 </head>
 <body>
     <div class="kt-container">
@@ -93,9 +75,9 @@
             </div>
 
             <!-- Visual Breakdown Cards Grid -->
-            <div class="alloc-grid">
+            <div class="kt-grid kt-mb-6" style="--kt-grid-min: 320px; --kt-grid-gap: 18px;">
                 <!-- Global Geographic Equity Distribution -->
-                <div class="alloc-card">
+                <div class="kt-card kt-card--padded">
                     <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Global Equity Geography</h3>
                     <div id="geo-breakdown-list">
                         <!-- Populated by JS -->
@@ -103,7 +85,7 @@
                 </div>
 
                 <!-- Asset Class Distribution -->
-                <div class="alloc-card">
+                <div class="kt-card kt-card--padded">
                     <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Asset Class Allocation</h3>
                     <div id="class-breakdown-list">
                         <!-- Populated by JS -->
@@ -111,7 +93,7 @@
                 </div>
 
                 <!-- Factor vs Broad Market Strategy Tilt -->
-                <div class="alloc-card">
+                <div class="kt-card kt-card--padded">
                     <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 14px;">Investment Strategy Tilts</h3>
                     <div id="strategy-breakdown-list">
                         <!-- Populated by JS -->

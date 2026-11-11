@@ -85,14 +85,14 @@ function renderTopHoldings() {
     container.innerHTML = top5.map((h, i) => {
         const weight = (h.sum / totalCAD) * 100;
         return `
-            <div class="top-holding-card">
-                <span class="rank-badge">#${i + 1}</span>
-                <div style="font-size: 1.15rem; font-weight: 800; color: #0969da;">${escapeHtml(h.ticker)}</div>
-                <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 8px;">${escapeHtml(h.name)}</div>
-                <div style="font-size: 1.3rem; font-weight: 800; color: #1f2328; margin-bottom: 4px;">${formatCurrency(h.sum)}</div>
-                <div style="font-size: 0.76rem; color: #64748b;">
-                    ${weight.toFixed(1)}% weight &bull; ${escapeHtml(h.brokerage)} (${escapeHtml(h.account)})
+            <div class="kt-stat kt-stat--inset">
+                <div class="kt-split" style="width: 100%;">
+                    <span class="kt-fs-md kt-fw-heavy kt-text-accent">${escapeHtml(h.ticker)}</span>
+                    <span class="kt-badge kt-badge--pill">#${i + 1}</span>
                 </div>
+                <div class="kt-fs-sm kt-text-muted kt-mb-2">${escapeHtml(h.name)}</div>
+                <div class="kt-stat__value">${formatCurrency(h.sum)}</div>
+                <div class="kt-stat__sub">${weight.toFixed(1)}% weight &bull; ${escapeHtml(h.brokerage)} (${escapeHtml(h.account)})</div>
             </div>
         `;
     }).join('');
