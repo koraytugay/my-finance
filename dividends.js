@@ -696,7 +696,7 @@ function renderTableRows(items) {
     document.getElementById('filtered-count').textContent = `${items.length} ${items.length === 1 ? 'position' : 'positions'}`;
 
     if (items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" style="text-align: center; padding: 24px; color: #64748b;">No holdings match your search and filter criteria.</td></tr>`;
+        tbody.innerHTML = `<tr><td class="kt-align-center kt-text-muted" colspan="12" style="padding: 24px;">No holdings match your search and filter criteria.</td></tr>`;
         return;
     }
 
@@ -732,23 +732,23 @@ function renderTableRows(items) {
             </td>
             <td>
                 <span>${escapeHtml(h.account)}</span>
-                <span style="font-size: 0.74rem; color: #64748b; margin-left: 4px;">(${escapeHtml(h.brokerage)})</span>
+                <span class="kt-fs-xs kt-text-muted" style="margin-left: 4px;">(${escapeHtml(h.brokerage)})</span>
             </td>
             <td><span class="kt-badge">${escapeHtml(h.strategy || 'Broad Market')}</span></td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(h.sum)}</td>
-            <td style="text-align: right; font-weight: 700; color: ${h.yieldPct > 0 ? '#166534' : '#64748b'};">${h.yieldPct.toFixed(2)}%</td>
-            <td style="text-align: right; font-weight: 700; color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
-            <td style="text-align: right; color: #475569;">${formatCurrency(h.grossAnnualIncome)}</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${h.yieldPct > 0 ? '#166534' : '#64748b'};">${h.yieldPct.toFixed(2)}%</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
+            <td class="kt-align-right kt-text-secondary">${formatCurrency(h.grossAnnualIncome)}</td>
             <td class="kt-align-center">
                 <span class="kt-badge kt-badge--pill ${h.tax.badgeClass}" title="${escapeHtml(h.tax.explanation)}">
                     ${escapeHtml(h.tax.label)}
                 </span>
             </td>
-            <td style="text-align: right; font-weight: 700; color: ${h.taxDragCAD > 0 ? '#dc2626' : '#94a3b8'};">
+            <td class="kt-align-right kt-fw-bold" style="color: ${h.taxDragCAD > 0 ? '#dc2626' : '#94a3b8'};">
                 ${h.taxDragCAD > 0 ? `-${formatCurrency(h.taxDragCAD)}` : '$0.00'}
             </td>
-            <td style="text-align: right; font-weight: 800; color: #166534;">${formatCurrency(h.netAnnualIncome)}</td>
-            <td style="text-align: right; font-weight: 600; color: #0969da;">${formatCurrency(h.netMonthlyIncome)}</td>
+            <td class="kt-align-right kt-fw-heavy kt-text-success">${formatCurrency(h.netAnnualIncome)}</td>
+            <td class="kt-align-right kt-fw-semibold kt-text-accent">${formatCurrency(h.netMonthlyIncome)}</td>
             <td class="kt-align-center"><span class="kt-badge kt-badge--pill ${freqClass}">${escapeHtml(h.freq)}</span></td>
         `;
         tbody.appendChild(tr);
