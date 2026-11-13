@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-13T19:00:33.526Z",
+  "updatedAt": "2026-11-13T19:15:22.502Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-11-13",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4264,
-    "cadUsdRate": 0.7011,
-    "updatedAt": "2026-11-13T19:00:33.526Z"
+    "usdCadRate": 1.4268,
+    "cadUsdRate": 0.7009,
+    "updatedAt": "2026-11-13T19:15:22.502Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -21,7 +21,7 @@
       "color": "#16a34a",
       "startPrice": 31.84,
       "currentPrice": 45.49,
-      "returnPct": 42.87,
+      "returnPct": 42.89,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-11-13",
@@ -284,8 +284,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 35.8,
-      "returnPct": 22.27,
+      "currentPrice": 35.81,
+      "returnPct": 22.3,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-11-13",
@@ -406,7 +406,7 @@
         35.48,
         35.42,
         35.41,
-        35.8
+        35.81
       ]
     },
     "XCB": {
