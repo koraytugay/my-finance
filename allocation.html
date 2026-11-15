@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Asset Allocation</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -132,7 +132,7 @@
                                 <span id="fx-direct-cad-val">$663,858 (97.6%)</span>
                             </div>
                             <div class="kt-progress">
-                                <div id="fx-direct-cad-bar" class="kt-progress__bar" style="width: 97.6%; --kt-progress-color: #0969da;"></div>
+                                <div id="fx-direct-cad-bar" class="kt-progress__bar" style="width: 97.6%; --kt-progress-color: var(--kt-series-1);"></div>
                             </div>
                         </div>
 
@@ -142,7 +142,7 @@
                                 <span id="fx-direct-usd-val">$16,183 (2.4%)</span>
                             </div>
                             <div class="kt-progress">
-                                <div id="fx-direct-usd-bar" class="kt-progress__bar" style="width: 2.4%; --kt-progress-color: #16a34a;"></div>
+                                <div id="fx-direct-usd-bar" class="kt-progress__bar" style="width: 2.4%; --kt-progress-color: var(--kt-success);"></div>
                             </div>
                         </div>
                     </div>
@@ -162,7 +162,7 @@
                                 <span id="fx-econ-usd-val">$225,100 CAD (33.1%)</span>
                             </div>
                             <div class="kt-progress">
-                                <div id="fx-econ-usd-bar" class="kt-progress__bar" style="width: 33.1%; --kt-progress-color: #16a34a;"></div>
+                                <div id="fx-econ-usd-bar" class="kt-progress__bar" style="width: 33.1%; --kt-progress-color: var(--kt-success);"></div>
                             </div>
                         </div>
 
@@ -172,7 +172,7 @@
                                 <span id="fx-econ-cad-val">$307,200 CAD (45.2%)</span>
                             </div>
                             <div class="kt-progress">
-                                <div id="fx-econ-cad-bar" class="kt-progress__bar" style="width: 45.2%; --kt-progress-color: #0969da;"></div>
+                                <div id="fx-econ-cad-bar" class="kt-progress__bar" style="width: 45.2%; --kt-progress-color: var(--kt-series-1);"></div>
                             </div>
                         </div>
 
@@ -182,7 +182,7 @@
                                 <span id="fx-econ-intl-val">$147,741 CAD (21.7%)</span>
                             </div>
                             <div class="kt-progress">
-                                <div id="fx-econ-intl-bar" class="kt-progress__bar" style="width: 21.7%; --kt-progress-color: #334155;"></div>
+                                <div id="fx-econ-intl-bar" class="kt-progress__bar" style="width: 21.7%; --kt-progress-color: var(--kt-series-3);"></div>
                             </div>
                         </div>
                     </div>
@@ -199,7 +199,7 @@
                         </div>
                         <div class="kt-cluster">
                             <span class="kt-fs-sm kt-fw-heavy" id="slider-rate-display">1 CAD = 0.730 USD (USD/CAD 1.370)</span>
-                            <button type="button" class="kt-btn kt-btn--accent kt-fs-xs" onclick="resetFXSlider()" style="padding: 2px 8px; border-radius: 4px; background: white; border: 1px solid #d0d7de; cursor: pointer;">Reset</button>
+                            <button type="button" class="kt-btn kt-btn--accent kt-fs-xs" onclick="resetFXSlider()" style="padding: 2px 8px; border-radius: 4px; background: var(--kt-surface); border: 1px solid var(--kt-border-strong); cursor: pointer;">Reset</button>
                         </div>
                     </div>
 
@@ -214,19 +214,19 @@
 
                     <!-- Impact Display Cards -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
+                        <div style="background: var(--kt-surface); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Simulated Portfolio Net Worth</div>
                             <div class="kt-fs-lg kt-fw-heavy kt-text-primary kt-mt-1 kt-mb-1" id="sim-nw-cad">$680,041 CAD</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-nw-usd">≈ $496,430 USD</div>
                         </div>
 
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
+                        <div style="background: var(--kt-surface); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Net Currency Impact ($ CAD)</div>
-                            <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="sim-impact-cad" style="color: #16a34a;">+$0 CAD (0.00%)</div>
+                            <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="sim-impact-cad" style="color: var(--kt-success);">+$0 CAD (0.00%)</div>
                             <div class="kt-fs-xs kt-text-muted" id="sim-impact-desc">Holding unhedged US assets buffers currency swings</div>
                         </div>
 
-                        <div style="background: white; border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
+                        <div style="background: var(--kt-surface); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--kt-divider);">
                             <div class="kt-eyebrow">Natural FX Hedge Efficiency</div>
                             <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="sim-fx-shield-pct">33.1% US Shield</div>
                             <div class="kt-fs-xs kt-text-muted">CAD dips boost purchasing power</div>
@@ -323,7 +323,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="allocation.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="allocation.js?v=3.6"></script>
 </body>
 </html>

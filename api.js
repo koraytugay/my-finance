@@ -8,6 +8,48 @@ let cachedPrices = null;
 let isSessionUnlocked = false;
 let activeUnlockPromise = null;
 
+/* ================= kt-styles color tokens ================= */
+/*
+ * Color language (see kt-styles pages/foundations/colors.html):
+ *   series-1..7     categories and series; the portfolio itself is series-1
+ *   chart-reference benchmarks (XEQT), averages, targets: always dashed
+ *   chart-grid / chart-axis / chart-label / chart-cursor  chart furniture
+ *   success / danger   gain/loss only
+ *   scale-pos/neg-1..3 heatmap cells
+ * In CSS strings prefer var(--kt-*). SVG presentation attributes (fill, stroke,
+ * stop-color) need a resolved value, so use ktColor('name') there.
+ * Fallbacks are kt-styles' light values (used in Node and if a token is missing).
+ */
+const KT_COLOR_FALLBACKS = {
+    'text': '#111111', 'text-secondary': '#374151', 'text-muted': '#5b6270', 'text-on-color': '#ffffff',
+    'surface': '#ffffff', 'surface-hover': '#f6f7f9', 'surface-sunken': '#eceef1',
+    'border': '#cfd4db', 'divider': '#e3e6ea', 'border-strong': '#a9b0ba',
+    'accent': '#0969da', 'accent-soft': 'rgba(9, 105, 218, 0.1)',
+    'success': '#1a7f37', 'success-soft': '#dafbe1', 'success-text': '#116329',
+    'danger': '#cf222e', 'danger-soft': '#ffe4e6', 'danger-text': '#a40e26',
+    'warning': '#d97706', 'warning-soft': '#fff4d4', 'warning-text': '#8a5300',
+    'series-1': '#1d4ed8', 'series-2': '#60a5fa', 'series-3': '#334155', 'series-4': '#94a3b8',
+    'series-5': '#93c5fd', 'series-6': '#cbd5e1', 'series-7': '#64748b',
+    'chart-grid': '#e3e6ea', 'chart-axis': '#a9b0ba', 'chart-label': '#6b7280',
+    'chart-cursor': '#5b6270', 'chart-reference': '#6b7280',
+    'scale-pos-1': '#dafbe1', 'scale-pos-2': '#a6e3b3', 'scale-pos-3': '#1a7f37',
+    'scale-neg-1': '#ffe4e6', 'scale-neg-2': '#f9bcc0', 'scale-neg-3': '#cf222e'
+};
+const ktColorCache = {};
+
+function ktColor(name) {
+    if (ktColorCache[name]) return ktColorCache[name];
+    let value = '';
+    if (typeof document !== 'undefined' && document.documentElement && typeof getComputedStyle === 'function') {
+        try {
+            value = getComputedStyle(document.documentElement).getPropertyValue('--kt-' + name).trim();
+        } catch (e) { /* not a real DOM */ }
+    }
+    if (!value) return KT_COLOR_FALLBACKS[name] || '';
+    ktColorCache[name] = value;
+    return value;
+}
+
 /* ================= Web Crypto Decryption ================= */
 
 function base64ToUint8Array(base64) {
@@ -158,8 +200,8 @@ function showScrambleBadge() {
         b.textContent = '🔀 Scrambled';
         b.title = 'Demo mode: monetary values are scaled. Open with ?scramble=false to disable.';
         b.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;padding:4px 10px;' +
-            'border-radius:999px;background:rgba(234,179,8,0.9);color:#000;font:600 12px system-ui;' +
-            'box-shadow:0 2px 8px rgba(0,0,0,0.3);pointer-events:auto;cursor:default;';
+            'border-radius:999px;background:var(--kt-warning-soft);color:var(--kt-warning-text);border:1px solid var(--kt-warning);font:600 12px system-ui;' +
+            'box-shadow:var(--kt-shadow-badge);pointer-events:auto;cursor:default;';
         document.body.appendChild(b);
     };
     if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
@@ -1178,6 +1220,7 @@ function bindChartInteractiveOverlay(overlay, onMove, onLeave) {
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        ktColor,
         formatCurrency,
         formatPercent,
         formatDate,

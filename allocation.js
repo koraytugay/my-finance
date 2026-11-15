@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Asset Allocation Controller
  */
@@ -93,10 +94,10 @@ function renderBreakdowns() {
 
     // 1. Global Equity Geography
     const geoItems = [
-        { label: 'US Equities', value: totals.us, color: '#1d4ed8' },
-        { label: 'Canadian Equities', value: totals.canada, color: '#60a5fa' },
-        { label: 'International Developed', value: totals.developed, color: '#334155' },
-        { label: 'Emerging Markets', value: totals.emerging, color: '#94a3b8' }
+        { label: 'US Equities', value: totals.us, color: ktColor('series-1') },
+        { label: 'Canadian Equities', value: totals.canada, color: ktColor('series-2') },
+        { label: 'International Developed', value: totals.developed, color: ktColor('series-3') },
+        { label: 'Emerging Markets', value: totals.emerging, color: ktColor('series-4') }
     ];
 
     document.getElementById('geo-breakdown-list').innerHTML = geoItems.map(item => {
@@ -118,10 +119,10 @@ function renderBreakdowns() {
 
     // 2. Asset Class Allocation
     const classItems = [
-        { label: 'Equities (Stocks)', value: totalEquities, color: '#1d4ed8' },
-        { label: 'Fixed Income & Cash', value: totals.fixed, color: '#93c5fd' },
-        { label: 'Precious Metals', value: totals.metals, color: '#cbd5e1' },
-        { label: 'Cryptocurrency', value: totals.crypto, color: '#64748b' }
+        { label: 'Equities (Stocks)', value: totalEquities, color: ktColor('series-1') },
+        { label: 'Fixed Income & Cash', value: totals.fixed, color: ktColor('series-5') },
+        { label: 'Precious Metals', value: totals.metals, color: ktColor('series-6') },
+        { label: 'Cryptocurrency', value: totals.crypto, color: ktColor('series-7') }
     ];
 
     document.getElementById('class-breakdown-list').innerHTML = classItems.map(item => {
@@ -146,18 +147,18 @@ function renderBreakdowns() {
     });
 
     const strategyColors = {
-        'Factor': '#1d4ed8',
-        'Broad Market': '#60a5fa',
-        'Fixed Income': '#93c5fd',
-        'Precious Metals': '#cbd5e1',
-        'Crypto': '#64748b'
+        'Factor': ktColor('series-1'),
+        'Broad Market': ktColor('series-2'),
+        'Fixed Income': ktColor('series-5'),
+        'Precious Metals': ktColor('series-6'),
+        'Crypto': ktColor('series-7')
     };
 
     const strategyEntries = Object.entries(strategyTotals).sort((a, b) => b[1] - a[1]);
 
     document.getElementById('strategy-breakdown-list').innerHTML = strategyEntries.map(([strat, val]) => {
         const pct = (val / t) * 100;
-        const color = strategyColors[strat] || '#64748b';
+        const color = strategyColors[strat] || ktColor('series-7');
         return `
             <div class="kt-mb-3">
                 <div class="kt-split kt-fs-sm kt-mb-1">
@@ -181,7 +182,7 @@ function renderMatrixTable() {
 
     tbody.innerHTML = sorted.map(h => {
         const a = h.allocation || {};
-        const formatCell = (val) => val > 0 ? formatCurrency(val) : '<span style="color: #cbd5e1;">-</span>';
+        const formatCell = (val) => val > 0 ? formatCurrency(val) : '<span class="kt-text-muted">-</span>';
 
         return `
             <tr>
@@ -310,10 +311,10 @@ function onFXSliderChange(newRateStr) {
         const sign = deltaCAD >= 0 ? '+' : '';
         impactEl.textContent = `${sign}${formatCurrency(deltaCAD, 'CAD')} (${sign}${deltaPct.toFixed(2)}%)`;
         if (deltaCAD > 50) {
-            impactEl.style.color = '#16a34a';
+            impactEl.style.color = ktColor('success');
             if (impactDesc) impactDesc.textContent = 'CAD depreciation boosted the purchasing power of your US assets';
         } else if (deltaCAD < -50) {
-            impactEl.style.color = '#cf222e';
+            impactEl.style.color = ktColor('danger');
             if (impactDesc) impactDesc.textContent = 'CAD appreciation slightly reduced converted CAD value of US assets';
         } else {
             impactEl.style.color = '';
@@ -464,7 +465,7 @@ function renderSimpleAllocTable() {
             `;
         } else {
             const sign = gainCAD > 0 ? '+' : '';
-            const color = gainCAD > 0 ? '#166534' : (gainCAD < 0 ? '#cf222e' : '#64748b');
+            const color = gainCAD > 0 ? ktColor('success-text') : (gainCAD < 0 ? ktColor('danger') : ktColor('text-muted'));
             gainHtml = `
                 <div class="kt-fw-bold" style="color: ${color};">${sign}${formatCurrency(gainCAD)}</div>
                 <div class="kt-fs-2xs" style="color: ${color};">${sign}${gainPct.toFixed(2)}%</div>
@@ -486,7 +487,7 @@ function renderSimpleAllocTable() {
     const totalGainCAD = simpleAllocData.reduce((s, item) => s + (Number(item.gainCAD) || 0), 0);
     const totalGainPct = totalCost > 0 ? (totalGainCAD / totalCost) * 100 : 0;
     const totalGainSign = totalGainCAD > 0 ? '+' : '';
-    const totalGainColor = totalGainCAD > 0 ? '#166534' : (totalGainCAD < 0 ? '#cf222e' : '#64748b');
+    const totalGainColor = totalGainCAD > 0 ? ktColor('success-text') : (totalGainCAD < 0 ? ktColor('danger') : ktColor('text-muted'));
 
     if (tfoot) {
         tfoot.innerHTML = `
@@ -512,7 +513,7 @@ function renderSimpleAllocTable() {
             iconEl.style.color = '';
         } else {
             iconEl.textContent = '⬍';
-            iconEl.style.color = '#94a3b8';
+            iconEl.style.color = ktColor('text-muted');
         }
     });
 }
@@ -577,7 +578,7 @@ function copySimpleAllocationTable(format = 'tsv') {
 
         const htmlRows = sorted.map(item => {
             const sign = item.gainCAD > 0 ? '+' : '';
-            const color = item.gainCAD > 0 ? '#166534' : (item.gainCAD < 0 ? '#cf222e' : '#64748b');
+            const color = item.gainCAD > 0 ? ktColor('success-text') : (item.gainCAD < 0 ? ktColor('danger') : ktColor('text-muted'));
             return `<tr><td>${escapeHtml(item.asset)}</td><td class="kt-align-right">${item.pct.toFixed(2)}%</td><td class="kt-align-right">${formatCurrency(item.sum)}</td><td class="kt-align-right" style="color: ${color};">${sign}${formatCurrency(item.gainCAD)} (${sign}${item.gainPct.toFixed(2)}%)</td></tr>`;
         }).join('');
         htmlContent = `<table><thead><tr><th>Asset</th><th>Allocation</th><th>Value (CAD)</th><th>Gain / Loss (CAD)</th></tr></thead><tbody>${htmlRows}</tbody><tfoot><tr><td>Total</td><td class="kt-align-right">100.00%</td><td class="kt-align-right">${formatCurrency(totalCAD)}</td><td class="kt-align-right">${totalGainSign}${formatCurrency(totalGainCAD)} (${totalGainSign}${totalGainPct.toFixed(2)}%)</td></tr></tfoot></table>`;
@@ -590,8 +591,8 @@ function copySimpleAllocationTable(format = 'tsv') {
         if (btn) {
             const originalText = btn.textContent;
             btn.textContent = '✓ Copied!';
-            btn.style.color = '#16a34a';
-            btn.style.borderColor = '#16a34a';
+            btn.style.color = ktColor('success');
+            btn.style.borderColor = ktColor('success');
             setTimeout(() => {
                 btn.textContent = originalText;
                 btn.style.color = '';

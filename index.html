@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Main Overview</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -48,17 +48,17 @@
                     <span class="kt-stat__sub" id="main-stat-total-cad-sub">Net Worth (CAD)</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-week-change" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value" id="main-stat-week-change" style="color: var(--kt-success);">+$0.00</span>
                     <span class="kt-stat__label" id="main-stat-week-label">Current Week (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-week-sub">+0.00% &bull; 🟢 Up this week</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-timeback-cad" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value" id="main-stat-timeback-cad" style="color: var(--kt-success);">0 weeks</span>
                     <span class="kt-stat__label">Time Back (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-timeback-cad-sub">🟢 At All-Time High</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-ath" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="kt-stat__value" id="main-stat-ath" style="color: var(--kt-success);">🟢 ATH!</span>
                     <span class="kt-stat__label" id="main-stat-ath-label">ATH Status (CAD)</span>
                     <span class="kt-stat__sub" id="main-stat-ath-val">$0.00 ATH</span>
                 </div>
@@ -85,17 +85,17 @@
                     <span class="kt-stat__sub" id="main-stat-total-usd-sub">Net Worth (USD)</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-week-change-usd" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value" id="main-stat-week-change-usd" style="color: var(--kt-success);">+$0.00</span>
                     <span class="kt-stat__label" id="main-stat-week-usd-label">Current Week (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-week-usd-sub">+0.00% &bull; 🟢 Up this week</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-timeback-usd" style="color: #16a34a;">0 weeks</span>
+                    <span class="kt-stat__value" id="main-stat-timeback-usd" style="color: var(--kt-success);">0 weeks</span>
                     <span class="kt-stat__label">Time Back (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-timeback-usd-sub">🟢 At All-Time High</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="main-stat-ath-usd" style="color: #16a34a;">🟢 ATH!</span>
+                    <span class="kt-stat__value" id="main-stat-ath-usd" style="color: var(--kt-success);">🟢 ATH!</span>
                     <span class="kt-stat__label" id="main-stat-ath-usd-label">ATH Status (USD)</span>
                     <span class="kt-stat__sub" id="main-stat-ath-usd-val">US$0.00 ATH</span>
                 </div>
@@ -122,11 +122,11 @@
                     <div class="kt-cluster">
                         <h2 class="kt-card__title kt-m-0" id="main-chart-title">📈 Net Worth Progression</h2>
                         <label class="kt-cluster kt-fs-sm kt-fw-bold" style="cursor: pointer; user-select: none; background: var(--kt-surface-hover); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--kt-border-strong);" title="Show only all-time high nodes across history (plus current node if not at ATH)">
-                            <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: #334155; cursor: pointer; width: 14px; height: 14px;">
+                            <input type="checkbox" id="main-filter-aths" onchange="toggleMainAthsFilter(this.checked)" style="accent-color: var(--kt-accent); cursor: pointer; width: 14px; height: 14px;">
                             ATHs
                         </label>
-                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
-                            <input type="checkbox" id="main-overlay-xeqt" onchange="toggleMainXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="cursor: pointer; user-select: none; background: var(--kt-surface-hover); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--kt-border-strong);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                            <input type="checkbox" id="main-overlay-xeqt" onchange="toggleMainXeqtOverlay(this.checked)" style="accent-color: var(--kt-accent); cursor: pointer; width: 14px; height: 14px;">
                             Overlay XEQT
                         </label>
                     </div>
@@ -156,7 +156,7 @@
                         </div>
                         <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="main-chart-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
-                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
+                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span> Total Net Worth &bull; Hover any data point to inspect breakdown
                             </div>
                         </div>
                     </div>
@@ -198,7 +198,7 @@
                         </div>
                         <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="xeqt-rel-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
-                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span> Portfolio vs XEQT &bull; Hover any data point to inspect breakdown
+                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span> Portfolio vs XEQT &bull; Hover any data point to inspect breakdown
                             </div>
                         </div>
                     </div>
@@ -274,10 +274,10 @@
                         </div>
                         <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="ath-chart-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
-                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> ATH Milestone Increments
+                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-success);"></span> ATH Milestone Increments
                             </div>
                             <div class="kt-legend__item">
-                                <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed #94a3b8;"></span>
+                                <span style="display: inline-block; width: 16px; height: 0; border-top: 2px dashed var(--kt-chart-reference);"></span>
                                 <span id="ath-legend-avg-text">Average Increment</span>
                             </div>
                         </div>
@@ -296,8 +296,8 @@
                         <span class="kt-fs-sm kt-text-muted kt-fw-medium" id="heatmap-subtitle">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
                     <div class="kt-cluster kt-ml-auto">
-                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
-                            <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="cursor: pointer; user-select: none; background: var(--kt-surface-hover); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--kt-border-strong);" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
+                            <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)" style="accent-color: var(--kt-accent); cursor: pointer; width: 14px; height: 14px;">
                             vs XEQT
                         </label>
                         <div class="kt-segmented kt-segmented--sm" id="heatmap-currency-toggle" role="group">
@@ -370,10 +370,10 @@
                         </div>
                         <div class="kt-legend kt-mt-2 kt-fs-xs kt-text-muted" id="weekly-bar-legend" style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
                             <div class="kt-legend__item">
-                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span> Weekly Gain
+                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-success);"></span> Weekly Gain
                             </div>
                             <div class="kt-legend__item">
-                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span> Weekly Pullback
+                                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-danger);"></span> Weekly Pullback
                             </div>
                             <div class="kt-legend__item">
                                 <span id="weekly-legend-avg-text">Average Weekly Change</span>
@@ -414,8 +414,8 @@
                     </div>
                     <div id="dd-stat-current-card" class="kt-stat kt-stat--inset">
                         <div id="dd-stat-current-title" class="kt-stat__label">Current Drawdown</div>
-                        <div id="dd-stat-current" class="kt-stat__value" style="color: #16a34a;">$0.00 (0.0%)</div>
-                        <div id="dd-stat-current-status" class="kt-stat__sub" style="color: #15803d;">At All-Time High</div>
+                        <div id="dd-stat-current" class="kt-stat__value" style="color: var(--kt-success);">$0.00 (0.0%)</div>
+                        <div id="dd-stat-current-status" class="kt-stat__sub" style="color: var(--kt-success);">At All-Time High</div>
                     </div>
                     <div class="kt-stat kt-stat--inset">
                         <div class="kt-stat__label">Longest Recovery Period</div>
@@ -556,15 +556,15 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change in Last 52 Weeks</dt>
-                            <dd id="metric-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="metric-total-gain" style="color: var(--kt-success);">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return (Last 52 Weeks)</dt>
-                            <dd id="metric-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="metric-gain-pct" style="color: var(--kt-success);">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd id="metric-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="metric-monthly-rate" style="color: var(--kt-success);">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
@@ -594,15 +594,15 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change Year to Date</dt>
-                            <dd id="ytd-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="ytd-total-gain" style="color: var(--kt-success);">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return Year to Date</dt>
-                            <dd id="ytd-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="ytd-gain-pct" style="color: var(--kt-success);">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd id="ytd-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="ytd-monthly-rate" style="color: var(--kt-success);">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
@@ -632,15 +632,15 @@
                         </div>
                         <div class="kt-kv__row">
                             <dt>Change All-Time</dt>
-                            <dd id="alltime-total-gain" style="color: #16a34a;">+$0.00</dd>
+                            <dd id="alltime-total-gain" style="color: var(--kt-success);">+$0.00</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Return All-Time</dt>
-                            <dd id="alltime-gain-pct" style="color: #16a34a;">+0.00%</dd>
+                            <dd id="alltime-gain-pct" style="color: var(--kt-success);">+0.00%</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Monthly Average Change</dt>
-                            <dd id="alltime-monthly-rate" style="color: #16a34a;">+$0.00 / mo</dd>
+                            <dd id="alltime-monthly-rate" style="color: var(--kt-success);">+$0.00 / mo</dd>
                         </div>
                         <div class="kt-kv__row">
                             <dt>Peak Net Worth</dt>
@@ -659,7 +659,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="main.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="main.js?v=3.6"></script>
 </body>
 </html>

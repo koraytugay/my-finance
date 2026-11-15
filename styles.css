@@ -115,9 +115,8 @@
 }
 .month-col.peak { outline: 2px solid var(--kt-text); outline-offset: 1px; }
 
-.month-net-part { width: 100%; background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); }
-.month-net-part.peak { background: #1e3a8a; }
-.month-tax-part { width: 100%; background: #94a3b8; }
+.month-net-part { width: 100%; background: var(--kt-series-1); }
+.month-tax-part { width: 100%; background: var(--kt-series-4); }
 
 .month-label {
     margin-top: var(--kt-space-2);
@@ -156,7 +155,7 @@
 }
 
 .heatmap-cell:hover {
-    filter: brightness(1.12);
+    filter: brightness(0.95);
 }
 
 #heatmap-table th:first-child,
@@ -183,13 +182,13 @@
     background-color: initial;
 }
 
-/* Data-scale colors (a diverging gain/loss scale, not theme colors) */
-.heat-green-deep { background: #14532d !important; color: #ffffff !important; }
-.heat-green-med  { background: #15803d !important; color: #ffffff !important; }
-.heat-green-soft { background: #16a34a !important; color: #ffffff !important; }
-.heat-red-soft   { background: #dc2626 !important; color: #ffffff !important; }
-.heat-red-med    { background: #b91c1c !important; color: #ffffff !important; }
-.heat-red-deep   { background: #7f1d1d !important; color: #ffffff !important; }
+/* Diverging gain/loss scale (kt-styles --kt-scale-pos/neg-1..3) */
+.heat-green-deep { background: var(--kt-scale-pos-3) !important; color: var(--kt-text-on-color) !important; }
+.heat-green-med  { background: var(--kt-scale-pos-2) !important; color: var(--kt-success-text) !important; }
+.heat-green-soft { background: var(--kt-scale-pos-1) !important; color: var(--kt-success-text) !important; }
+.heat-red-soft   { background: var(--kt-scale-neg-1) !important; color: var(--kt-danger-text) !important; }
+.heat-red-med    { background: var(--kt-scale-neg-2) !important; color: var(--kt-danger-text) !important; }
+.heat-red-deep   { background: var(--kt-scale-neg-3) !important; color: var(--kt-text-on-color) !important; }
 .heat-neutral    { background: var(--kt-surface-sunken) !important; color: var(--kt-text-muted) !important; }
 
 /* ================= Holdings card view ================= */
@@ -260,14 +259,14 @@
 }
 
 /* ================= Allocation bar segment colors (inside .kt-progress) ================= */
-/* Asset-class colors (fixed categorical palette for this app) */
-.alloc-seg-us { background-color: #1d4ed8; }
-.alloc-seg-canada { background-color: #60a5fa; }
-.alloc-seg-developed { background-color: #334155; }
-.alloc-seg-emerging { background-color: #94a3b8; }
-.alloc-seg-fixed { background-color: #93c5fd; }
-.alloc-seg-crypto { background-color: #64748b; }
-.alloc-seg-metals { background-color: #cbd5e1; }
+/* Asset-class colors: the kt-styles series palette, in a fixed order for this app */
+.alloc-seg-us { background-color: var(--kt-series-1); }
+.alloc-seg-canada { background-color: var(--kt-series-2); }
+.alloc-seg-developed { background-color: var(--kt-series-3); }
+.alloc-seg-emerging { background-color: var(--kt-series-4); }
+.alloc-seg-fixed { background-color: var(--kt-series-5); }
+.alloc-seg-metals { background-color: var(--kt-series-6); }
+.alloc-seg-crypto { background-color: var(--kt-series-7); }
 
 /* ================= Charts ================= */
 .chart-container {

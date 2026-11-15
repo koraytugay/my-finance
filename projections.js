@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * FIRE & Wealth Compounding Simulator Controller
  */
@@ -348,10 +349,10 @@ function renderTable(tableData, highlightYear = null) {
         const isTarget = highlightYear && row.year === highlightYear;
         const tr = document.createElement('tr');
         if (isTarget) {
-            tr.style.background = '#f0f9ff';
+            tr.style.background = ktColor('accent-soft');
         }
         tr.innerHTML = `
-            <td class="kt-fw-bold">Year ${row.year}${isTarget ? ' <span class="kt-fs-2xs kt-fw-heavy" style="background: #e0f2fe; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
+            <td class="kt-fw-bold">Year ${row.year}${isTarget ? ' <span class="kt-fs-2xs kt-fw-heavy" style="background: var(--kt-accent-soft); padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Target</span>' : ''}</td>
             <td class="kt-text-muted">${row.timeline}</td>
             <td class="kt-align-right">${formatCurrency(row.startBalance)}</td>
             <td class="kt-align-right">+${formatCurrency(row.annualContribution)}</td>
@@ -396,8 +397,8 @@ function renderProjectionChart() {
         const yVal = (maxVal / ySteps) * i;
         const yPos = getY(yVal);
         gridSvg += `
-            <line x1="${padL}" y1="${yPos}" x2="${width - padR}" y2="${yPos}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${padL - 8}" y="${yPos + 4}" font-size="10" fill="#94a3b8" text-anchor="end" font-family="inherit">
+            <line x1="${padL}" y1="${yPos}" x2="${width - padR}" y2="${yPos}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+            <text x="${padL - 8}" y="${yPos + 4}" font-size="10" fill="${ktColor('chart-label')}" text-anchor="end" font-family="inherit">
                 ${formatCurrencyShort(yVal)}
             </text>
         `;
@@ -409,8 +410,8 @@ function renderProjectionChart() {
         const xPos = getX(yr);
         const point = chartPoints[yr] || {};
         xLabelsSvg += `
-            <line x1="${xPos}" y1="${height - padB}" x2="${xPos}" y2="${height - padB + 4}" stroke="#cbd5e1" stroke-width="1" />
-            <text x="${xPos}" y="${height - padB + 16}" font-size="10" fill="#64748b" text-anchor="middle" font-family="inherit">
+            <line x1="${xPos}" y1="${height - padB}" x2="${xPos}" y2="${height - padB + 4}" stroke="${ktColor('chart-axis')}" stroke-width="1" />
+            <text x="${xPos}" y="${height - padB + 16}" font-size="10" fill="${ktColor('chart-label')}" text-anchor="middle" font-family="inherit">
                 Yr ${yr} (${point.timelineYear || ''})
             </text>
         `;
@@ -436,8 +437,8 @@ function renderProjectionChart() {
         <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="overflow: visible; display: block;" id="svg-element">
             <defs>
                 <linearGradient id="expGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0969da" stop-opacity="0.16"/>
-                    <stop offset="100%" stop-color="#0969da" stop-opacity="0.01"/>
+                    <stop offset="0%" stop-color="${ktColor('series-1')}" stop-opacity="0.16"/>
+                    <stop offset="100%" stop-color="${ktColor('series-1')}" stop-opacity="0.01"/>
                 </linearGradient>
             </defs>
 
@@ -448,17 +449,17 @@ function renderProjectionChart() {
             <path d="${areaExp}" fill="url(#expGradient)" />
 
             <!-- Trajectory lines -->
-            <path d="${pathInv}" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="4 3" />
-            <path d="${pathCons}" fill="none" stroke="#94a3b8" stroke-width="2" />
-            <path d="${pathOpt}" fill="none" stroke="#16a34a" stroke-width="2" stroke-dasharray="3 2" />
-            <path d="${pathExp}" fill="none" stroke="#0969da" stroke-width="3" />
+            <path d="${pathInv}" fill="none" stroke="${ktColor('chart-reference')}" stroke-width="1.8" stroke-dasharray="4 3" />
+            <path d="${pathCons}" fill="none" stroke="${ktColor('series-3')}" stroke-width="2" />
+            <path d="${pathOpt}" fill="none" stroke="${ktColor('series-2')}" stroke-width="2" stroke-dasharray="3 2" />
+            <path d="${pathExp}" fill="none" stroke="${ktColor('series-1')}" stroke-width="3" />
 
             <!-- Interactive Crosshair & Point Markers -->
-            <line id="crosshair-x" x1="0" y1="${padT}" x2="0" y2="${height - padB}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3 3" style="display: none; pointer-events: none;" />
-            <circle id="dot-exp" r="5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
-            <circle id="dot-opt" r="4.2" fill="#16a34a" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
-            <circle id="dot-cons" r="4.2" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
-            <circle id="dot-inv" r="3.8" fill="#94a3b8" stroke="#ffffff" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <line id="crosshair-x" x1="0" y1="${padT}" x2="0" y2="${height - padB}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3 3" style="display: none; pointer-events: none;" />
+            <circle id="dot-exp" r="5" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="dot-opt" r="4.2" fill="${ktColor('series-2')}" stroke="${ktColor('surface')}" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <circle id="dot-cons" r="4.2" fill="${ktColor('series-3')}" stroke="${ktColor('surface')}" stroke-width="1.5" style="display: none; pointer-events: none;" />
+            <circle id="dot-inv" r="3.8" fill="${ktColor('chart-reference')}" stroke="${ktColor('surface')}" stroke-width="1.5" style="display: none; pointer-events: none;" />
 
             <!-- Full Tracking Overlay Rect -->
             <rect id="projection-overlay" x="${padL}" y="${padT}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
@@ -495,7 +496,7 @@ function buildProjectionCardHtml(point, isHover = false) {
     if (isHover) {
         badgeHtml = `<span class="kt-badge">INSPECTING</span>`;
     } else if (point.year === horizonYears) {
-        badgeHtml = `<span class="kt-badge" style="background: #ede9fe; ">TARGET (YR ${point.year})</span>`;
+        badgeHtml = `<span class="kt-badge" style="background: var(--kt-surface-sunken); ">TARGET (YR ${point.year})</span>`;
     } else {
         badgeHtml = `<span class="kt-badge">${point.year === 0 ? 'START (YR 0)' : `YEAR ${point.year}`}</span>`;
     }
@@ -514,19 +515,19 @@ function buildProjectionCardHtml(point, isHover = false) {
         <div class="kt-readout__section">
             <div class="kt-eyebrow kt-mb-1">Scenario Projections</div>
             <div class="kt-readout__row">
-                <span class="kt-text-success kt-fw-semibold">● Optimistic (+2%):</span>
+                <span class="kt-fw-semibold"><span style="color: var(--kt-series-2);">●</span> Optimistic (+2%):</span>
                 <strong>${formatCurrency(point.optimistic)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span class="kt-fw-semibold">● Expected:</span>
+                <span class="kt-fw-semibold"><span style="color: var(--kt-series-1);">●</span> Expected:</span>
                 <strong>${formatCurrency(point.expected)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span class="kt-fw-semibold">● Conservative (-2%):</span>
+                <span class="kt-fw-semibold"><span style="color: var(--kt-series-3);">●</span> Conservative (-2%):</span>
                 <strong>${formatCurrency(point.conservative)}</strong>
             </div>
             <div class="kt-readout__row">
-                <span class="kt-text-muted kt-fw-semibold">● Capital Invested:</span>
+                <span class="kt-text-muted kt-fw-semibold"><span style="color: var(--kt-chart-reference);">○</span> Capital Invested:</span>
                 <strong>${formatCurrency(point.invested)}</strong>
             </div>
         </div>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - FIRE &amp; Wealth Projections</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -139,7 +139,7 @@
                     <div class="kt-field">
                         <label class="kt-field__label kt-split" for="input-horizon-years">
                             <span>Projection Horizon</span>
-                            <span id="label-horizon-years" style="color: #6366f1;">20 Years</span>
+                            <span id="label-horizon-years" style="color: var(--kt-text);">20 Years</span>
                         </label>
                         <input class="kt-range" type="range" id="input-horizon-years" min="5" max="20" step="1" value="20" oninput="runProjections()">
                     </div>
@@ -170,11 +170,11 @@
                             Visualizes your wealth compound curves over 30 years under Expected, Optimistic (+2%), and Conservative (-2%) returns vs. Cash Savings Baseline. Hover to inspect values.
                         </p>
                     </div>
-                    <div class="kt-fs-xs kt-fw-bold" style="display: flex; gap: 12px; flex-wrap: wrap;">
-                        <span class="kt-text-success">● Optimistic (+2%)</span>
-                        <span>● Expected Return</span>
-                        <span>● Conservative (-2%)</span>
-                        <span class="kt-text-muted">● Capital Invested</span>
+                    <div class="kt-legend">
+                        <span class="kt-legend__item"><span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-series-2)"></span>Optimistic (+2%)</span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch kt-legend__swatch--line" style="--kt-legend-color: var(--kt-series-1)"></span>Expected Return</span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch kt-legend__swatch--line" style="--kt-legend-color: var(--kt-series-3)"></span>Conservative (-2%)</span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-reference)"></span>Capital Invested</span>
                     </div>
                 </div>
                 <div class="kt-chart-layout">
@@ -225,7 +225,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="projections.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="projections.js?v=3.6"></script>
 </body>
 </html>

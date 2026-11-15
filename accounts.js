@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Accounts & Brokerages Controller
  */
@@ -199,7 +200,7 @@ function renderGroupedViews() {
             const sgGainPct = sgCost > 0 ? (sgGain / sgCost) * 100 : 0;
             const hasCost = sg.holdings.some(h => (h.averageCost || 0) > 0);
             const gainSign = sgGain >= 0 ? '+' : '';
-            const gainColor = sgGain >= 0 ? '#166534' : '#cf222e';
+            const gainColor = sgGain >= 0 ? ktColor('success-text') : ktColor('danger');
             const gainText = hasCost ? `<span class="kt-fs-xs kt-fw-semibold" style="color: ${gainColor}; margin-left: 6px;">(${gainSign}${formatCurrency(sgGain)} / ${gainSign}${sgGainPct.toFixed(1)}%)</span>` : '';
 
             const subtotalRow = `

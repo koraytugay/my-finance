@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Dividends &amp; Passive Income</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -58,7 +58,7 @@
             </div>
 
             <!-- Tax Assumptions Accordion/Panel -->
-            <div id="tax-settings-panel" class="kt-card kt-card--padded kt-mb-5" style="display: none; background: var(--kt-surface); border: 1px solid #cbd5e1; border-radius: 8px;">
+            <div id="tax-settings-panel" class="kt-card kt-card--padded kt-mb-5" style="display: none; background: var(--kt-surface); border: 1px solid var(--kt-border); border-radius: 8px;">
                 <div class="kt-split kt-mb-3">
                     <div>
                         <h4 class="kt-m-0 kt-fs-base kt-fw-heavy kt-text-primary">🇨🇦 Tax Policy &amp; Bracket Assumptions</h4>
@@ -71,17 +71,17 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
                     <div>
                         <label class="kt-fs-xs kt-fw-bold kt-text-secondary kt-mb-1" style="display: block;">Marginal Tax Rate on Cash / Interest (%):</label>
-                        <input class="kt-input kt-fs-sm" type="number" id="setting-cash-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('cashRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <input class="kt-input kt-fs-sm" type="number" id="setting-cash-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('cashRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid var(--kt-series-6); border-radius: 6px;">
                         <span class="kt-fs-2xs kt-text-muted">Applies to Cash, HISA, and 2.0% Fixed Income</span>
                     </div>
                     <div>
                         <label class="kt-fs-xs kt-fw-bold kt-text-secondary kt-mb-1" style="display: block;">Eligible Canadian Dividend Rate (%):</label>
-                        <input class="kt-input kt-fs-sm" type="number" id="setting-eligible-rate" value="8.9" step="0.1" min="0" max="50" onchange="updateTaxSetting('eligibleDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <input class="kt-input kt-fs-sm" type="number" id="setting-eligible-rate" value="8.9" step="0.1" min="0" max="50" onchange="updateTaxSetting('eligibleDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid var(--kt-series-6); border-radius: 6px;">
                         <span class="kt-fs-2xs kt-text-muted">30% bracket + 38% gross-up &amp; DTC (Ontario)</span>
                     </div>
                     <div>
                         <label class="kt-fs-xs kt-fw-bold kt-text-secondary kt-mb-1" style="display: block;">Foreign / US Dividend Rate (%):</label>
-                        <input class="kt-input kt-fs-sm" type="number" id="setting-foreign-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('foreignDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                        <input class="kt-input kt-fs-sm" type="number" id="setting-foreign-rate" value="30.0" step="0.5" min="0" max="60" onchange="updateTaxSetting('foreignDivRatePct', this.value)" style="width: 100%; padding: 6px 10px; border: 1px solid var(--kt-series-6); border-radius: 6px;">
                         <span class="kt-fs-2xs kt-text-muted">Foreign income taxed at regular marginal rate</span>
                     </div>
                     <div>
@@ -167,12 +167,12 @@
                 <!-- Gross-to-Net Cashflow Waterfall Bar -->
                 <div class="kt-mt-2">
                     <div class="kt-split kt-fs-xs kt-fw-bold kt-mb-1">
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #16a34a;"></span><span class="kt-text-success" id="bar-label-net">Real In-Pocket Cashflow: $0.00 (0.0%)</span></span>
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #94a3b8;"></span><span class="kt-text-danger" id="bar-label-drag">CRA Tax Drag: -$0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span><span id="bar-label-net">Real In-Pocket Cashflow: $0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-4);"></span><span class="kt-text-danger" id="bar-label-drag">CRA Tax Drag: -$0.00 (0.0%)</span></span>
                     </div>
                     <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
-                        <div id="tax-bar-net" style="background: #16a34a; height: 100%; width: 85%;" title="Net In-Pocket"></div>
-                        <div id="tax-bar-drag" style="background: #94a3b8; height: 100%; width: 15%;" title="Tax Drag"></div>
+                        <div id="tax-bar-net" style="background: var(--kt-series-1); height: 100%; width: 85%;" title="Net In-Pocket"></div>
+                        <div id="tax-bar-drag" style="background: var(--kt-series-4); height: 100%; width: 15%;" title="Tax Drag"></div>
                     </div>
                 </div>
             </div>
@@ -189,8 +189,8 @@
                         </p>
                     </div>
                     <div class="kt-fs-xs kt-fw-bold" style="display: flex; gap: 14px;">
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #1d4ed8;"></span>Net In-Pocket Cashflow</span>
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #94a3b8;"></span>Estimated CRA Tax Drag</span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span>Net In-Pocket Cashflow</span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-4);"></span>Estimated CRA Tax Drag</span>
                     </div>
                 </div>
 
@@ -210,11 +210,11 @@
                         <span id="filtered-count" class="kt-badge kt-badge--pill kt-ml-auto kt-fs-sm kt-text-muted" style="margin-left: 0;">0 positions</span>
                     </div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <input class="kt-input kt-fs-sm" type="text" id="filter-search" placeholder="Search ticker or brokerage..." oninput="applyTableFilters()" style="padding: 6px 12px; border: 1px solid #d0d7de; border-radius: 6px; min-width: 200px;">
-                        <select class="kt-select kt-fs-sm" id="filter-account" onchange="applyTableFilters()" style="padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 6px;">
+                        <input class="kt-input kt-fs-sm" type="text" id="filter-search" placeholder="Search ticker or brokerage..." oninput="applyTableFilters()" style="padding: 6px 12px; border: 1px solid var(--kt-border-strong); border-radius: 6px; min-width: 200px;">
+                        <select class="kt-select kt-fs-sm" id="filter-account" onchange="applyTableFilters()" style="padding: 6px 10px; border: 1px solid var(--kt-border-strong); border-radius: 6px;">
                             <option value="ALL">All Accounts</option>
                         </select>
-                        <select class="kt-select kt-fs-sm" id="filter-tax" onchange="applyTableFilters()" style="padding: 6px 10px; border: 1px solid #d0d7de; border-radius: 6px;">
+                        <select class="kt-select kt-fs-sm" id="filter-tax" onchange="applyTableFilters()" style="padding: 6px 10px; border: 1px solid var(--kt-border-strong); border-radius: 6px;">
                             <option value="ALL">All Tax Statuses</option>
                             <option value="taxfree">Tax-Free (TFSA &amp; FHSA) - 0% Tax</option>
                             <option value="deferred">Tax-Deferred (RRSP) - 0% Tax</option>
@@ -248,7 +248,7 @@
                             <!-- Populated via JS -->
                         </tbody>
                         <tfoot>
-                            <tr class="kt-fw-heavy" style="background: #f0fdf4;">
+                            <tr class="kt-fw-heavy" style="background: var(--kt-success-soft);">
                                 <td class="kt-text-success" colspan="3" style="padding: 12px 14px;">Portfolio Total Passive Cashflow</td>
                                 <td class="kt-align-right kt-text-success" style="padding: 12px 14px;" id="tfoot-total-val">$0.00</td>
                                 <td class="kt-align-right kt-text-success" style="padding: 12px 14px;" id="tfoot-total-yield">0.00%</td>
@@ -274,7 +274,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="dividends.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="dividends.js?v=3.6"></script>
 </body>
 </html>

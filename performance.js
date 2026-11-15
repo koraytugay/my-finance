@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Performance & Returns Analytics Controller
  */
@@ -313,7 +314,7 @@ function renderAthStreaksSection(history) {
     }
 
     function renderStreakItems(streaks, currency) {
-        const badgeBg = currency === 'USD' ? '#334155' : '#0969da';
+        const badgeBg = currency === 'USD' ? ktColor('series-3') : ktColor('series-1');
 
         return streaks.map((s, idx) => {
             const dateStr = formatStreakDates(s.startDate, s.endDate);
@@ -322,14 +323,14 @@ function renderAthStreaksSection(history) {
             const recoveryPart = s.isOngoing
                 ? '<span class="kt-fw-bold">Ongoing consolidation</span>'
                 : `Recovery: ${recoveryStr} (W${s.recoveryWeek})`;
-            const dipColor = s.maxDD < 0 ? '#cf222e' : '#16a34a';
+            const dipColor = s.maxDD < 0 ? ktColor('danger') : ktColor('success');
             const weekRangeStr = s.startWeek === s.endWeek ? `Week ${s.startWeek}` : `Weeks ${s.startWeek}–${s.endWeek}`;
 
             return `
                 <div class="kt-split" style="background: var(--kt-surface-hover); border-radius: 8px; padding: 10px 14px; border: 1px solid var(--kt-divider);">
                     <div>
                         <div class="kt-cluster kt-mb-0">
-                            <span class="kt-fs-2xs kt-fw-heavy" style="background: ${badgeBg}; color: white; padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
+                            <span class="kt-fs-2xs kt-fw-heavy" style="background: ${badgeBg}; color: var(--kt-text-on-color); padding: 1px 6px; border-radius: 4px;">#${idx + 1}</span>
                             <strong class="kt-fs-base kt-text-primary">${s.nonAthWeeks} week${s.nonAthWeeks === 1 ? '' : 's'}</strong>
                             <span class="kt-fs-xs kt-text-muted">(${s.elapsedWeeks} wks ${s.isOngoing ? 'elapsed' : 'recovery'})</span>
                         </div>
@@ -408,7 +409,7 @@ function renderOverviewCards() {
     const totalGainPctEl = document.getElementById('stat-total-gain-pct');
     const sign = totalMarketGainsCAD >= 0 ? '+' : '';
     totalGainEl.textContent = `${sign}${formatCurrency(totalMarketGainsCAD, 'CAD')}`;
-    totalGainEl.style.color = totalMarketGainsCAD >= 0 ? '#16a34a' : '#cf222e';
+    totalGainEl.style.color = totalMarketGainsCAD >= 0 ? ktColor('success') : ktColor('danger');
     const gainPctNW = currentCAD > 0 ? (totalMarketGainsCAD / currentCAD) * 100 : 0;
     totalGainPctEl.textContent = `Open positions • ${gainPctNW.toFixed(1)}% of NW`;
 
@@ -428,7 +429,7 @@ function renderOverviewCards() {
     if (growthCadEl) {
         const gSign = totalGrowthCAD >= 0 ? '+' : '';
         growthCadEl.textContent = `${gSign}${formatCurrency(totalGrowthCAD, 'CAD')}`;
-        growthCadEl.style.color = totalGrowthCAD >= 0 ? '' : '#cf222e';
+        growthCadEl.style.color = totalGrowthCAD >= 0 ? '' : ktColor('danger');
         growthSubEl.textContent = `${gSign}${totalGrowthPct.toFixed(1)}% Growth (contributions + gains)`;
     }
 
@@ -569,10 +570,10 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
     // 3. Benchmark Cards
     const bData = benchmarksData?.benchmarks || {};
     const benchmarkItems = [
-        { id: 'XEQT', key: 'xeqt', defaultCategory: '100% All-Equity passive blend', defaultRet: 43.81, defaultDd: -15.3, color: '#334155' },
-        { id: 'XBAL', key: 'xbal', defaultCategory: '60% Stocks / 40% Bonds benchmark', defaultRet: 22.30, defaultDd: -9.9, color: '#94a3b8' },
-        { id: 'VFV', key: 'vfv', defaultCategory: '100% US Mega-cap equity (CAD)', defaultRet: 43.11, defaultDd: -19.3, color: '#60a5fa' },
-        { id: 'XCB', key: 'xcb', defaultCategory: 'Canadian corporate bond index', defaultRet: -2.05, defaultDd: -4.9, color: '#cbd5e1' }
+        { id: 'XEQT', key: 'xeqt', defaultCategory: '100% All-Equity passive blend', defaultRet: 43.81, defaultDd: -15.3, color: ktColor('series-3') },
+        { id: 'XBAL', key: 'xbal', defaultCategory: '60% Stocks / 40% Bonds benchmark', defaultRet: 22.30, defaultDd: -9.9, color: ktColor('series-4') },
+        { id: 'VFV', key: 'vfv', defaultCategory: '100% US Mega-cap equity (CAD)', defaultRet: 43.11, defaultDd: -19.3, color: ktColor('series-2') },
+        { id: 'XCB', key: 'xcb', defaultCategory: 'Canadian corporate bond index', defaultRet: -2.05, defaultDd: -4.9, color: ktColor('series-6') }
     ];
 
     benchmarkItems.forEach(item => {
@@ -586,7 +587,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         const sign = ret >= 0 ? '+' : '';
         if (retEl) {
             retEl.textContent = `${sign}${ret.toFixed(1)}%`;
-            retEl.style.color = ret >= 0 ? '#16a34a' : '#cf222e';
+            retEl.style.color = ret >= 0 ? ktColor('success') : ktColor('danger');
         }
         if (subEl) {
             if (data.startPrice && data.currentPrice) {
@@ -604,11 +605,11 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
     const barsContainer = document.getElementById('bench-bars-container');
     if (barsContainer) {
         const series = [
-            { label: 'My Portfolio (Total Growth)', val: growthPct, color: '#1d4ed8', isPortfolio: true },
-            { label: 'S&P 500 CAD (VFV.TO)', val: (bData.VFV?.returnPct !== undefined ? bData.VFV.returnPct : 43.11), color: '#60a5fa' },
-            { label: 'Global Equity (XEQT.TO)', val: (bData.XEQT?.returnPct !== undefined ? bData.XEQT.returnPct : 43.81), color: '#334155' },
-            { label: 'Balanced 60/40 (XBAL.TO)', val: (bData.XBAL?.returnPct !== undefined ? bData.XBAL.returnPct : 22.30), color: '#94a3b8' },
-            { label: 'CDN Corp Bonds (XCB.TO)', val: (bData.XCB?.returnPct !== undefined ? bData.XCB.returnPct : -2.05), color: '#cbd5e1' }
+            { label: 'My Portfolio (Total Growth)', val: growthPct, color: ktColor('series-1'), isPortfolio: true },
+            { label: 'S&P 500 CAD (VFV.TO)', val: (bData.VFV?.returnPct !== undefined ? bData.VFV.returnPct : 43.11), color: ktColor('series-2') },
+            { label: 'Global Equity (XEQT.TO)', val: (bData.XEQT?.returnPct !== undefined ? bData.XEQT.returnPct : 43.81), color: ktColor('series-3') },
+            { label: 'Balanced 60/40 (XBAL.TO)', val: (bData.XBAL?.returnPct !== undefined ? bData.XBAL.returnPct : 22.30), color: ktColor('series-4') },
+            { label: 'CDN Corp Bonds (XCB.TO)', val: (bData.XCB?.returnPct !== undefined ? bData.XCB.returnPct : -2.05), color: ktColor('series-6') }
         ];
 
         const maxVal = Math.max(...series.map(s => Math.max(0, s.val)), 1);
@@ -619,8 +620,8 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
             return `
                 <div>
                     <div class="kt-split kt-fs-xs kt-mb-1" style="font-weight: ${s.isPortfolio ? '800' : '700'};">
-                        <span style="color: ${s.isPortfolio ? '#0969da' : '#1f2328'};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
-                        <span class="kt-fw-heavy" style="color: ${s.val >= 0 ? '#16a34a' : '#cf222e'};">${valSign}${s.val.toFixed(1)}%</span>
+                        <span style="color: ${s.isPortfolio ? ktColor('series-1') : ktColor('text')};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
+                        <span class="kt-fw-heavy" style="color: ${s.val >= 0 ? ktColor('success') : ktColor('danger')};">${valSign}${s.val.toFixed(1)}%</span>
                     </div>
                     <div class="kt-progress" style="--kt-progress-h: 10px;">
                         <div class="kt-progress__bar" style="width: ${widthPct.toFixed(1)}%; --kt-progress-color: ${s.color};"></div>
@@ -721,7 +722,7 @@ function renderPurchasingPower() {
     const rSign = pp.realGain >= 0 ? '+' : '';
     if (realGainEl) {
         realGainEl.textContent = `${rSign}${formatCurrency(pp.realGain, 'CAD')}`;
-        realGainEl.style.color = pp.realGain >= 0 ? '#16a34a' : '#cf222e';
+        realGainEl.style.color = pp.realGain >= 0 ? ktColor('success') : ktColor('danger');
     }
     if (realGainSubEl) realGainSubEl.textContent = `${rSign}${pp.realGainPct.toFixed(1)}% real expansion above inflation`;
 
@@ -941,15 +942,15 @@ function toggleRolling52Xeqt() {
 
     if (btn && check) {
         if (rolling52ShowXeqt) {
-            btn.style.background = '#f0fdf4';
-            btn.style.borderColor = '#16a34a';
-            btn.style.color = '#16a34a';
-            check.style.background = '#16a34a';
+            btn.style.background = ktColor('accent-soft');
+            btn.style.borderColor = ktColor('accent');
+            btn.style.color = ktColor('accent');
+            check.style.background = ktColor('chart-reference');
         } else {
-            btn.style.background = '#f8fafc';
-            btn.style.borderColor = '#d0d7de';
-            btn.style.color = '#64748b';
-            check.style.background = '#94a3b8';
+            btn.style.background = ktColor('surface-hover');
+            btn.style.borderColor = ktColor('border-strong');
+            btn.style.color = ktColor('text-muted');
+            check.style.background = ktColor('border-strong');
         }
     }
     if (banner) {
@@ -1091,17 +1092,17 @@ function renderRolling52Charts() {
     if (bestDates) bestDates.textContent = `${formatDate(getWinBaselineDate(best))} – ${formatDate(best.endDate)}`;
     if (bestProgPct) {
         bestProgPct.textContent = `${signOf(best.pctCAD)}${best.pctCAD.toFixed(2)}%`;
-        bestProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#16a34a' : '#1f2328';
+        bestProgPct.style.color = (rolling52OverlayMetric === 'pct') ? ktColor('success') : ktColor('text');
     }
     if (bestProgUsdPct) bestProgUsdPct.textContent = `${signOf(best.pctUSD)}${best.pctUSD.toFixed(2)}% USD`;
     if (bestProgCad) {
         bestProgCad.textContent = `${signOf(best.gainCAD)}${formatCurrency(best.gainCAD, 'CAD')}`;
-        bestProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#16a34a' : '#1f2328';
+        bestProgCad.style.color = (rolling52OverlayMetric === 'cad') ? ktColor('success') : ktColor('text');
     }
     if (bestStartEndCad) bestStartEndCad.innerHTML = `${formatCurrency(best.startValCAD, 'CAD')} &rarr; ${formatCurrency(best.endValCAD, 'CAD')}`;
     if (bestProgUsd) {
         bestProgUsd.textContent = `${signOf(best.gainUSD)}${formatCurrency(best.gainUSD, 'USD')}`;
-        bestProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#16a34a' : '#1f2328';
+        bestProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? ktColor('success') : ktColor('text');
     }
     if (bestStartEndUsd) bestStartEndUsd.innerHTML = `${formatCurrency(best.startValUSD, 'USD')} &rarr; ${formatCurrency(best.endValUSD, 'USD')}`;
     if (bestPace) bestPace.textContent = `Avg: +${formatCurrency(best.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(best.avgWeeklyGainUSD, 'USD')} USD)`;
@@ -1124,17 +1125,17 @@ function renderRolling52Charts() {
         if (currentDates) currentDates.textContent = `${formatDate(getWinBaselineDate(current))} – ${formatDate(current.endDate)}`;
         if (currentProgPct) {
             currentProgPct.textContent = `${signOf(current.pctCAD)}${current.pctCAD.toFixed(2)}%`;
-            currentProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '' : '#1f2328';
+            currentProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '' : ktColor('text');
         }
         if (currentProgUsdPct) currentProgUsdPct.textContent = `${signOf(current.pctUSD)}${current.pctUSD.toFixed(2)}% USD`;
         if (currentProgCad) {
             currentProgCad.textContent = `${signOf(current.gainCAD)}${formatCurrency(current.gainCAD, 'CAD')}`;
-            currentProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '' : '#1f2328';
+            currentProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '' : ktColor('text');
         }
         if (currentStartEndCad) currentStartEndCad.innerHTML = `${formatCurrency(current.startValCAD, 'CAD')} &rarr; ${formatCurrency(current.endValCAD, 'CAD')}`;
         if (currentProgUsd) {
             currentProgUsd.textContent = `${signOf(current.gainUSD)}${formatCurrency(current.gainUSD, 'USD')}`;
-            currentProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '' : '#1f2328';
+            currentProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '' : ktColor('text');
         }
         if (currentStartEndUsd) currentStartEndUsd.innerHTML = `${formatCurrency(current.startValUSD, 'USD')} &rarr; ${formatCurrency(current.endValUSD, 'USD')}`;
         if (currentPace) currentPace.textContent = `Avg: +${formatCurrency(current.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(current.avgWeeklyGainUSD, 'USD')} USD)`;
@@ -1157,17 +1158,17 @@ function renderRolling52Charts() {
     if (worstDates) worstDates.textContent = `${formatDate(getWinBaselineDate(worst))} – ${formatDate(worst.endDate)}`;
     if (worstProgPct) {
         worstProgPct.textContent = `${signOf(worst.pctCAD)}${worst.pctCAD.toFixed(2)}%`;
-        worstProgPct.style.color = (rolling52OverlayMetric === 'pct') ? '#cf222e' : '#1f2328';
+        worstProgPct.style.color = (rolling52OverlayMetric === 'pct') ? ktColor('danger') : ktColor('text');
     }
     if (worstProgUsdPct) worstProgUsdPct.textContent = `${signOf(worst.pctUSD)}${worst.pctUSD.toFixed(2)}% USD`;
     if (worstProgCad) {
         worstProgCad.textContent = `${signOf(worst.gainCAD)}${formatCurrency(worst.gainCAD, 'CAD')}`;
-        worstProgCad.style.color = (rolling52OverlayMetric === 'cad') ? '#cf222e' : '#1f2328';
+        worstProgCad.style.color = (rolling52OverlayMetric === 'cad') ? ktColor('danger') : ktColor('text');
     }
     if (worstStartEndCad) worstStartEndCad.innerHTML = `${formatCurrency(worst.startValCAD, 'CAD')} &rarr; ${formatCurrency(worst.endValCAD, 'CAD')}`;
     if (worstProgUsd) {
         worstProgUsd.textContent = `${signOf(worst.gainUSD)}${formatCurrency(worst.gainUSD, 'USD')}`;
-        worstProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? '#cf222e' : '#1f2328';
+        worstProgUsd.style.color = (rolling52OverlayMetric === 'usd') ? ktColor('danger') : ktColor('text');
     }
     if (worstStartEndUsd) worstStartEndUsd.innerHTML = `${formatCurrency(worst.startValUSD, 'USD')} &rarr; ${formatCurrency(worst.endValUSD, 'USD')}`;
     if (worstPace) worstPace.textContent = `Avg: +${formatCurrency(worst.avgWeeklyGainCAD, 'CAD')} / wk (+${formatCurrency(worst.avgWeeklyGainUSD, 'USD')} USD)`;
@@ -1332,7 +1333,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         const val = minY + (i / ySteps) * rangeY;
         const y = getY(val);
         const isZero = Math.abs(val) < 0.01;
-        const strokeColor = isZero ? '#64748b' : '#e2e8f0';
+        const strokeColor = isZero ? ktColor('chart-axis') : ktColor('chart-grid');
         const strokeWidth = isZero ? '1.5' : '1';
         const strokeDash = isZero ? '' : '3 3';
         let label = '';
@@ -1351,7 +1352,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         }
         gridLinesHtml += `
             <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${strokeDash}" />
-            <text x="${padding.left - 10}" y="${y + 4}" fill="${isZero ? '#1e293b' : '#8c959f'}" font-size="11" font-weight="${isZero ? '700' : '400'}" text-anchor="end">${label}</text>
+            <text x="${padding.left - 10}" y="${y + 4}" fill="${isZero ? ktColor('text') : ktColor('chart-label')}" font-size="11" font-weight="${isZero ? '700' : '400'}" text-anchor="end">${label}</text>
         `;
     }
 
@@ -1362,8 +1363,8 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         const x = getX(w);
         const label = w === 0 ? 'W0 (Start)' : (w === 52 ? 'W52 (End)' : `Week ${w}`);
         xTicksHtml += `
-            <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x}" y="${height - 10}" fill="#64748b" font-size="11" font-weight="600" text-anchor="middle">${label}</text>
+            <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+            <text x="${x}" y="${height - 10}" fill="${ktColor('chart-label')}" font-size="11" font-weight="600" text-anchor="middle">${label}</text>
         `;
     });
 
@@ -1409,17 +1410,17 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
     // drawing dashed red on top of solid blue creates an alternating red/blue dashed pattern so both are distinctly visible!
     if (showBest) {
         pathsHtml += `
-            <path d="${bestLineD}" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${bestLineD}" fill="none" stroke="${ktColor('success')}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         `;
     }
     if (showCurrent && currentLineD) {
         pathsHtml += `
-            <path d="${currentLineD}" fill="none" stroke="#0969da" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${currentLineD}" fill="none" stroke="${ktColor('series-1')}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         `;
     }
     if (showWorst) {
         pathsHtml += `
-            <path d="${worstLineD}" fill="none" stroke="#cf222e" stroke-width="2.5" stroke-dasharray="6,6" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${worstLineD}" fill="none" stroke="${ktColor('danger')}" stroke-width="2.5" stroke-dasharray="6,6" stroke-linecap="round" stroke-linejoin="round" />
         `;
     }
 
@@ -1427,29 +1428,29 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
         <svg viewBox="0 0 ${width} ${height}" class="svg-chart" style="width: 100%; max-height: 260px; display: block; overflow: visible;">
             <defs>
                 <linearGradient id="r52BestGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#16a34a" stop-opacity="0.20" />
-                    <stop offset="100%" stop-color="#16a34a" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="${ktColor('success')}" stop-opacity="0.20" />
+                    <stop offset="100%" stop-color="${ktColor('success')}" stop-opacity="0.0" />
                 </linearGradient>
                 <linearGradient id="r52WorstGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#cf222e" stop-opacity="0.15" />
-                    <stop offset="100%" stop-color="#cf222e" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="${ktColor('danger')}" stop-opacity="0.15" />
+                    <stop offset="100%" stop-color="${ktColor('danger')}" stop-opacity="0.0" />
                 </linearGradient>
                 <linearGradient id="r52CurrentGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0969da" stop-opacity="0.22" />
-                    <stop offset="100%" stop-color="#0969da" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="${ktColor('series-1')}" stop-opacity="0.22" />
+                    <stop offset="100%" stop-color="${ktColor('series-1')}" stop-opacity="0.0" />
                 </linearGradient>
             </defs>
             ${gridLinesHtml}
             ${xTicksHtml}
             ${pathsHtml}
             <!-- Vertical Crosshair Line -->
-            <line id="r52-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <line id="r52-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
             <!-- Worst Hover Dot (rendered first so inner dot sits on top if overlapping) -->
-            <circle id="r52-dot-worst" r="5" fill="#cf222e" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="r52-dot-worst" r="5" fill="${ktColor('danger')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Best Hover Dot -->
-            <circle id="r52-dot-best" r="5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="r52-dot-best" r="5" fill="${ktColor('success')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Current Hover Dot -->
-            <circle id="r52-dot-current" r="5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="r52-dot-current" r="5" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Mouse Tracking Overlay -->
             <rect id="r52-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair;" />
         </svg>
@@ -1577,7 +1578,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 <div>
                     <div class="kt-readout__row">
                         <span class="kt-cluster">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #0969da;"></span>
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--kt-series-1);"></span>
                             <strong>Current 52W:</strong>
                         </span>
                         <strong class="kt-fs-base">${fmtPrimary(currentPt)}</strong>
@@ -1589,7 +1590,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 <div>
                     <div class="kt-readout__row">
                         <span class="kt-cluster">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--kt-success);"></span>
                             <strong class="kt-text-success">Best 52W:</strong>
                         </span>
                         <strong class="kt-text-success kt-fs-base">${fmtPrimary(bestPt)}</strong>
@@ -1601,7 +1602,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 <div>
                     <div class="kt-readout__row">
                         <span class="kt-cluster">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cf222e;"></span>
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--kt-danger);"></span>
                             <strong class="kt-text-danger">Worst 52W:</strong>
                         </span>
                         <strong class="kt-text-danger kt-fs-base">${fmtPrimary(worstPt)}</strong>
@@ -1770,8 +1771,8 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         const spread = avgVal - avgXeqtVal;
         statSpread.textContent = `${signOf(spread)}${metric === 'pct' ? spread.toFixed(1) + '%' : formatCurrency(spread, metric === 'usd' ? 'USD' : 'CAD')}`;
         if (spreadWrap) {
-            spreadWrap.style.color = spread >= 0 ? '#15803d' : '#b91c1c';
-            spreadWrap.style.background = spread >= 0 ? '#dcfce7' : '#fee2e2';
+            spreadWrap.style.color = spread >= 0 ? ktColor('success') : ktColor('danger');
+            spreadWrap.style.background = spread >= 0 ? ktColor('success-soft') : ktColor('danger-soft');
         }
     }
 
@@ -1817,7 +1818,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         const val = minY + (i / ySteps) * rangeY;
         const y = getY(val);
         const isZero = Math.abs(val) < 0.001;
-        const strokeColor = isZero ? '#475569' : '#e2e8f0';
+        const strokeColor = isZero ? ktColor('chart-axis') : ktColor('chart-grid');
         const strokeWidth = isZero ? '1.5' : '1';
         const strokeDash = isZero ? '' : '3,3';
         let label = '';
@@ -1836,7 +1837,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         }
         gridLinesHtml += `
             <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeWidth}" stroke-dasharray="${strokeDash}" />
-            <text x="${padding.left - 10}" y="${y + 4}" fill="${isZero ? '#1e293b' : '#8c959f'}" font-size="11" font-weight="${isZero ? '700' : '400'}" text-anchor="end">${label}</text>
+            <text x="${padding.left - 10}" y="${y + 4}" fill="${isZero ? ktColor('text') : ktColor('chart-label')}" font-size="11" font-weight="${isZero ? '700' : '400'}" text-anchor="end">${label}</text>
         `;
     }
 
@@ -1853,8 +1854,8 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         const x = getX(idx);
         const dateStr = item.endDate ? fmt(item.endDate) : `W${item.endWeek}`;
         xTicksHtml += `
-            <line x1="${x}" y1="${padding.top + plotH}" x2="${x}" y2="${padding.top + plotH + 5}" stroke="#cbd5e1" stroke-width="1" />
-            <text x="${x}" y="${height - 10}" fill="#64748b" font-size="11" font-weight="600" text-anchor="middle">${dateStr}</text>
+            <line x1="${x}" y1="${padding.top + plotH}" x2="${x}" y2="${padding.top + plotH + 5}" stroke="${ktColor('chart-axis')}" stroke-width="1" />
+            <text x="${x}" y="${height - 10}" fill="${ktColor('chart-label')}" font-size="11" font-weight="600" text-anchor="middle">${dateStr}</text>
         `;
     });
 
@@ -1866,8 +1867,8 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
     // Portfolio Average reference line
     const avgY = getY(avgVal);
     const avgLineHtml = `
-        <line x1="${padding.left}" y1="${avgY}" x2="${width - padding.right}" y2="${avgY}" stroke="#0969da" stroke-width="1.75" stroke-dasharray="4,4" />
-        <text x="${width - padding.right}" y="${avgY - 6}" fill="#0969da" font-size="11" font-weight="700" text-anchor="end">Portfolio Avg: ${formatMetricVal(avgVal)}</text>
+        <line x1="${padding.left}" y1="${avgY}" x2="${width - padding.right}" y2="${avgY}" stroke="${ktColor('series-1')}" stroke-width="1.75" stroke-dasharray="4,4" />
+        <text x="${width - padding.right}" y="${avgY - 6}" fill="${ktColor('series-1')}" font-size="11" font-weight="700" text-anchor="end">Portfolio Avg: ${formatMetricVal(avgVal)}</text>
     `;
 
     // 5b. Build Paths for XEQT Benchmark Overlay
@@ -1882,10 +1883,10 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
             <!-- XEQT Area -->
             <path d="${xeqtAreaD}" fill="url(#r52XeqtGrad)" opacity="0.30" />
             <!-- XEQT Line -->
-            <path d="${xeqtLineD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="5,3" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${xeqtLineD}" fill="none" stroke="${ktColor('chart-reference')}" stroke-width="2.2" stroke-dasharray="5,3" stroke-linecap="round" stroke-linejoin="round" />
             <!-- XEQT Average Reference Line -->
-            <line x1="${padding.left}" y1="${avgXeqtY}" x2="${width - padding.right}" y2="${avgXeqtY}" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="3,3" />
-            <text x="${padding.left + 8}" y="${avgXeqtY - 5}" fill="#16a34a" font-size="10.5" font-weight="700">XEQT Avg: ${formatMetricVal(avgXeqtVal)}</text>
+            <line x1="${padding.left}" y1="${avgXeqtY}" x2="${width - padding.right}" y2="${avgXeqtY}" stroke="${ktColor('chart-reference')}" stroke-width="1.5" stroke-dasharray="3,3" />
+            <text x="${padding.left + 8}" y="${avgXeqtY - 5}" fill="${ktColor('chart-reference')}" font-size="10.5" font-weight="700">XEQT Avg: ${formatMetricVal(avgXeqtVal)}</text>
         `;
     }
 
@@ -1899,15 +1900,15 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
 
     const markersHtml = `
         <!-- Peak Dot -->
-        <circle cx="${peakX}" cy="${peakY}" r="5" fill="#16a34a" stroke="#ffffff" stroke-width="2">
+        <circle cx="${peakX}" cy="${peakY}" r="5" fill="${ktColor('success')}" stroke="${ktColor('surface')}" stroke-width="2">
             <title>Peak 52W: ${formatMetricVal(maxItem.val)} (Week ${maxItem.endWeek})</title>
         </circle>
         <!-- Lowest Dot -->
-        <circle cx="${lowX}" cy="${lowY}" r="5" fill="#cf222e" stroke="#ffffff" stroke-width="2">
+        <circle cx="${lowX}" cy="${lowY}" r="5" fill="${ktColor('danger')}" stroke="${ktColor('surface')}" stroke-width="2">
             <title>Lowest 52W: ${formatMetricVal(minItem.val)} (Week ${minItem.endWeek})</title>
         </circle>
         <!-- Current Dot -->
-        <circle cx="${curX}" cy="${curY}" r="5.5" fill="#0969da" stroke="#ffffff" stroke-width="2.5">
+        <circle cx="${curX}" cy="${curY}" r="5.5" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2.5">
             <title>Current 52W: ${formatMetricVal(currentItem.val)} (Week ${currentItem.endWeek})</title>
         </circle>
     `;
@@ -1916,12 +1917,12 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         <svg viewBox="0 0 ${width} ${height}" style="width: 100%; height: 100%; display: block; overflow: visible;" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <linearGradient id="r52TimelineGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#0969da" stop-opacity="0.30" />
-                    <stop offset="100%" stop-color="#0969da" stop-opacity="0.02" />
+                    <stop offset="0%" stop-color="${ktColor('series-1')}" stop-opacity="0.30" />
+                    <stop offset="100%" stop-color="${ktColor('series-1')}" stop-opacity="0.02" />
                 </linearGradient>
                 <linearGradient id="r52XeqtGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stop-color="#16a34a" stop-opacity="0.25" />
-                    <stop offset="100%" stop-color="#16a34a" stop-opacity="0.02" />
+                    <stop offset="0%" stop-color="${ktColor('success')}" stop-opacity="0.25" />
+                    <stop offset="100%" stop-color="${ktColor('success')}" stop-opacity="0.02" />
                 </linearGradient>
             </defs>
 
@@ -1937,15 +1938,15 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
 
             <!-- Portfolio Area & Line -->
             <path d="${areaD}" fill="url(#r52TimelineGrad)" />
-            <path d="${lineD}" fill="none" stroke="#0969da" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${lineD}" fill="none" stroke="${ktColor('series-1')}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
 
             <!-- Key Markers -->
             ${markersHtml}
 
             <!-- Crosshair Cursor -->
-            <line id="r52-tl-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
-            <circle id="r52-tl-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2.5" style="display: none; pointer-events: none;" />
-            <circle id="r52-tl-xeqt-dot" r="5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <line id="r52-tl-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <circle id="r52-tl-dot" r="6" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2.5" style="display: none; pointer-events: none;" />
+            <circle id="r52-tl-xeqt-dot" r="5" fill="${ktColor('chart-reference')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
 
             <!-- Mouse Overlay -->
             <rect id="r52-tl-mouse" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair;" />
@@ -2015,9 +2016,9 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
         const isLatest = idx === N - 1;
 
         let tag = '';
-        if (isPeak) tag = '<span class="kt-badge" style="background: #16a34a; color: white;">PEAK 52W</span>';
-        else if (isLowest) tag = '<span class="kt-badge" style="background: #cf222e; color: white;">LOWEST 52W</span>';
-        else if (isLatest) tag = '<span class="kt-badge" style="background: #0969da; color: white;">CURRENT</span>';
+        if (isPeak) tag = '<span class="kt-badge kt-badge--soft-success">PEAK 52W</span>';
+        else if (isLowest) tag = '<span class="kt-badge kt-badge--soft-danger">LOWEST 52W</span>';
+        else if (isLatest) tag = '<span class="kt-badge kt-badge--soft-info">CURRENT</span>';
         else tag = isHover ? '<span class="kt-badge">INSPECTING</span>' : '<span class="kt-badge">WINDOW</span>';
 
         const diff = xeqtItem ? (item.val - xeqtItem.val) : 0;
@@ -2041,10 +2042,10 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
             </div>
             ${rolling52ShowXeqt && xeqtItem ? `
             <div class="kt-readout__row">
-                <span class="kt-text-success kt-fw-bold">● XEQT:</span>
-                <strong class="kt-text-success">${formatMetricVal(xeqtItem.val)}</strong>
+                <span class="kt-fw-bold">○ XEQT:</span>
+                <strong>${formatMetricVal(xeqtItem.val)}</strong>
             </div>
-            <div class="kt-readout__row kt-fw-bold" style="color: ${diff >= 0 ? '#16a34a' : '#cf222e'};">
+            <div class="kt-readout__row kt-fw-bold" style="color: ${diff >= 0 ? ktColor('success') : ktColor('danger')};">
                 <span>Spread vs XEQT:</span>
                 <span>${signDiff}${metric === 'pct' ? diff.toFixed(1) + '%' : formatCurrency(diff, metric === 'usd' ? 'USD' : 'CAD')}</span>
             </div>
@@ -2329,8 +2330,8 @@ function renderAnnualSummary() {
 
     summaries.forEach(s => {
         const sign = s.netChange >= 0 ? '+' : '';
-        const color = s.netChange >= 0 ? '#1a7f37' : '#cf222e';
-        const ddColor = s.maxDrawdownVal < 0 ? '#cf222e' : '#1a7f37';
+        const color = s.netChange >= 0 ? ktColor('success') : ktColor('danger');
+        const ddColor = s.maxDrawdownVal < 0 ? ktColor('danger') : ktColor('success');
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -2437,7 +2438,7 @@ function renderCrisisStressTest() {
             desc: 'Global equity plunge with safe-haven flight into bonds and gold.',
             shocks: { us: -0.50, can: -0.45, intl: -0.52, em: -0.54, fixed: +0.08, gold: +0.25, crypto: -0.65 },
             recovery: '38 months to recover peak',
-            color: '#cf222e'
+            color: ktColor('danger')
         },
         {
             title: '2020 COVID Flash Crash',
@@ -2445,7 +2446,7 @@ function renderCrisisStressTest() {
             desc: 'Fastest 30% drop in history followed by rapid stimulus rebound.',
             shocks: { us: -0.34, can: -0.37, intl: -0.32, em: -0.31, fixed: +0.03, gold: +0.04, crypto: -0.45 },
             recovery: '6 months to recover peak',
-            color: '#cf222e'
+            color: ktColor('danger')
         },
         {
             title: '2022 Inflation & Rate Hike Shock',
@@ -2453,7 +2454,7 @@ function renderCrisisStressTest() {
             desc: 'Simultaneous equity correction and rare bond duration drawdown.',
             shocks: { us: -0.19, can: -0.12, intl: -0.16, em: -0.22, fixed: -0.12, gold: -0.01, crypto: -0.65 },
             recovery: '14 months to recover peak',
-            color: '#cf222e'
+            color: ktColor('danger')
         },
         {
             title: '2000 Dot-Com Tech Bubble',
@@ -2461,7 +2462,7 @@ function renderCrisisStressTest() {
             desc: 'Severe tech and growth repricing; strong resilience in value and bonds.',
             shocks: { us: -0.45, can: -0.28, intl: -0.38, em: -0.35, fixed: +0.15, gold: +0.12, crypto: -0.50 },
             recovery: '48 months to recover peak',
-            color: '#cf222e'
+            color: ktColor('danger')
         }
     ];
 

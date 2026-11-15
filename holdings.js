@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Holdings View Controller
  */
@@ -90,7 +91,7 @@ function updateOverviewCards() {
     if (gainEl && totalBookCost > 0) {
         const sign = totalGainCAD >= 0 ? '+' : '';
         gainEl.textContent = `${sign}${formatCurrency(totalGainCAD, 'CAD')}`;
-        gainEl.style.color = totalGainCAD >= 0 ? '#166534' : '#cf222e';
+        gainEl.style.color = totalGainCAD >= 0 ? ktColor('success-text') : ktColor('danger');
         gainSubEl.textContent = `${sign}${totalGainPct.toFixed(2)}% on ${formatCurrency(totalBookCost)} cost`;
     } else if (gainEl) {
         gainEl.textContent = '$0.00';
@@ -276,7 +277,7 @@ function renderTable(items, totalCAD) {
         let gainHtml = '<span class="kt-text-muted">-</span>';
         if (totalCost > 0 && avgCost > 0) {
             const sign = gainCAD >= 0 ? '+' : '';
-            const color = gainCAD >= 0 ? '#166534' : '#cf222e';
+            const color = gainCAD >= 0 ? ktColor('success-text') : ktColor('danger');
             gainHtml = `
                 <div class="kt-fw-bold" style="color: ${color};">${sign}${formatCurrency(gainCAD)}</div>
                 <div class="kt-fs-2xs" style="color: ${color};">${sign}${gainPct.toFixed(2)}%</div>
@@ -319,7 +320,7 @@ function renderTable(items, totalCAD) {
                 <td class="kt-align-right">
                     <div>${weightPct.toFixed(2)}%</div>
                     <div class="kt-progress kt-mt-1" style="height: 4px;" title="Weight in portfolio">
-                        <div style="width: ${weightPct}%; background-color: #0969da; height: 100%;"></div>
+                        <div style="width: ${weightPct}%; background-color: var(--kt-series-1); height: 100%;"></div>
                     </div>
                 </td>
                 <td>
@@ -358,8 +359,8 @@ function renderCards(items, totalCAD) {
         let gainBadge = '';
         if (totalCost > 0 && avgCost > 0) {
             const sign = gainCAD >= 0 ? '+' : '';
-            const color = gainCAD >= 0 ? '#166534' : '#cf222e';
-            const bg = gainCAD >= 0 ? '#dcfce7' : '#fee2e2';
+            const color = gainCAD >= 0 ? ktColor('success-text') : ktColor('danger');
+            const bg = gainCAD >= 0 ? ktColor('success-soft') : ktColor('danger-soft');
             gainBadge = `
                 <span class="kt-badge kt-fw-bold" style="background: ${bg}; color: ${color};">
                     ${sign}${formatCurrency(gainCAD)} (${sign}${gainPct.toFixed(1)}%)
@@ -495,18 +496,18 @@ function showHoldingModal(id) {
     const gainPct = holding.unrealizedGainPct !== undefined ? holding.unrealizedGainPct : (totalCost > 0 ? (gainCAD / totalCost) * 100 : 0);
 
     const sign = gainCAD >= 0 ? '+' : '';
-    const gainColor = gainCAD >= 0 ? '#166534' : '#cf222e';
+    const gainColor = gainCAD >= 0 ? ktColor('success-text') : ktColor('danger');
 
     // Breakdown segments
     const alloc = holding.allocation || {};
     const categories = [
-        { label: 'US Equities', value: alloc.us || 0, color: '#1d4ed8' },
-        { label: 'Canadian Equities', value: alloc.canada || 0, color: '#60a5fa' },
-        { label: 'International Developed', value: alloc.developed || 0, color: '#334155' },
-        { label: 'Emerging Markets', value: alloc.emerging || 0, color: '#94a3b8' },
-        { label: 'Fixed Income / Cash', value: alloc.fixedIncome || 0, color: '#93c5fd' },
-        { label: 'Precious Metals', value: alloc.preciousMetals || 0, color: '#cbd5e1' },
-        { label: 'Cryptocurrency', value: alloc.crypto || 0, color: '#64748b' }
+        { label: 'US Equities', value: alloc.us || 0, color: ktColor('series-1') },
+        { label: 'Canadian Equities', value: alloc.canada || 0, color: ktColor('series-2') },
+        { label: 'International Developed', value: alloc.developed || 0, color: ktColor('series-3') },
+        { label: 'Emerging Markets', value: alloc.emerging || 0, color: ktColor('series-4') },
+        { label: 'Fixed Income / Cash', value: alloc.fixedIncome || 0, color: ktColor('series-5') },
+        { label: 'Precious Metals', value: alloc.preciousMetals || 0, color: ktColor('series-6') },
+        { label: 'Cryptocurrency', value: alloc.crypto || 0, color: ktColor('series-7') }
     ].filter(c => c.value > 0);
 
     const breakdownHtml = categories.map(cat => {
@@ -558,8 +559,8 @@ function showHoldingModal(id) {
             </div>
             <div class="kt-stat kt-stat--inset">
                 <span class="kt-stat__label">Unrealized Gain</span>
-                <span class="kt-stat__value" style="color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${formatCurrency(gainCAD)}` : '-'}</span>
-                <span class="kt-stat__sub" style="color: ${totalCost > 0 ? gainColor : '#64748b'};">${totalCost > 0 ? `${sign}${gainPct.toFixed(2)}% all-time` : 'Awaiting cost'}</span>
+                <span class="kt-stat__value" style="color: ${totalCost > 0 ? gainColor : ktColor('text-muted')};">${totalCost > 0 ? `${sign}${formatCurrency(gainCAD)}` : '-'}</span>
+                <span class="kt-stat__sub" style="color: ${totalCost > 0 ? gainColor : ktColor('text-muted')};">${totalCost > 0 ? `${sign}${gainPct.toFixed(2)}% all-time` : 'Awaiting cost'}</span>
             </div>
         </div>
 

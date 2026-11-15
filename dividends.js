@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Dividends & Passive Cashflow Controller
  * Full Canadian Tax Intelligence:
@@ -736,15 +737,15 @@ function renderTableRows(items) {
             </td>
             <td><span class="kt-badge">${escapeHtml(h.strategy || 'Broad Market')}</span></td>
             <td class="kt-align-right kt-fw-semibold">${formatCurrency(h.sum)}</td>
-            <td class="kt-align-right kt-fw-bold" style="color: ${h.yieldPct > 0 ? '#166534' : '#64748b'};">${h.yieldPct.toFixed(2)}%</td>
-            <td class="kt-align-right kt-fw-bold" style="color: ${yocDisplay > h.yieldPct ? '#166534' : (yocDisplay > 0 ? '#475569' : '#94a3b8')};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${h.yieldPct > 0 ? ktColor('success-text') : ktColor('text-muted')};">${h.yieldPct.toFixed(2)}%</td>
+            <td class="kt-align-right kt-fw-bold" style="color: ${yocDisplay > h.yieldPct ? ktColor('success-text') : (yocDisplay > 0 ? ktColor('text-secondary') : ktColor('text-muted'))};">${yocDisplay > 0 ? `${yocDisplay.toFixed(2)}%` : '-'}</td>
             <td class="kt-align-right kt-text-secondary">${formatCurrency(h.grossAnnualIncome)}</td>
             <td class="kt-align-center">
                 <span class="kt-badge kt-badge--pill ${h.tax.badgeClass}" title="${escapeHtml(h.tax.explanation)}">
                     ${escapeHtml(h.tax.label)}
                 </span>
             </td>
-            <td class="kt-align-right kt-fw-bold" style="color: ${h.taxDragCAD > 0 ? '#dc2626' : '#94a3b8'};">
+            <td class="kt-align-right kt-fw-bold" style="color: ${h.taxDragCAD > 0 ? ktColor('danger') : ktColor('text-muted')};">
                 ${h.taxDragCAD > 0 ? `-${formatCurrency(h.taxDragCAD)}` : '$0.00'}
             </td>
             <td class="kt-align-right kt-fw-heavy kt-text-success">${formatCurrency(h.netAnnualIncome)}</td>

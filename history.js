@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Net Worth History Controller
  */
@@ -106,7 +107,7 @@ function updateStatCards() {
     if (actualReturnEl) {
         const rSign = totalMarketGainsCAD >= 0 ? '+' : '';
         actualReturnEl.textContent = `${rSign}${formatCurrency(totalMarketGainsCAD, 'CAD')}`;
-        actualReturnEl.style.color = totalMarketGainsCAD >= 0 ? '#16a34a' : '#cf222e';
+        actualReturnEl.style.color = totalMarketGainsCAD >= 0 ? ktColor('success') : ktColor('danger');
         const gainPctOfNW = currentCAD > 0 ? (totalMarketGainsCAD / currentCAD) * 100 : 0;
         if (actualReturnPctEl) {
             actualReturnPctEl.textContent = `Open positions • ${gainPctOfNW.toFixed(1)}% of NW`;
@@ -119,7 +120,7 @@ function updateStatCards() {
     if (totalGainEl) {
         const gSign = totalGrowthCAD >= 0 ? '+' : '';
         totalGainEl.textContent = `${gSign}${formatCurrency(totalGrowthCAD, 'CAD')}`;
-        totalGainEl.style.color = totalGrowthCAD >= 0 ? '' : '#cf222e';
+        totalGainEl.style.color = totalGrowthCAD >= 0 ? '' : ktColor('danger');
         if (totalGainPctEl) {
             totalGainPctEl.textContent = `${formatPercent(totalGrowthPct, true)} Growth (contributions + gains)`;
         }
@@ -167,7 +168,7 @@ function renderSavingsVelocity(history, startingCAD, currentCAD) {
     const summaries = typeof computeAnnualSummaries === 'function'
         ? computeAnnualSummaries(history, 'CAD', currentCAD)
         : [];
-    const palette = ['#334155', '#1d4ed8', '#64748b', '#60a5fa', '#94a3b8'];
+    const palette = [ktColor('series-3'), ktColor('series-1'), ktColor('series-7'), ktColor('series-2'), ktColor('series-4')];
 
     const yearData = summaries.map((s, idx) => {
         const label = s.isCurrentYear ? `${s.year} (YTD - ${s.weeks} wks)` : `${s.year} (${s.weeks} wks)`;
@@ -270,23 +271,23 @@ function renderResilienceMetrics(history, currentCAD) {
     if (currDDEl) {
         if (currentDDPct >= -0.01) {
             currDDEl.textContent = '0.00%';
-            currDDEl.style.color = '#16a34a';
+            currDDEl.style.color = ktColor('success');
             if (currDDSubEl) {
                 currDDSubEl.textContent = `At all-time high (${formatCurrency(peak, 'CAD')})`;
             }
             if (athPill) {
                 athPill.innerHTML = '🟢 Sitting at All-Time Peak (0.00% Drawdown)';
-                athPill.style.color = '#16a34a';
+                athPill.style.color = ktColor('success');
             }
         } else {
             currDDEl.textContent = `${currentDDPct.toFixed(2)}%`;
-            currDDEl.style.color = '#cf222e';
+            currDDEl.style.color = ktColor('danger');
             if (currDDSubEl) {
                 currDDSubEl.textContent = `${formatCurrency(currentDD, 'CAD')} below ATH (${formatCurrency(peak, 'CAD')})`;
             }
             if (athPill) {
                 athPill.innerHTML = `⚠️ ${currentDDPct.toFixed(2)}% below All-Time High`;
-                athPill.style.color = '#cf222e';
+                athPill.style.color = ktColor('danger');
             }
         }
     }
@@ -447,8 +448,8 @@ function renderChart(records, currency = 'CAD') {
         const y = getY(val);
         const label = `$${(val / 1000).toFixed(0)}k`;
         gridLinesHtml += `
-            <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-            <text x="${padding.left - 10}" y="${y + 4}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+            <line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="${ktColor('chart-grid')}" stroke-dasharray="3 3" />
+            <text x="${padding.left - 10}" y="${y + 4}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="end">${label}</text>
         `;
     }
 
@@ -461,8 +462,8 @@ function renderChart(records, currency = 'CAD') {
         const x = getX(idx);
         const label = typeof formatMonthShort === 'function' ? formatMonthShort(rec.date) : formatDate(rec.date);
         xTicksHtml += `
-            <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x}" y="${height - 10}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+            <line x1="${x}" y1="${padding.top}" x2="${x}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+            <text x="${x}" y="${height - 10}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="middle">${label}</text>
         `;
     }
 
@@ -483,7 +484,7 @@ function renderChart(records, currency = 'CAD') {
 
     // Interactive hover points
     const hoverPointsHtml = portPoints.map((p, i) => `
-        <circle class="chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+        <circle class="chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="4" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="cursor: pointer;" />
     `).join('');
 
     // XEQT Benchmark line and points
@@ -503,10 +504,10 @@ function renderChart(records, currency = 'CAD') {
         });
         const xeqtLineD = 'M ' + xeqtPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
         xeqtPathHtml = `
-            <path d="${xeqtLineD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${xeqtLineD}" fill="none" stroke="${ktColor('chart-reference')}" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
         `;
         xeqtPointsHtml = xeqtPoints.map((p, i) => `
-            <circle class="hist-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
+            <circle class="hist-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${ktColor('surface')}" stroke="${ktColor('chart-reference')}" stroke-width="1.8" style="cursor: pointer;" />
         `).join('');
     }
 
@@ -514,8 +515,8 @@ function renderChart(records, currency = 'CAD') {
         <svg viewBox="0 0 ${width} ${height}" class="svg-chart" id="networth-svg" style="width: 100%; max-height: 250px; display: block; overflow: visible;">
             <defs>
                 <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#0969da" stop-opacity="0.28" />
-                    <stop offset="100%" stop-color="#0969da" stop-opacity="0.0" />
+                    <stop offset="0%" stop-color="${ktColor('series-1')}" stop-opacity="0.28" />
+                    <stop offset="100%" stop-color="${ktColor('series-1')}" stop-opacity="0.0" />
                 </linearGradient>
             </defs>
 
@@ -525,7 +526,7 @@ function renderChart(records, currency = 'CAD') {
 
             <!-- Area & Line -->
             <path d="${areaPathD}" fill="url(#areaGradient)" />
-            <path d="${linePathD}" fill="none" stroke="#0969da" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${linePathD}" fill="none" stroke="${ktColor('series-1')}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
             ${xeqtPathHtml}
 
             <!-- Hover Interaction Points -->
@@ -533,10 +534,10 @@ function renderChart(records, currency = 'CAD') {
             ${xeqtPointsHtml}
 
             <!-- Vertical Crosshair Line -->
-            <line id="hist-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <line id="hist-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
             <!-- Active Hover Dots -->
-            <circle id="hist-port-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
-            <circle id="hist-xeqt-dot" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="hist-port-dot" r="6" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="hist-xeqt-dot" r="5.5" fill="${ktColor('chart-reference')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Full Tracking Overlay Rect -->
             <rect id="hist-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
@@ -551,24 +552,24 @@ function renderChart(records, currency = 'CAD') {
             const startVal = records[0][valKey];
             const lastItem = xeqtSeries[xeqtSeries.length - 1];
             const spreadSign = lastItem.spreadVal >= 0 ? '+' : '';
-            const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
-            const spreadBg = lastItem.spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const spreadColor = lastItem.spreadVal >= 0 ? ktColor('success') : ktColor('danger');
+            const spreadBg = lastItem.spreadVal >= 0 ? 'var(--kt-success-soft)' : 'var(--kt-danger-soft)';
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span class="kt-legend__swatch" style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
+                    <span class="kt-legend__swatch" style="display: inline-block; width: 12px; height: 3px; background: var(--kt-series-1); border-radius: 2px;"></span>
                     <strong class="kt-text-primary">Total Net Worth (Portfolio)</strong>
                 </div>
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
+                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed var(--kt-chart-reference);"></span>
+                    <strong>XEQT Benchmark (${currency})</strong> (Simulated from ${formatCurrency(startVal, currency)})
                 </div>
-                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
+                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, ${spreadColor} 20%, transparent);">
                     Spread: ${spreadSign}${formatCurrency(lastItem.spreadVal, currency)} (${spreadSign}${lastItem.spreadPct.toFixed(2)}%)
                 </div>
             `;
         } else {
             legendEl.innerHTML = `
-                <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: var(--kt-series-1);"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
             `;
         }
     }
@@ -608,7 +609,7 @@ function renderChart(records, currency = 'CAD') {
         const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
         const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
         const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
-        const changeColor = weeklyChangeVal >= 0 ? '#16a34a' : '#cf222e';
+        const changeColor = weeklyChangeVal >= 0 ? ktColor('success') : ktColor('danger');
 
         let xeqtSection = '';
         if (showXeqt && xeqtSeries[idx]) {
@@ -617,19 +618,19 @@ function renderChart(records, currency = 'CAD') {
             const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
             const portRetStr = `${x.portfolioReturnPct >= 0 ? '+' : ''}${x.portfolioReturnPct.toFixed(2)}%`;
             const spreadSign = x.spreadVal >= 0 ? '+' : '';
-            const spreadColor = x.spreadVal >= 0 ? '#16a34a' : '#cf222e';
+            const spreadColor = x.spreadVal >= 0 ? ktColor('success') : ktColor('danger');
             const spreadValStr = `${spreadSign}${formatCurrency(x.spreadVal, currency)}`;
             const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
             xeqtSection = `
                 <div class="kt-readout__section">
                     <div class="kt-split kt-mb-0">
-                        <span class="kt-text-success kt-fw-bold">🟢 XEQT Benchmark:</span>
-                        <strong class="kt-text-success">${xeqtValStr}</strong>
+                        <span class="kt-fw-bold">XEQT Benchmark:</span>
+                        <strong>${xeqtValStr}</strong>
                     </div>
                     <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong>${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                         <span>Spread:</span>

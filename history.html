@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Net Worth History</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -58,7 +58,7 @@
                     <span class="kt-stat__sub" id="hist-total-contributions-sub">Added since Week 1</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="hist-actual-return" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value" id="hist-actual-return" style="color: var(--kt-success);">+$0.00</span>
                     <span class="kt-stat__label">Current Unrealized Gains</span>
                     <span class="kt-stat__sub" id="hist-actual-return-pct">Open positions</span>
                 </div>
@@ -96,14 +96,14 @@
                     </span>
                 </div>
                 <div class="kt-split kt-fs-xs kt-fw-semibold kt-mb-1 kt-text-secondary">
-                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #0969da;"></span><span id="hist-bar-label-starting">Starting Baseline: $0.00 (0.0%)</span></span>
-                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #334155;"></span><span id="hist-bar-label-savings">Contributions &amp; Realized: +$0.00 (0.0%)</span></span>
-                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #16a34a;"></span><span class="kt-text-success" id="hist-bar-label-gains">Current Unrealized Gains: +$0.00 (0.0%)</span></span>
+                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span><span id="hist-bar-label-starting">Starting Baseline: $0.00 (0.0%)</span></span>
+                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-3);"></span><span id="hist-bar-label-savings">Contributions &amp; Realized: +$0.00 (0.0%)</span></span>
+                    <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-success);"></span><span class="kt-text-success" id="hist-bar-label-gains">Current Unrealized Gains: +$0.00 (0.0%)</span></span>
                 </div>
                 <div style="width: 100%; height: 14px; border-radius: 6px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
-                    <div id="hist-bar-starting" style="background: #0969da; height: 100%; width: 50%;" title="Starting Baseline"></div>
-                    <div id="hist-bar-savings" style="background: #334155; height: 100%; width: 35%;" title="Contributions &amp; Realized Growth"></div>
-                    <div id="hist-bar-gains" style="background: #16a34a; height: 100%; width: 15%;" title="Current Unrealized Gains"></div>
+                    <div id="hist-bar-starting" style="background: var(--kt-series-1); height: 100%; width: 50%;" title="Starting Baseline"></div>
+                    <div id="hist-bar-savings" style="background: var(--kt-series-3); height: 100%; width: 35%;" title="Contributions &amp; Realized Growth"></div>
+                    <div id="hist-bar-gains" style="background: var(--kt-success); height: 100%; width: 15%;" title="Current Unrealized Gains"></div>
                 </div>
             </div>
 
@@ -143,8 +143,8 @@
                         <span id="chart-subtitle" class="kt-badge kt-badge--pill kt-ml-auto">-</span>
                     </div>
                     <div>
-                        <label class="kt-cluster kt-fs-sm kt-fw-bold kt-text-success" style="cursor: pointer; user-select: none; background: rgba(22, 163, 74, 0.08); padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.25);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
-                            <input type="checkbox" id="hist-overlay-xeqt" onchange="toggleHistXeqtOverlay(this.checked)" style="accent-color: #16a34a; cursor: pointer; width: 14px; height: 14px;">
+                        <label class="kt-cluster kt-fs-sm kt-fw-bold" style="cursor: pointer; user-select: none; background: var(--kt-surface-hover); padding: 4px 10px; border-radius: 6px; border: 1px solid var(--kt-border-strong);" title="Compare your portfolio growth with holding 100% XEQT over the selected timeframe">
+                            <input type="checkbox" id="hist-overlay-xeqt" onchange="toggleHistXeqtOverlay(this.checked)" style="accent-color: var(--kt-accent); cursor: pointer; width: 14px; height: 14px;">
                             Overlay XEQT
                         </label>
                     </div>
@@ -157,7 +157,7 @@
                             <div id="chart-tooltip" class="chart-tooltip"></div>
                         </div>
                         <div class="kt-legend kt-mt-2" id="chart-legend">
-                            <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: #0969da;"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
+                            <div class="kt-legend__item"><span class="kt-legend__swatch" style="background: var(--kt-series-1);"></span> Total Net Worth &bull; Hover any data point to inspect exact asset breakdown</div>
                         </div>
                     </div>
                     <div class="kt-readout" id="hist-chart-info-card">
@@ -191,7 +191,7 @@
                     <h3 class="kt-card__title kt-m-0">
                         🛡️ Historical Pullback &amp; Downside Resilience
                     </h3>
-                    <span class="kt-fs-sm kt-fw-bold" style="color: #16a34a;" id="resilience-ath-pill">
+                    <span class="kt-fs-sm kt-fw-bold" style="color: var(--kt-success);" id="resilience-ath-pill">
                         🟢 Sitting at All-Time Peak (0.00% Drawdown)
                     </span>
                 </div>
@@ -202,7 +202,7 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
                     <div class="kt-card kt-card--padded">
                         <div class="kt-eyebrow kt-text-success">Current Drawdown</div>
-                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="resilience-current-dd" style="color: #16a34a;">0.00%</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1 kt-mb-1" id="resilience-current-dd" style="color: var(--kt-success);">0.00%</div>
                         <div class="kt-fs-xs kt-text-muted" id="resilience-current-dd-sub">At all-time high ($680,041 CAD)</div>
                     </div>
                     <div class="kt-card kt-card--padded">
@@ -261,7 +261,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="history.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="history.js?v=3.6"></script>
 </body>
 </html>

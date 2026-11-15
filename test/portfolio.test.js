@@ -1341,7 +1341,7 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       assert.ok(mockTitle.textContent.includes('2025 - CAD'), `Title should include 2025 and CAD, got: ${mockTitle.textContent}`);
 
       // Verify SVG contains XEQT dashed path and point markers
-      assert.ok(mockBox.innerHTML.includes('stroke="#16a34a" stroke-width="2.2" stroke-dasharray="4,4"'), 'SVG must include green dashed XEQT path');
+      assert.ok(mockBox.innerHTML.includes('stroke="#6b7280" stroke-width="2.2" stroke-dasharray="4,4"'), 'SVG must include the dashed XEQT reference path (--kt-chart-reference)');
       assert.ok(mockBox.innerHTML.includes('class="main-year-xeqt-point"'), 'SVG must include XEQT point markers');
 
       // Verify legend contains XEQT Benchmark (CAD) and Spread

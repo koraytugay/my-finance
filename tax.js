@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Tax Location & Asset Placement Controller
  */
@@ -5,13 +6,13 @@
 let allHoldings = [];
 
 const ASSET_CLASSES = [
-    { key: 'us', label: 'US Equity', color: '#1d4ed8' },
-    { key: 'canada', label: 'Canadian Equity', color: '#60a5fa' },
-    { key: 'developed', label: 'Developed Markets', color: '#334155' },
-    { key: 'emerging', label: 'Emerging Markets', color: '#94a3b8' },
-    { key: 'fixedIncome', label: 'Fixed Income & Cash', color: '#93c5fd' },
-    { key: 'preciousMetals', label: 'Precious Metals', color: '#cbd5e1' },
-    { key: 'crypto', label: 'Crypto', color: '#64748b' }
+    { key: 'us', label: 'US Equity', color: ktColor('series-1') },
+    { key: 'canada', label: 'Canadian Equity', color: ktColor('series-2') },
+    { key: 'developed', label: 'Developed Markets', color: ktColor('series-3') },
+    { key: 'emerging', label: 'Emerging Markets', color: ktColor('series-4') },
+    { key: 'fixedIncome', label: 'Fixed Income & Cash', color: ktColor('series-5') },
+    { key: 'preciousMetals', label: 'Precious Metals', color: ktColor('series-6') },
+    { key: 'crypto', label: 'Crypto', color: ktColor('series-7') }
 ];
 
 async function initTax() {
@@ -84,13 +85,13 @@ function renderOverviewCards() {
     const statusEl = document.getElementById('stat-shield-status');
     if (regPct >= 70) {
         statusEl.textContent = 'High Tax Shelter';
-        statusEl.style.color = '#16a34a';
+        statusEl.style.color = ktColor('success');
     } else if (regPct >= 50) {
         statusEl.textContent = 'Balanced Shelter';
         statusEl.style.color = '';
     } else {
         statusEl.textContent = 'Low Tax Shelter';
-        statusEl.style.color = '#dc2626';
+        statusEl.style.color = ktColor('danger');
     }
 }
 
@@ -161,14 +162,14 @@ function renderTaxMatrix() {
         if (row.total <= 0) return;
 
         const shelteredPct = row.total > 0 ? (row.sheltered / row.total) * 100 : 0;
-        let badgeColor = '#16a34a';
-        let badgeBg = '#dcfce7';
+        let badgeColor = ktColor('success');
+        let badgeBg = ktColor('success-soft');
         if (shelteredPct < 40) {
-            badgeColor = '#dc2626';
-            badgeBg = '#fee2e2';
+            badgeColor = ktColor('danger');
+            badgeBg = ktColor('danger-soft');
         } else if (shelteredPct < 70) {
-            badgeColor = '#94a3b8';
-            badgeBg = '#fef3c7';
+            badgeColor = ktColor('warning-text');
+            badgeBg = ktColor('warning-soft');
         }
 
         const tr = document.createElement('tr');

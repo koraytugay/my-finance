@@ -1,3 +1,4 @@
+if (typeof ktColor === 'undefined' && typeof require !== 'undefined') { global.ktColor = require('./api.js').ktColor; }
 /**
  * Main Executive Dashboard Controller
  * Displays the 3 exact tables from the Google Sheets "Main" tab:
@@ -424,7 +425,7 @@ function renderMainTopStats(mainData, holdings, history) {
 
     if (weekChangeEl && cw) {
         const sign = cw.changeCAD >= 0 ? '+' : '';
-        const color = cw.isUp ? '#16a34a' : '#dc2626';
+        const color = cw.isUp ? ktColor('success') : ktColor('danger');
         const icon = cw.isUp ? '🟢' : '🔴';
         weekChangeEl.textContent = `${sign}${formatCurr(cw.changeCAD, 'CAD')}`;
         weekChangeEl.style.color = color;
@@ -446,7 +447,7 @@ function renderMainTopStats(mainData, holdings, history) {
         const isUpUSD = cw.isUpUSD !== undefined ? cw.isUpUSD : (changeUSD >= 0);
         const statusTextUSD = cw.statusTextUSD || (isUpUSD ? 'Up this week' : 'Down this week');
         const signUSD = changeUSD >= 0 ? '+' : '';
-        const colorUSD = isUpUSD ? '#16a34a' : '#dc2626';
+        const colorUSD = isUpUSD ? ktColor('success') : ktColor('danger');
         const iconUSD = isUpUSD ? '🟢' : '🔴';
         weekChangeUsdEl.textContent = `${signUSD}${formatCurr(changeUSD, 'USD')}`;
         weekChangeUsdEl.style.color = colorUSD;
@@ -466,7 +467,7 @@ function renderMainTopStats(mainData, holdings, history) {
     const tbCadSubEl = document.getElementById('main-stat-timeback-cad-sub');
     if (tbCadEl) {
         tbCadEl.textContent = timeBackCAD.label;
-        tbCadEl.style.color = timeBackCAD.weeks > 0 ? (timeBackCAD.weeks >= 4 ? '#cf222e' : '') : '#16a34a';
+        tbCadEl.style.color = timeBackCAD.weeks > 0 ? (timeBackCAD.weeks >= 4 ? ktColor('danger') : '') : ktColor('success');
         if (tbCadSubEl) tbCadSubEl.textContent = timeBackCAD.sub;
     }
 
@@ -474,7 +475,7 @@ function renderMainTopStats(mainData, holdings, history) {
     const tbUsdSubEl = document.getElementById('main-stat-timeback-usd-sub');
     if (tbUsdEl) {
         tbUsdEl.textContent = timeBackUSD.label;
-        tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? '#cf222e' : '') : '#16a34a';
+        tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? ktColor('danger') : '') : ktColor('success');
         if (tbUsdSubEl) tbUsdSubEl.textContent = timeBackUSD.sub;
     }
 
@@ -489,13 +490,13 @@ function renderMainTopStats(mainData, holdings, history) {
     if (athEl) {
         if (isAth) {
             athEl.textContent = '🟢 ATH!';
-            athEl.style.color = '#16a34a';
+            athEl.style.color = ktColor('success');
             if (athLabelEl) athLabelEl.textContent = 'ATH Status (CAD)';
             if (athValEl) athValEl.textContent = `At Peak: ${formatCurr(athValue, 'CAD')}`;
         } else {
             const diffPct = athValue > 0 ? (diffFromAth / athValue) * 100 : 0;
             athEl.textContent = formatCurr(diffFromAth, 'CAD');
-            athEl.style.color = '#dc2626';
+            athEl.style.color = ktColor('danger');
             if (athLabelEl) athLabelEl.textContent = 'Off ATH (CAD)';
             if (athValEl) athValEl.textContent = `${diffPct.toFixed(2)}% \u2022 Peak: ${formatCurr(athValue, 'CAD')}`;
         }
@@ -520,13 +521,13 @@ function renderMainTopStats(mainData, holdings, history) {
     if (athUsdEl) {
         if (isAthUSD) {
             athUsdEl.textContent = '🟢 ATH!';
-            athUsdEl.style.color = '#16a34a';
+            athUsdEl.style.color = ktColor('success');
             if (athUsdLabelEl) athUsdLabelEl.textContent = 'ATH Status (USD)';
             if (athUsdValEl) athUsdValEl.textContent = `At Peak: ${formatCurr(athValueUSD, 'USD')}`;
         } else {
             const diffPctUSD = athValueUSD > 0 ? (diffFromAthUSD / athValueUSD) * 100 : 0;
             athUsdEl.textContent = formatCurr(diffFromAthUSD, 'USD');
-            athUsdEl.style.color = '#dc2626';
+            athUsdEl.style.color = ktColor('danger');
             if (athUsdLabelEl) athUsdLabelEl.textContent = 'Off ATH (USD)';
             if (athUsdValEl) athUsdValEl.textContent = `${diffPctUSD.toFixed(2)}% \u2022 Peak: ${formatCurr(athValueUSD, 'USD')}`;
         }
@@ -670,9 +671,9 @@ function renderAssetClassTable(mainData, holdings) {
 
     // Subtotal for Equities
     const eqSubtotalTr = document.createElement('tr');
-    eqSubtotalTr.style.background = '#f8fafc';
-    eqSubtotalTr.style.borderTop = '1.5px solid #cbd5e1';
-    eqSubtotalTr.style.borderBottom = '1.5px solid #cbd5e1';
+    eqSubtotalTr.style.background = ktColor('surface-hover');
+    eqSubtotalTr.style.borderTop = '1.5px solid var(--kt-border-strong)';
+    eqSubtotalTr.style.borderBottom = '1.5px solid var(--kt-border-strong)';
     eqSubtotalTr.innerHTML = `
         <td><strong>Total Equities</strong></td>
         <td class="kt-align-right kt-fw-heavy kt-text-primary">${formatCurrency(totalEquityVal, 'CAD')}</td>
@@ -694,7 +695,7 @@ function renderAssetClassTable(mainData, holdings) {
     // Grand Total Portfolio Row
     const grandTotal = mainData.metrics && mainData.metrics.totalValue ? mainData.metrics.totalValue : holdings.reduce((s, h) => s + h.sum, 0);
     const totalTr = document.createElement('tr');
-    totalTr.style.background = '#f1f5f9';
+    totalTr.style.background = ktColor('chart-grid');
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
@@ -724,7 +725,7 @@ function renderAccountTypeTable(mainData, holdings, history) {
 
     // Total Row
     const totalTr = document.createElement('tr');
-    totalTr.style.background = '#f1f5f9';
+    totalTr.style.background = ktColor('chart-grid');
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
@@ -742,15 +743,15 @@ function renderCategoryTable(mainData, holdings) {
     let totalVal = 0;
 
     const catColors = {
-        'Stocks': '#1d4ed8',
-        'Fixed Income': '#93c5fd',
-        'Precious Metals': '#cbd5e1',
-        'Crypto': '#64748b'
+        'Stocks': ktColor('series-1'),
+        'Fixed Income': ktColor('series-5'),
+        'Precious Metals': ktColor('series-6'),
+        'Crypto': ktColor('series-7')
     };
 
     categories.forEach(item => {
         totalVal += item.value;
-        const color = catColors[item.name] || '#64748b';
+        const color = catColors[item.name] || ktColor('series-7');
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
@@ -765,7 +766,7 @@ function renderCategoryTable(mainData, holdings) {
 
     // Total Row
     const totalTr = document.createElement('tr');
-    totalTr.style.background = '#f1f5f9';
+    totalTr.style.background = ktColor('chart-grid');
     totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
     totalTr.innerHTML = `
         <td><strong>Total Portfolio</strong></td>
@@ -783,7 +784,7 @@ function renderCategoryTable(mainData, holdings) {
 
     categories.forEach(item => {
         const pctNum = parseFloat(item.percentage) || (totalVal > 0 ? (item.value / totalVal * 100) : 0);
-        const color = catColors[item.name] || '#64748b';
+        const color = catColors[item.name] || ktColor('series-7');
 
         const segment = document.createElement('div');
         segment.style.width = `${pctNum}%`;
@@ -819,7 +820,7 @@ function renderPerformanceCards(mainData) {
 
     const changeVal52 = m.oneYearChangeCAD !== undefined ? m.oneYearChangeCAD : (m.totalGainCAD || 0);
     const sign52 = changeVal52 >= 0 ? '+' : '';
-    const color52 = changeVal52 >= 0 ? '#16a34a' : '#dc2626';
+    const color52 = changeVal52 >= 0 ? ktColor('success') : ktColor('danger');
 
     const gainEl52 = document.getElementById('metric-total-gain');
     if (gainEl52) {
@@ -840,7 +841,7 @@ function renderPerformanceCards(mainData) {
     const monthlySign52 = monthlyGain52 >= 0 ? '+' : '';
     if (monthlyEl52) {
         monthlyEl52.textContent = `${monthlySign52}${formatCurrency(monthlyGain52, 'CAD')} / mo`;
-        monthlyEl52.style.color = monthlyGain52 >= 0 ? '#16a34a' : '#dc2626';
+        monthlyEl52.style.color = monthlyGain52 >= 0 ? ktColor('success') : ktColor('danger');
     }
 
     const athEl52 = document.getElementById('metric-ath-val');
@@ -862,7 +863,7 @@ function renderPerformanceCards(mainData) {
 
     const ytdChangeVal = y.changeCAD !== undefined ? y.changeCAD : 0;
     const ytdSign = ytdChangeVal >= 0 ? '+' : '';
-    const ytdColor = ytdChangeVal >= 0 ? '#16a34a' : '#dc2626';
+    const ytdColor = ytdChangeVal >= 0 ? ktColor('success') : ktColor('danger');
 
     const ytdGainEl = document.getElementById('ytd-total-gain');
     if (ytdGainEl) {
@@ -883,7 +884,7 @@ function renderPerformanceCards(mainData) {
     const ytdMonthlySign = ytdMonthlyGain >= 0 ? '+' : '';
     if (ytdMonthlyEl) {
         ytdMonthlyEl.textContent = `${ytdMonthlySign}${formatCurrency(ytdMonthlyGain, 'CAD')} / mo`;
-        ytdMonthlyEl.style.color = ytdMonthlyGain >= 0 ? '#16a34a' : '#dc2626';
+        ytdMonthlyEl.style.color = ytdMonthlyGain >= 0 ? ktColor('success') : ktColor('danger');
     }
 
     const ytdPeakEl = document.getElementById('ytd-peak-val');
@@ -902,7 +903,7 @@ function renderPerformanceCards(mainData) {
 
     const atChangeVal = atm.changeCAD !== undefined ? atm.changeCAD : (atm.totalGrowthCAD || 0);
     const atSign = atChangeVal >= 0 ? '+' : '';
-    const atColor = atChangeVal >= 0 ? '#16a34a' : '#dc2626';
+    const atColor = atChangeVal >= 0 ? ktColor('success') : ktColor('danger');
 
     const atGainEl = document.getElementById('alltime-total-gain') || document.getElementById('alltime-growth-val');
     if (atGainEl) {
@@ -923,7 +924,7 @@ function renderPerformanceCards(mainData) {
     const atMonthlySign = atMonthlyGain >= 0 ? '+' : '';
     if (atMonthlyEl) {
         atMonthlyEl.textContent = `${atMonthlySign}${formatCurrency(atMonthlyGain, 'CAD')} / mo`;
-        atMonthlyEl.style.color = atMonthlyGain >= 0 ? '#16a34a' : '#dc2626';
+        atMonthlyEl.style.color = atMonthlyGain >= 0 ? ktColor('success') : ktColor('danger');
     }
 
     const atPeakEl = document.getElementById('alltime-peak-val');
@@ -939,29 +940,29 @@ function renderPerformanceCards(mainData) {
     if (atEtfEl) {
         const sign = (atm.totalMarketGainsCAD || 0) >= 0 ? '+' : '';
         atEtfEl.textContent = `${sign}${formatCurrency(atm.totalMarketGainsCAD || 0, 'CAD')}`;
-        atEtfEl.style.color = (atm.totalMarketGainsCAD || 0) >= 0 ? '#16a34a' : '#dc2626';
+        atEtfEl.style.color = (atm.totalMarketGainsCAD || 0) >= 0 ? ktColor('success') : ktColor('danger');
     }
 }
 
 /* ================= Net Worth Progression SVG Chart ================= */
 
 const MAIN_YEAR_COLORS = {
-    '2026': '#1d4ed8',
-    '2025': '#334155',
-    '2024': '#94a3b8',
-    '2023': '#60a5fa',
-    '2027': '#93c5fd',
-    '2028': '#64748b'
+    '2026': ktColor('series-1'),
+    '2025': ktColor('series-3'),
+    '2024': ktColor('series-4'),
+    '2023': ktColor('series-2'),
+    '2027': ktColor('series-5'),
+    '2028': ktColor('series-7')
 };
 
 function getMainYearColor(year) {
     if (MAIN_YEAR_COLORS[year]) return MAIN_YEAR_COLORS[year];
-    const palette = ['#1d4ed8', '#334155', '#94a3b8', '#60a5fa', '#93c5fd', '#64748b', '#cbd5e1'];
+    const palette = [ktColor('series-1'), ktColor('series-3'), ktColor('series-4'), ktColor('series-2'), ktColor('series-5'), ktColor('series-7'), ktColor('series-6')];
     const num = parseInt(year, 10);
     if (!isNaN(num)) {
         return palette[Math.abs(num) % palette.length];
     }
-    return '#0969da';
+    return ktColor('series-1');
 }
 
 function updateMainTimeframeButtonsUI() {
@@ -981,8 +982,6 @@ function updateMainTimeframeButtonsUI() {
         } else if (/^\d{4}$/.test(tf)) {
             const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(tf);
             btn.classList.toggle('is-active', isActive);
-            const yrColor = getMainYearColor(tf);
-            btn.style.setProperty('--kt-segmented-active-bg', yrColor);
             btn.title = isActive ? `Year ${tf} (Active - click to hide)` : `Year ${tf} (Click to overlay)`;
         }
     });
@@ -1040,11 +1039,11 @@ function buildCalendarYearMonthGridHtml(height, padding, plotW, plotH) {
 
         if (m > 0) {
             html += `
-                <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
+                <line x1="${startX.toFixed(1)}" y1="${padding.top}" x2="${startX.toFixed(1)}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
             `;
         }
         html += `
-            <text x="${midX.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${CALENDAR_MONTH_NAMES[m]}</text>
+            <text x="${midX.toFixed(1)}" y="${height - 8}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="middle">${CALENDAR_MONTH_NAMES[m]}</text>
         `;
     }
     return html;
@@ -1095,9 +1094,8 @@ function syncMainTimeframeButtons(history) {
 
     availableYears.forEach(year => {
         const isActive = currentMainMode === 'years' && currentMainSelectedYears.has(year);
-        const yrColor = getMainYearColor(year);
         html += `
-            <button type="button" class="timeframe-pill ${isActive ?'is-active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" style="--kt-segmented-active-bg: ${yrColor}" title="Toggle Year ${year} overlay">${year}</button>
+            <button type="button" class="timeframe-pill ${isActive ?'is-active' : ''}" data-timeframe="${year}" onclick="setMainTimeframe('${year}')" title="Toggle Year ${year} overlay">${year}</button>
         `;
     });
 
@@ -1464,10 +1462,10 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const sign = p > 0 ? '+' : '';
             const label = `${sign}${p}%`;
             const isZero = Math.abs(p) < 0.001;
-            const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
+            const strokeColor = isZero ? ktColor('chart-axis') : ktColor('chart-grid');
             const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
             const strokeWidth = isZero ? '1.5' : '1';
-            const fontColor = isZero ? '#1e293b' : '#8c959f';
+            const fontColor = isZero ? ktColor('text') : ktColor('chart-label');
             const fontWeight = isZero ? '700' : 'normal';
 
             gridLinesHtml += `
@@ -1482,8 +1480,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const y = getY(val);
             const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
             gridLinesHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-grid')}" stroke-dasharray="3 3" />
+                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="end">${label}</text>
             `;
         }
     }
@@ -1497,8 +1495,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const x = getX(idx);
         const label = typeof formatMonthShort === 'function' ? formatMonthShort(rec.date) : formatDate(rec.date);
         xTicksHtml += `
-            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+            <text x="${x.toFixed(1)}" y="${height - 8}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="middle">${label}</text>
         `;
     }
 
@@ -1509,20 +1507,20 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
     const lastX = portPoints.length > 0 ? portPoints[portPoints.length - 1].x : (padding.left + plotW);
     const areaPathD = linePathD ? `${linePathD} L ${lastX.toFixed(1)},${padding.top + plotH} L ${firstX.toFixed(1)},${padding.top + plotH} Z` : '';
 
-    const strokeColor = currentMainFilterAths ? '#334155' : '#0969da';
-    const areaGradColor = currentMainFilterAths ? '#334155' : '#0969da';
+    const strokeColor = ktColor('series-1');
+    const areaGradColor = ktColor('series-1');
 
     const hoverPointsHtml = portPoints.map((p, i) => {
         if (currentMainFilterAths) {
             const isDown = !p.isAth;
-            const fill = isDown ? '#ef4444' : '#16a34a';
+            const fill = isDown ? ktColor('danger') : ktColor('success');
             const radius = isDown ? 5.5 : 4.0;
             return `
-                <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+                <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="${ktColor('surface')}" stroke-width="2" style="cursor: pointer;" />
             `;
         }
         return `
-            <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+            <circle class="main-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="cursor: pointer;" />
         `;
     }).join('');
 
@@ -1542,10 +1540,10 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         });
         const xeqtLineD = 'M ' + xeqtPoints.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
         xeqtPathHtml = `
-            <path d="${xeqtLineD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${xeqtLineD}" fill="none" stroke="${ktColor('chart-reference')}" stroke-width="2.2" stroke-dasharray="6 4" stroke-linecap="round" stroke-linejoin="round" />
         `;
         xeqtPointsHtml = xeqtPoints.map((p, i) => `
-            <circle class="main-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" style="cursor: pointer;" />
+            <circle class="main-xeqt-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.2" fill="${ktColor('surface')}" stroke="${ktColor('chart-reference')}" stroke-width="1.8" style="cursor: pointer;" />
         `).join('');
     }
 
@@ -1565,10 +1563,10 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             ${hoverPointsHtml}
             ${xeqtPointsHtml}
             <!-- Vertical Crosshair Line -->
-            <line id="main-single-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <line id="main-single-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
             <!-- Active Hover Dots -->
-            <circle id="main-single-port-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
-            <circle id="main-single-xeqt-dot" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="main-single-port-dot" r="6" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="main-single-xeqt-dot" r="5.5" fill="${ktColor('chart-reference')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Full Tracking Overlay Rect -->
             <rect id="main-single-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
@@ -1593,7 +1591,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 const downPctStr = Math.abs(lastPort.downPct).toFixed(2);
                 statusHtml = `
                     <div class="kt-legend__item">
-                        <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444;"></span>
+                        <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-danger);"></span>
                         <strong class="kt-text-danger">Current Drawdown</strong>: <span class="kt-text-danger kt-fw-bold">-${downValStr} (-${downPctStr}%)</span>
                     </div>
                 `;
@@ -1608,7 +1606,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #16a34a;"></span>
+                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-success);"></span>
                     <strong class="kt-text-primary">${athCount} All-Time Highs</strong> (${isPct ? `Peak Return: +${peakPct.toFixed(2)}%` : `Peak: ${formatCurrency(peakVal, currency)}`})
                 </div>
                 ${statusHtml}
@@ -1621,20 +1619,20 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const portSign = lastPort.pct >= 0 ? '+' : '';
             const lastItem = xeqtSeries[xeqtSeries.length - 1];
             const spreadSign = lastItem.spreadVal >= 0 ? '+' : '';
-            const spreadColor = lastItem.spreadVal >= 0 ? '#16a34a' : '#cf222e';
-            const spreadBg = lastItem.spreadVal >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const spreadColor = lastItem.spreadVal >= 0 ? ktColor('success') : ktColor('danger');
+            const spreadBg = lastItem.spreadVal >= 0 ? 'var(--kt-success-soft)' : 'var(--kt-danger-soft)';
             const xeqtSign = lastItem.returnPct >= 0 ? '+' : '';
 
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 12px; height: 3px; background: #0969da; border-radius: 2px;"></span>
+                    <span style="display: inline-block; width: 12px; height: 3px; background: var(--kt-series-1); border-radius: 2px;"></span>
                     <strong class="kt-text-primary">Portfolio</strong>: ${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : `${formatCurrency(lastPort.val, currency)} (${portSign}${lastPort.pct.toFixed(2)}%)`}
                 </div>
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
+                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed var(--kt-chart-reference);"></span>
+                    <strong>XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
                 </div>
-                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
+                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, ${spreadColor} 20%, transparent);">
                     Spread: ${spreadSign}${lastItem.spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(lastItem.spreadVal, currency)})
                 </div>
             `;
@@ -1643,7 +1641,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const portSign = lastPort.pct >= 0 ? '+' : '';
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
+                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span>
                     Total Net Worth: <strong>${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : formatCurrency(lastPort.val, currency)}</strong> &bull; Hover any data point to inspect breakdown
                 </div>
             `;
@@ -1662,7 +1660,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const dateStr = formatDate(r.date);
         const totalVal = formatCurrency(r[valKey], currency);
         const pctSign = pt.pct >= 0 ? '+' : '';
-        const pctColor = pt.pct >= 0 ? '#16a34a' : '#cf222e';
+        const pctColor = pt.pct >= 0 ? ktColor('success') : ktColor('danger');
         const isUSD = currency === 'USD';
         const recRate = (r.totalCAD && r.totalUSD)
             ? (r.totalUSD / r.totalCAD)
@@ -1681,7 +1679,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const weeklyChangeSign = weeklyChangeVal >= 0 ? '+' : '';
         const weeklyPctSign = weeklyPct >= 0 ? '+' : '';
         const weeklyChangeStr = `${weeklyChangeSign}${formatCurrency(weeklyChangeVal, currency)} (${weeklyPctSign}${weeklyPct.toFixed(2)}%)`;
-        const changeColor = weeklyChangeVal >= 0 ? '#16a34a' : '#cf222e';
+        const changeColor = weeklyChangeVal >= 0 ? ktColor('success') : ktColor('danger');
 
         let xeqtSection = '';
         if (showXeqt && xeqtSeries[idx]) {
@@ -1690,19 +1688,19 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const xeqtRetStr = `${x.returnPct >= 0 ? '+' : ''}${x.returnPct.toFixed(2)}%`;
             const portRetStr = `${pt.pct >= 0 ? '+' : ''}${pt.pct.toFixed(2)}%`;
             const spreadSign = (isPct ? x.spreadPct : x.spreadVal) >= 0 ? '+' : '';
-            const spreadColor = (isPct ? x.spreadPct : x.spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+            const spreadColor = (isPct ? x.spreadPct : x.spreadVal) >= 0 ? ktColor('success') : ktColor('danger');
             const spreadValStr = `${x.spreadVal >= 0 ? '+' : ''}${formatCurrency(x.spreadVal, currency)}`;
             const spreadPctStr = `${x.spreadPct >= 0 ? '+' : ''}${x.spreadPct.toFixed(2)}% pts`;
 
             xeqtSection = `
                 <div class="kt-readout__section">
                     <div class="kt-split kt-mb-0">
-                        <span class="kt-text-success kt-fw-bold">🟢 XEQT Benchmark:</span>
-                        <strong class="kt-text-success">${isPct ? xeqtRetStr : xeqtValStr}</strong>
+                        <span class="kt-fw-bold">XEQT Benchmark:</span>
+                        <strong>${isPct ? xeqtRetStr : xeqtValStr}</strong>
                     </div>
                     <div class="kt-readout__row kt-text-muted">
                         <span>Return:</span>
-                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xeqtRetStr}</strong></span>
+                        <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong>${xeqtRetStr}</strong></span>
                     </div>
                     <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                         <span>Spread:</span>
@@ -1720,9 +1718,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         let badgeHtml = '';
         if (currentMainFilterAths) {
             if (pt.isAth) {
-                badgeHtml = `<span class="kt-badge kt-text-success kt-fw-bold" style="background: #dcfce7;">🟢 ATH #${pt.athNumber || (idx + 1)}</span>`;
+                badgeHtml = `<span class="kt-badge kt-text-success kt-fw-bold" style="background: var(--kt-success-soft);">🟢 ATH #${pt.athNumber || (idx + 1)}</span>`;
             } else {
-                badgeHtml = `<span class="kt-badge kt-text-danger kt-fw-bold" style="background: #fee2e2;">🔴 CURRENT (-${Math.abs(pt.downPct).toFixed(2)}%)</span>`;
+                badgeHtml = `<span class="kt-badge kt-text-danger kt-fw-bold" style="background: var(--kt-danger-soft);">🔴 CURRENT (-${Math.abs(pt.downPct).toFixed(2)}%)</span>`;
             }
         } else {
             badgeHtml = isHover
@@ -1746,7 +1744,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         } else {
             const gainVal = (r[valKey] || 0) - baseVal;
             const gainSign = gainVal >= 0 ? '+' : '';
-            const gainColor = gainVal >= 0 ? '#16a34a' : '#cf222e';
+            const gainColor = gainVal >= 0 ? ktColor('success') : ktColor('danger');
             const gainValStr = `${gainSign}${formatCurrency(gainVal, currency)}`;
             subValHtml = `
                 ${isPct ? `Net Worth: <strong>${totalVal}</strong>` : `Return: <strong style="color: ${pctColor}">${pctSign}${pt.pct.toFixed(2)}%</strong>`}
@@ -1812,7 +1810,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         if (portDot) {
             portDot.setAttribute('cx', pt.x.toFixed(1));
             portDot.setAttribute('cy', pt.y.toFixed(1));
-            const dotFill = currentMainFilterAths ? (pt.isAth ? '#16a34a' : '#ef4444') : '#0969da';
+            const dotFill = currentMainFilterAths ? (pt.isAth ? ktColor('success') : ktColor('danger')) : ktColor('series-1');
             portDot.setAttribute('fill', dotFill);
             portDot.style.display = 'block';
         }
@@ -2324,10 +2322,10 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const sign = p > 0 ? '+' : '';
             const label = `${sign}${p}%`;
             const isZero = Math.abs(p) < 0.001;
-            const strokeColor = isZero ? '#94a3b8' : '#e2e8f0';
+            const strokeColor = isZero ? ktColor('chart-axis') : ktColor('chart-grid');
             const strokeDash = isZero ? '' : 'stroke-dasharray="3 3"';
             const strokeWidth = isZero ? '1.5' : '1';
-            const fontColor = isZero ? '#1e293b' : '#8c959f';
+            const fontColor = isZero ? ktColor('text') : ktColor('chart-label');
             const fontWeight = isZero ? '700' : 'normal';
 
             yGridHtml += `
@@ -2342,8 +2340,8 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const y = getY(val);
             const label = currency === 'USD' ? `US$${(val / 1000).toFixed(0)}k` : `$${(val / 1000).toFixed(0)}k`;
             yGridHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-dasharray="3 3" />
-                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-grid')}" stroke-dasharray="3 3" />
+                <text x="${padding.left - 10}" y="${(y + 4).toFixed(1)}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="end">${label}</text>
             `;
         }
     }
@@ -2393,17 +2391,17 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         pointsHtml += pts.filter(pt => !pt.p.isAnchor).map(pt => {
             if (currentMainFilterAths) {
                 const isDown = !pt.p.isAth;
-                const fill = isDown ? '#ef4444' : s.color;
+                const fill = isDown ? ktColor('danger') : s.color;
                 const radius = isDown ? '5.5' : '4.2';
                 return `
-                    <circle class="main-overlay-point" data-year="${s.year}" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+                    <circle class="main-overlay-point" data-year="${s.year}" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${radius}" fill="${fill}" stroke="${ktColor('surface')}" stroke-width="2" style="cursor: pointer;" />
                 `;
             }
             const isStart = pt.p.isOverlayStart;
             const r = isStart ? '4.5' : '3.2';
             const strokeW = isStart ? '2.4' : '1.8';
-            const fill = isStart ? '#ffffff' : s.color;
-            const stroke = isStart ? s.color : '#ffffff';
+            const fill = isStart ? ktColor('surface') : s.color;
+            const stroke = isStart ? s.color : ktColor('surface');
             return `
                 <circle class="main-overlay-point" data-year="${s.year}" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}" />
             `;
@@ -2424,16 +2422,16 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
         const xeqtLinePathD = 'M ' + xeqtPlotPoints.map(pt => `${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(' L ');
         xeqtPathHtml = `
-            <path d="${xeqtLinePathD}" fill="none" stroke="#16a34a" stroke-width="2.2" stroke-dasharray="4,4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="${xeqtLinePathD}" fill="none" stroke="${ktColor('chart-reference')}" stroke-width="2.2" stroke-dasharray="4,4" stroke-linecap="round" stroke-linejoin="round" />
         `;
 
         xeqtPointsHtml = xeqtPlotPoints.filter(pt => !pt.p.isAnchor).map(pt => `
-            <circle class="main-year-xeqt-point" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.2" fill="#ffffff" stroke="#16a34a" stroke-width="1.8" />
+            <circle class="main-year-xeqt-point" data-idx="${pt.idx}" cx="${pt.x.toFixed(1)}" cy="${pt.y.toFixed(1)}" r="3.2" fill="${ktColor('surface')}" stroke="${ktColor('chart-reference')}" stroke-width="1.8" />
         `).join('');
     }
 
     const crosshairHtml = `
-        <line id="main-overlay-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+        <line id="main-overlay-cursor" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
         <g id="main-overlay-hover-dots" style="pointer-events: none;"></g>
         <rect id="main-overlay-mouse-capture" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair;" />
     `;
@@ -2480,7 +2478,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     <div class="kt-readout__row">
                         <span class="kt-cluster">
                             <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color}; display: inline-block;"></span>
-                            <strong style="color: ${s.color}">${s.year}</strong>:
+                            <strong>${s.year}</strong>:
                         </span>
                         <span>
                             <strong class="kt-text-success">${athCount} ATHs</strong>
@@ -2494,7 +2492,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             return `
                 <div class="kt-readout__header">
                     <span class="kt-readout__title">${yearSeries.map(s => s.year).join(' vs ')} ATH Comparison</span>
-                    <span class="kt-badge kt-text-success kt-fw-bold" style="background: #dcfce7;">ATHs ONLY</span>
+                    <span class="kt-badge kt-text-success kt-fw-bold" style="background: var(--kt-success-soft);">ATHs ONLY</span>
                 </div>
                 <div class="kt-readout__sub kt-text-muted kt-mb-2">
                     All-Time High milestones plotted across calendar days (Jan–Dec)
@@ -2530,19 +2528,19 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const spreadPct = portPct - xPct;
                 const spreadVal = portVal - xVal;
                 const spreadSign = (isPct ? spreadPct : spreadVal) >= 0 ? '+' : '';
-                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? ktColor('success') : ktColor('danger');
                 const spreadValStr = `${spreadVal >= 0 ? '+' : ''}${formatCurrency(spreadVal, currency)}`;
                 const spreadPctStr = `${spreadPct >= 0 ? '+' : ''}${spreadPct.toFixed(2)}% pts`;
 
                 xeqtSection = `
                     <div class="kt-readout__section">
                         <div class="kt-split kt-mb-0">
-                            <span class="kt-text-success kt-fw-bold">🟢 XEQT Benchmark:</span>
+                            <span class="kt-fw-bold">XEQT Benchmark:</span>
                             <strong class="kt-text-success">${isPct ? xRetStr : xValStr}</strong>
                         </div>
                         <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
+                            <span>Port: <strong>${portRetStr}</strong> | XEQT: <strong>${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2561,7 +2559,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const dateStr = formatDate(last.date);
             const totalVal = formatCurrency(last.val, currency);
             const pctSign = last.pct >= 0 ? '+' : '';
-            const pctColor = last.pct >= 0 ? '#16a34a' : '#cf222e';
+            const pctColor = last.pct >= 0 ? ktColor('success') : ktColor('danger');
             const isUSD = currency === 'USD';
             const r = last.rec;
             const recRate = (r && r.totalCAD && r.totalUSD)
@@ -2570,7 +2568,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
             const yearlyGainVal = last.val - s.baseVal;
             const yearlyGainSign = yearlyGainVal >= 0 ? '+' : '';
-            const yearlyGainColor = yearlyGainVal >= 0 ? '#16a34a' : '#cf222e';
+            const yearlyGainColor = yearlyGainVal >= 0 ? ktColor('success') : ktColor('danger');
             const yearlyGainStr = `${yearlyGainSign}${formatCurrency(yearlyGainVal, currency)}`;
             const weekPrefix = r?.week ? `Week ${r.week} &bull; ` : '';
 
@@ -2627,12 +2625,12 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         let yearRows = yearSeries.map(s => {
             const last = s.points[s.points.length - 1];
             const sign = last.pct >= 0 ? '+' : '';
-            const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
+            const color = last.pct >= 0 ? ktColor('success') : ktColor('danger');
             return `
                 <div class="kt-readout__row">
                     <span class="kt-cluster">
                         <span style="width: 8px; height: 8px; border-radius: 50%; background: ${s.color}; display: inline-block;"></span>
-                        <strong style="color: ${s.color}">${s.year}</strong>:
+                        <strong>${s.year}</strong>:
                     </span>
                     <span>
                         <strong style="color: ${color}">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</strong>
@@ -2697,9 +2695,9 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 if (closest && closestDist <= threshold) {
                     const cx = (padding.left + closest.fraction * plotW).toFixed(1);
                     const cy = getY(isPct ? closest.pct : closest.val).toFixed(1);
-                    const dotFill = currentMainFilterAths ? (closest.isAth ? s.color : '#ef4444') : s.color;
+                    const dotFill = currentMainFilterAths ? (closest.isAth ? s.color : ktColor('danger')) : s.color;
                     hoverDotsHtml += `
-                        <circle cx="${cx}" cy="${cy}" r="5.5" fill="${dotFill}" stroke="#ffffff" stroke-width="2" />
+                        <circle cx="${cx}" cy="${cy}" r="5.5" fill="${dotFill}" stroke="${ktColor('surface')}" stroke-width="2" />
                     `;
                     activeYearDetails.push({
                         year: s.year,
@@ -2724,7 +2722,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
                 if (closestXeqt && closestXeqtDist <= 0.05) {
                     hoverDotsHtml += `
-                        <circle cx="${closestXeqt.x.toFixed(1)}" cy="${closestXeqt.y.toFixed(1)}" r="5.5" fill="#16a34a" stroke="#ffffff" stroke-width="2" />
+                        <circle cx="${closestXeqt.x.toFixed(1)}" cy="${closestXeqt.y.toFixed(1)}" r="5.5" fill="${ktColor('chart-reference')}" stroke="${ktColor('surface')}" stroke-width="2" />
                     `;
                 } else {
                     closestXeqt = null;
@@ -2739,7 +2737,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             let yearRows = activeYearDetails.map(d => {
                 const p = d.point;
                 const pctSign = p.pct >= 0 ? '+' : '';
-                const pctColor = p.pct >= 0 ? '#16a34a' : '#cf222e';
+                const pctColor = p.pct >= 0 ? ktColor('success') : ktColor('danger');
 
                 if (currentMainFilterAths) {
                     const athBadge = p.isAth
@@ -2772,7 +2770,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     ? (p.weeklyChangeUSD !== undefined ? p.weeklyChangeUSD : (p.rec?.weeklyChangeUSD || 0))
                     : (p.weeklyChangeCAD !== undefined ? p.weeklyChangeCAD : (p.rec?.weeklyChangeCAD || 0));
                 const weeklySign = weeklyChgVal >= 0 ? '+' : '';
-                const weeklyColor = weeklyChgVal >= 0 ? '#16a34a' : '#cf222e';
+                const weeklyColor = weeklyChgVal >= 0 ? ktColor('success') : ktColor('danger');
                 const weeklyPctSign = p.weeklyChangePct >= 0 ? '+' : '';
 
                 return `
@@ -2819,19 +2817,19 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const spreadPct = portPct - xPct;
                 const spreadVal = portVal - xVal;
                 const spreadSign = (isPct ? spreadPct : spreadVal) >= 0 ? '+' : '';
-                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? '#16a34a' : '#cf222e';
+                const spreadColor = (isPct ? spreadPct : spreadVal) >= 0 ? ktColor('success') : ktColor('danger');
                 const spreadValStr = `${spreadVal >= 0 ? '+' : ''}${formatCurrency(spreadVal, currency)}`;
                 const spreadPctStr = `${spreadPct >= 0 ? '+' : ''}${spreadPct.toFixed(2)}% pts`;
 
                 xeqtCardHtml = `
                     <div class="kt-readout__section">
                         <div class="kt-split kt-mb-0">
-                            <span class="kt-text-success kt-fw-bold">🟢 XEQT Benchmark:</span>
+                            <span class="kt-fw-bold">XEQT Benchmark:</span>
                             <strong class="kt-text-success">${isPct ? xRetStr : xValStr}</strong>
                         </div>
                         <div class="kt-readout__row kt-text-muted">
                             <span>Return:</span>
-                            <span>Port: <strong>${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong class="kt-text-success">${xRetStr}</strong></span>
+                            <span>Port: <strong>${portPct >= 0 ? '+' : ''}${portPct.toFixed(2)}%</strong> | XEQT: <strong>${xRetStr}</strong></span>
                         </div>
                         <div class="kt-readout__row kt-mt-0 kt-fw-bold" style="color: ${spreadColor};">
                             <span>Spread:</span>
@@ -2847,7 +2845,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const prior = activeYearDetails[1];
                 const pctDiff = newest.point.pct - prior.point.pct;
                 const spSign = pctDiff >= 0 ? '+' : '';
-                const spColor = pctDiff >= 0 ? '#16a34a' : '#cf222e';
+                const spColor = pctDiff >= 0 ? ktColor('success') : ktColor('danger');
                 const valDiff = newest.point.val - prior.point.val;
                 const valSign = valDiff >= 0 ? '+' : '';
 
@@ -2942,7 +2940,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 return `
                     <div class="kt-legend__item">
                         <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
-                        <strong style="color: ${s.color};">${s.year}</strong>:
+                        <strong>${s.year}</strong>:
                         <span class="kt-fw-bold kt-text-success">${athCount} ATHs</span>
                         <span class="kt-text-muted kt-fs-xs">(Peak: ${valStr})</span>
                     </div>
@@ -2950,14 +2948,14 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             }
             const last = s.points[s.points.length - 1];
             const sign = last.pct >= 0 ? '+' : '';
-            const color = last.pct >= 0 ? '#16a34a' : '#cf222e';
+            const color = last.pct >= 0 ? ktColor('success') : ktColor('danger');
             const chainedBadge = s.chainedFromYear
                 ? `<span class="kt-fs-2xs" style="background: var(--kt-surface-hover); padding: 1px 5px; border-radius: 3px; margin-left: 3px;" title="Starts onwards from lowest overlay node (${s.chainedFromYear} @ ${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)">from ${s.chainedFromYear} (${s.chainedStartPct >= 0 ? '+' : ''}${s.chainedStartPct.toFixed(1)}%)</span>`
                 : '';
             return `
                 <div class="kt-legend__item">
                     <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
-                    <strong style="color: ${s.color};">${s.year}</strong>${chainedBadge}:
+                    <strong>${s.year}</strong>${chainedBadge}:
                     <span class="kt-fw-bold" style="color: ${color};">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</span>
                     <span class="kt-text-muted kt-fs-xs">(${isPct ? formatCurrency(last.val, currency) : `${sign}${last.pct.toFixed(2)}%`})</span>
                 </div>
@@ -2967,7 +2965,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         if (currentMainFilterAths && yearSeries.length >= 2) {
             const totalAths = yearSeries.reduce((acc, s) => acc + s.points.filter(p => p.isAth).length, 0);
             itemsHtml += `
-                <div class="kt-fs-xs kt-fw-bold kt-text-success" style="background: rgba(22, 163, 74, 0.1); padding: 2px 8px; border-radius: 4px; border: 1px solid #16a34a30;">
+                <div class="kt-fs-xs kt-fw-bold kt-text-success" style="background: var(--kt-success-soft); padding: 2px 8px; border-radius: 4px; border: 1px solid #16a34a30;">
                     Total ATH Milestones in selection: ${totalAths}
                 </div>
             `;
@@ -2979,11 +2977,11 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const valDiff = newest.val - prior.val;
             const sign = diff >= 0 ? '+' : '';
             const valSign = valDiff >= 0 ? '+' : '';
-            const color = diff >= 0 ? '#16a34a' : '#cf222e';
-            const bg = diff >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const color = diff >= 0 ? ktColor('success') : ktColor('danger');
+            const bg = diff >= 0 ? 'var(--kt-success-soft)' : 'var(--kt-danger-soft)';
 
             itemsHtml += `
-                <div class="kt-fs-xs kt-fw-bold" style="color: ${color}; background: ${bg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${color}30;">
+                <div class="kt-fs-xs kt-fw-bold" style="color: ${color}; background: ${bg}; padding: 2px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, ${color} 20%, transparent);">
                     ${sortedDesc[0].year} vs ${sortedDesc[1].year}: ${isPct ? `${sign}${diff.toFixed(2)}% pts` : `${valSign}${formatCurrency(valDiff, currency)} (${sign}${diff.toFixed(2)}% pts)`}
                 </div>
             `;
@@ -2993,21 +2991,21 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             const lastXeqt = xeqtPlotPoints[xeqtPlotPoints.length - 1].p;
             const lastPort = yearSeries[0].points[yearSeries[0].points.length - 1];
             const xeqtSign = lastXeqt.pct >= 0 ? '+' : '';
-            const xeqtColor = lastXeqt.pct >= 0 ? '#16a34a' : '#cf222e';
+            const xeqtColor = lastXeqt.pct >= 0 ? ktColor('success') : ktColor('danger');
             const spreadPct = lastPort.pct - lastXeqt.pct;
             const spreadVal = lastPort.val - lastXeqt.val;
             const spreadSign = spreadPct >= 0 ? '+' : '';
-            const spreadColor = spreadPct >= 0 ? '#16a34a' : '#cf222e';
-            const spreadBg = spreadPct >= 0 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(207, 34, 46, 0.1)';
+            const spreadColor = spreadPct >= 0 ? ktColor('success') : ktColor('danger');
+            const spreadBg = spreadPct >= 0 ? 'var(--kt-success-soft)' : 'var(--kt-danger-soft)';
 
             itemsHtml += `
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed #16a34a;"></span>
-                    <strong class="kt-text-success">XEQT Benchmark (${currency})</strong>:
+                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed var(--kt-chart-reference);"></span>
+                    <strong>XEQT Benchmark (${currency})</strong>:
                     <span class="kt-fw-bold" style="color: ${xeqtColor};">${isPct ? `${xeqtSign}${lastXeqt.pct.toFixed(2)}%` : formatCurrency(lastXeqt.val, currency)}</span>
                     <span class="kt-text-muted kt-fs-xs">(${isPct ? formatCurrency(lastXeqt.val, currency) : `${xeqtSign}${lastXeqt.pct.toFixed(2)}%`})</span>
                 </div>
-                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid ${spreadColor}30;">
+                <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, ${spreadColor} 20%, transparent);">
                     Spread: ${spreadSign}${spreadPct.toFixed(2)}% pts (${spreadSign}${formatCurrency(spreadVal, currency)})
                 </div>
             `;
@@ -3105,7 +3103,7 @@ function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCap
     const isPct = unit === 'PCT';
     const spreadSign = pt.spreadPct >= 0 ? '+' : '';
     const spreadValSign = pt.spreadVal >= 0 ? '+' : '';
-    const spreadColor = pt.spreadPct >= 0 ? '#16a34a' : '#cf222e';
+    const spreadColor = pt.spreadPct >= 0 ? ktColor('success') : ktColor('danger');
 
     const dateStr = typeof formatDate === 'function' ? formatDate(pt.date) : pt.date;
     const badgeHtml = isInspecting
@@ -3299,13 +3297,13 @@ function renderPortfolioVsXeqtChart() {
 
         if (isZero) {
             gridLinesHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" />
-                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#1e293b" font-weight="700" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-axis')}" stroke-width="1.8" stroke-dasharray="4 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${ktColor('text')}" font-weight="700" font-size="11" text-anchor="end">${label}</text>
             `;
         } else {
             gridLinesHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3" />
-                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-grid')}" stroke-width="1" stroke-dasharray="3 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="end">${label}</text>
             `;
         }
     }
@@ -3322,8 +3320,8 @@ function renderPortfolioVsXeqtChart() {
             const x = getX(idx);
             const label = typeof formatMonthShort === 'function' ? formatMonthShort(pt.date) : formatDate(pt.date);
             xTicksHtml += `
-                <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-                <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+                <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+                <text x="${x.toFixed(1)}" y="${height - 8}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="middle">${label}</text>
             `;
         }
     }
@@ -3335,11 +3333,11 @@ function renderPortfolioVsXeqtChart() {
     const lastX = points.length > 0 ? points[points.length - 1].x : (padding.left + plotW);
     const areaPathD = linePathD ? `${linePathD} L ${lastX.toFixed(1)},${padding.top + plotH} L ${firstX.toFixed(1)},${padding.top + plotH} Z` : '';
 
-    const strokeColor = '#0969da';
-    const areaGradColor = '#0969da';
+    const strokeColor = ktColor('series-1');
+    const areaGradColor = ktColor('series-1');
 
     const hoverPointsHtml = points.map((p, i) => `
-        <circle class="xeqt-rel-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="#0969da" stroke="#ffffff" stroke-width="2" style="cursor: pointer;" />
+        <circle class="xeqt-rel-chart-point" data-idx="${i}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="cursor: pointer;" />
     `).join('');
 
     const startCapital = records[0][currency === 'USD' ? 'totalUSD' : 'totalCAD'] || 0;
@@ -3359,9 +3357,9 @@ function renderPortfolioVsXeqtChart() {
             <path d="${linePathD}" fill="none" stroke="${strokeColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
             ${hoverPointsHtml}
             <!-- Vertical Crosshair Line -->
-            <line id="xeqt-rel-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <line id="xeqt-rel-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
             <!-- Active Hover Dot -->
-            <circle id="xeqt-rel-cursor-dot" r="6" fill="#0969da" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;" />
+            <circle id="xeqt-rel-cursor-dot" r="6" fill="${ktColor('series-1')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;" />
             <!-- Mouse capture overlay -->
             <rect id="xeqt-rel-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
@@ -3379,11 +3377,11 @@ function renderPortfolioVsXeqtChart() {
 
         legendEl.innerHTML = `
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
+                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span>
                 <strong class="kt-text-primary">Spread vs XEQT</strong>: <span class="kt-fw-bold">${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts (${spreadValSign}${formatCurrency(lastPt.spreadVal, currency)})</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-axis);"></span>
                 <span class="kt-text-muted kt-fw-semibold">0.0% Parity (XEQT Baseline)</span>
             </div>
             <div class="kt-fs-xs kt-text-muted">
@@ -3536,7 +3534,7 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
     const isBeat = it.spreadPct >= 0;
     const sign = it.spreadPct >= 0 ? '+' : '';
     const valSign = it.spreadVal >= 0 ? '+' : '';
-    const color = isBeat ? '#16a34a' : '#dc2626';
+    const color = isBeat ? ktColor('success') : ktColor('danger');
 
     const dateStr = typeof formatDate === 'function' ? formatDate(it.date) : it.date;
     const badgeHtml = isHover
@@ -3726,13 +3724,13 @@ function renderWeeklyPortfolioVsXeqtChart() {
 
         if (isZero) {
             gridLinesHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#64748b" stroke-width="1.8" stroke-dasharray="4 3" />
-                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#1e293b" font-weight="700" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-axis')}" stroke-width="1.8" stroke-dasharray="4 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${ktColor('text')}" font-weight="700" font-size="11" text-anchor="end">${label}</text>
             `;
         } else {
             gridLinesHtml += `
-                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="3 3" />
-                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="#8c959f" font-size="11" text-anchor="end">${label}</text>
+                <line x1="${padding.left}" y1="${y.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${y.toFixed(1)}" stroke="${ktColor('chart-grid')}" stroke-width="1" stroke-dasharray="3 3" />
+                <text x="${padding.left - 8}" y="${(y + 4).toFixed(1)}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="end">${label}</text>
             `;
         }
     }
@@ -3742,7 +3740,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
     if (Math.abs(avgSpread) > 0.01) {
         const avgY = getY(avgSpread);
         avgLineHtml = `
-            <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.85" />
+            <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(width - padding.right).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="${ktColor('chart-reference')}" stroke-width="1.4" stroke-dasharray="3 3" opacity="0.85" />
         `;
     }
 
@@ -3756,8 +3754,8 @@ function renderWeeklyPortfolioVsXeqtChart() {
         const x = padding.left + (idx + 0.5) * stepW;
         const label = typeof formatMonthShort === 'function' ? formatMonthShort(it.date) : (typeof formatDate === 'function' ? formatDate(it.date) : it.date);
         xTicksHtml += `
-            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="#f1f5f9" stroke-width="1" />
-            <text x="${x.toFixed(1)}" y="${height - 8}" fill="#8c959f" font-size="11" text-anchor="middle">${label}</text>
+            <line x1="${x.toFixed(1)}" y1="${padding.top}" x2="${x.toFixed(1)}" y2="${padding.top + plotH}" stroke="${ktColor('chart-grid')}" stroke-width="1" />
+            <text x="${x.toFixed(1)}" y="${height - 8}" fill="${ktColor('chart-label')}" font-size="11" text-anchor="middle">${label}</text>
         `;
     }
 
@@ -3774,11 +3772,11 @@ function renderWeeklyPortfolioVsXeqtChart() {
         if (it.chartVal >= 0) {
             barY = valY;
             barH = Math.max(2, zeroY - valY);
-            color = '#16a34a';
+            color = ktColor('success');
         } else {
             barY = zeroY;
             barH = Math.max(2, valY - zeroY);
-            color = '#dc2626';
+            color = ktColor('danger');
         }
 
         return `
@@ -3793,7 +3791,7 @@ function renderWeeklyPortfolioVsXeqtChart() {
             ${xTicksHtml}
             ${barsHtml}
             <!-- Vertical Crosshair Line -->
-            <line id="xeqt-weekly-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+            <line id="xeqt-weekly-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
             <!-- Mouse capture overlay -->
             <rect id="xeqt-weekly-overlay" x="${padding.left}" y="${padding.top}" width="${plotW}" height="${plotH}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />
         </svg>
@@ -3805,19 +3803,19 @@ function renderWeeklyPortfolioVsXeqtChart() {
     if (legendEl) {
         legendEl.innerHTML = `
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #16a34a;"></span>
+                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-success);"></span>
                 <strong class="kt-text-primary">Beat XEQT</strong>: <span class="kt-fw-bold kt-text-success">${beatCount} weeks (${beatPct}%)</span>
             </div>
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: #dc2626;"></span>
+                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-danger);"></span>
                 <strong class="kt-text-primary">Lagged XEQT</strong>: <span class="kt-fw-bold kt-text-danger">${lagCount} weeks</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #64748b;"></span>
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-axis);"></span>
                 <span class="kt-text-muted kt-fw-semibold">0.0% Parity</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed #94a3b8;"></span>
+                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-reference);"></span>
                 <span class="kt-text-muted">Average: <strong>${avgStr}</strong></span>
             </div>
         `;
@@ -3994,7 +3992,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
     }
 
     const badgeLabel = `🏆 ATH MILESTONE #${m.index}`;
-    const badgeHtml = `<span class="kt-badge kt-text-success kt-fw-bold" style="background: #dcfce7;">${badgeLabel}</span>`;
+    const badgeHtml = `<span class="kt-badge kt-text-success kt-fw-bold" style="background: var(--kt-success-soft);">${badgeLabel}</span>`;
     const dateStr = typeof formatDate === 'function' ? formatDate(m.date) : m.date;
     const prevDateStr = typeof formatDate === 'function' ? formatDate(m.prevDate) : m.prevDate;
     const diffValStr = typeof formatCurrency === 'function' ? formatCurrency(m.diffVal, currency) : `$${m.diffVal.toFixed(2)}`;
@@ -4018,7 +4016,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
         const compStr = compDiff >= 0
             ? (isPctUnit ? `+${compDiff.toFixed(2)}% vs avg` : `+${typeof formatCurrency === 'function' ? formatCurrency(compDiff, currency) : `$${compDiff.toFixed(2)}`} vs avg`)
             : (isPctUnit ? `${compDiff.toFixed(2)}% vs avg` : `-${typeof formatCurrency === 'function' ? formatCurrency(Math.abs(compDiff), currency) : `$${Math.abs(compDiff).toFixed(2)}`} vs avg`);
-        const compColor = compDiff >= 0 ? '#16a34a' : '#94a3b8';
+        const compColor = compDiff >= 0 ? ktColor('success') : ktColor('text-muted');
 
         avgCompHtml = `
             <div class="kt-readout__row kt-mt-0">
@@ -4211,13 +4209,13 @@ function renderAthBarChart() {
         }
 
         const isBaseline = tickVal === 0;
-        const strokeColor = isBaseline ? '#94a3b8' : '#cbd5e1';
+        const strokeColor = isBaseline ? ktColor('chart-axis') : ktColor('chart-grid');
         const strokeWidth = isBaseline ? '1.2' : '1';
         const strokeDash = isBaseline ? '' : 'stroke-dasharray="4 3"';
 
         gridLinesSvg += `
             <line x1="${padding.left}" y1="${yPos.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${yPos.toFixed(1)}" stroke="${strokeColor}" stroke-width="${strokeWidth}" ${strokeDash} />
-            <text x="${padding.left - 10}" y="${(yPos + 3.5).toFixed(1)}" font-size="10.5" font-weight="500" fill="#64748b" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${labelText}</text>
+            <text x="${padding.left - 10}" y="${(yPos + 3.5).toFixed(1)}" font-size="10.5" font-weight="500" fill="${ktColor('chart-label')}" text-anchor="end" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${labelText}</text>
         `;
     });
 
@@ -4229,7 +4227,7 @@ function renderAthBarChart() {
 
         avgLineSvg = `
             <g class="ath-avg-line-group" pointer-events="none">
-                <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="5 3" />
+                <line x1="${padding.left}" y1="${avgY.toFixed(1)}" x2="${(padding.left + plotW).toFixed(1)}" y2="${avgY.toFixed(1)}" stroke="${ktColor('chart-reference')}" stroke-width="1.8" stroke-dasharray="5 3" />
             </g>
         `;
     }
@@ -4256,26 +4254,26 @@ function renderAthBarChart() {
         if (showLabel) {
             const centerX = padding.left + idx * slotW + slotW / 2;
             xTicksSvg += `
-                <line x1="${centerX.toFixed(1)}" y1="${padding.top + plotH}" x2="${centerX.toFixed(1)}" y2="${padding.top + plotH + 4}" stroke="#cbd5e1" stroke-width="1" />
-                <text x="${centerX.toFixed(1)}" y="${padding.top + plotH + 16}" font-size="9.5" font-weight="500" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${m.index}</text>
+                <line x1="${centerX.toFixed(1)}" y1="${padding.top + plotH}" x2="${centerX.toFixed(1)}" y2="${padding.top + plotH + 4}" stroke="${ktColor('chart-axis')}" stroke-width="1" />
+                <text x="${centerX.toFixed(1)}" y="${padding.top + plotH + 16}" font-size="9.5" font-weight="500" fill="${ktColor('chart-label')}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">${m.index}</text>
             `;
         }
 
         // Static green bar with no hover highlight / border / opacity flashing
         barsSvg += `
-            <rect id="ath-bar-${idx}" class="ath-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" ry="2" fill="#16a34a" opacity="1" stroke="none" stroke-width="0" style="cursor: pointer;" />
+            <rect id="ath-bar-${idx}" class="ath-bar" data-idx="${idx}" x="${barX.toFixed(1)}" y="${barY.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" rx="2" ry="2" fill="${ktColor('success')}" opacity="1" stroke="none" stroke-width="0" style="cursor: pointer;" />
         `;
     });
 
     // Baseline axis
     const axisSvg = `
-        <line x1="${padding.left}" y1="${padding.top + plotH}" x2="${padding.left + plotW}" y2="${padding.top + plotH}" stroke="#94a3b8" stroke-width="1.2" />
-        <text x="${padding.left + plotW / 2}" y="${height - 6}" font-size="10" font-weight="600" fill="#64748b" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">All-Time High Milestone Number (1 to ${N})</text>
+        <line x1="${padding.left}" y1="${padding.top + plotH}" x2="${padding.left + plotW}" y2="${padding.top + plotH}" stroke="${ktColor('chart-axis')}" stroke-width="1.2" />
+        <text x="${padding.left + plotW / 2}" y="${height - 6}" font-size="10" font-weight="600" fill="${ktColor('chart-label')}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif">All-Time High Milestone Number (1 to ${N})</text>
     `;
 
     // Vertical Crosshair Cursor Line
     const cursorLineSvg = `
-        <line id="ath-chart-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
+        <line id="ath-chart-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${padding.top + plotH}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />
     `;
 
     // Overlay for smooth scrubbing & click detection
@@ -4732,7 +4730,7 @@ function renderMonthlyHeatmap() {
         }
         const ySign = fullYearPct > 0 ? '+' : '';
         const yVSign = fullYearDiff > 0 ? '+' : '';
-        const yBg = fullYearPct >= 0 ? '#166534' : '#991b1b';
+        const yBg = fullYearPct >= 0 ? ktColor('success-text') : ktColor('danger-text');
 
         const fyPctFormatted = `${ySign}${fullYearPct.toFixed(1)}%`;
         const fyPctPrecise = `${ySign}${fullYearPct.toFixed(2)}%`;
@@ -4744,7 +4742,7 @@ function renderMonthlyHeatmap() {
             ? `Full Year ${yData.year}: ${fyPctPrecise} (${fyValPrecise})`
             : `Full Year ${yData.year}: ${fyValPrecise} (${fyPctPrecise})`;
 
-        rowHtml += `<td class="kt-align-center kt-fw-bold kt-fs-2xs" style="color: #ffffff !important; background: ${yBg} !important; padding: 7px 4px; white-space: nowrap; border-radius: 4px; font-variant-numeric: tabular-nums;" title="${fyTitle}">
+        rowHtml += `<td class="kt-align-center kt-fw-bold kt-fs-2xs" style="color: var(--kt-surface) !important; background: ${yBg} !important; padding: 7px 4px; white-space: nowrap; border-radius: 4px; font-variant-numeric: tabular-nums;" title="${fyTitle}">
             ${fyText}
         </td>`;
 
@@ -4903,7 +4901,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
     const changeVal = item.changeVal;
     const changePct = item.changePct;
     const isPositive = isPct ? changePct >= 0 : changeVal >= 0;
-    const changeColor = isPositive ? '#16a34a' : '#cf222e';
+    const changeColor = isPositive ? ktColor('success') : ktColor('danger');
 
     const signVal = changeVal >= 0 ? '+' : '';
     const signPct = changePct >= 0 ? '+' : '';
@@ -5036,7 +5034,7 @@ function renderWeeklyBarChart() {
     let svg = `<svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="display: block; width: 100%; height: 100%; overflow: visible;" id="weekly-bar-svg">`;
 
     // Zero baseline
-    svg += `<line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="3,3"/>`;
+    svg += `<line x1="${padding.left}" y1="${zeroY}" x2="${width - padding.right}" y2="${zeroY}" stroke="${ktColor('chart-axis')}" stroke-width="1.5" stroke-dasharray="3,3"/>`;
 
     items.forEach((item, idx) => {
         const x = padding.left + (idx * stepW);
@@ -5047,17 +5045,17 @@ function renderWeeklyBarChart() {
         let barY, color;
         if (val >= 0) {
             barY = zeroY - barH;
-            color = '#16a34a';
+            color = ktColor('success');
         } else {
             barY = zeroY;
-            color = '#dc2626';
+            color = ktColor('danger');
         }
 
         svg += `<rect id="weekly-bar-rect-${idx}" x="${x}" y="${barY}" width="${barWidth}" height="${barH}" rx="1" fill="${color}" opacity="0.85" />`;
     });
 
     // Vertical Crosshair Line
-    svg += `<line id="weekly-bar-cursor-line" x1="0" y1="${padding.top}" x2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
+    svg += `<line id="weekly-bar-cursor-line" x1="0" y1="${padding.top}" x2="${height - padding.bottom}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;" />`;
 
     // Full Mouse Capture Overlay
     svg += `<rect id="weekly-bar-mouse-overlay" x="${padding.left}" y="${padding.top}" width="${chartWidth}" height="${chartHeight}" fill="transparent" style="cursor: crosshair; pointer-events: all;" />`;
@@ -5180,7 +5178,7 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
     if (!nearest || !nearest.r) return '';
     const isWeeks = unit === 'WEEKS';
     const isPeak = isWeeks ? (nearest.weeksBack === 0) : (Math.abs(nearest.ddVal) < 1);
-    const ddColor = isPeak ? '#16a34a' : '#cf222e';
+    const ddColor = isPeak ? ktColor('success') : ktColor('danger');
     const dateStr = typeof formatDate === 'function' ? formatDate(nearest.r.date) : nearest.r.date;
     const isUsd = currency === 'USD';
     const netVal = isUsd && nearest.r.totalUSD !== undefined ? nearest.r.totalUSD : (nearest.val || nearest.r.totalCAD);
@@ -5533,26 +5531,26 @@ function renderDrawdownChart() {
         if (isWeeks) {
             if (currentWeeksBack === 0) {
                 curStatEl.textContent = '0 weeks';
-                curStatEl.style.color = '#16a34a';
+                curStatEl.style.color = ktColor('success');
                 curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
-                curStatusEl.style.color = '#15803d';
+                curStatusEl.style.color = ktColor('success');
             } else {
                 curStatEl.textContent = `${currentWeeksBack} ${currentWeeksBack === 1 ? 'week' : 'weeks'}`;
-                curStatEl.style.color = currentWeeksBack >= 4 ? '#dc2626' : '';
+                curStatEl.style.color = currentWeeksBack >= 4 ? ktColor('danger') : '';
                 curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} (${currentDDPct.toFixed(2)}%) from ATH`;
-                curStatusEl.style.color = '#b91c1c';
+                curStatusEl.style.color = ktColor('danger');
             }
         } else {
             if (currentDDVal >= -1) {
                 curStatEl.textContent = '$0.00 (0.0%)';
-                curStatEl.style.color = '#16a34a';
+                curStatEl.style.color = ktColor('success');
                 curStatusEl.textContent = `🟢 At All-Time High (${formatCurrency(overallPeakVal, currency)})`;
-                curStatusEl.style.color = '#15803d';
+                curStatusEl.style.color = ktColor('success');
             } else {
                 curStatEl.textContent = `${formatCurrency(currentDDVal, currency)} (${currentDDPct.toFixed(2)}%)`;
-                curStatEl.style.color = '#dc2626';
+                curStatEl.style.color = ktColor('danger');
                 curStatusEl.textContent = `🔴 Down ${formatCurrency(Math.abs(currentDDVal), currency)} from ATH (${formatCurrency(overallPeakVal, currency)})`;
-                curStatusEl.style.color = '#b91c1c';
+                curStatusEl.style.color = ktColor('danger');
             }
         }
     }
@@ -5590,8 +5588,8 @@ function renderDrawdownChart() {
     svg += `
         <defs>
             <linearGradient id="underwaterGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#ef4444" stop-opacity="0.12"/>
-                <stop offset="100%" stop-color="#b91c1c" stop-opacity="0.55"/>
+                <stop offset="0%" stop-color="${ktColor('danger')}" stop-opacity="0.12"/>
+                <stop offset="100%" stop-color="${ktColor('danger')}" stop-opacity="0.55"/>
             </linearGradient>
         </defs>
     `;
@@ -5611,8 +5609,8 @@ function renderDrawdownChart() {
             label = formatCurrency(tickVal, currency);
         }
         svg += `
-            <line x1="${padding.left}" y1="${tickY}" x2="${width - padding.right}" y2="${tickY}" stroke="#e2e8f0" stroke-width="${i === 0 ? '1.5' : '1'}" stroke-dasharray="${i === 0 ? '' : '3,3'}"/>
-            <text x="${padding.left - 8}" y="${tickY + 4}" font-size="11" font-weight="${i === 0 ? '700' : '500'}" fill="${i === 0 ? '#1f2328' : '#64748b'}" text-anchor="end">${label}</text>
+            <line x1="${padding.left}" y1="${tickY}" x2="${width - padding.right}" y2="${tickY}" stroke="${ktColor('chart-grid')}" stroke-width="${i === 0 ? '1.5' : '1'}" stroke-dasharray="${i === 0 ? '' : '3,3'}"/>
+            <text x="${padding.left - 8}" y="${tickY + 4}" font-size="11" font-weight="${i === 0 ? '700' : '500'}" fill="${i === 0 ? ktColor('text') : ktColor('chart-label')}" text-anchor="end">${label}</text>
         `;
     }
 
@@ -5645,10 +5643,10 @@ function renderDrawdownChart() {
 
         // Render Area & Stroke
         svg += `<path d="${areaD}" fill="url(#underwaterGrad)"/>`;
-        svg += `<path d="${pathD}" fill="none" stroke="#dc2626" stroke-width="2" stroke-linejoin="round"/>`;
+        svg += `<path d="${pathD}" fill="none" stroke="${ktColor('danger')}" stroke-width="2" stroke-linejoin="round"/>`;
 
         // Top zero baseline
-        svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${width - padding.right}" y2="${padding.top}" stroke="#475569" stroke-width="1.5"/>`;
+        svg += `<line x1="${padding.left}" y1="${padding.top}" x2="${width - padding.right}" y2="${padding.top}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5"/>`;
 
         // Lowest Drawdown / Time Back Point Markers (up to 3 lowest points labeled)
         const lowestPoints = findLowestDrawdownPoints(points, 3);
@@ -5657,8 +5655,8 @@ function renderDrawdownChart() {
                 ? `-${pt.weeksBack} wks`
                 : (isPct ? pt.ddPct.toFixed(1) + '%' : formatCurrency(pt.ddVal, currency));
             svg += `
-                <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="#b91c1c" stroke="#ffffff" stroke-width="2" style="pointer-events: none;"/>
-                <text x="${pt.x}" y="${Math.min(height - 10, pt.y + 16)}" font-size="10.5" font-weight="800" fill="#b91c1c" text-anchor="middle" style="pointer-events: none;">
+                <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="${ktColor('danger')}" stroke="${ktColor('surface')}" stroke-width="2" style="pointer-events: none;"/>
+                <text x="${pt.x}" y="${Math.min(height - 10, pt.y + 16)}" font-size="10.5" font-weight="800" fill="${ktColor('danger')}" text-anchor="middle" style="pointer-events: none;">
                     ${markerLabel}
                 </text>
             `;
@@ -5670,16 +5668,16 @@ function renderDrawdownChart() {
         for (let i = 0; i < rawHistory.length; i += step) {
             const pt = points[i];
             if (pt) {
-                svg += `<text x="${pt.x}" y="${height - 8}" font-size="10.5" fill="#64748b" text-anchor="middle">${fmt(pt.r.date)}</text>`;
+                svg += `<text x="${pt.x}" y="${height - 8}" font-size="10.5" fill="${ktColor('chart-label')}" text-anchor="middle">${fmt(pt.r.date)}</text>`;
             }
         }
     }
 
     // Vertical Cursor line (hidden initially)
-    svg += `<line id="dd-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${height - padding.bottom}" stroke="#475569" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;"/>`;
+    svg += `<line id="dd-cursor-line" x1="0" y1="${padding.top}" x2="0" y2="${height - padding.bottom}" stroke="${ktColor('chart-cursor')}" stroke-width="1.5" stroke-dasharray="3,3" style="display: none; pointer-events: none;"/>`;
 
     // Intersection hover dot on the curve
-    svg += `<circle id="dd-hover-dot" r="5" fill="#dc2626" stroke="#ffffff" stroke-width="2" style="display: none; pointer-events: none;"/>`;
+    svg += `<circle id="dd-hover-dot" r="5" fill="${ktColor('danger')}" stroke="${ktColor('surface')}" stroke-width="2" style="display: none; pointer-events: none;"/>`;
 
     // Transparent overlay rect for mouse tracking across the entire chart area
     svg += `<rect id="dd-overlay" x="0" y="0" width="${width}" height="${height}" fill="transparent" style="cursor: crosshair;"/>`;

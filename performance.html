@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Finance - Performance &amp; Return Analytics</title>
     <link rel="stylesheet" href="https://koraytugay.github.io/kt-styles/dist/kt.min.css">
-    <link rel="stylesheet" href="styles.css?v=4.0">
+    <link rel="stylesheet" href="styles.css?v=4.1">
 </head>
 <body>
     <div class="kt-container">
@@ -43,7 +43,7 @@
             <!-- Key Metric Stat Cards -->
             <div class="kt-stat-row">
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-total-gain" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value" id="stat-total-gain" style="color: var(--kt-success);">+$0.00</span>
                     <span class="kt-stat__label">Current Unrealized Gains</span>
                     <span class="kt-stat__sub" id="stat-total-gain-pct">Open positions</span>
                 </div>
@@ -63,12 +63,12 @@
                     <span class="kt-stat__sub" id="stat-win-count">0 up / 0 down</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-best-week" style="color: #16a34a;">+$0.00</span>
+                    <span class="kt-stat__value" id="stat-best-week" style="color: var(--kt-success);">+$0.00</span>
                     <span class="kt-stat__label">Best Week</span>
                     <span class="kt-stat__sub" id="stat-best-week-date">-</span>
                 </div>
                 <div class="kt-stat">
-                    <span class="kt-stat__value" id="stat-worst-week" style="color: #cf222e;">-$0.00</span>
+                    <span class="kt-stat__value" id="stat-worst-week" style="color: var(--kt-danger);">-$0.00</span>
                     <span class="kt-stat__label">Worst Week</span>
                     <span class="kt-stat__sub" id="stat-worst-week-date">-</span>
                 </div>
@@ -197,14 +197,14 @@
                 <!-- Visual Wealth Decomposition Stack Bar -->
                 <div>
                     <div class="kt-split kt-fs-xs kt-fw-bold kt-mb-1 kt-text-secondary">
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #0969da;"></span><span id="wealth-bar-label-starting">Starting Baseline: $0.00 (0.0%)</span></span>
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #334155;"></span><span id="wealth-bar-label-savings">Contributions &amp; Realized: +$0.00 (0.0%)</span></span>
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #16a34a;"></span><span class="kt-text-success" id="wealth-bar-label-gains">Current Unrealized Gains: +$0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span><span id="wealth-bar-label-starting">Starting Baseline: $0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-3);"></span><span id="wealth-bar-label-savings">Contributions &amp; Realized: +$0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-success);"></span><span class="kt-text-success" id="wealth-bar-label-gains">Current Unrealized Gains: +$0.00 (0.0%)</span></span>
                     </div>
                     <div style="width: 100%; height: 18px; border-radius: 8px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
-                        <div id="wealth-bar-starting" style="background: #0969da; height: 100%; width: 50%;" title="Starting Baseline"></div>
-                        <div id="wealth-bar-savings" style="background: #334155; height: 100%; width: 35%;" title="Contributions &amp; Realized Growth"></div>
-                        <div id="wealth-bar-gains" style="background: #16a34a; height: 100%; width: 15%;" title="Current Unrealized Gains"></div>
+                        <div id="wealth-bar-starting" style="background: var(--kt-series-1); height: 100%; width: 50%;" title="Starting Baseline"></div>
+                        <div id="wealth-bar-savings" style="background: var(--kt-series-3); height: 100%; width: 35%;" title="Contributions &amp; Realized Growth"></div>
+                        <div id="wealth-bar-gains" style="background: var(--kt-success); height: 100%; width: 15%;" title="Current Unrealized Gains"></div>
                     </div>
                 </div>
             </div>
@@ -241,7 +241,7 @@
                     </div>
                     <div style="background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
                         <div class="kt-eyebrow">Real Purchasing Power Gain</div>
-                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1" id="pp-real-gain" style="color: #16a34a;">+$0.00</div>
+                        <div class="kt-fs-lg kt-fw-heavy kt-mt-1" id="pp-real-gain" style="color: var(--kt-success);">+$0.00</div>
                         <div class="kt-fs-2xs kt-text-success kt-fw-semibold kt-mt-0" id="pp-real-gain-sub">+0.0% real growth above inflation</div>
                     </div>
                     <div style="background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 8px; padding: 12px 14px;">
@@ -259,12 +259,12 @@
                 <!-- Visual Stack Bar: Real Gain vs Inflation Drag -->
                 <div class="kt-mb-3">
                     <div class="kt-split kt-fs-xs kt-fw-bold kt-mb-1 kt-text-secondary">
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #16a34a;"></span><span class="kt-text-success" id="pp-bar-label-real">Real Purchasing Power Expansion: +$0.00 (0.0%)</span></span>
-                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: #94a3b8;"></span><span id="pp-bar-label-drag">Cost-of-Living Drag: -$0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-success);"></span><span class="kt-text-success" id="pp-bar-label-real">Real Purchasing Power Expansion: +$0.00 (0.0%)</span></span>
+                        <span class="kt-legend__item"><span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-4);"></span><span id="pp-bar-label-drag">Cost-of-Living Drag: -$0.00 (0.0%)</span></span>
                     </div>
                     <div style="width: 100%; height: 16px; border-radius: 8px; overflow: hidden; display: flex; background: var(--kt-surface-sunken);">
-                        <div id="pp-bar-real" style="background: #16a34a; height: 100%; width: 80%; transition: width 0.3s ease;"></div>
-                        <div id="pp-bar-drag" style="background: #94a3b8; height: 100%; width: 20%; transition: width 0.3s ease;"></div>
+                        <div id="pp-bar-real" style="background: var(--kt-success); height: 100%; width: 80%; transition: width 0.3s ease;"></div>
+                        <div id="pp-bar-drag" style="background: var(--kt-series-4); height: 100%; width: 20%; transition: width 0.3s ease;"></div>
                     </div>
                 </div>
 
@@ -291,8 +291,8 @@
                 <!-- Comparison Grid Cards -->
                 <div class="kt-mb-5" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px;">
                     <!-- Card 1: Your Portfolio -->
-                    <div style="background: white; border-radius: 10px; padding: 16px 18px; border: 2px solid var(--kt-accent); position: relative;">
-                        <div class="kt-eyebrow" style="position: absolute; top: -10px; right: 14px; background: #0969da; color: white; padding: 2px 8px; border-radius: 10px;">
+                    <div style="background: var(--kt-surface); border-radius: 10px; padding: 16px 18px; border: 2px solid var(--kt-accent); position: relative;">
+                        <div class="kt-eyebrow" style="position: absolute; top: -10px; right: 14px; background: var(--kt-accent); color: var(--kt-text-on-accent); padding: 2px 8px; border-radius: 10px;">
                             Your Portfolio
                         </div>
                         <div class="kt-eyebrow">My Finance Portfolio</div>
@@ -381,17 +381,17 @@
                         <div class="kt-mb-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 12px;">
                             <div>
                                 <div class="kt-eyebrow">Progress (%)</div>
-                                <div class="kt-fs-lg kt-fw-heavy kt-mt-0" id="r52-best-progress-pct" style="color: #16a34a;">+0.00%</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-mt-0" id="r52-best-progress-pct" style="color: var(--kt-success);">+0.00%</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-best-progress-usd-pct">+0.00% USD</div>
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (CAD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-best-progress-cad" style="color: #1f2328;">+$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-best-progress-cad" style="color: var(--kt-text);">+$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-best-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (USD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-best-progress-usd" style="color: #1f2328;">+US$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-best-progress-usd" style="color: var(--kt-text);">+US$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-best-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
@@ -408,7 +408,7 @@
                         <div class="kt-split kt-mb-2">
                             <div class="kt-cluster">
                                 <span class="kt-fs-base kt-fw-heavy kt-text-primary">⏱️ Current (Last) 52 Weeks</span>
-                                <span id="r52-current-weeks-pill" class="kt-badge kt-fw-bold" style="background: #e0f2fe; ">-</span>
+                                <span id="r52-current-weeks-pill" class="kt-badge kt-fw-bold" style="background: var(--kt-accent-soft); ">-</span>
                             </div>
                             <span class="kt-fs-xs kt-text-muted kt-fw-semibold" id="r52-current-dates">-</span>
                         </div>
@@ -422,12 +422,12 @@
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (CAD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-current-progress-cad" style="color: #1f2328;">+$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-current-progress-cad" style="color: var(--kt-text);">+$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-current-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (USD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-current-progress-usd" style="color: #1f2328;">+US$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-current-progress-usd" style="color: var(--kt-text);">+US$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-current-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
@@ -453,17 +453,17 @@
                         <div class="kt-mb-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: var(--kt-surface-hover); border: 1px solid var(--kt-divider); border-radius: 8px; padding: 10px 12px;">
                             <div>
                                 <div class="kt-eyebrow">Progress (%)</div>
-                                <div class="kt-fs-lg kt-fw-heavy kt-mt-0" id="r52-worst-progress-pct" style="color: #cf222e;">+0.00%</div>
+                                <div class="kt-fs-lg kt-fw-heavy kt-mt-0" id="r52-worst-progress-pct" style="color: var(--kt-danger);">+0.00%</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-worst-progress-usd-pct">+0.00% USD</div>
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (CAD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-worst-progress-cad" style="color: #1f2328;">+$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-worst-progress-cad" style="color: var(--kt-text);">+$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-worst-start-end-cad">$0k &rarr; $0k</div>
                             </div>
                             <div>
                                 <div class="kt-eyebrow">Progress (USD)</div>
-                                <div class="kt-fs-lg kt-fw-heavy" id="r52-worst-progress-usd" style="color: #1f2328;">+US$0.00</div>
+                                <div class="kt-fs-lg kt-fw-heavy" id="r52-worst-progress-usd" style="color: var(--kt-text);">+US$0.00</div>
                                 <div class="kt-fs-xs kt-text-muted" id="r52-worst-start-end-usd">US$0k &rarr; US$0k</div>
                             </div>
                         </div>
@@ -496,21 +496,21 @@
                         </div>
                         <div class="kt-cluster kt-fs-xs kt-fw-bold kt-mb-3" id="r52-overlay-legend">
                             <span class="kt-cluster" id="r52-legend-current">
-                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0969da;"></span>
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span>
                                 Current 52W: <strong id="r52-legend-current-val">+0.00%</strong>
                             </span>
                             <span class="kt-cluster kt-text-success" id="r52-legend-best">
-                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #16a34a;"></span>
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-success);"></span>
                                 Best 52W: <strong id="r52-legend-best-val">+0.00%</strong>
                             </span>
                             <span class="kt-cluster kt-text-danger" id="r52-legend-worst">
-                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #cf222e;"></span>
+                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-danger);"></span>
                                 Worst 52W: <strong id="r52-legend-worst-val">+0.00%</strong>
                             </span>
-                            <span id="r52-legend-spread" style="background: #f3e8ff; padding: 2px 8px; border-radius: 4px;">
+                            <span id="r52-legend-spread" style="background: var(--kt-surface-sunken); padding: 2px 8px; border-radius: 4px;">
                                 Spread: <strong id="r52-legend-spread-val">+0.00%</strong>
                             </span>
-                            <span class="kt-text-secondary kt-fs-2xs kt-fw-medium" id="r52-legend-overlap-badge" style="display: none; background: var(--kt-surface-hover); border: 1px solid #d0d7de; padding: 2px 8px; border-radius: 12px;"></span>
+                            <span class="kt-text-secondary kt-fs-2xs kt-fw-medium" id="r52-legend-overlap-badge" style="display: none; background: var(--kt-surface-hover); border: 1px solid var(--kt-border-strong); padding: 2px 8px; border-radius: 12px;"></span>
                         </div>
                         <div class="kt-chart-layout">
                             <div class="kt-chart-layout__plot">
@@ -537,8 +537,8 @@
                                 </p>
                             </div>
                             <div class="kt-cluster">
-                                <button type="button" id="btn-r52-toggle-xeqt" class="kt-btn kt-btn--accent active kt-cluster kt-fs-xs kt-fw-bold" onclick="toggleRolling52Xeqt()" style="padding: 4px 10px; border: 1px solid #16a34a; border-radius: 6px; background: #f0fdf4; color: #16a34a; cursor: pointer;">
-                                    <span id="r52-xeqt-check" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #16a34a;"></span>
+                                <button type="button" id="btn-r52-toggle-xeqt" class="kt-btn kt-btn--accent active kt-cluster kt-fs-xs kt-fw-bold" onclick="toggleRolling52Xeqt()" style="padding: 4px 10px; border: 1px solid var(--kt-accent); border-radius: 6px; background: var(--kt-accent-soft); color: var(--kt-accent); cursor: pointer;">
+                                    <span id="r52-xeqt-check" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--kt-chart-reference);"></span>
                                     Overlay XEQT Benchmark
                                 </button>
                                 <div class="kt-segmented kt-segmented--sm" role="group">
@@ -556,7 +556,7 @@
                             <span>Portfolio Peak: <strong id="r52-timeline-stat-peak">-</strong></span>
                             <span>Portfolio Lowest: <strong class="kt-text-danger" id="r52-timeline-stat-low">-</strong></span>
                             <span>Current 52W: <strong class="kt-text-primary" id="r52-timeline-stat-current">-</strong></span>
-                            <span id="r52-timeline-stat-spread-wrap" style="background: #f3e8ff; padding: 1px 6px; border-radius: 4px;">Spread: <strong id="r52-timeline-stat-spread">+0.0%</strong></span>
+                            <span id="r52-timeline-stat-spread-wrap" style="background: var(--kt-surface-sunken); padding: 1px 6px; border-radius: 4px;">Spread: <strong id="r52-timeline-stat-spread">+0.0%</strong></span>
                         </div>
 
                         <!-- SVG Chart Container -->
@@ -655,7 +655,7 @@
         </footer>
     </div>
 
-    <script src="api.js?v=3.5"></script>
-    <script src="performance.js?v=3.5"></script>
+    <script src="api.js?v=3.6"></script>
+    <script src="performance.js?v=3.6"></script>
 </body>
 </html>
