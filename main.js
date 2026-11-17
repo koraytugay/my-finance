@@ -459,27 +459,7 @@ function renderMainTopStats(mainData, holdings, history) {
         }
     }
 
-    // 3. Time Back in Terms of Money (CAD & USD)
-    const timeBackCAD = calculateTimeBack(validHistory, totalCAD, 'totalCAD');
-    const timeBackUSD = calculateTimeBack(validHistory, totalUSD, 'totalUSD');
-
-    const tbCadEl = document.getElementById('main-stat-timeback-cad');
-    const tbCadSubEl = document.getElementById('main-stat-timeback-cad-sub');
-    if (tbCadEl) {
-        tbCadEl.textContent = timeBackCAD.label;
-        tbCadEl.style.color = timeBackCAD.weeks > 0 ? (timeBackCAD.weeks >= 4 ? ktColor('danger') : '') : ktColor('success');
-        if (tbCadSubEl) tbCadSubEl.textContent = timeBackCAD.sub;
-    }
-
-    const tbUsdEl = document.getElementById('main-stat-timeback-usd');
-    const tbUsdSubEl = document.getElementById('main-stat-timeback-usd-sub');
-    if (tbUsdEl) {
-        tbUsdEl.textContent = timeBackUSD.label;
-        tbUsdEl.style.color = timeBackUSD.weeks > 0 ? (timeBackUSD.weeks >= 4 ? ktColor('danger') : '') : ktColor('success');
-        if (tbUsdSubEl) tbUsdSubEl.textContent = timeBackUSD.sub;
-    }
-
-    // 4. All-Time High Status (CAD & USD)
+    // 3. All-Time High Status (CAD & USD)
     const athValue = mainData.metrics?.athValue || 0;
     const diffFromAth = totalCAD - athValue;
     const isAth = diffFromAth >= -1.0;
@@ -533,7 +513,7 @@ function renderMainTopStats(mainData, holdings, history) {
         }
     }
 
-    // 5. Asset Allocation Categories (CAD & USD)
+    // 4. Asset Allocation Categories (CAD & USD)
     const categories = mainData?.categories || [];
     const catStocks = categories.find(c => c.name === 'Stocks') || { value: 0, percentage: '0%' };
     const catFixed = categories.find(c => c.name === 'Fixed Income') || { value: 0, percentage: '0%' };

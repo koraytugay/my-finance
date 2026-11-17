@@ -1523,7 +1523,7 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
     }
   });
 
-  await t.test('renderMainTopStats renders all 7 CAD cards and 7 USD cards with accurate values and labels', () => {
+  await t.test('renderMainTopStats renders all 6 CAD cards and 6 USD cards with accurate values and labels', () => {
     const mockElements = {
       'main-stat-total-cad': { textContent: '' },
       'main-stat-total-cad-sub': { textContent: '' },
@@ -1535,10 +1535,6 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       'main-stat-week-change-usd': { textContent: '', style: {} },
       'main-stat-week-usd-label': { textContent: '' },
       'main-stat-week-usd-sub': { innerHTML: '' },
-      'main-stat-timeback-cad': { textContent: '', style: {} },
-      'main-stat-timeback-cad-sub': { textContent: '' },
-      'main-stat-timeback-usd': { textContent: '', style: {} },
-      'main-stat-timeback-usd-sub': { textContent: '' },
       'main-stat-ath': { textContent: '', style: {} },
       'main-stat-ath-label': { textContent: '' },
       'main-stat-ath-val': { textContent: '' },
@@ -1616,29 +1612,25 @@ test('Net Worth Progression Multi-Year Overlay Suite', async (t) => {
       assert.equal(mockElements['main-stat-week-change-usd'].textContent, '+US$3,600.00');
       assert.equal(mockElements['main-stat-week-usd-label'].textContent, 'Week 2 (USD)');
 
-      // 3. Time Back CAD & USD
-      assert.equal(mockElements['main-stat-timeback-cad'].textContent, '0 weeks');
-      assert.equal(mockElements['main-stat-timeback-usd'].textContent, '0 weeks');
-
-      // 4. ATH Status CAD & USD
+      // 3. ATH Status CAD & USD
       assert.equal(mockElements['main-stat-ath'].textContent, '🟢 ATH!');
       assert.equal(mockElements['main-stat-ath-label'].textContent, 'ATH Status (CAD)');
       assert.equal(mockElements['main-stat-ath-usd'].textContent, '🟢 ATH!');
       assert.equal(mockElements['main-stat-ath-usd-label'].textContent, 'ATH Status (USD)');
 
-      // 5. Equities (Stocks) CAD & USD
+      // 4. Equities (Stocks) CAD & USD
       assert.equal(mockElements['main-stat-stocks'].textContent, '$84,000.00');
       assert.equal(mockElements['main-stat-stocks-pct'].textContent, '80.00% of portfolio');
       assert.equal(mockElements['main-stat-stocks-usd'].textContent, 'US$60,480.00');
       assert.equal(mockElements['main-stat-stocks-usd-pct'].textContent, '80.00% of portfolio');
 
-      // 6. Fixed Income CAD & USD
+      // 5. Fixed Income CAD & USD
       assert.equal(mockElements['main-stat-fixed'].textContent, '$15,750.00');
       assert.equal(mockElements['main-stat-fixed-pct'].textContent, '15.00% of portfolio');
       assert.equal(mockElements['main-stat-fixed-usd'].textContent, 'US$11,340.00');
       assert.equal(mockElements['main-stat-fixed-usd-pct'].textContent, '15.00% of portfolio');
 
-      // 7. Metals & Crypto CAD & USD
+      // 6. Metals & Crypto CAD & USD
       // 3150 + 2100 = 5250 CAD -> 5250 * 0.72 = 3780 USD (5.00%)
       assert.equal(mockElements['main-stat-alts'].textContent, '$5,250.00');
       assert.equal(mockElements['main-stat-alts-pct'].textContent, '5.00% of portfolio');

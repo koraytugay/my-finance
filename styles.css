@@ -21,23 +21,28 @@
     margin-bottom: var(--kt-space-5);
 }
 
-/* ================= 7-column stat rows (CAD & USD) ================= */
+/* ================= 6-column stat rows (CAD & USD) ================= */
+.kt-stat-row.stats-grid-6,
 .kt-stat-row.stats-grid-7 {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 10px;
     margin-bottom: var(--kt-space-3);
 }
 
+.stats-grid-6 .kt-stat,
 .stats-grid-7 .kt-stat {
     padding: var(--kt-space-3) 6px;
     min-width: 0;
 }
 
+.stats-grid-6 .kt-stat__value,
 .stats-grid-7 .kt-stat__value {
     font-size: 1.32rem;
     white-space: nowrap;
 }
 
+.stats-grid-6 .kt-stat__label,
+.stats-grid-6 .kt-stat__sub,
 .stats-grid-7 .kt-stat__label,
 .stats-grid-7 .kt-stat__sub {
     white-space: nowrap;
@@ -47,6 +52,7 @@
 }
 
 @media (max-width: 1150px) {
+    .kt-stat-row.stats-grid-6,
     .kt-stat-row.stats-grid-7 {
         grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
     }
