@@ -72,7 +72,8 @@ const {
   setDrawdownMode,
   findLowestDrawdownPoints,
   getDrawdownChartState,
-  resetDrawdownChartState
+  resetDrawdownChartState,
+  niceNegativeAxis
 } = require('../main.js');
 
 // Mock portfolio holdings fixture for unit testing (pure synthetic data; zero password dependency)
@@ -2956,3 +2957,18 @@ test('Portfolio Drawdown Underwater Chart Suite (Main Page)', async (t) => {
 
 
 
+
+test('niceNegativeAxis picks round drawdown axis steps', () => {
+  assert.deepEqual(niceNegativeAxis(-12079, 5), { min: -12500, step: 2500, ticks: 5 });
+  assert.deepEqual(niceNegativeAxis(-3200, 5), { min: -4000, step: 1000, ticks: 4 });
+  assert.deepEqual(niceNegativeAxis(-27.3, 5), { min: -30, step: 10, ticks: 3 });
+  assert.deepEqual(niceNegativeAxis(-10000, 5), { min: -10000, step: 2000, ticks: 5 });
+  assert.deepEqual(niceNegativeAxis(0, 5), { min: -1, step: 1, ticks: 1 });
+  // integerOnly avoids fractional week steps
+  assert.deepEqual(niceNegativeAxis(-12, 5, true), { min: -15, step: 5, ticks: 3 });
+  assert.deepEqual(niceNegativeAxis(-4, 5, true), { min: -4, step: 1, ticks: 4 });
+  for (const v of [-1, -7.7, -999, -12345, -98765, -0.4]) {
+    const a = niceNegativeAxis(v, 5);
+    assert.ok(a.min <= v && a.ticks <= 5, `covers ${v}`);
+  }
+});

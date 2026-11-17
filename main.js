@@ -5454,6 +5454,25 @@ function findLowestDrawdownPoints(points, maxCount = 3, minDistancePx = 30) {
     return selected.sort((a, b) => (a.idx ?? a.x ?? 0) - (b.idx ?? b.x ?? 0));
 }
 
+/**
+ * Round axis for a chart that runs from 0 down to a negative value.
+ * Picks a step of 1, 2, 2.5 or 5 x 10^k so that at most `maxTicks` steps cover |rawMin|.
+ * With integerOnly, only whole-number steps are used (e.g. weeks).
+ * Returns { min, step, ticks } where min = -step * ticks.
+ */
+function niceNegativeAxis(rawMin, maxTicks = 5, integerOnly = false) {
+    const span = Math.abs(Number(rawMin) || 0);
+    if (span === 0) return { min: -1, step: 1, ticks: 1 };
+    const rough = span / maxTicks;
+    const mag = Math.pow(10, Math.floor(Math.log10(rough)));
+    const step = [1, 2, 2.5, 5, 10]
+        .map(m => m * mag)
+        .filter(s => !integerOnly || (s >= 1 && Number.isInteger(s)))
+        .find(s => Math.ceil(span / s - 1e-9) <= maxTicks) || Math.max(1, Math.ceil(rough));
+    const ticks = Math.max(1, Math.ceil(span / step - 1e-9));
+    return { min: -step * ticks, step, ticks };
+}
+
 function renderDrawdownChart() {
     if (typeof document === 'undefined') return;
     const container = document.getElementById('drawdown-chart-container');
@@ -5548,9 +5567,11 @@ function renderDrawdownChart() {
     const chartWidth = Math.max(10, width - padding.left - padding.right);
     const chartHeight = height - padding.top - padding.bottom;
 
-    const minVal = isWeeks
-        ? -Math.max(4, Math.ceil((maxWeeksBack * 1.15) / 4) * 4)
-        : (isPct ? Math.min(maxDDPct * 1.15, -1) : Math.min(maxDDVal * 1.15, -1000));
+    const rawMin = isWeeks
+        ? -Math.max(4, maxWeeksBack * 1.1)
+        : (isPct ? Math.min(maxDDPct * 1.1, -1) : Math.min(maxDDVal * 1.1, -1000));
+    const axis = niceNegativeAxis(rawMin, 5, isWeeks);
+    const minVal = axis.min;
 
     function getY(val) {
         const fraction = minVal !== 0 ? (val / minVal) : 0; // 0 to 1
@@ -5574,18 +5595,18 @@ function renderDrawdownChart() {
     `;
 
     // Horizontal grid lines
-    const gridTicks = 4;
+    const gridTicks = axis.ticks;
     for (let i = 0; i <= gridTicks; i++) {
-        const tickVal = (minVal / gridTicks) * i;
+        const tickVal = -axis.step * i;
         const tickY = getY(tickVal);
         let label = '';
         if (isWeeks) {
             const w = Math.round(Math.abs(tickVal));
             label = i === 0 ? '0 wks' : `-${w} wks`;
         } else if (isPct) {
-            label = `${tickVal.toFixed(1)}%`;
+            label = `${Number(tickVal.toFixed(2))}%`;
         } else {
-            label = formatCurrency(tickVal, currency);
+            label = formatCurrency(tickVal, currency).replace(/\.00$/, '');
         }
         svg += `
             <line x1="${padding.left}" y1="${tickY}" x2="${width - padding.right}" y2="${tickY}" stroke="${ktColor('chart-grid')}" stroke-width="${i === 0 ? '1.5' : '1'}" stroke-dasharray="${i === 0 ? '' : '3,3'}"/>
@@ -5764,6 +5785,7 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         calculateMainData,
+        niceNegativeAxis,
         renderMainProgressionChart,
         renderMainYearOverlayChart,
         renderMainTopStats,
