@@ -629,6 +629,29 @@ function calculateTimeBack(history, currentVal, currencyKey) {
     };
 }
 
+function renderAllocationRow(name, value, pct, swatchColor) {
+    const tr = document.createElement('tr');
+    const swatch = swatchColor ? `<span class="kt-legend__swatch" style="--kt-legend-color: ${swatchColor};"></span> ` : '';
+    tr.innerHTML = `
+        <td>${swatch}${escapeHtml(name)}</td>
+        <td class="kt-num">${formatCurrency(value, 'CAD')}</td>
+        <td class="kt-num">${pct ? escapeHtml(pct) : '&mdash;'}</td>
+    `;
+    return tr;
+}
+
+function renderAllocationTotal(tfootId, value, pct) {
+    const tfoot = document.getElementById(tfootId);
+    if (!tfoot) return;
+    tfoot.innerHTML = `
+        <tr>
+            <td>Total Portfolio</td>
+            <td class="kt-num">${formatCurrency(value, 'CAD')}</td>
+            <td class="kt-num">${pct}</td>
+        </tr>
+    `;
+}
+
 function renderAssetClassTable(mainData, holdings) {
     const tbody = document.getElementById('tbody-asset-class');
     tbody.innerHTML = '';
@@ -640,49 +663,21 @@ function renderAssetClassTable(mainData, holdings) {
     let totalEquityVal = 0;
     equityItems.forEach(item => {
         totalEquityVal += item.value;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
-        `;
-        tbody.appendChild(tr);
+        tbody.appendChild(renderAllocationRow(item.name, item.value, item.percentage));
     });
 
     // Subtotal for Equities
-    const eqSubtotalTr = document.createElement('tr');
-    eqSubtotalTr.style.background = ktColor('surface-hover');
-    eqSubtotalTr.style.borderTop = '1.5px solid var(--kt-border-strong)';
-    eqSubtotalTr.style.borderBottom = '1.5px solid var(--kt-border-strong)';
-    eqSubtotalTr.innerHTML = `
-        <td><strong>Total Equities</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-text-primary">${formatCurrency(totalEquityVal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy kt-text-primary">100.00%</td>
-    `;
+    const eqSubtotalTr = renderAllocationRow('Total Equities', totalEquityVal, '100.00%');
+    eqSubtotalTr.className = 'kt-table__subtotal';
     tbody.appendChild(eqSubtotalTr);
 
     // Other Asset Classes
     otherItems.forEach(item => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-text-muted">${item.percentage ? escapeHtml(item.percentage) : '&mdash;'}</td>
-        `;
-        tbody.appendChild(tr);
+        tbody.appendChild(renderAllocationRow(item.name, item.value, item.percentage));
     });
 
-    // Grand Total Portfolio Row
     const grandTotal = mainData.metrics && mainData.metrics.totalValue ? mainData.metrics.totalValue : holdings.reduce((s, h) => s + h.sum, 0);
-    const totalTr = document.createElement('tr');
-    totalTr.style.background = ktColor('chart-grid');
-    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
-    totalTr.innerHTML = `
-        <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(grandTotal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy">&mdash;</td>
-    `;
-    tbody.appendChild(totalTr);
+    renderAllocationTotal('tfoot-asset-class', grandTotal, '&mdash;');
 }
 
 function renderAccountTypeTable(mainData, holdings, history) {
@@ -694,25 +689,10 @@ function renderAccountTypeTable(mainData, holdings, history) {
 
     types.forEach(item => {
         totalVal += item.value;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td><strong>${escapeHtml(item.name)}</strong></td>
-            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
-        `;
-        tbody.appendChild(tr);
+        tbody.appendChild(renderAllocationRow(item.name, item.value, item.percentage));
     });
 
-    // Total Row
-    const totalTr = document.createElement('tr');
-    totalTr.style.background = ktColor('chart-grid');
-    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
-    totalTr.innerHTML = `
-        <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy">100.00%</td>
-    `;
-    tbody.appendChild(totalTr);
+    renderAllocationTotal('tfoot-account-type', totalVal, '100.00%');
 }
 
 function renderCategoryTable(mainData, holdings) {
@@ -732,28 +712,10 @@ function renderCategoryTable(mainData, holdings) {
     categories.forEach(item => {
         totalVal += item.value;
         const color = catColors[item.name] || ktColor('series-7');
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>
-                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${color}; margin-right: 6px;"></span>
-                <strong>${escapeHtml(item.name)}</strong>
-            </td>
-            <td class="kt-align-right kt-fw-semibold">${formatCurrency(item.value, 'CAD')}</td>
-            <td class="kt-align-right kt-fw-bold">${escapeHtml(item.percentage)}</td>
-        `;
-        tbody.appendChild(tr);
+        tbody.appendChild(renderAllocationRow(item.name, item.value, item.percentage, color));
     });
 
-    // Total Row
-    const totalTr = document.createElement('tr');
-    totalTr.style.background = ktColor('chart-grid');
-    totalTr.style.borderTop = '2px solid var(--kt-border-strong)';
-    totalTr.innerHTML = `
-        <td><strong>Total Portfolio</strong></td>
-        <td class="kt-align-right kt-fw-heavy kt-fs-base">${formatCurrency(totalVal, 'CAD')}</td>
-        <td class="kt-align-right kt-fw-heavy">100.00%</td>
-    `;
-    tbody.appendChild(totalTr);
+    renderAllocationTotal('tfoot-category', totalVal, '100.00%');
 
     // Progress Bar & Legend
     document.getElementById('cat-bar-total').textContent = `${formatCurrency(totalVal, 'CAD')}`;
@@ -767,19 +729,17 @@ function renderCategoryTable(mainData, holdings) {
         const color = catColors[item.name] || ktColor('series-7');
 
         const segment = document.createElement('div');
+        segment.className = 'kt-progress__bar';
         segment.style.width = `${pctNum}%`;
-        segment.style.background = color;
-        segment.style.height = '100%';
+        segment.style.setProperty('--kt-progress-color', color);
         segment.title = `${item.name}: ${item.percentage}`;
         barContainer.appendChild(segment);
 
-        const legendItem = document.createElement('div');
-        legendItem.style.display = 'flex';
-        legendItem.style.alignItems = 'center';
-        legendItem.style.gap = '4px';
+        const legendItem = document.createElement('span');
+        legendItem.className = 'kt-legend__item';
         legendItem.innerHTML = `
-            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${color};"></span>
-            <span class="kt-text-secondary">${escapeHtml(item.name)}: <strong>${escapeHtml(item.percentage)}</strong></span>
+            <span class="kt-legend__swatch" style="--kt-legend-color: ${color};"></span>
+            ${escapeHtml(item.name)} ${escapeHtml(item.percentage)}
         `;
         legendContainer.appendChild(legendItem);
     });
@@ -1571,7 +1531,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
                 const downPctStr = Math.abs(lastPort.downPct).toFixed(2);
                 statusHtml = `
                     <div class="kt-legend__item">
-                        <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-danger);"></span>
+                        <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-danger);"></span>
                         <strong class="kt-text-danger">Current Drawdown</strong>: <span class="kt-text-danger kt-fw-bold">-${downValStr} (-${downPctStr}%)</span>
                     </div>
                 `;
@@ -1585,7 +1545,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-success);"></span>
+                    <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-success);"></span>
                     <strong class="kt-text-primary">${athCount} All-Time Highs</strong> (${isPct ? `Peak Return: +${peakPct.toFixed(2)}%` : `Peak: ${formatCurrency(peakVal, currency)}`})
                 </div>
                 ${statusHtml}
@@ -1604,11 +1564,11 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
 
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 12px; height: 3px; background: var(--kt-series-1); border-radius: 2px;"></span>
+                    <span class="kt-legend__swatch kt-legend__swatch--line" style="--kt-legend-color: var(--kt-series-1);"></span>
                     <strong class="kt-text-primary">Portfolio</strong>: ${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : `${formatCurrency(lastPort.val, currency)} (${portSign}${lastPort.pct.toFixed(2)}%)`}
                 </div>
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed var(--kt-chart-reference);"></span>
+                    <span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-reference);"></span>
                     <strong>XEQT Benchmark (${currency})</strong>: ${isPct ? `${xeqtSign}${lastItem.returnPct.toFixed(2)}%` : `${formatCurrency(lastItem.val, currency)} (${xeqtSign}${lastItem.returnPct.toFixed(2)}%)`}
                 </div>
                 <div class="kt-fs-xs kt-fw-bold" style="color: ${spreadColor}; background: ${spreadBg}; padding: 2px 8px; border-radius: 4px; border: 1px solid color-mix(in srgb, ${spreadColor} 20%, transparent);">
@@ -1620,7 +1580,7 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             const portSign = lastPort.pct >= 0 ? '+' : '';
             legendEl.innerHTML = `
                 <div class="kt-legend__item">
-                    <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span>
+                    <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span>
                     Total Net Worth: <strong>${isPct ? `${portSign}${lastPort.pct.toFixed(2)}% (${formatCurrency(lastPort.val, currency)})` : formatCurrency(lastPort.val, currency)}</strong> &bull; Hover any data point to inspect breakdown
                 </div>
             `;
@@ -2918,7 +2878,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 const valStr = last ? formatCurrency(last.val, currency) : '$0.00';
                 return `
                     <div class="kt-legend__item">
-                        <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
+                        <span class="kt-legend__swatch kt-legend__swatch--line" style="--kt-legend-color: ${s.color};"></span>
                         <strong>${s.year}</strong>:
                         <span class="kt-fw-bold kt-text-success">${athCount} ATHs</span>
                         <span class="kt-text-muted kt-fs-xs">(Peak: ${valStr})</span>
@@ -2933,7 +2893,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 : '';
             return `
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 12px; height: 3px; background: ${s.color}; border-radius: 2px;"></span>
+                    <span class="kt-legend__swatch kt-legend__swatch--line" style="--kt-legend-color: ${s.color};"></span>
                     <strong>${s.year}</strong>${chainedBadge}:
                     <span class="kt-fw-bold" style="color: ${color};">${isPct ? `${sign}${last.pct.toFixed(2)}%` : formatCurrency(last.val, currency)}</span>
                     <span class="kt-text-muted kt-fs-xs">(${isPct ? formatCurrency(last.val, currency) : `${sign}${last.pct.toFixed(2)}%`})</span>
@@ -2979,7 +2939,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
             itemsHtml += `
                 <div class="kt-legend__item">
-                    <span style="display: inline-block; width: 16px; height: 0; border-top: 2.5px dashed var(--kt-chart-reference);"></span>
+                    <span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-reference);"></span>
                     <strong>XEQT Benchmark (${currency})</strong>:
                     <span class="kt-fw-bold" style="color: ${xeqtColor};">${isPct ? `${xeqtSign}${lastXeqt.pct.toFixed(2)}%` : formatCurrency(lastXeqt.val, currency)}</span>
                     <span class="kt-text-muted kt-fs-xs">(${isPct ? formatCurrency(lastXeqt.val, currency) : `${xeqtSign}${lastXeqt.pct.toFixed(2)}%`})</span>
@@ -3356,11 +3316,11 @@ function renderPortfolioVsXeqtChart() {
 
         legendEl.innerHTML = `
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--kt-series-1);"></span>
+                <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-series-1);"></span>
                 <strong class="kt-text-primary">Spread vs XEQT</strong>: <span class="kt-fw-bold">${spreadSign}${lastPt.spreadPct.toFixed(2)}% pts (${spreadValSign}${formatCurrency(lastPt.spreadVal, currency)})</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-axis);"></span>
+                <span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-axis);"></span>
                 <span class="kt-text-muted kt-fw-semibold">0.0% Parity (XEQT Baseline)</span>
             </div>
             <div class="kt-fs-xs kt-text-muted">
@@ -3782,19 +3742,19 @@ function renderWeeklyPortfolioVsXeqtChart() {
     if (legendEl) {
         legendEl.innerHTML = `
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-success);"></span>
+                <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-success);"></span>
                 <strong class="kt-text-primary">Beat XEQT</strong>: <span class="kt-fw-bold kt-text-success">${beatCount} weeks (${beatPct}%)</span>
             </div>
             <div class="kt-legend__item">
-                <span class="kt-legend__swatch" style="display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--kt-danger);"></span>
+                <span class="kt-legend__swatch" style="--kt-legend-color: var(--kt-danger);"></span>
                 <strong class="kt-text-primary">Lagged XEQT</strong>: <span class="kt-fw-bold kt-text-danger">${lagCount} weeks</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-axis);"></span>
+                <span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-axis);"></span>
                 <span class="kt-text-muted kt-fw-semibold">0.0% Parity</span>
             </div>
             <div class="kt-legend__item">
-                <span style="display: inline-block; width: 16px; height: 0; border-top: 1.8px dashed var(--kt-chart-reference);"></span>
+                <span class="kt-legend__swatch kt-legend__swatch--dash" style="--kt-legend-color: var(--kt-chart-reference);"></span>
                 <span class="kt-text-muted">Average: <strong>${avgStr}</strong></span>
             </div>
         `;

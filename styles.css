@@ -278,7 +278,6 @@
 .chart-container {
     position: relative;
     width: 100%;
-    margin: var(--kt-space-3) 0;
 }
 
 .svg-chart {
