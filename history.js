@@ -683,7 +683,7 @@ function renderChart(records, currency = 'CAD') {
                 </div>
             </div>
             <div class="kt-readout__footer">
-                💡 Hover over graph to inspect historical weeks
+                Hover over graph to inspect historical weeks
             </div>
         `;
     }

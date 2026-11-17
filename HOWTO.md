@@ -1,4 +1,4 @@
-# 📖 How-To Guide: My Finance
+# How-To Guide: My Finance
 
 Welcome to your personal finance dashboard!
 
@@ -6,7 +6,7 @@ This web project is a **direct frontend for your Google Sheet (`July2026`)**. Al
 
 ---
 
-## 🔗 Key Links & Cloud Resources
+## Key Links & Cloud Resources
 
 | Resource | Description | Link |
 | :--- | :--- | :--- |
@@ -19,7 +19,7 @@ This web project is a **direct frontend for your Google Sheet (`July2026`)**. Al
 
 ---
 
-## 🌟 The Automated Workflow (No Manual Data Entry Here!)
+## The Automated Workflow (No Manual Data Entry Here!)
 
 ```
   ┌──────────────────────────────────────────────────────────────┐
@@ -51,7 +51,7 @@ You **never** have to manually edit CSV, JSON, or code files in this repository.
 
 ---
 
-## 🛒 What to Do When Buying a New ETF (e.g. `XEI`)
+## What to Do When Buying a New ETF (e.g. `XEI`)
 
 If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account):
 
@@ -78,7 +78,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 ---
 
-## 🧭 Dashboard Suite & Feature Guide
+## Dashboard Suite & Feature Guide
 
 | Page | File | Purpose & Key Features |
 | :--- | :--- | :--- |
@@ -95,7 +95,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 ---
 
-## ✏️ What to Do When Changing Share Counts or Cash Balances
+## What to Do When Changing Share Counts or Cash Balances
 
 1. Open your Google Sheet (`July2026`).
 2. Go to the **`Holdings`** tab.
@@ -105,7 +105,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 ---
 
-## 🔐 Security & Encryption Architecture
+## Security & Encryption Architecture
 
 - **Public Repository Safe**: All your private holdings, quantities, share counts, account names, and net worth history are encrypted using **AES-256-GCM** with **PBKDF2** key derivation (100,000 SHA-256 iterations).
 - **Zero Plaintext Files**: There are no plaintext CSV or JSON data files in the repository.
@@ -114,7 +114,7 @@ If you start buying a new ETF (for example, `TSE:XEI` in your brokerage account)
 
 ---
 
-## ⚙️ Setting Up GitHub Actions Secret
+## Setting Up GitHub Actions Secret
 
 For GitHub Actions to run automatically:
 
@@ -126,7 +126,7 @@ For GitHub Actions to run automatically:
 
 ---
 
-## ⚡ Running Locally
+## Running Locally
 
 If you want to sync or view the website locally on your Mac:
 

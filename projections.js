@@ -543,7 +543,7 @@ function buildProjectionCardHtml(point, isHover = false) {
             </div>
         </div>
         <div class="kt-readout__footer">
-            💡 Hover over graph to inspect any year
+            Hover over graph to inspect any year
         </div>
     `;
 }

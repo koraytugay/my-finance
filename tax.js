@@ -216,22 +216,18 @@ function renderTaxInsights() {
 
     const insights = [
         {
-            icon: '🛡️',
             title: 'TFSA: Maximize Long-Term Growth Assets',
             text: 'Because TFSA withdrawals are 100% tax-free for life and never affect income-tested benefits, high-expected-return equity ETFs (like broad market and factor tilts) benefit most from compounding inside your TFSA.'
         },
         {
-            icon: '🇺🇸',
             title: 'US Securities in RRSP: 0% Withholding Tax',
             text: 'Under the US-Canada Tax Treaty, US-listed ETFs held directly inside an RRSP are exempt from the standard 15% US dividend withholding tax. Holding US dividend payers inside an RRSP maximizes net dividend yield.'
         },
         {
-            icon: '🇨🇦',
             title: 'Canadian Dividends in Taxable Accounts',
             text: 'Canadian dividend-paying equities qualify for the federal and provincial Dividend Tax Credit (DTC) in non-registered accounts, making them significantly more tax-efficient than interest income if registered room is filled.'
         },
         {
-            icon: '💰',
             title: 'Fixed Income & Cash Shelter Priority',
             text: 'Interest from savings, bonds, and high-interest cash is taxed at 100% of your top marginal income tax rate (unlike capital gains which have a 50% inclusion rate). Sheltering fixed income inside registered accounts protects you from high annual tax drag.'
         }
@@ -242,7 +238,6 @@ function renderTaxInsights() {
         card.className = 'kt-card kt-card--padded';
         card.innerHTML = `
             <div class="kt-cluster kt-mb-1">
-                <span class="kt-fs-md">${item.icon}</span>
                 <strong class="kt-fs-base kt-text-primary">${item.title}</strong>
             </div>
             <p class="kt-m-0 kt-fs-sm kt-text-muted" style="line-height: 1.45;">

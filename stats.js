@@ -180,7 +180,7 @@ function renderMilestones() {
         const barEl = document.getElementById(`${m.idPrefix}-bar`);
 
         if (pctEl) pctEl.textContent = `${pct.toFixed(1)}%`;
-        if (remEl) remEl.textContent = rem > 0 ? `-${formatCurrency(rem, 'CAD')} to go` : '✅ Milestone Achieved!';
+        if (remEl) remEl.textContent = rem > 0 ? `-${formatCurrency(rem, 'CAD')} to go` : 'Milestone Achieved!';
         if (timeEl) {
             if (rem > 0) {
                 timeEl.textContent = wks <= 52 

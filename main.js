@@ -1320,9 +1320,9 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         const curLabel = currency === 'USD' ? 'USD' : 'CAD';
         const tfLabel = timeframe === 'all' ? 'All Time' : 'Last 52 Weeks';
         if (isPct) {
-            titleEl.textContent = `📈 Net Worth Progression (% Return - ${tfLabel} - ${curLabel})`;
+            titleEl.textContent = `Net Worth Progression (% Return - ${tfLabel} - ${curLabel})`;
         } else {
-            titleEl.textContent = `📈 Net Worth Progression (${tfLabel} - ${curLabel})`;
+            titleEl.textContent = `Net Worth Progression (${tfLabel} - ${curLabel})`;
         }
     }
 
@@ -1578,7 +1578,6 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
             } else {
                 statusHtml = `
                     <div class="kt-legend__item">
-                        <span class="kt-fs-sm">🎉</span>
                         <strong class="kt-text-success">Sitting at All-Time High!</strong>
                     </div>
                 `;
@@ -1733,8 +1732,8 @@ function renderMainSingleChart(box, tooltip, valKey, currency, width, height, pa
         }
 
         const footerText = currentMainFilterAths
-            ? `💡 Showing only All-Time High nodes (and current position)`
-            : `💡 Hover over graph to inspect historical weeks`;
+            ? `Showing only All-Time High nodes (and current position)`
+            : `Hover over graph to inspect historical weeks`;
 
         return `
             <div class="kt-readout__header">
@@ -2145,12 +2144,12 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
         const sortedDesc = [...selectedYearsList].reverse();
         if (isPct) {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression (% Year ${sortedDesc[0]} - ${curLabel})`;
+                ? `Net Worth Progression (% Overlay: ${sortedDesc.join(' vs ')})`
+                : `Net Worth Progression (% Year ${sortedDesc[0]} - ${curLabel})`;
         } else {
             titleEl.textContent = sortedDesc.length > 1
-                ? `📈 Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
-                : `📈 Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
+                ? `Net Worth Progression (${curLabel} Overlay: ${sortedDesc.join(' vs ')})`
+                : `Net Worth Progression (${curLabel} - Year ${sortedDesc[0]})`;
         }
     }
 
@@ -2481,7 +2480,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                     ${yearRows}
                 </div>
                 <div class="kt-readout__footer">
-                    💡 Hover across calendar months to inspect ATH milestones
+                    Hover across calendar months to inspect ATH milestones
                 </div>
             `;
         }
@@ -2597,7 +2596,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 ${xeqtSection}
                 ${assetBreakdownHtml}
                 <div class="kt-readout__footer">
-                    💡 Hover over graph to inspect historical weeks
+                    Hover over graph to inspect historical weeks
                 </div>
             `;
         }
@@ -2633,7 +2632,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
             </div>
             ${xeqtSection}
             <div class="kt-readout__footer">
-                💡 Hover across calendar months to compare trajectories
+                Hover across calendar months to compare trajectories
             </div>
         `;
     }
@@ -2882,7 +2881,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
 
             const singleHoverHeader = activeYearDetails.length === 1 && activeYearDetails[0].point.rec?.week
                 ? `<span class="kt-readout__title">Week ${activeYearDetails[0].point.rec.week} &bull; ${formatDate(activeYearDetails[0].point.date)}</span>`
-                : `<span class="kt-readout__title">🗓️ ${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}</span>`;
+                : `<span class="kt-readout__title">${monthNames[approxMonthIdx]} &bull; Day ~${Math.round(frac * 365)}</span>`;
 
             const cardContent = `
                 <div class="kt-readout__header">
@@ -2894,7 +2893,7 @@ function renderMainYearOverlayChart(box, tooltip, valKey, currency, width, heigh
                 ${compCardHtml}
                 ${hoverAssetBreakdownHtml}
                 <div class="kt-readout__footer">
-                    💡 Hover across calendar months to compare trajectories
+                    Hover across calendar months to compare trajectories
                 </div>
             `;
 
@@ -3140,7 +3139,7 @@ function buildXeqtRelCardHtml(pt, currency, unit, isInspecting = false, startCap
             ` : ''}
         </div>
         <div class="kt-readout__footer">
-            💡 Hover any data point to inspect breakdown
+            Hover any data point to inspect breakdown
         </div>
     `;
 }
@@ -3168,9 +3167,9 @@ function renderPortfolioVsXeqtChart() {
 
     if (titleEl) {
         if (isPct) {
-            titleEl.textContent = `📈 Portfolio vs XEQT Progression (% Spread - ${tfLabel} - ${curLabel})`;
+            titleEl.textContent = `Portfolio vs XEQT Progression (% Spread - ${tfLabel} - ${curLabel})`;
         } else {
-            titleEl.textContent = `📈 Portfolio vs XEQT Progression (${tfLabel} - ${curLabel})`;
+            titleEl.textContent = `Portfolio vs XEQT Progression (${tfLabel} - ${curLabel})`;
         }
     }
 
@@ -3534,8 +3533,8 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
     const portValSign = it.portfolioChange >= 0 ? '+' : '';
 
     const outcomeText = isBeat
-        ? `🏆 Beat XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`
-        : `📉 Lagged XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`;
+        ? `Beat XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`
+        : `Lagged XEQT by ${Math.abs(it.spreadPct).toFixed(2)}% pts`;
 
     return `
         <div class="kt-readout__header">
@@ -3576,7 +3575,7 @@ function buildXeqtWeeklyCardHtml(it, currency, unit, isHover = false, avgStr = '
             ` : ''}
         </div>
         <div class="kt-readout__footer">
-            💡 Hover any bar to inspect weekly performance
+            Hover any bar to inspect weekly performance
         </div>
     `;
 }
@@ -3645,8 +3644,8 @@ function renderWeeklyPortfolioVsXeqtChart() {
 
     if (titleEl) {
         titleEl.textContent = isPct
-            ? `📊 Weekly Performance vs XEQT (% Spread - ${tfLabel} - ${curLabel})`
-            : `📊 Weekly Performance vs XEQT ($ Spread - ${tfLabel} - ${curLabel})`;
+            ? `Weekly Performance vs XEQT (% Spread - ${tfLabel} - ${curLabel})`
+            : `Weekly Performance vs XEQT ($ Spread - ${tfLabel} - ${curLabel})`;
     }
 
     const width = 1000;
@@ -3971,7 +3970,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
         `;
     }
 
-    const badgeLabel = `🏆 ATH MILESTONE #${m.index}`;
+    const badgeLabel = `ATH MILESTONE #${m.index}`;
     const badgeHtml = `<span class="kt-badge kt-text-success kt-fw-bold" style="background: var(--kt-success-soft);">${badgeLabel}</span>`;
     const dateStr = typeof formatDate === 'function' ? formatDate(m.date) : m.date;
     const prevDateStr = typeof formatDate === 'function' ? formatDate(m.prevDate) : m.prevDate;
@@ -4046,7 +4045,7 @@ function buildAthBarInfoCardHtml(m, currency, isPctUnit, isActive, avgVal) {
             </div>
         </div>
         <div class="kt-readout__footer kt-fs-2xs kt-text-muted" style="margin-top: auto; padding-top: 8px; border-top: 1px solid var(--kt-divider);">
-            💡 Click or hover any bar to inspect that All-Time High milestone
+            Click or hover any bar to inspect that All-Time High milestone
         </div>
     `;
 }
@@ -4129,8 +4128,8 @@ function renderAthBarChart() {
 
     if (titleEl) {
         titleEl.textContent = isPct
-            ? `🏆 All-Time High Increments (% Return - ${currency})`
-            : `🏆 All-Time High Increments (${currency} $)`;
+            ? `All-Time High Increments (% Return - ${currency})`
+            : `All-Time High Increments (${currency} $)`;
     }
 
     if (milestones.length === 0) {
@@ -4309,7 +4308,7 @@ function renderAthBarChart() {
 
                 tooltip.style.display = 'block';
                 tooltip.innerHTML = `
-                    <div class="kt-fw-bold kt-text-success kt-mb-0">🏆 Milestone #${m.index} (Week ${m.week})</div>
+                    <div class="kt-fw-bold kt-text-success kt-mb-0">Milestone #${m.index} (Week ${m.week})</div>
                     <div class="kt-fs-xs kt-text-muted kt-mb-1">${formatDate(m.date)}</div>
                     <div>Jump: <strong class="kt-text-success">${diffStr}</strong> (+${m.diffPct.toFixed(2)}%)</div>
                     <div class="kt-fs-xs kt-text-muted kt-mt-0">Prior ATH: ${formatCurrency(m.prevVal, currency)} &bull; ${m.weeksBetween}w ago</div>
@@ -4600,8 +4599,8 @@ function renderMonthlyHeatmap() {
 
     if (titleEl) {
         titleEl.textContent = (isPct
-            ? `🗓️ Monthly Returns Heatmap (% Return - ${currency})`
-            : `🗓️ Monthly Returns Heatmap (${currency} $)`) + (vsXeqt ? ' vs XEQT' : '');
+            ? `Monthly Returns Heatmap (% Return - ${currency})`
+            : `Monthly Returns Heatmap (${currency} $)`) + (vsXeqt ? ' vs XEQT' : '');
     }
 
     if (subTitleEl) {
@@ -4901,8 +4900,8 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
         : `<span class="kt-badge">LATEST</span>`;
 
     const contextText = isPct
-        ? (changePct >= 0 ? '📈 Percentage Gain' : '📉 Percentage Pullback')
-        : (changeVal >= 0 ? '📈 Dollar Gain' : '📉 Dollar Pullback');
+        ? (changePct >= 0 ? 'Percentage Gain' : 'Percentage Pullback')
+        : (changeVal >= 0 ? 'Dollar Gain' : 'Dollar Pullback');
 
     return `
         <div class="kt-readout__header">
@@ -4934,7 +4933,7 @@ function buildWeeklyBarCardHtml(item, currency = 'CAD', unit = 'VAL', isHover = 
             ` : ''}
         </div>
         <div class="kt-readout__footer">
-            💡 Move cursor across bars to inspect weekly changes
+            Move cursor across bars to inspect weekly changes
         </div>
     `;
 }
@@ -4960,7 +4959,7 @@ function renderWeeklyBarChart() {
     else if (/^\d{4}$/.test(timeframe)) tfLabel = timeframe;
 
     if (titleEl) {
-        titleEl.textContent = '📊 Weekly Net Worth Change';
+        titleEl.textContent = 'Weekly Net Worth Change';
     }
 
     if (!rawHistory || rawHistory.length <= 1) {
@@ -5236,7 +5235,7 @@ function buildDrawdownCardHtml(nearest, isHover = true, currency = 'CAD', unit =
             </div>
         </div>
         <div class="kt-readout__footer">
-            💡 Move cursor across underwater curve to inspect historical drawdowns
+            Move cursor across underwater curve to inspect historical drawdowns
         </div>
     `;
 }

@@ -197,7 +197,7 @@ function showScrambleBadge() {
         if (document.getElementById('scramble-badge')) return;
         const b = document.createElement('div');
         b.id = 'scramble-badge';
-        b.textContent = '🔀 Scrambled';
+        b.textContent = 'Scrambled';
         b.title = 'Demo mode: monetary values are scaled. Open with ?scramble=false to disable.';
         b.style.cssText = 'position:fixed;bottom:12px;right:12px;z-index:9999;padding:4px 10px;' +
             'border-radius:999px;background:var(--kt-warning-soft);color:var(--kt-warning-text);border:1px solid var(--kt-warning);font:600 12px system-ui;' +
@@ -624,7 +624,6 @@ function showUnlockModal(onSuccess) {
         overlay.innerHTML = `
             <div class="kt-modal__dialog">
                 <div class="kt-modal__body">
-                    <div class="kt-empty__icon">🔒</div>
                     <h2 class="kt-modal__title">My Finance is Encrypted</h2>
                     <p class="kt-text-secondary kt-fs-sm kt-mt-1 kt-mb-5">
                         Enter your password to decrypt your portfolio holdings and history.

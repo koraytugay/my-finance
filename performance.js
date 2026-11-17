@@ -620,7 +620,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
             return `
                 <div>
                     <div class="kt-split kt-fs-xs kt-mb-1" style="font-weight: ${s.isPortfolio ? '800' : '700'};">
-                        <span style="color: ${s.isPortfolio ? ktColor('series-1') : ktColor('text')};">${s.isPortfolio ? '🔵 ' : ''}${escapeHtml(s.label)}</span>
+                        <span style="color: ${s.isPortfolio ? ktColor('series-1') : ktColor('text')};">${escapeHtml(s.label)}</span>
                         <span class="kt-fw-heavy" style="color: ${s.val >= 0 ? ktColor('success') : ktColor('danger')};">${valSign}${s.val.toFixed(1)}%</span>
                     </div>
                     <div class="kt-progress" style="--kt-progress-h: 10px;">
@@ -640,7 +640,7 @@ function renderBenchmarkComparison(growthPct, growthCAD, maxDrawdownPct, benchma
         const vfvDd = bData.VFV?.maxDrawdownPct !== undefined ? bData.VFV.maxDrawdownPct : -19.3;
 
         insightEl.innerHTML = `
-            💡 <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong>${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong class="kt-text-danger">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong class="kt-text-danger">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
+            <strong>Risk-Adjusted Insight:</strong> While pure equity indexes delivered robust market appreciation during this period (Global Equity XEQT at <strong>+${xeqtRet.toFixed(1)}%</strong>, S&amp;P 500 VFV at <strong>+${vfvRet.toFixed(1)}%</strong>), your disciplined personal contributions and multi-asset allocation propelled total portfolio net worth by <strong>+${growthPct.toFixed(1)}%</strong> (<strong>+${formatCurrency(growthCAD, 'CAD')}</strong>). Importantly, your balanced diversification provided superior capital preservation: your historical maximum drawdown was held to just <strong>${maxDrawdownPct.toFixed(1)}%</strong>, compared to <strong class="kt-text-danger">${xeqtDd.toFixed(1)}%</strong> for XEQT and <strong class="kt-text-danger">${vfvDd.toFixed(1)}%</strong> for the S&amp;P 500.
         `;
     }
 }
@@ -754,7 +754,7 @@ function renderPurchasingPower() {
     const insightEl = document.getElementById('pp-insight-note');
     if (insightEl) {
         insightEl.innerHTML = `
-            💡 <strong>Purchasing Power Insight:</strong> At an assumed <strong>${currentInflationRate.toFixed(1)}% annual inflation hurdle</strong>, cumulative price increases absorbed <strong>${formatCurrency(pp.inflationDrag, 'CAD')}</strong> of your nominal wealth. However, your portfolio's investment appreciation and consistent savings substantially outpaced inflation, creating <strong>+${formatCurrency(pp.realGain, 'CAD')}</strong> of true, uncompromised purchasing power expansion (<strong>${rSign}${pp.realGainPct.toFixed(1)}% real growth</strong>).
+            <strong>Purchasing Power Insight:</strong> At an assumed <strong>${currentInflationRate.toFixed(1)}% annual inflation hurdle</strong>, cumulative price increases absorbed <strong>${formatCurrency(pp.inflationDrag, 'CAD')}</strong> of your nominal wealth. However, your portfolio's investment appreciation and consistent savings substantially outpaced inflation, creating <strong>+${formatCurrency(pp.realGain, 'CAD')}</strong> of true, uncompromised purchasing power expansion (<strong>${rSign}${pp.realGainPct.toFixed(1)}% real growth</strong>).
         `;
     }
 }
@@ -1179,11 +1179,11 @@ function renderRolling52Charts() {
     const overlaySub = document.getElementById('r52-overlay-sub');
     if (overlayTitle) {
         if (rolling52OverlayMetric === 'cad') {
-            overlayTitle.textContent = '📊 52-Week Progression Overlay: Current vs. Best vs. Worst ($ CAD)';
+            overlayTitle.textContent = '52-Week Progression Overlay: Current vs. Best vs. Worst ($ CAD)';
         } else if (rolling52OverlayMetric === 'usd') {
-            overlayTitle.textContent = '📊 52-Week Progression Overlay: Current vs. Best vs. Worst ($ USD)';
+            overlayTitle.textContent = '52-Week Progression Overlay: Current vs. Best vs. Worst ($ USD)';
         } else {
-            overlayTitle.textContent = '📊 52-Week Progression Overlay: Current vs. Best vs. Worst (%)';
+            overlayTitle.textContent = '52-Week Progression Overlay: Current vs. Best vs. Worst (%)';
         }
     }
     if (overlaySub) {
@@ -1619,7 +1619,7 @@ function renderRolling52OverlayChart(best, worst, current, currency = 'CAD', ove
                 </div>` : ''}
             </div>
             <div class="kt-readout__footer">
-                💡 Move cursor across weeks to compare trajectory
+                Move cursor across weeks to compare trajectory
             </div>
         `;
     }
@@ -2069,7 +2069,7 @@ function renderRolling52TimelineChart(timeline, metric = 'pct', benchmarksData =
                 </div>
             </div>
             <div class="kt-readout__footer">
-                💡 Move cursor across timeline to inspect rolling 1-year windows
+                Move cursor across timeline to inspect rolling 1-year windows
             </div>
         `;
     }

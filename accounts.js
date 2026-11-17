@@ -165,7 +165,7 @@ function renderGroupedViews() {
             const headerRow = `
                 <tr class="subgroup-header-row">
                     <td colspan="7">
-                        <strong class="kt-text-primary kt-fs-base">📁 ${escapeHtml(sg.title)}</strong>
+                        <strong class="kt-text-primary kt-fs-base">${escapeHtml(sg.title)}</strong>
                         ${subBadge}
                         <span class="kt-text-muted kt-fs-xs" style="margin-left: 8px;">(${sg.holdings.length} ${sg.holdings.length === 1 ? 'position' : 'positions'})</span>
                     </td>

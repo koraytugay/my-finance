@@ -1,4 +1,4 @@
-# My Finance 📈
+# My Finance 
 
 Personal finance, portfolio asset allocation, and net worth tracking website hosted on GitHub Pages.
 
@@ -6,7 +6,7 @@ Running at: `https://koraytugay.github.io/my-finance/`
 
 ---
 
-## 🌟 Overview & Architecture
+## Overview & Architecture
 
 **My Finance** is a lightweight, secure frontend for your Google Sheets portfolio:
 
@@ -25,7 +25,7 @@ Running at: `https://koraytugay.github.io/my-finance/`
 
 ---
 
-## 🔒 Security & AI Agent Directives
+## Security & AI Agent Directives
 
 > [!CAUTION]
 > **CRITICAL SECURITY REQUIREMENT FOR AI CODING AGENTS & CONTRIBUTORS**
@@ -35,7 +35,7 @@ Running at: `https://koraytugay.github.io/my-finance/`
 
 ---
 
-## 🔗 Key Links & Cloud Resources
+## Key Links & Cloud Resources
 
 - **Google Sheet (Portfolio)**: [July2026 Spreadsheet](https://docs.google.com/spreadsheets/d/1ofMWRVDjxR1DsEkqWkURfTTyvbO23k2l4YBXUpSx4fM/edit)
 - **Google Cloud IAM Console**: [Service Account Details & Key Management](https://console.cloud.google.com/iam-admin/serviceaccounts/details/117152471666773814465;edit=true?project=gen-lang-client-0273341539)
@@ -70,7 +70,7 @@ Synchronization is driven reliably via an external cron service (such as [cron-j
 
 ---
 
-## 🧭 Navigation & Views
+## Navigation & Views
 
 1. **Executive Dashboard (`index.html`)**: Real-time portfolio overview, current week status, net worth progression, ATH increments, monthly returns heatmap, weekly net worth change bar chart, 52-week wealth creation and performance metrics, and asset class summaries.
 2. **Holdings (`holdings.html`)**: Complete portfolio view with interactive search, multi-criteria filtering (Brokerage, Account, Strategy), Table & Card display modes, and holding detail modal.
@@ -85,13 +85,13 @@ Synchronization is driven reliably via an external cron service (such as [cron-j
 
 ---
 
-## 📖 How-To Guide
+## How-To Guide
 
 For detailed step-by-step instructions, read the [**HOWTO.md**](HOWTO.md) guide.
 
 ---
 
-## ⌨️ Command Cheat Sheet
+## Command Cheat Sheet
 
 | Command | Description |
 | :--- | :--- |
