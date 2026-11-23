@@ -286,10 +286,11 @@
                         <span class="kt-card__subtitle" id="heatmap-subtitle">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
                     <div class="kt-cluster">
-                        <label class="kt-check kt-check--boxed kt-check--sm" title="Show each month's return relative to XEQT (portfolio minus XEQT)">
-                            <input type="checkbox" id="heatmap-vs-xeqt" onchange="setHeatmapVsXeqt(this.checked)">
-                            vs XEQT
-                        </label>
+                        <div class="kt-segmented kt-segmented--sm" id="heatmap-mode-toggle" role="group">
+                            <button type="button" id="btn-heatmap-mode-port" class="is-active" onclick="setHeatmapMode('portfolio')" title="Display portfolio total monthly returns">Portfolio</button>
+                            <button type="button" id="btn-heatmap-mode-xeqt" onclick="setHeatmapMode('xeqt')" title="Display XEQT benchmark monthly returns">XEQT</button>
+                            <button type="button" id="btn-heatmap-mode-spread" onclick="setHeatmapMode('spread')" title="Display spread / excess return over XEQT (Portfolio minus XEQT)">Spread</button>
+                        </div>
                         <div class="kt-segmented kt-segmented--sm" id="heatmap-currency-toggle" role="group">
                             <button type="button" id="btn-heatmap-cur-cad" class="is-active" onclick="setHeatmapCurrency('CAD')" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
                             <button type="button" id="btn-heatmap-cur-usd" onclick="setHeatmapCurrency('USD')" title="Display monthly returns in US Dollars (USD $)">USD ($)</button>
