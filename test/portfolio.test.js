@@ -47,6 +47,8 @@ const {
   computeMonthlyHeatmap,
   setHeatmapCurrency,
   setHeatmapUnit,
+  setHeatmapVsXeqt,
+  setHeatmapGains,
   getHeatmapState,
   resetHeatmapState,
   computeWeeklyBarData,
@@ -2300,6 +2302,8 @@ test('Monthly Returns Heatmap Calculation Suite', async (t) => {
     let state = getHeatmapState();
     assert.equal(state.currentHeatmapCurrency, 'CAD');
     assert.equal(state.currentHeatmapUnit, 'PCT');
+    assert.equal(state.currentHeatmapVsXeqt, false);
+    assert.equal(state.currentHeatmapGains, false);
 
     setHeatmapCurrency('USD');
     state = getHeatmapState();
@@ -2321,6 +2325,94 @@ test('Monthly Returns Heatmap Calculation Suite', async (t) => {
     state = getHeatmapState();
     assert.equal(state.currentHeatmapCurrency, 'CAD');
     assert.equal(state.currentHeatmapUnit, 'PCT');
+    assert.equal(state.currentHeatmapVsXeqt, false);
+    assert.equal(state.currentHeatmapGains, false);
+  });
+
+  await t.test('setHeatmapVsXeqt and setHeatmapGains manage mutual exclusivity and state transitions', () => {
+    resetHeatmapState();
+    let state = getHeatmapState();
+    assert.equal(state.currentHeatmapVsXeqt, false);
+    assert.equal(state.currentHeatmapGains, false);
+
+    // Turn on vs XEQT
+    setHeatmapVsXeqt(true);
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapVsXeqt, true);
+    assert.equal(state.currentHeatmapGains, false);
+
+    // Turning on Gains should automatically uncheck vs XEQT
+    setHeatmapGains(true);
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapVsXeqt, false);
+    assert.equal(state.currentHeatmapGains, true);
+
+    // Turning on vs XEQT should automatically uncheck Gains
+    setHeatmapVsXeqt(true);
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapVsXeqt, true);
+    assert.equal(state.currentHeatmapGains, false);
+
+    // Unchecking vs XEQT should leave both unchecked
+    setHeatmapVsXeqt(false);
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapVsXeqt, false);
+    assert.equal(state.currentHeatmapGains, false);
+
+    // Setting same value should be no-op
+    setHeatmapGains(true);
+    setHeatmapGains(true);
+    state = getHeatmapState();
+    assert.equal(state.currentHeatmapGains, true);
+
+    resetHeatmapState();
+  });
+
+  await t.test('computeMonthlyHeatmap computes XEQT benchmark gains and vs XEQT relative spread', () => {
+    // Dec baseline: week 1, total 100k
+    // Jan week 2: starts 100k, ends 102k
+    // Jan week 3: ends 105k (Jan total diff = +5,000, +5.00%)
+    // XEQT weekly prices: week 1 = 20.00, week 2 = 20.20, week 3 = 20.60
+    // Jan XEQT return: (20.60 - 20.00) / 20.00 = +3.00%
+    // On starting capital 100,000:
+    // XEQT simulated gain: 100,000 * 3.00% = +3,000
+    // vs XEQT (outperformance / active lead): 5,000 - 3,000 = +2,000 (+2.00% pts)
+    const synthetic = [
+      { week: 1, date: '2024-12-27', totalCAD: 100000, weeklyChangeCAD: 1000 },
+      { week: 2, date: '2025-01-03', totalCAD: 102000, weeklyChangeCAD: 2000 },
+      { week: 3, date: '2025-01-10', totalCAD: 105000, weeklyChangeCAD: 3000 }
+    ];
+    const xeqtPrices = [20.00, 20.20, 20.60]; // week 1, week 2, week 3
+
+    const result = computeMonthlyHeatmap(synthetic, 'CAD', xeqtPrices);
+    assert.equal(result.length, 2, 'Should have 2025 and 2024');
+
+    // 2025 Jan
+    const y2025 = result[0];
+    assert.equal(y2025.year, 2025);
+    const m = y2025.months[0];
+    assert.equal(m.hasData, true);
+    assert.equal(m.hasXeqtData, true);
+    assert.equal(m.diffVal, 5000);
+    assert.equal(m.diffPct, 5.0);
+
+    // Verify benchmark XEQT return: +3.00% and +$3,000
+    assert.equal(Number(m.xeqtPct.toFixed(2)), 3.00);
+    assert.equal(Number(m.xeqtVal.toFixed(2)), 3000);
+
+    // Verify vs XEQT spread: +2.00% and +$2,000
+    assert.equal(Number(m.spreadPct.toFixed(2)), 2.00);
+    assert.equal(Number(m.spreadVal.toFixed(2)), 2000);
+
+    // Check relationship: Portfolio = XEQT Gains + vs XEQT
+    assert.equal(m.xeqtVal + m.spreadVal, m.diffVal);
+    assert.equal(Number((m.xeqtPct + m.spreadPct).toFixed(4)), Number(m.diffPct.toFixed(4)));
+
+    // Verify full year totals
+    assert.equal(Number(y2025.fullYearXeqtPct.toFixed(2)), 3.00);
+    assert.equal(Number(y2025.fullYearXeqtVal.toFixed(2)), 3000);
+    assert.equal(Number(y2025.fullYearSpreadPct.toFixed(2)), 2.00);
+    assert.equal(Number(y2025.fullYearSpreadVal.toFixed(2)), 2000);
   });
 });
 
