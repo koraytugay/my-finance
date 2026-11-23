@@ -4577,29 +4577,11 @@ function renderMonthlyHeatmap() {
     const mode = currentHeatmapMode;
 
     if (titleEl) {
-        let suffix = '';
-        if (mode === 'xeqt') suffix = ' • XEQT Benchmark';
-        else if (mode === 'spread') suffix = ' vs XEQT Spread';
-
-        titleEl.textContent = (isPct
-            ? `Monthly Returns Heatmap (% Return - ${currency})`
-            : `Monthly Returns Heatmap (${currency} $)`) + suffix;
+        titleEl.textContent = 'Monthly Returns Heatmap';
     }
 
     if (subTitleEl) {
-        if (mode === 'xeqt') {
-            subTitleEl.textContent = isPct
-                ? `XEQT benchmark monthly return in percentage (%) • Baseline market performance`
-                : `Simulated monthly gain if your starting balance was invested in XEQT (${currency} $)`;
-        } else if (mode === 'spread') {
-            subTitleEl.textContent = isPct
-                ? `Portfolio monthly return minus XEQT monthly return, in % points (${currency}) • 0 = parity with XEQT`
-                : `Portfolio monthly gain minus what the same starting balance would have gained in XEQT (${currency} $)`;
-        } else {
-            subTitleEl.textContent = isPct
-                ? `Percentage net worth growth by calendar month derived from your history log (${currency})`
-                : `Net worth dollar change by calendar month derived from your history log (${currency} $)`;
-        }
+        subTitleEl.textContent = '';
     }
 
     if (!rawHistory || rawHistory.length === 0) {

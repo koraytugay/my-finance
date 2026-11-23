@@ -283,13 +283,12 @@
                 <div class="kt-split kt-mb-3">
                     <div class="kt-cluster">
                         <h2 class="kt-card__title" id="heatmap-title">Monthly Returns Heatmap</h2>
-                        <span class="kt-card__subtitle" id="heatmap-subtitle">Percentage net worth growth by calendar month derived from your history log (CAD)</span>
                     </div>
                     <div class="kt-cluster">
                         <div class="kt-segmented kt-segmented--sm" id="heatmap-mode-toggle" role="group">
-                            <button type="button" id="btn-heatmap-mode-port" class="is-active" onclick="setHeatmapMode('portfolio')" title="Display portfolio total monthly returns">Portfolio</button>
+                            <button type="button" id="btn-heatmap-mode-port" class="is-active" onclick="setHeatmapMode('portfolio')" title="Display portfolio total monthly returns">Port</button>
                             <button type="button" id="btn-heatmap-mode-xeqt" onclick="setHeatmapMode('xeqt')" title="Display XEQT benchmark monthly returns">XEQT</button>
-                            <button type="button" id="btn-heatmap-mode-spread" onclick="setHeatmapMode('spread')" title="Display spread / excess return over XEQT (Portfolio minus XEQT)">Spread</button>
+                            <button type="button" id="btn-heatmap-mode-spread" onclick="setHeatmapMode('spread')" title="Display difference over XEQT (Portfolio minus XEQT)">Diff</button>
                         </div>
                         <div class="kt-segmented kt-segmented--sm" id="heatmap-currency-toggle" role="group">
                             <button type="button" id="btn-heatmap-cur-cad" class="is-active" onclick="setHeatmapCurrency('CAD')" title="Display monthly returns in Canadian Dollars (CAD $)">CAD ($)</button>
