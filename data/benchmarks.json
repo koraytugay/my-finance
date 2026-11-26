@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-26T20:30:30.639Z",
+  "updatedAt": "2026-11-26T20:45:24.267Z",
   "window": {
     "startDate": "2024-08-23",
     "endDate": "2026-11-26",
@@ -8,9 +8,9 @@
   },
   "fx": {
     "symbol": "USDCAD=X",
-    "usdCadRate": 1.4246,
-    "cadUsdRate": 0.702,
-    "updatedAt": "2026-11-26T20:30:30.639Z"
+    "usdCadRate": 1.4247,
+    "cadUsdRate": 0.7019,
+    "updatedAt": "2026-11-26T20:45:24.267Z"
   },
   "benchmarks": {
     "XEQT": {
@@ -20,8 +20,8 @@
       "category": "100% All-Equity passive blend",
       "color": "#16a34a",
       "startPrice": 31.84,
-      "currentPrice": 43.54,
-      "returnPct": 36.75,
+      "currentPrice": 43.53,
+      "returnPct": 36.71,
       "maxDrawdownPct": -15.3,
       "startDate": "2024-08-23",
       "endDate": "2026-11-26",
@@ -144,7 +144,7 @@
         44.31,
         45.52,
         41.97,
-        43.54
+        43.53
       ]
     },
     "VFV": {
@@ -154,8 +154,8 @@
       "category": "100% US Mega-cap equity (CAD)",
       "color": "#d97706",
       "startPrice": 135.15,
-      "currentPrice": 183.3,
-      "returnPct": 35.63,
+      "currentPrice": 183.35,
+      "returnPct": 35.66,
       "maxDrawdownPct": -19.27,
       "startDate": "2024-08-23",
       "endDate": "2026-11-26",
@@ -278,7 +278,7 @@
         184.9,
         191.4,
         176.29,
-        183.3
+        183.35
       ]
     },
     "XBAL": {
@@ -288,8 +288,8 @@
       "category": "60% Stocks / 40% Bonds benchmark",
       "color": "#8250df",
       "startPrice": 29.28,
-      "currentPrice": 34.97,
-      "returnPct": 19.43,
+      "currentPrice": 34.99,
+      "returnPct": 19.5,
       "maxDrawdownPct": -9.91,
       "startDate": "2024-08-23",
       "endDate": "2026-11-26",
@@ -412,7 +412,7 @@
         35.41,
         35.95,
         34.17,
-        34.97
+        34.99
       ]
     },
     "XCB": {
@@ -423,7 +423,7 @@
       "color": "#64748b",
       "startPrice": 20.03,
       "currentPrice": 19.7,
-      "returnPct": -1.65,
+      "returnPct": -1.62,
       "maxDrawdownPct": -4.86,
       "startDate": "2024-08-23",
       "endDate": "2026-11-26",
